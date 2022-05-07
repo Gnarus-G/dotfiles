@@ -18,3 +18,21 @@ set incsearch
 set scrolloff=8
 set signcolumn=yes
 set colorcolumn=80
+
+call plug#begin('~/.vim/plugged')
+Plug 'nvim-lua/plenary.nvim'
+Plug 'nvim-telescope/telescope.nvim'
+Plug 'gruvbox-community/gruvbox'
+call plug#end()
+
+colorscheme gruvbox
+
+let mapleader = " "
+" Find files using Telescope command-line sugar.
+nnoremap <leader>ff <cmd>Telescope find_files<cr>
+nnoremap <leader>fg <cmd>Telescope live_grep<cr>
+nnoremap <leader>fb <cmd>Telescope buffers<cr>
+nnoremap <leader>fh <cmd>Telescope help_tags<cr>
+
+nnoremap <leader>ps :lua require('telescope.builtin').grep_string({ search = vim.fn.input("Grep for > ") }) <cr>
+nnoremap <c-p> <cmd>Telescope find_files<cr>
