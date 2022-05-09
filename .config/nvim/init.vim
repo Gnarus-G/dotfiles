@@ -32,6 +32,8 @@ Plug 'kassio/neoterm'
 Plug 'tpope/vim-commentary'
 Plug 'sbdchd/neoformat'
 
+Plug 'tpope/vim-surround'
+
 Plug 'tpope/vim-fugitive'
 Plug 'airblade/vim-gitgutter'
 
