@@ -1,0 +1,9 @@
+{
+  "name": "hexydump",
+  "dependencies": {
+    "hexy": "^0.3.3"
+  },
+  "bin": {
+    "hexydump": "index.js"
+  }
+}
