@@ -64,6 +64,17 @@ nnoremap <leader>fh <cmd>Telescope help_tags<cr>
 nnoremap <leader>ps :lua require('telescope.builtin').grep_string({ search = vim.fn.input("Grep for > ") }) <cr>
 nnoremap <c-p> <cmd>Telescope find_files<cr>
 
+" itchyny/vim-gitbranch
+let g:lightline = {
+      \ 'active': {
+      \   'left': [ [ 'mode', 'paste' ],
+      \             [ 'gitbranch', 'readonly', 'filename', 'modified' ] ]
+      \ },
+      \ 'component_function': {
+      \   'gitbranch': 'gitbranch#name'
+      \ },
+      \ }
+
 " kassio/neoterm
 let g:neoterm_default_mod = 'vertical'
 let g:neoterm_size = 60
