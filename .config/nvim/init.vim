@@ -84,7 +84,8 @@ inoremap <c-t> <Esc>:Ttoggle<CR>
 tnoremap <c-t> <c-\><c-n>:Ttoggle<CR>
 
 " sbdchd/neoformat
-nnoremap <leader>F :Neoformat prettier<CR>
+let g:neoformat_try_node_exe = 1
+nnoremap <leader>F :Neoformat <CR>
 
 " tpope/vim-fugitive
 nnoremap <leader>gg :G<CR>
