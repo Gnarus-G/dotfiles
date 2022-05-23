@@ -21,6 +21,9 @@ PROMPT='%F{blue}%n%f in %F{yellow}%/%f$vcs_info_msg_0_ > '
 
 path=($HOME/.local/bin $path)
 
+# for "cargo install" binaries
+path=($HOME/.cargo/bin $path)
+
 export EDITOR=nvim
 
 alias vim=nvim
