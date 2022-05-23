@@ -13,6 +13,9 @@ autoload -Uz compinit
 compinit
 # End of lines added by compinstall
 
+# Vim rempap jk to <Esc>
+bindkey -M viins 'jk' vi-cmd-mode
+
 autoload -Uz vcs_info # enable vcs_info
 precmd () { vcs_info } # always load before displaying the prompt
 zstyle ':vcs_info:*' formats ' %s(%F{green}%b%f)' # git(main)
