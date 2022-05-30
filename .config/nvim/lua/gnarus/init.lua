@@ -1,4 +1,5 @@
 require("gnarus.lsp")
+require("gnarus.eslint")
 
 P = function(v)
 	print(vim.inspect(v))
