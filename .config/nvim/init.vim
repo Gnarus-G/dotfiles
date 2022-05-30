@@ -99,4 +99,9 @@ nnoremap <leader>F :Neoformat <CR>
 " tpope/vim-fugitive
 nnoremap <leader>gg :G<CR>
 
+augroup highlight_yank
+    autocmd!
+    autocmd TextYankPost * silent! lua require'vim.highlight'.on_yank({timeout = 40})
+augroup END
+
 lua require("gnarus")
