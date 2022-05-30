@@ -6,8 +6,8 @@ vnoremap <C-S>         <C-C>:w<CR>
 inoremap <C-S>         <C-O>:w<CR>
 
 set completeopt=menuone,noinsert,noselect
-set tabstop=4 softtabstop=4
-set relativenumber
+set expandtab tabstop=2 softtabstop=2 shiftwidth=2
+set number relativenumber
 set nohlsearch
 set hidden
 set noerrorbells
