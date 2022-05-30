@@ -55,9 +55,13 @@ Plug 'mxw/vim-jsx'
 Plug 'jose-elias-alvarez/null-ls.nvim'
 Plug 'MunifTanjim/eslint.nvim'
 
+Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
+
 call plug#end()
 
 colorscheme codedark
+
+lua require'nvim-treesitter.configs'.setup { highlight = { enable = true }, incremental_selection = { enable = true }, textobjects = { enable = true }}
 
 let mapleader = " "
 " Find files using Telescope command-line sugar.
