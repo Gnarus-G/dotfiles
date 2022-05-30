@@ -50,6 +50,11 @@ Plug 'hrsh7th/nvim-cmp'
 Plug 'L3MON4D3/LuaSnip'
 Plug 'saadparwaiz1/cmp_luasnip'
 
+Plug 'mxw/vim-jsx'
+
+Plug 'jose-elias-alvarez/null-ls.nvim'
+Plug 'MunifTanjim/eslint.nvim'
+
 call plug#end()
 
 colorscheme codedark
