@@ -30,6 +30,7 @@ Plug 'itchyny/vim-gitbranch'
 
 Plug 'kassio/neoterm'
 Plug 'tpope/vim-commentary'
+" TODO use neovim's native formatter over this...
 Plug 'sbdchd/neoformat'
 
 Plug 'tpope/vim-surround'
