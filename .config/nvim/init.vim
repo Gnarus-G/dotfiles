@@ -23,12 +23,12 @@ set colorcolumn=80
 filetype plugin indent on
 
 call plug#begin('~/.vim/plugged')
-Plug 'tomasiser/vim-code-dark'
+Plug 'folke/tokyonight.nvim', { 'branch': 'main' }
+
 Plug 'pangloss/vim-javascript'
 Plug 'itchyny/lightline.vim'
 Plug 'itchyny/vim-gitbranch'
 
-Plug 'kassio/neoterm'
 Plug 'tpope/vim-commentary'
 " TODO use neovim's native formatter over this...
 Plug 'sbdchd/neoformat'
@@ -60,19 +60,17 @@ Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
 
 call plug#end()
 
-colorscheme codedark
+colorscheme tokyonight
 
 lua require'nvim-treesitter.configs'.setup { highlight = { enable = true }, incremental_selection = { enable = true }, textobjects = { enable = true }}
 
 let mapleader = " "
 " Find files using Telescope command-line sugar.
+nnoremap <c-p> <cmd>Telescope find_files<cr>
 nnoremap <leader>ff <cmd>Telescope find_files<cr>
 nnoremap <leader>fg <cmd>Telescope live_grep<cr>
 nnoremap <leader>fb <cmd>Telescope buffers<cr>
 nnoremap <leader>fh <cmd>Telescope help_tags<cr>
-
-nnoremap <leader>ps :lua require('telescope.builtin').grep_string({ search = vim.fn.input("Grep for > ") }) <cr>
-nnoremap <c-p> <cmd>Telescope find_files<cr>
 
 " itchyny/vim-gitbranch
 let g:lightline = {
@@ -84,14 +82,6 @@ let g:lightline = {
       \   'gitbranch': 'gitbranch#name'
       \ },
       \ }
-
-" kassio/neoterm
-let g:neoterm_default_mod = 'vertical'
-let g:neoterm_size = 60
-let g:neoterm_autoinsert = 1
-nnoremap <c-t> :Ttoggle<CR>
-inoremap <c-t> <Esc>:Ttoggle<CR>
-tnoremap <c-t> <c-\><c-n>:Ttoggle<CR>
 
 " sbdchd/neoformat
 let g:neoformat_try_node_exe = 1
