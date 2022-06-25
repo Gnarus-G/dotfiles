@@ -97,6 +97,17 @@ fi
 # Compilation flags
 # export ARCHFLAGS="-arch x86_64"
 
+# personal scripts and bin
+path=($HOME/.local/bin $path)
+
+# for "cargo install" binaries
+path=($HOME/.cargo/bin $path)
+
+# pnpm
+export PNPM_HOME="/home/gnarus/.local/share/pnpm"
+export PATH="$PNPM_HOME:$PATH"
+# pnpm end
+
 # Set personal aliases, overriding those provided by oh-my-zsh libs,
 # plugins, and themes. Aliases can be placed here, though oh-my-zsh
 # users are encouraged to define aliases within the ZSH_CUSTOM folder.
