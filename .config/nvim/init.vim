@@ -25,6 +25,8 @@ filetype plugin indent on
 call plug#begin('~/.vim/plugged')
 Plug 'folke/tokyonight.nvim', { 'branch': 'main' }
 
+Plug 'christoomey/vim-tmux-navigator'
+
 Plug 'pangloss/vim-javascript'
 Plug 'itchyny/lightline.vim'
 Plug 'itchyny/vim-gitbranch'
