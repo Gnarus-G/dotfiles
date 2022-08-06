@@ -1,5 +1,5 @@
-local map = require("user.keymap").map
-local map_buf = require("user.keymap").map_buf;
+local map = require("gnarus.keymap").map
+local map_buf = require("gnarus.keymap").map_buf;
 
 -- Mappings.
 -- See `:help vim.diagnostic.*` for documentation on any of the below functions

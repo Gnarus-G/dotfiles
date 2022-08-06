@@ -1,6 +1,6 @@
-require "user.options"
-require "user.plugins"
-require "user.remaps"
+require "gnarus.options"
+require "gnarus.plugins"
+require "gnarus.remaps"
 
 vim.cmd [[
   augroup highlight_yank

@@ -1,4 +1,4 @@
-local map = require("user.keymap").map
+local map = require("gnarus.keymap").map
 
 local ok, nvim_tree = pcall(require, ("nvim-tree"))
 if not ok then

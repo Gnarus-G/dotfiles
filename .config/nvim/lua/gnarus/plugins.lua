@@ -38,6 +38,7 @@ return packer.startup(function(use)
   use 'lewis6991/gitsigns.nvim'
 
   use 'nvim-telescope/telescope.nvim'
+  use 'windwp/nvim-spectre'
 
   use 'hrsh7th/nvim-cmp'
   use 'hrsh7th/cmp-nvim-lsp'
