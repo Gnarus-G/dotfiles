@@ -15,6 +15,8 @@ return packer.startup(function(use)
   use 'wbthomason/packer.nvim'
   use 'nvim-lua/plenary.nvim'
 
+  use { 'goolord/alpha-nvim', requires = { 'kyazdani42/nvim-web-devicons' } }
+
   use 'folke/tokyonight.nvim'
 
   use 'christoomey/vim-tmux-navigator'
