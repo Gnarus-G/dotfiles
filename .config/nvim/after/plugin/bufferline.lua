@@ -9,3 +9,4 @@ require("bufferline").setup {
 
 map("n", "H", "<cmd>BufferLineCyclePrev<CR>")
 map("n", "L", "<cmd>BufferLineCycleNext<CR>")
+map("n", "<leader>C", "<cmd>bdelete<CR>")
