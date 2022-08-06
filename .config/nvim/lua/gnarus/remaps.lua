@@ -1,4 +1,4 @@
-local map = require("user.keymap").map;
+local map = require("gnarus.keymap").map;
 
 vim.cmd "let mapleader = \" \""
 
