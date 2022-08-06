@@ -38,5 +38,11 @@ telescope.setup {
 map("n", "<c-p>", "<cmd>Telescope find_files find_command=rg,--ignore,--hidden,--files prompt_prefix=🔍<cr>")
 map("n", "<leader>ff", "<cmd>Telescope find_files find_command=rg,--ignore,--hidden,--files prompt_prefix=🔍<cr>")
 map("n", "<leader>fg", "<cmd>Telescope live_grep<cr>")
+map("n", "<leader>fo", "<cmd>Telescope oldfiles<cr>")
 map("n", "<leader>fb", "<cmd>Telescope buffers<cr>")
-map("n", "<leader>fh ", "<cmd>Telescope help_tags<cr>")
+map("n", "<leader>fh", "<cmd>Telescope help_tags<cr>")
+-- Lsp mappings
+map("n", "<leader>fr", "<cmd>Telescope lsp_references<cr>")
+-- Git mappings
+map("n", "<leader>gc", "<cmd>Telescope git_bcommits<cr>")
+map("n", "<leader>gC", "<cmd>Telescope git_commits<cr>")
