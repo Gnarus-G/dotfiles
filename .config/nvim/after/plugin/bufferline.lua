@@ -1,0 +1,11 @@
+local map = require("user.keymap").map;
+
+vim.opt.termguicolors = true
+require("bufferline").setup {
+  options = {
+    offsets = { { filetype = "NvimTree", text = "", padding = 1 } },
+  }
+}
+
+map("n", "H", "<cmd>BufferLineCyclePrev<CR>")
+map("n", "L", "<cmd>BufferLineCycleNext<CR>")
