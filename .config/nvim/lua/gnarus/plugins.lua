@@ -51,6 +51,7 @@ return packer.startup(function(use)
   use 'rafamadriz/friendly-snippets'
 
   use 'neovim/nvim-lspconfig'
+  use "b0o/schemastore.nvim"
   use "williamboman/nvim-lsp-installer"
 
   use 'jose-elias-alvarez/null-ls.nvim'
