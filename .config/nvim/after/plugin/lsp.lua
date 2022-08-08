@@ -4,7 +4,7 @@ local map_buf = require("gnarus.keymap").map_buf;
 -- Mappings.
 -- See `:help vim.diagnostic.*` for documentation on any of the below functions
 
-map('n', '<leader>d', '<cmd>lua vim.diagnostic.open_float()<CR>')
+map('n', '<leader>D', '<cmd>lua vim.diagnostic.open_float()<CR>')
 map('n', '[d', '<cmd>lua vim.diagnostic.goto_prev()<CR>')
 map('n', ']d', '<cmd>lua vim.diagnostic.goto_next()<CR>')
 map('n', '<leader>q', '<cmd>lua vim.diagnostic.setloclist()<CR>')

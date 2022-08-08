@@ -3,6 +3,9 @@ if not ok then
   return
 end
 
+local map = require("gnarus.keymap").map;
+map("n", "<leader>d", "<cmd>Alpha<CR>")
+
 local my_header = {
   type = "text",
   val = {
@@ -45,7 +48,3 @@ config.layout[2] = my_header
 config.layout[6] = my_buttons
 
 alpha.setup(config)
-
-local map = require("gnarus.keymap").map;
-
-map("n", "<leader>d", "<cmd>Alpha<CR>")
