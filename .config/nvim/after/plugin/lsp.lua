@@ -15,8 +15,12 @@ local on_attach = function(client, bufnr)
   -- Enable completion triggered by <c-x><c-o>
   vim.api.nvim_buf_set_option(bufnr, 'omnifunc', 'v:lua.vim.lsp.omnifunc')
 
-  if client.name == "tsserver" then
-    client.resolved_capabilities.document_formatting = false
+  -- Disable native language formatting for certain lsp servers
+  -- assuming that null-ls will handle it later
+  for _, name in pairs({ "tsserver", "jsonls" }) do
+    if client.name == name then
+      client.resolved_capabilities.document_formatting = false
+    end
   end
 
   -- Mappings.
@@ -105,17 +109,8 @@ lspconfig.jsonls.setup {
   capabilities = capabilities,
   settings = {
     json = {
-      schemas = {
-        {
-          description = "NPM package config",
-          fileMatch = "package.json",
-          url = "https://json.schemastore.org/package.json"
-        }, {
-          description = "Typescript config",
-          fileMatch = { "tsconfig.json", "tsconfig.*.json" },
-          url = "https://json.schemastore.org/tsconfig.json"
-        }
-      }
+      schemas = require "schemastore".json.schemas(),
+      validate = { enable = true }
     }
   }
 }
