@@ -8,7 +8,7 @@ local on_attach = function(client, bufnr)
 
   -- Disable native language formatting for certain lsp servers
   -- assuming that null-ls will handle it later
-  for _, name in pairs({ "tsserver", "jsonls" }) do
+  for _, name in pairs({ "tsserver", "jsonls", "astro" }) do
     if client.name == name then
       client.resolved_capabilities.document_formatting = false
     end
