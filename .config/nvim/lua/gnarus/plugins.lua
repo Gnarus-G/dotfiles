@@ -58,6 +58,7 @@ return packer.startup(function(use)
 
   use 'nvim-treesitter/nvim-treesitter'
   use 'nvim-treesitter/playground'
+  use 'gnarus-g/ts-node-jumps.nvim'
 
   use 'wuelnerdotexe/vim-astro'
 
