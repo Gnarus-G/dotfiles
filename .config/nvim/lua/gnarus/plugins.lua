@@ -54,6 +54,9 @@ return packer.startup(function(use)
   use "b0o/schemastore.nvim"
   use "williamboman/nvim-lsp-installer"
 
+  use { "rcarriga/nvim-dap-ui", requires = { "mfussenegger/nvim-dap" } }
+  use 'theHamsta/nvim-dap-virtual-text'
+
   use 'jose-elias-alvarez/null-ls.nvim'
 
   use 'nvim-treesitter/nvim-treesitter'
