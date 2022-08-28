@@ -12,17 +12,17 @@ map("n", "<F5>", ":lua require'dap'.continue()<cr>")
 map("n", "<F10>", ":lua require'dap'.step_over()<cr>")
 map("n", "<F11>", ":lua require'dap'.step_into()<cr>")
 
-dap.adapters.node2 = function(cb, config)
-  if config.preLaunchTask then
-    vim.cmd(":!" .. config.preLaunchTask)
-  end
-  local adapter = {
-    type = 'executable',
-    command = 'node',
-    args = { os.getenv('HOME') .. '/dev/microsoft/vscode-node-debug2/out/src/nodeDebug.js' },
-  }
-  cb(adapter)
-end
+dap.adapters.node2 = {
+  type = 'executable',
+  command = 'node',
+  args = { os.getenv('HOME') .. '/dev/microsoft/vscode-node-debug2/out/src/nodeDebug.js' },
+}
+
+dap.adapters.chrome = {
+  type = "executable",
+  command = "node",
+  args = { os.getenv("HOME") .. "/dev/microsoft/vscode-chrome-debug/out/src/chromeDebug.js" }
+}
 
 local node_launcher = {
   name = 'Launch',
@@ -65,25 +65,39 @@ local node_attach = {
   processId = require 'dap.utils'.pick_process,
 }
 
+local chrome_attach = {
+  type = "chrome",
+  request = "attach",
+  program = "${file}",
+  cwd = vim.fn.getcwd(),
+  sourceMaps = true,
+  protocol = "inspector",
+  port = 9222,
+  webRoot = vim.fn.getcwd()
+}
+
 dap.configurations.javascript = {
   node_launcher,
   node_jest_launcher,
   node_attach,
 }
 
+dap.configurations.javascriptreact = {
+  chrome_attach
+}
+
 local ts_specific_configs = {
-  --[[ preLaunchTask = "./node_modules/typescript/bin/tsc", ]]
   outFiles = { vim.fn.getcwd() .. "/dist/**/*.js", vim.fn.getcwd() .. "/build/**/*.js" }
 }
 
-local ts_node_launcher = extend(node_launcher, ts_specific_configs)
-
-local ts_node_jest_launcher = extend(node_jest_launcher, ts_specific_configs)
-
 dap.configurations.typescript = {
-  ts_node_launcher,
-  ts_node_jest_launcher,
+  extend(node_launcher, ts_specific_configs),
+  extend(node_jest_launcher, ts_specific_configs),
   node_attach,
+}
+
+dap.configurations.typescriptreact = {
+  chrome_attach
 }
 
 dapui.setup();
