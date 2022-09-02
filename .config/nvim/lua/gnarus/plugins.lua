@@ -60,6 +60,7 @@ return packer.startup(function(use)
   use 'jose-elias-alvarez/null-ls.nvim'
 
   use 'nvim-treesitter/nvim-treesitter'
+  use 'nvim-treesitter/nvim-treesitter-context'
   use 'nvim-treesitter/playground'
   use 'gnarus-g/ts-node-jumps.nvim'
 
