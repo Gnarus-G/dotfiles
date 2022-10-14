@@ -2,17 +2,9 @@ local map_buf = require("gnarus.keymap").map_buf;
 
 -- Use an on_attach function to only map the following keys
 -- after the language server attaches to the current buffer
-local on_attach = function(client, bufnr)
+local on_attach = function(_, bufnr)
   -- Enable completion triggered by <c-x><c-o>
   vim.api.nvim_buf_set_option(bufnr, 'omnifunc', 'v:lua.vim.lsp.omnifunc')
-
-  -- Disable native language formatting for certain lsp servers
-  -- assuming that null-ls will handle it later
-  for _, name in pairs({ "tsserver", "jsonls", "astro" }) do
-    if client.name == name then
-      client.resolved_capabilities.document_formatting = false
-    end
-  end
 
   -- Mappings.
   -- See `:help vim.lsp.*` for documentation on any of the below functions
@@ -29,7 +21,6 @@ local on_attach = function(client, bufnr)
   map_buf(bufnr, 'n', '<F2>', '<cmd>lua vim.lsp.buf.rename()<CR>')
   map_buf(bufnr, 'n', '<leader>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>')
   map_buf(bufnr, 'n', 'gr', '<cmd>lua vim.lsp.buf.references()<CR>')
-  map_buf(bufnr, 'n', '<leader>F', '<cmd>lua vim.lsp.buf.formatting()<CR>')
 end
 
 -- Setup lspconfig.
