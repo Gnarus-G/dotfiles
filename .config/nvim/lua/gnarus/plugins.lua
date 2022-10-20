@@ -47,6 +47,8 @@ return packer.startup(function(use)
   use 'hrsh7th/cmp-cmdline'
   use 'saadparwaiz1/cmp_luasnip'
 
+  use { 'David-Kunz/cmp-npm', requires = { 'nvim-lua/plenary.nvim' } }
+
   use 'L3MON4D3/LuaSnip'
   use 'rafamadriz/friendly-snippets'
 
