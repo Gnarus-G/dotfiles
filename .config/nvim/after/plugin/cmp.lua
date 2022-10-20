@@ -43,6 +43,8 @@ local kind_icons = {
   TypeParameter = "",
 }
 
+require('cmp-npm').setup({})
+
 cmp.setup({
   snippet = {
     expand = function(args)
@@ -101,11 +103,13 @@ cmp.setup({
         buffer = "[BUF]",
         path = "[PATH]",
         emoji = "[EMO]",
+        npm = "[NPM]",
       })[entry.source.name]
       return vim_item
     end,
   },
   sources = {
+    { name = "npm", keyword_length = 4 },
     { name = "nvim_lsp" },
     { name = "nvim_lua" },
     { name = "luasnip" },
