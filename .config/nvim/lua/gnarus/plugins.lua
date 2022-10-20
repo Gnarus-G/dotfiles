@@ -58,6 +58,7 @@ return packer.startup(function(use)
   use 'theHamsta/nvim-dap-virtual-text'
 
   use 'jose-elias-alvarez/null-ls.nvim'
+  use 'jose-elias-alvarez/typescript.nvim'
 
   use 'nvim-treesitter/nvim-treesitter'
   use 'nvim-treesitter/nvim-treesitter-context'
