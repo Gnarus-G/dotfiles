@@ -100,6 +100,10 @@ dap.configurations.typescriptreact = {
   chrome_attach
 }
 
+dap.configurations.svelte = {
+  chrome_attach
+}
+
 dapui.setup();
 
 dap.listeners.after.event_initialized["dapui_listener"] = function()
