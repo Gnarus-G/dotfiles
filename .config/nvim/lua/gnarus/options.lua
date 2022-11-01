@@ -19,5 +19,6 @@ o.incsearch = true
 o.scrolloff = 8
 o.signcolumn = "yes"
 o.colorcolumn = "80"
+o.mouse = ""
 
 vim.cmd "filetype plugin indent on"
