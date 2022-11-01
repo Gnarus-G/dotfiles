@@ -26,7 +26,8 @@ lsp_installer.setup({
 
 -- Use a loop to conveniently call 'setup' on multiple servers and
 -- map buffer local keybindings when the language server attaches
-local servers = { 'rust_analyzer', 'tsserver', 'gopls', 'vimls', 'tailwindcss', 'prismals', 'dockerls', 'svelte', "cssls" }
+local servers = { 'rust_analyzer', 'tsserver', 'gopls', 'vimls', 'tailwindcss', 'prismals', 'dockerls', 'svelte', "cssls",
+  "clangd" }
 
 local lsp_setup = require "gnarus.lsp-setup";
 
