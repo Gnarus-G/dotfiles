@@ -1,10 +1,6 @@
 local map = require 'gnarus.keymap'.map;
 local dap, dapui = require 'dap', require 'dapui'
 
-local extend = function(t, e)
-  return vim.tbl_deep_extend("force", t, e)
-end
-
 map("n", "<leader>b", ":lua require'dap'.toggle_breakpoint()<cr>")
 map("n", "<leader>B", ":lua require'dap'.set_breakpoint(vim.fn.input('Breakpoint condition: '))<cr>")
 map("n", "<leader>k", ":lua require'dapui'.eval()<cr>")
@@ -86,13 +82,7 @@ dap.configurations.javascriptreact = {
   chrome_attach
 }
 
-local ts_specific_configs = {
-  outFiles = { vim.fn.getcwd() .. "/dist/**/*.js", vim.fn.getcwd() .. "/build/**/*.js" }
-}
-
 dap.configurations.typescript = {
-  extend(node_launcher, ts_specific_configs),
-  extend(node_jest_launcher, ts_specific_configs),
   node_attach,
 }
 
