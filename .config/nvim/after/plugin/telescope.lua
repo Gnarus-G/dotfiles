@@ -46,3 +46,7 @@ map("n", "<leader>fr", "<cmd>Telescope lsp_references<cr>")
 -- Git mappings
 map("n", "<leader>gc", "<cmd>Telescope git_bcommits<cr>")
 map("n", "<leader>gC", "<cmd>Telescope git_commits<cr>")
+
+telescope.load_extension("git_worktree")
+map("n", "<leader>W", "<cmd>:lua require('telescope').extensions.git_worktree.create_git_worktree()<cr>")
+map("n", "<leader>w", "<cmd>:lua require('telescope').extensions.git_worktree.git_worktrees()<cr>")
