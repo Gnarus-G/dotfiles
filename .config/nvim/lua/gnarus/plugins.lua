@@ -35,6 +35,8 @@ return packer.startup(function(use)
   use 'tpope/vim-fugitive'
   use 'lewis6991/gitsigns.nvim'
 
+  use 'ThePrimeagen/git-worktree.nvim'
+
   use 'nvim-telescope/telescope.nvim'
   use 'windwp/nvim-spectre'
 
