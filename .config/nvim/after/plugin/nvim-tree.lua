@@ -1,5 +1,3 @@
-local map = require("gnarus.keymap").map
-
 local ok, nvim_tree = pcall(require, ("nvim-tree"))
 if not ok then
   return
@@ -23,4 +21,4 @@ nvim_tree.setup({
   },
 })
 
-map("n", "<leader>e", "<cmd>NvimTreeFindFileToggle<CR>")
+vim.keymap.set("n", "<leader>e", "<cmd>NvimTreeFindFileToggle<CR>")

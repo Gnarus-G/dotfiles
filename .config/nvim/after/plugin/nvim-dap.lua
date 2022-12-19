@@ -1,12 +1,11 @@
-local map = require 'gnarus.keymap'.map;
 local dap, dapui = require 'dap', require 'dapui'
 
-map("n", "<leader>b", ":lua require'dap'.toggle_breakpoint()<cr>")
-map("n", "<leader>B", ":lua require'dap'.set_breakpoint(vim.fn.input('Breakpoint condition: '))<cr>")
-map("n", "<leader>k", ":lua require'dapui'.eval()<cr>")
-map("n", "<F5>", ":lua require'dap'.continue()<cr>")
-map("n", "<F10>", ":lua require'dap'.step_over()<cr>")
-map("n", "<F11>", ":lua require'dap'.step_into()<cr>")
+vim.keymap.set("n", "<leader>b", ":lua require'dap'.toggle_breakpoint()<cr>")
+vim.keymap.set("n", "<leader>B", ":lua require'dap'.set_breakpoint(vim.fn.input('Breakpoint condition: '))<cr>")
+vim.keymap.set("n", "<leader>k", ":lua require'dapui'.eval()<cr>")
+vim.keymap.set("n", "<F5>", ":lua require'dap'.continue()<cr>")
+vim.keymap.set("n", "<F10>", ":lua require'dap'.step_over()<cr>")
+vim.keymap.set("n", "<F11>", ":lua require'dap'.step_into()<cr>")
 
 dap.adapters.node2 = {
   type = 'executable',

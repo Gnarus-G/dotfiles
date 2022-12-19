@@ -1,6 +1,6 @@
-local map = require("gnarus.keymap").map
-map("n", "<leader>gs", ":G<CR>")
-map("n", "<leader>gg", ":G<CR>")
+
+vim.keymap.set("n", "<leader>gs", ":G<CR>")
+vim.keymap.set("n", "<leader>gg", ":G<CR>")
 
 local ThePrimeagen_Fugitive = vim.api.nvim_create_augroup("ThePrimeagen_Fugitive", {})
 

@@ -1,11 +1,9 @@
-local map = require("gnarus.keymap").map;
-
 vim.cmd "let mapleader = \" \""
 
-map("i", "jk", "<Esc>")
-map("n", "<leader>e", "<cmd>Lex 25<cr>")
+vim.keymap.set("i", "jk", "<Esc>")
+vim.keymap.set("n", "<leader>e", "<cmd>Lex 25<cr>")
 
-map("n", "<leader>F", "<cmd>lua require('gnarus.formatting').async()<CR>")
+vim.keymap.set("n", "<leader>F", "<cmd>lua require('gnarus.formatting').async()<CR>")
 
-map("v", "J", ":m '>+1<cr>gv=gv")
-map("v", "K", ":m '<-2<cr>gv=gv")
+vim.keymap.set("v", "J", ":m '>+1<cr>gv=gv")
+vim.keymap.set("v", "K", ":m '<-2<cr>gv=gv")
