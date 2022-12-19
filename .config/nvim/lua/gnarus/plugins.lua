@@ -13,7 +13,6 @@ end
 
 return packer.startup(function(use)
   use 'wbthomason/packer.nvim'
-  use 'nvim-lua/plenary.nvim'
 
   use { 'goolord/alpha-nvim', requires = { 'kyazdani42/nvim-web-devicons' } }
 
@@ -27,8 +26,6 @@ return packer.startup(function(use)
 
   use { 'kyazdani42/nvim-tree.lua', requires = { 'kyazdani42/nvim-web-devicons' } }
 
-  use { 'akinsho/bufferline.nvim', tag = "v2.*", requires = 'kyazdani42/nvim-web-devicons' }
-
   use 'numToStr/Comment.nvim'
   use 'JoosepAlviste/nvim-ts-context-commentstring'
 
@@ -36,8 +33,9 @@ return packer.startup(function(use)
   use 'lewis6991/gitsigns.nvim'
 
   use 'ThePrimeagen/git-worktree.nvim'
+  use 'ThePrimeagen/harpoon'
 
-  use 'nvim-telescope/telescope.nvim'
+  use { 'nvim-telescope/telescope.nvim', requires = { 'nvim-lua/plenary.nvim' } }
   use 'windwp/nvim-spectre'
 
   use 'hrsh7th/nvim-cmp'
@@ -62,9 +60,10 @@ return packer.startup(function(use)
   use 'jose-elias-alvarez/null-ls.nvim'
   use 'jose-elias-alvarez/typescript.nvim'
 
-  use 'nvim-treesitter/nvim-treesitter'
+  use { 'nvim-treesitter/nvim-treesitter', run = ":TSUpdate" }
   use 'nvim-treesitter/nvim-treesitter-context'
   use 'nvim-treesitter/playground'
+  use 'mbbill/undotree'
   use 'gnarus-g/ts-node-jumps.nvim'
 
   use 'wuelnerdotexe/vim-astro'
