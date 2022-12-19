@@ -1,64 +1,61 @@
-local map = require("gnarus.keymap").map
+local lsp = require('lsp-zero')
 
--- Mappings.
--- See `:help vim.diagnostic.*` for documentation on any of the below functions
-map('n', '<leader>D', '<cmd>lua vim.diagnostic.open_float()<CR>')
-map('n', '[d', '<cmd>lua vim.diagnostic.goto_prev()<CR>')
-map('n', ']d', '<cmd>lua vim.diagnostic.goto_next()<CR>')
-map('n', '<leader>q', '<cmd>lua vim.diagnostic.setloclist()<CR>')
+lsp.preset('recommended')
 
--- Lsp Installer
-local ok, lsp_installer = pcall(require, "nvim-lsp-installer")
-if not ok then
-  return
+lsp.ensure_installed {
+  'rust_analyzer', 'tailwindcss', 'dockerls', "cssls", "clangd", "sumneko_lua"
+}
+
+local cmp = require("cmp");
+
+lsp.setup_nvim_cmp({
+  mapping = lsp.defaults.cmp_mappings({
+    ["<C-b>"] = cmp.mapping(cmp.mapping.scroll_docs(-1), { "i", "c" }),
+    ["<C-f>"] = cmp.mapping(cmp.mapping.scroll_docs(1), { "i", "c" }),
+    ["<C-Space>"] = cmp.mapping(cmp.mapping.complete(), { "i", "c" }),
+    ["<C-e>"] = cmp.mapping({
+      i = cmp.mapping.abort(),
+      c = cmp.mapping.close(),
+    }),
+    -- Accept currently selected item. If none selected, `select` first item.
+    -- Set `select` to `false` to only confirm explicitly selected items.
+    ["<CR>"] = cmp.mapping.confirm({ select = true }),
+  }),
+  sources = {
+    { name = "npm", keyword_length = 4 },
+    { name = "nvim_lsp" },
+    { name = "nvim_lua" },
+    { name = "luasnip" },
+    { name = "buffer" },
+    { name = "path" },
+  },
+})
+--
+-- Use an on_attach function to only map the following keys
+-- after the language server attaches to the current buffer
+local on_attach = function(_, bufnr)
+  local opts = { buffer = bufnr, remap = false }
+
+  -- Mappings.
+  -- See `:help vim.lsp.*` for documentation on any of the below functions
+  vim.keymap.set('n', 'gD', '<cmd>lua vim.lsp.buf.declaration()<CR>', opts)
+  vim.keymap.set('n', 'gd', '<cmd>lua vim.lsp.buf.definition()<CR>', opts)
+  vim.keymap.set('n', 'K', '<cmd>lua vim.lsp.buf.hover()<CR>', opts)
+  vim.keymap.set('n', 'gi', '<cmd>lua vim.lsp.buf.implementation()<CR>', opts)
+  vim.keymap.set('n', '<C-k>', '<cmd>lua vim.lsp.buf.signature_help()<CR>', opts)
+  vim.keymap.set('n', '<leader>wa', '<cmd>lua vim.lsp.buf.add_workspace_folder()<CR>', opts)
+  vim.keymap.set('n', '<leader>wr', '<cmd>lua vim.lsp.buf.remove_workspace_folder()<CR>', opts)
+  vim.keymap.set('n', '<leader>wl',
+    '<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<CR>', opts)
+  vim.keymap.set('n', '<leader>D', '<cmd>lua vim.lsp.buf.type_definition()<CR>', opts)
+  vim.keymap.set('n', '<F2>', '<cmd>lua vim.lsp.buf.rename()<CR>', opts)
+  vim.keymap.set('n', '<leader>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
+  vim.keymap.set('n', 'gr', '<cmd>lua vim.lsp.buf.references()<CR>', opts)
 end
 
-lsp_installer.setup({
-  automatic_installation = true, -- automatically detect which servers to install (based on which servers are set up via lspconfig)
-  ui = {
-    icons = {
-      server_installed = "✓",
-      server_pending = "➜",
-      server_uninstalled = "✗"
-    }
-  }
-})
+lsp.on_attach(on_attach)
 
--- Use a loop to conveniently call 'setup' on multiple servers and
--- map buffer local keybindings when the language server attaches
-local servers = { 'rust_analyzer', 'tsserver', 'gopls', 'vimls', 'tailwindcss', 'prismals', 'dockerls', 'svelte', "cssls",
-  "clangd" }
-
-local lsp_setup = require "gnarus.lsp-setup";
-
-for _, lsp in pairs(servers) do
-  lsp_setup(lsp, {})
-end
-
-lsp_setup("sumneko_lua", {
-  settings = {
-    Lua = {
-      runtime = {
-        -- Tell the language server which version of Lua you're using (most likely LuaJIT in the case of Neovim)
-        version = 'LuaJIT',
-      },
-      diagnostics = {
-        -- Get the language server to recognize the `vim` global
-        globals = { 'vim' },
-      },
-      workspace = {
-        -- Make the server aware of Neovim runtime files
-        library = vim.api.nvim_get_runtime_file("", true),
-      },
-      -- Do not send telemetry data containing a randomized but unique identifier
-      telemetry = {
-        enable = false,
-      },
-    },
-  }
-})
-
-lsp_setup("jsonls", {
+lsp.configure("jsonls", {
   settings = {
     json = {
       schemas = require "schemastore".json.schemas(),
@@ -67,4 +64,23 @@ lsp_setup("jsonls", {
   }
 })
 
-lsp_setup("astro", {})
+lsp.nvim_workspace()
+
+lsp.setup()
+
+require("typescript").setup({
+  disable_commands = false, -- prevent the plugin from creating Vim commands
+  debug = false, -- enable debug logging for commands
+  go_to_source_definition = {
+    fallback = true, -- fall back to standard LSP definition on failure
+  },
+  server = {
+    on_attach = on_attach,
+    capabilities = require('cmp_nvim_lsp')
+        .default_capabilities(vim.lsp.protocol.make_client_capabilities())
+  }
+})
+
+vim.diagnostic.config({
+  virtual_text = true,
+})
