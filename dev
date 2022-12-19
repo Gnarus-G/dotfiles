@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+pwd=$(pwd)
+configPaths=(.config/nvim .config/alacritty .tmux.conf .wezterm.lua .zshrc)
+
+for p in ${configPaths[*]}
+do
+  rm -rf ~/$p
+  ln -s $pwd/$p ~/$p
+done
