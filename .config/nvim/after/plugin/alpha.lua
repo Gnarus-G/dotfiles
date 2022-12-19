@@ -3,8 +3,7 @@ if not ok then
   return
 end
 
-local map = require("gnarus.keymap").map;
-map("n", "<leader>d", "<cmd>Alpha<CR>")
+vim.keymap.set("n", "<leader>d", "<cmd>Alpha<CR>")
 
 local my_header = {
   type = "text",
