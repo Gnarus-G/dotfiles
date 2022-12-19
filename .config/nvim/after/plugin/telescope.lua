@@ -1,4 +1,3 @@
-local map = require("gnarus.keymap").map
 local ok, telescope = pcall(require, 'telescope');
 if not ok then
   return
@@ -35,18 +34,21 @@ telescope.setup {
   }
 }
 
-map("n", "<c-p>", "<cmd>Telescope find_files find_command=rg,--ignore,--hidden,--files prompt_prefix=🔍<cr>")
-map("n", "<leader>ff", "<cmd>Telescope find_files find_command=rg,--ignore,--hidden,--files prompt_prefix=🔍<cr>")
-map("n", "<leader>fg", "<cmd>Telescope live_grep<cr>")
-map("n", "<leader>fo", "<cmd>Telescope oldfiles<cr>")
-map("n", "<leader>fb", "<cmd>Telescope buffers<cr>")
-map("n", "<leader>fh", "<cmd>Telescope help_tags<cr>")
--- Lsp mappings
-map("n", "<leader>fr", "<cmd>Telescope lsp_references<cr>")
--- Git mappings
-map("n", "<leader>gc", "<cmd>Telescope git_bcommits<cr>")
-map("n", "<leader>gC", "<cmd>Telescope git_commits<cr>")
+local builtin = require("telescope.builtin")
+
+vim.keymap.set("n", "<c-p>", "<cmd>Telescope find_files find_command=rg,--ignore,--files prompt_prefix=🔍<cr>")
+vim.keymap.set("n", "<leader>ff",
+  "<cmd>Telescope find_files find_command=rg,--ignore,--hidden,--files prompt_prefix=🔍<cr>")
+vim.keymap.set("n", "<leader>fg", builtin.live_grep)
+vim.keymap.set("n", "<leader>fo", builtin.oldfiles)
+vim.keymap.set("n", "<leader>fb", builtin.buffers)
+vim.keymap.set("n", "<leader>fh", builtin.help_tags)
+-- Lsp vim.keymap.setpings
+vim.keymap.set("n", "<leader>fr", builtin.lsp_references)
+-- Git vim.keymap.setpings
+vim.keymap.set("n", "<leader>gc", builtin.git_bcommits)
+vim.keymap.set("n", "<leader>gC", builtin.git_commits)
 
 telescope.load_extension("git_worktree")
-map("n", "<leader>W", "<cmd>:lua require('telescope').extensions.git_worktree.create_git_worktree()<cr>")
-map("n", "<leader>w", "<cmd>:lua require('telescope').extensions.git_worktree.git_worktrees()<cr>")
+vim.keymap.set("n", "<leader>W", require('telescope').extensions.git_worktree.create_git_worktree)
+vim.keymap.set("n", "<leader>w", require('telescope').extensions.git_worktree.git_worktrees)
