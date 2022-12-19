@@ -7,4 +7,4 @@ const [, , input] = process.argv;
 
 if (!input) process.exit(1);
 
-console.log(hexy.hexy(fs.readFileSync(input), { littleEndian: true }))
+console.log(hexy.hexy(fs.readFileSync(input), { littleEndian: true }));
