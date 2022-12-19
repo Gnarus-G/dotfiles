@@ -7,7 +7,7 @@ lsp.ensure_installed {
 }
 
 local cmp = require("cmp");
-
+require('cmp-npm').setup({})
 lsp.setup_nvim_cmp({
   mapping = lsp.defaults.cmp_mappings({
     ["<C-b>"] = cmp.mapping(cmp.mapping.scroll_docs(-1), { "i", "c" }),
