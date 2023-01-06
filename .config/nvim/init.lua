@@ -15,3 +15,16 @@ vim.api.nvim_create_autocmd("TextYankPost", {
     require 'vim.highlight'.on_yank({ timeout = 40 })
   end
 })
+
+-- clipboard register config
+-- using my own clipboard cli https://github.com/Gnarus-G/clip
+vim.g.clipboard = {
+  name = "my-clipboard",
+  copy = {
+    ["+"] = { "clip" }
+  },
+  paste = {
+    ["+"] = { "clip read" }
+  },
+  cache_enabled = 1
+}
