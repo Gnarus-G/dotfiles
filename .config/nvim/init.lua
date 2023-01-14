@@ -24,7 +24,7 @@ vim.g.clipboard = {
     ["+"] = { "clip" }
   },
   paste = {
-    ["+"] = { "clip read" }
+    ["+"] = { "clip", "read" }
   },
   cache_enabled = 1
 }
