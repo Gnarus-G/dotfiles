@@ -77,6 +77,10 @@ return packer.startup(function(use)
 
   use 'wuelnerdotexe/vim-astro'
 
+  use 'ron-rs/ron.vim'
+  use 'elkowar/yuck.vim'
+  use 'gpanders/nvim-parinfer'
+
   -- Automatically set up your configuration after cloning packer.nvim
   -- Put this at the end after all plugins
   if packer_bootstrap then
