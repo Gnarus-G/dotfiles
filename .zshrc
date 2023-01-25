@@ -103,6 +103,10 @@ path=($HOME/.local/bin $path)
 # for "cargo install" binaries
 path=($HOME/.cargo/bin $path)
 
+# Linux dev
+export MAKEFLAGS="-j16"
+export LLVM="1"
+
 # pnpm
 export PNPM_HOME="/home/gnarus/.local/share/pnpm"
 export PATH="$PNPM_HOME:$PATH"
