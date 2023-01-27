@@ -15,4 +15,4 @@ eww daemon &
 # Set the theme.ron config
 leftwm-command "LoadTheme $SCRIPTPATH/theme.ron"
 
-eww open-many bar cal
+eww open bar
