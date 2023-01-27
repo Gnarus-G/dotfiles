@@ -1,12 +1,19 @@
+$light: #b0b4bc;
+$dark: #2e2e2e;
+$primary: #60a5fa;
+$secondary: #a5b4fc;
+$urgent: #f43f5e;
+$background: #0f172a;
+
 * {
   all: unset; //Unsets everything so you can style everything from scratch
 }
 
 //Global Styles
 .bar {
-  background-color: #3a3a3a;
+  background-color: $background;
   border-radius: 5px;
-  color: #b0b4bc;
+  color: $light;
   padding: 0px 10px;
 }
 
@@ -34,7 +41,7 @@
 }
 .metric scale trough highlight {
   all: unset;
-  background-color: #d35d6e;
+  background-color: $primary;
   color: #000000;
   border-radius: 10px;
 }
@@ -50,33 +57,50 @@
 .label-ram {
   font-size: large;
 }
-.time {
-  margin-right: 30px;
+.today {
+  color: $secondary;
 }
 
 .workspaces button {
-  font-size: 24px;
-  padding: 0px 5px;
-  margin: 0 2px;
+  margin: 0px 2px;
+  border-radius: 50%;
 }
-.workspaces button:hover {
-  color: #d35d6e;
+
+.workspaces button:hover:not(.ws-button-mine) {
+  color: darken($color: $primary, $amount: 20);
 }
 .ws-button-mine {
-  color: #4e4e4e;
-  background-color: #ffd5ca;
+  color: $dark;
+  background-color: $primary;
 }
 .ws-button-visible {
-  color: #d35d6e;
-  background-color: #4e4e4e;
+  color: $light;
 }
 .ws-button-urgent {
-  color: #ffd5ca;
+  color: $dark;
   background-color: #d35d6e;
 }
 .ws-button-busy {
-  color: #d35d6e;
+  color: lighten($color: $dark, $amount: 30);
 }
-.ws-button {
-  color: #b0b4bc;
+
+// utilities
+.px {
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.text-primary {
+  color: $light;
+}
+
+.border-x {
+  border-left: 2px solid;
+  border-right: 2px solid;
+  border-color: $dark;
+}
+
+.border-r {
+  border-right: 2px solid;
+  border-color: $dark;
 }
