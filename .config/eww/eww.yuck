@@ -8,13 +8,10 @@
     (metric :label "🔊"
             :value volume
             :onchange "amixer -D pulse sset Master {}%")
-    (metric :label ""
-            :value {EWW_RAM.used_mem_perc}
-            :onchange "")
-    (metric :label "💾"
-            :value {round((1 - (EWW_DISK["/"].free / EWW_DISK["/"].total)) * 100, 0)}
-            :onchange "")
-    time))
+    (box :class "px border-x" :space-evenly false "CPU:" {round(EWW_CPU.avg,0)} "%")
+    (box :class "px border-r" :space-evenly false "RAM:" {round(EWW_RAM.used_mem_perc,0)} "%")
+   (box :class "border-r px today" today)
+   (box :style "padding-left: 10px;" time)))
 
 ; eww is natively able to parse the JSON output of `leftwm-state`
 ; since eww also has the ability of `for` loops there is no need for a `liquid` template anymore
@@ -23,14 +20,18 @@
          :orientation "h"
          :space-evenly true
          :halign "start"
+        :height 30
          :spacing 10
       (box
         (for tag in '${wmstate.workspaces[0].tags}'
           (button
+            :width 25
+            :valign "center" 
+            :halign "center"
             :class {tag.mine ? "ws-button-mine" :
                     tag.visible ? "ws-button-visible" :
                     tag.urgent ? "ws-button-urgent" :
-                    tag.busy ? "ws-button-busy" : "ws-button"}
+                    tag.busy ? "ws-button-busy" : ""}
             :onclick "leftwm-command \"SendWorkspaceToTag 0 ${tag.index}\""
             {!tag.mine && !tag.busy && !tag.visible && !tag.urgent ?  "·" : "${tag.name}"})))))
 
@@ -50,15 +51,17 @@
 (defpoll volume :interval "1s"
   "scripts/getvol")
 
-(defpoll time :interval "10s"
-  "date '+%H:%M %b %d, %Y'")
+(defpoll today :interval "1s"
+  "date '+%a, %b %d'")
+
+(defpoll time :interval "1s"
+  "date '+%l:%M %p'")
 
 (deflisten wmstate 
            :initial '{"workspaces":[{"layout":"","tags":[{"name":"","index":0,"mine":false,"busy":false,"visible":false,"urgent":false}]}]}'
            "leftwm state")
 
 (defwindow bar
-  :class "p-10"
   :monitor 0
   :windowtype "dock"
   :geometry (geometry :x "0%"
