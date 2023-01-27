@@ -84,6 +84,16 @@ $background: #0f172a;
   color: lighten($color: $dark, $amount: 30);
 }
 
+.calendar {
+  background-color: $background;
+  border-radius: 5px;
+  border: 2px solid $secondary;
+}
+.calendar:selected {
+  color: $dark;
+  background-color: $secondary;
+}
+
 // utilities
 .px {
   padding-left: 10px;
