@@ -10,7 +10,8 @@
             :onchange "amixer -D pulse sset Master {}%")
     (box :class "px border-x" :space-evenly false "CPU:" {round(EWW_CPU.avg,0)} "%")
     (box :class "px border-r" :space-evenly false "RAM:" {round(EWW_RAM.used_mem_perc,0)} "%")
-   (box :class "border-r px today" today)
+   (box :class "border-r px today" 
+    (eventbox :onclick "${EWW_CMD} update show_cal=${!show_cal}" today))
    (box :style "padding-left: 10px;" time)))
 
 ; eww is natively able to parse the JSON output of `leftwm-state`
@@ -61,6 +62,8 @@
            :initial '{"workspaces":[{"layout":"","tags":[{"name":"","index":0,"mine":false,"busy":false,"visible":false,"urgent":false}]}]}'
            "leftwm state")
 
+(defvar show_cal false)
+
 (defwindow bar
   :monitor 0
   :windowtype "dock"
@@ -71,3 +74,10 @@
                       :anchor "top center")
   :reserve (struts :side "top" :distance "4%")
   (bar))
+
+(defwindow cal
+  :monitor 0
+  :windowtype "dock"
+  :wm-ignore true
+  :geometry (geometry :x "-1%" :y "4%" :anchor "top right")
+  (calendar :class "calendar" :visible show_cal))
