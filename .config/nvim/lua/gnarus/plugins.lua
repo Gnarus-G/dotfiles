@@ -18,8 +18,6 @@ return packer.startup(function(use)
 
   use 'folke/tokyonight.nvim'
 
-  use 'christoomey/vim-tmux-navigator'
-
   use 'tpope/vim-surround'
 
   use { 'nvim-lualine/lualine.nvim', requires = { 'kyazdani42/nvim-web-devicons', opt = true } }
