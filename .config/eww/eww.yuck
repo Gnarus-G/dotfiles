@@ -70,7 +70,7 @@
   :monitor 0
   :windowtype "dock"
   :geometry (geometry :x "0%"
-                      :y "1%"
+                      :y "0.25%"
                       :width "99%"
                       :height "10px"
                       :anchor "top center")
@@ -82,7 +82,7 @@
   :stacking "fg"
   :wm-ignore true
   :windowtype "dock"
-  :geometry (geometry :x "-1%" :y "4%" :anchor "top right")
+  :geometry (geometry :x "-1%" :y "3%" :anchor "top right")
    (calendar :class "calendar"))
     
   
