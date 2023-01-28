@@ -1,9 +1,23 @@
 local wezterm = require("wezterm")
 local act = wezterm.action
 
-wezterm.on('update-right-status', function(window, pane)
-  window:set_right_status(window:active_workspace())
-end)
+-- Equivalent to POSIX basename(3)
+-- Given "/foo/bar" returns "bar"
+-- Given "c:\\foo\\bar" returns "bar"
+local function basename(s)
+  return string.gsub(s, '(.*)[/\\](.*)$', '%2');
+end
+
+wezterm.on(
+  'format-tab-title',
+  function(tab, tabs, panes, config, hover, max_width)
+    local title = basename(tab.active_pane.current_working_dir);
+    if title == "" then
+      title = tab.active_pane.title
+    end
+    return "|" .. tab.tab_index + 1 .. "|" .. title .. "  ";
+  end
+)
 
 local launch_menu = {}
 
@@ -27,6 +41,9 @@ end
 
 return {
   enable_tab_bar = true,
+  hide_tab_bar_if_only_one_tab = true,
+  tab_bar_at_bottom = true,
+  use_fancy_tab_bar = false,
   font = wezterm.font "Fira Code",
   font_size = 10,
   harfbuzz_features = { "zero", "ss01", "cv05" },
@@ -39,7 +56,7 @@ return {
     -- Show launcher menu items
     {
       key = 'd',
-      mods = 'ALT|SHIFT',
+      mods = 'CTRL|SHIFT',
       action = act.ShowLauncherArgs {
         flags = 'FUZZY|LAUNCH_MENU_ITEMS',
         title = "Projects and stuff"
