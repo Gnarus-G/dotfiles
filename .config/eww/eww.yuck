@@ -21,7 +21,7 @@
          :orientation "h"
          :space-evenly true
          :halign "start"
-        :height 30
+         :height 30
          :spacing 10
       (box
         (for tag in '${wmstate.workspaces[0].tags}'
@@ -34,7 +34,9 @@
                     tag.urgent ? "ws-button-urgent" :
                     tag.busy ? "ws-button-busy" : ""}
             :onclick "leftwm-command \"SendWorkspaceToTag 0 ${tag.index}\""
-            {!tag.mine && !tag.busy && !tag.visible && !tag.urgent ?  "·" : "${tag.name}"})))))
+            {!tag.mine && !tag.busy && !tag.visible && !tag.urgent ?  "·" : "${tag.name}"})))
+     (label :class "text-bg-light" :text "Layout: ${wmstate.workspaces[0].layout}")))
+      
 
 (defwidget metric [label value onchange]
   (box :orientation "h"
