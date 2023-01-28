@@ -74,7 +74,7 @@
                       :width "99%"
                       :height "10px"
                       :anchor "top center")
-  :reserve (struts :side "top" :distance "4%")
+  :reserve (struts :side "top" :distance "2%")
   (bar))
 
 (defwindow cal
