@@ -61,12 +61,21 @@ return {
     -- Show the launcher in fuzzy selection mode and have it list all workspaces
     -- and allow activating one.
     {
-      key = 'd',
+      key = 'w',
       mods = 'ALT',
       action = act.ShowLauncherArgs {
         flags = 'FUZZY|WORKSPACES',
       },
     },
+    -- Show launcher menu items
+    {
+      key = 'd',
+      mods = 'ALT|SHIFT',
+      action = act.ShowLauncherArgs {
+        flags = 'FUZZY|LAUNCH_MENU_ITEMS',
+        title = "Projects and stuff"
+      },
+    }
   },
   -- This causes `wezterm` to act as though it was started as
   -- `wezterm connect unix` by default, connecting to the unix
