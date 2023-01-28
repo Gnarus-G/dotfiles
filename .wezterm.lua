@@ -75,6 +75,20 @@ return {
         flags = 'FUZZY|LAUNCH_MENU_ITEMS',
         title = "Projects and stuff"
       },
+    },
+    {
+      key = '"',
+      mods = 'CTRL|SHIFT',
+      action = act.SplitVertical {
+        domain = 'CurrentPaneDomain'
+      },
+    },
+    {
+      key = '%',
+      mods = 'CTRL|SHIFT',
+      action = act.SplitHorizontal {
+        domain = 'CurrentPaneDomain'
+      },
     }
   },
   -- This causes `wezterm` to act as though it was started as
