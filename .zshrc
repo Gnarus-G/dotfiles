@@ -121,3 +121,4 @@ export PATH="$PNPM_HOME:$PATH"
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 alias vim=nvim
+alias cdd='cd $(fd -HIg "**/.git" --base-directory ~/d --strip-cwd-prefix -x echo {//} | fzf | xargs -I % echo ~/d/%)'
