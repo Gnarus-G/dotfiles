@@ -75,6 +75,11 @@ return {
       action = act.SplitHorizontal {
         domain = 'CurrentPaneDomain'
       },
+    },
+    {
+      key = 'w',
+      mods = 'CTRL|SHIFT',
+      action = act.CloseCurrentPane { confirm = true },
     }
   },
   -- This causes `wezterm` to act as though it was started as
