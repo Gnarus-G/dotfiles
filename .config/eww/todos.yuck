@@ -1,0 +1,8 @@
+(defwidget todo []
+  (box :class "todo" :visible {!todos_empty} :orientation "h" :space-evenly false :halign "center"
+    (label :class "label" :text "todo:" :yalign 1)
+    (label :class "message" :text {latest_todo.message} :yalign 1)
+    (button :class "del-btn" :onclick "todo rm ${latest_todo.id} && notify-send 'todo ${latest_todo.id} deleted!'" "❌")))
+
+(defpoll latest_todo :interval "1s" :initial "null" "todo | jq last")
+(defpoll todos_empty :interval "1s" :initial true "todo | jq 'isempty(.[])'")
