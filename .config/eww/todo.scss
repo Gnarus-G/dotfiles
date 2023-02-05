@@ -11,6 +11,22 @@
   padding: 0 10px;
 }
 
+progressbar > trough {
+  min-width: 50px;
+}
+
+progressbar > trough > progress {
+  border-radius: 2px;
+}
+
+.todo progressbar.priority progress {
+  background: pink;
+}
+
+.todo progressbar.drag progress {
+  background: $secondary;
+}
+
 .todo > .del-btn {
   opacity: 0.5;
   border: lighten($color: red, $amount: 10) solid 3px;
