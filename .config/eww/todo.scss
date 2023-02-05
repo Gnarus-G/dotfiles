@@ -1,0 +1,29 @@
+.todo {
+  font-size: 16px;
+}
+
+.todo > * {
+  margin: 0 3px;
+}
+
+.todo > .label {
+  font-style: italic;
+  opacity: 0.7;
+  text-decoration: underline;
+}
+
+.todo > .message {
+  font-size: 20px;
+  padding: 0 10px;
+}
+
+.todo > .del-btn {
+  opacity: 0.5;
+  border: lighten($color: red, $amount: 10) solid 3px;
+  background-color: darken($color: pink, $amount: 5);
+  border-radius: 50%;
+}
+
+.todo > .del-btn:hover {
+  opacity: 1;
+}

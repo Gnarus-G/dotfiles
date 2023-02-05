@@ -9,6 +9,8 @@ $background: #0f172a;
   all: unset; //Unsets everything so you can style everything from scratch
 }
 
+@import "./todo.scss";
+
 //Global Styles
 .bar {
   background-color: $background;
