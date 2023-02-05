@@ -3,7 +3,9 @@
 (defwidget bar []
   (box :orientation "h" :class "bar"
     (workspaces)
-    (todo)
+    (box :orientation "h" :visible {!todos_empty} :space-evenly false :halign "center"
+     (button :onclick '${EWW_CMD} windows | grep "\*todo_list" && ${EWW_CMD} close todo_list || ${EWW_CMD} open todo_list' "📜")
+     (todo :item latest_todo))
     (sidestuff)))
 
 (defwidget sidestuff []
