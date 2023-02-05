@@ -1,6 +1,9 @@
+(include "./todos.yuck")
+
 (defwidget bar []
   (box :orientation "h" :class "bar"
     (workspaces)
+    (todo)
     (sidestuff)))
 
 (defwidget sidestuff []
