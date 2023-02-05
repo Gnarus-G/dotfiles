@@ -1,8 +1,20 @@
-(defwidget todo []
-  (box :class "todo" :visible {!todos_empty} :orientation "h" :space-evenly false :halign "center"
-    (label :class "label" :text "todo:" :yalign 1)
-    (label :class "message" :text {latest_todo.message} :yalign 1)
-    (button :class "del-btn" :onclick "todo rm ${latest_todo.id} && notify-send 'todo ${latest_todo.id} deleted!'" "❌")))
+(defwidget todo [item]
+  (box :class "todo" :orientation "h" :space-evenly false :halign "center"
+    (label :class "message" :text {item.message} :yalign 1)
+    (button :class "del-btn" :onclick "todo rm ${item.id} ${arraylength(todos) == 1 ? '&& ${EWW_CMD} close todo_list' : ""} && notify-send 'todo ${item.id} deleted!'" "❌")))
 
+(defpoll todos :interval "2s" :initial "[]" "todo")
 (defpoll latest_todo :interval "1s" :initial "null" "todo | jq last")
 (defpoll todos_empty :interval "1s" :initial true "todo | jq 'isempty(.[])'")
+
+(defwindow todo_list
+  :monitor 0
+  :stacking "fg"
+  :wm-ignore true
+  :windowtype "dock"
+  :geometry (geometry :x "0.3%" :y "3%" :height "35%" :width "15%" :anchor "top center")
+  (scroll :vscroll true
+   (box :class "todo-list" :orientation "v" :space-evenly true :halign "center"
+     (for t in todos(todo :item t))))) 
+
+    
