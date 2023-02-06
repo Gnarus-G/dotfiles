@@ -1,8 +1,8 @@
 (include "./todos.yuck")
 
-(defwidget bar []
+(defwidget bar [index]
   (box :orientation "h" :class "bar"
-    (workspaces)
+    (workspaces :index index)
     (box :orientation "h" :visible {!todos_empty} :space-evenly false :halign "center"
      (button :onclick '${EWW_CMD} windows | grep "\*todo_list" && ${EWW_CMD} close todo_list || ${EWW_CMD} open todo_list' "📜")
      (todo :item latest_todo))
@@ -19,9 +19,7 @@
     (eventbox :onclick "${EWW_CMD} ${cal_is_open ? "close" : "open"} cal; ${EWW_CMD} update cal_is_open=${!cal_is_open}; " today))
    (box :style "padding-left: 10px;" time)))
 
-; eww is natively able to parse the JSON output of `leftwm-state`
-; since eww also has the ability of `for` loops there is no need for a `liquid` template anymore
-(defwidget workspaces []
+(defwidget workspaces [index]
     (box :class "workspaces"
          :orientation "h"
          :space-evenly true
@@ -29,7 +27,7 @@
          :height 30
          :spacing 10
       (box
-        (for tag in '${wmstate.workspaces[0].tags}'
+        (for tag in '${wmstate.workspaces[index].tags}'
           (button
             :width 25
             :valign "center" 
@@ -38,9 +36,9 @@
                     tag.visible ? "ws-button-visible" :
                     tag.urgent ? "ws-button-urgent" :
                     tag.busy ? "ws-button-busy" : ""}
-            :onclick "leftwm-command \"SendWorkspaceToTag 0 ${tag.index}\""
+            :onclick "leftwm-command \"SendWorkspaceToTag ${index} ${tag.index}\""
             {!tag.mine && !tag.busy && !tag.visible && !tag.urgent ?  "·" : "${tag.name}"})))
-     (label :class "text-bg-light" :text "Layout: ${wmstate.workspaces[0].layout}")))
+     (label :class "text-bg-light" :text "Layout: ${wmstate.workspaces[index].layout}")))
       
 
 (defwidget metric [label value onchange]
@@ -80,7 +78,29 @@
                       :height "10px"
                       :anchor "top center")
   :reserve (struts :side "top" :distance "2%")
-  (bar))
+  (bar :index 0))
+
+(defwindow bar1
+  :monitor 1
+  :windowtype "dock"
+  :geometry (geometry :x "0%"
+                      :y "0.25%"
+                      :width "99%"
+                      :height "10px"
+                      :anchor "top center")
+  :reserve (struts :side "top" :distance "2%")
+  (bar :index 1))
+
+(defwindow bar2
+  :monitor 2
+  :windowtype "dock"
+  :geometry (geometry :x "0%"
+                      :y "0.25%"
+                      :width "99%"
+                      :height "10px"
+                      :anchor "top center")
+  :reserve (struts :side "top" :distance "2%")
+  (bar :index 2))
 
 (defwindow cal
   :monitor 0
@@ -89,6 +109,3 @@
   :windowtype "dock"
   :geometry (geometry :x "-1%" :y "3%" :anchor "top right")
    (calendar :class "calendar"))
-    
-  
-
