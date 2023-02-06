@@ -17,4 +17,4 @@ leftwm-command "LoadTheme $SCRIPTPATH/theme.ron"
 
 feh --randomize --bg-fill "$SCRIPTPATH"/wallpaper/*.png
 
-eww open bar
+eww open-many bar bar1 bar2
