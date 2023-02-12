@@ -50,6 +50,13 @@ return {
       key = 'w',
       mods = 'CTRL|SHIFT',
       action = act.CloseCurrentPane { confirm = true },
+    },
+    {
+      key = 'p',
+      mods = 'CTRL|SHIFT',
+      action = act.PaneSelect {
+        mode = 'SwapWithActive'
+      },
     }
   },
   -- This causes `wezterm` to act as though it was started as
