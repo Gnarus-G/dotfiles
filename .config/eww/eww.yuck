@@ -88,7 +88,7 @@
                       :width "99%"
                       :height "10px"
                       :anchor "top center")
-  :reserve (struts :side "top" :distance "2%")
+  :reserve (struts :side "top" :distance "2.5%")
   (bar :index 1))
 
 (defwindow bar2
@@ -99,7 +99,7 @@
                       :width "99%"
                       :height "10px"
                       :anchor "top center")
-  :reserve (struts :side "top" :distance "2%")
+  :reserve (struts :side "top" :distance "2.5%")
   (bar :index 2))
 
 (defwindow cal
