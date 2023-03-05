@@ -2,27 +2,25 @@ local lsp = require('lsp-zero')
 
 lsp.preset('recommended')
 
-lsp.ensure_installed {
-  'rust_analyzer', 'tailwindcss', 'dockerls', "cssls", "clangd", "sumneko_lua"
-}
+lsp.ensure_installed { 'rust_analyzer', 'tailwindcss', 'dockerls', "cssls", "clangd" }
 
 local cmp = require("cmp");
 require('cmp-npm').setup({})
 lsp.setup_nvim_cmp({
   mapping = lsp.defaults.cmp_mappings({
-    ["<C-b>"] = cmp.mapping(cmp.mapping.scroll_docs(-1), { "i", "c" }),
-    ["<C-f>"] = cmp.mapping(cmp.mapping.scroll_docs(1), { "i", "c" }),
-    ["<C-Space>"] = cmp.mapping(cmp.mapping.complete(), { "i", "c" }),
-    ["<C-e>"] = cmp.mapping({
+        ["<C-b>"] = cmp.mapping(cmp.mapping.scroll_docs(-1), { "i", "c" }),
+        ["<C-f>"] = cmp.mapping(cmp.mapping.scroll_docs(1), { "i", "c" }),
+        ["<C-Space>"] = cmp.mapping(cmp.mapping.complete(), { "i", "c" }),
+        ["<C-e>"] = cmp.mapping({
       i = cmp.mapping.abort(),
       c = cmp.mapping.close(),
     }),
     -- Accept currently selected item. If none selected, `select` first item.
     -- Set `select` to `false` to only confirm explicitly selected items.
-    ["<CR>"] = cmp.mapping.confirm({ select = true }),
+        ["<CR>"] = cmp.mapping.confirm({ select = true }),
   }),
   sources = {
-    { name = "npm", keyword_length = 4 },
+    { name = "npm",     keyword_length = 4 },
     { name = "nvim_lsp" },
     { name = "nvim_lua" },
     { name = "luasnip" },
@@ -70,9 +68,9 @@ lsp.setup()
 
 require("typescript").setup({
   disable_commands = false, -- prevent the plugin from creating Vim commands
-  debug = false, -- enable debug logging for commands
+  debug = false,            -- enable debug logging for commands
   go_to_source_definition = {
-    fallback = true, -- fall back to standard LSP definition on failure
+    fallback = true,        -- fall back to standard LSP definition on failure
   },
   server = {
     on_attach = on_attach,
