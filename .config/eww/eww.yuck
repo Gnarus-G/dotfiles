@@ -12,7 +12,7 @@
   (box :class "sidestuff" :orientation "h" :space-evenly false :halign "end"
     (metric :label "🔊"
             :value volume
-            :onchange "amixer -D pulse sset Master {}%")
+            :onchange "pamixer --set-volume {}")
     (box :class "px border-x" :space-evenly false "CPU:" {round(EWW_CPU.avg,0)} "%")
     (box :class "px border-r" :space-evenly false "RAM:" {round(EWW_RAM.used_mem_perc,0)} "%")
    (box :class "border-r px today" 
@@ -55,7 +55,7 @@
 
 
 (defpoll volume :interval "1s"
-  "scripts/getvol")
+  "pamixer --get-volume")
 
 (defpoll today :interval "1s"
   "date '+%a, %b %d'")
