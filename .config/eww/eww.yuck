@@ -19,7 +19,9 @@
     (eventbox :onclick "${EWW_CMD} ${cal_is_open ? "close" : "open"} cal; ${EWW_CMD} update cal_is_open=${!cal_is_open}; " today))
    (box :style "padding-left: 10px;" time)))
 
-(defwidget toggle_audio_icon_button [] (box :class "label" (button :onclick 'pamixer -t' {volume_muted ? "🔇" : "🔊"})))
+(defwidget toggle_audio_icon_button [] 
+  (box :class "label" 
+       (button :onclick 'pamixer -t' {volume_muted ? "🔇" : volume < 30 ? "🔈" : volume < 70 ? "🔉" : "🔊"})))
 
 (defwidget workspaces [index]
     (box :class "workspaces"
@@ -55,7 +57,7 @@
 
 
 
-(defpoll volume :interval "1s"
+(defpoll volume :interval "200ms"
   "pamixer --get-volume")
 
 (defpoll volume_muted :interval "100ms"
