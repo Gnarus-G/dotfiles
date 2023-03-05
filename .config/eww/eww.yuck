@@ -10,14 +10,16 @@
 
 (defwidget sidestuff []
   (box :class "sidestuff" :orientation "h" :space-evenly false :halign "end"
-    (metric :label "🔊"
-            :value volume
+    (toggle_audio_icon_button)
+    (metric :value volume
             :onchange "pamixer --set-volume {}")
     (box :class "px border-x" :space-evenly false "CPU:" {round(EWW_CPU.avg,0)} "%")
     (box :class "px border-r" :space-evenly false "RAM:" {round(EWW_RAM.used_mem_perc,0)} "%")
    (box :class "border-r px today" 
     (eventbox :onclick "${EWW_CMD} ${cal_is_open ? "close" : "open"} cal; ${EWW_CMD} update cal_is_open=${!cal_is_open}; " today))
    (box :style "padding-left: 10px;" time)))
+
+(defwidget toggle_audio_icon_button [] (box :class "label" (button :onclick 'pamixer -t' {volume_muted ? "🔇" : "🔊"})))
 
 (defwidget workspaces [index]
     (box :class "workspaces"
@@ -41,11 +43,10 @@
      (label :class "text-bg-light" :text "Layout: ${wmstate.workspaces[index].layout}")))
       
 
-(defwidget metric [label value onchange]
+(defwidget metric [value onchange]
   (box :orientation "h"
        :class "metric"
        :space-evenly false
-    (box :class "label" label)
     (scale :min 0
            :max 101
            :active {onchange != ""}
@@ -56,6 +57,9 @@
 
 (defpoll volume :interval "1s"
   "pamixer --get-volume")
+
+(defpoll volume_muted :interval "100ms"
+  "pamixer --get-mute")
 
 (defpoll today :interval "1s"
   "date '+%a, %b %d'")
