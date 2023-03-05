@@ -5,3 +5,5 @@ export SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
 leftwm-command "UnloadTheme"
 
 eww kill
+
+pkill stalonetray
