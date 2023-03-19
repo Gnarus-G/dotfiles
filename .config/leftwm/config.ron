@@ -41,7 +41,8 @@
     layout_mode: Tag,
     insert_behavior: Bottom,
     scratchpad: [
-        (name: "Wezterm", value: "wezterm start", x: 750, y: 390, height: 720, width: 1080),
+        (name: "Whatever", value: "wezterm start", x: 750, y: 390, height: 720, width: 1080),
+        (name: "Work", value: "wezterm", x: 600, y: 100, height: 1240, width: 1460),
     ],
     window_rules: [],
     disable_current_tag_swap: true,
@@ -50,8 +51,9 @@
     focus_new_windows: true,
     keybind: [
         (command: ToggleFullScreen, modifier: ["modkey"], key: "f"),
-        (command: ToggleScratchPad, value: "Wezterm", modifier: ["modkey"], key: "t"),
-        (command: Execute, value: "wezterm", modifier: ["modkey", "Shift"], key: "t"),
+        (command: ToggleScratchPad, value: "Whatever", modifier: ["modkey"], key: "t"),
+        (command: ToggleScratchPad, value: "Work", modifier: ["modkey", "Shift"], key: "t"),
+        (command: Execute, value: "wezterm", modifier: ["modkey", "Alt"], key: "t"),
         (command: Execute, value: "rofi -show drun", modifier: ["modkey"], key: "d"),
         (command: CloseWindow, value: "", modifier: ["modkey", "Shift"], key: "q"),
         (command: SoftReload, value: "", modifier: ["modkey", "Shift"], key: "r"),
