@@ -15,6 +15,9 @@ eww daemon &
 # start system tray viewer, if one exists
 type stalonetray &> /dev/null && stalonetray &
 
+# start compositor
+type picom &> /dev/null && picom --no-vsync &
+
 # Set the theme.ron config
 leftwm-command "LoadTheme $SCRIPTPATH/theme.ron"
 

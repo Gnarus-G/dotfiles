@@ -7,3 +7,5 @@ leftwm-command "UnloadTheme"
 eww kill
 
 pkill stalonetray
+
+pkill picom
