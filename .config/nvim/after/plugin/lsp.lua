@@ -1,3 +1,4 @@
+local nvim_lsp = require("lspconfig");
 local lsp = require('lsp-zero')
 
 lsp.preset('recommended')
@@ -62,6 +63,10 @@ lsp.configure("jsonls", {
   }
 })
 
+lsp.configure("denols", {
+  root_dir = nvim_lsp.util.root_pattern("deno.json", "deno.jsonc"),
+})
+
 lsp.nvim_workspace()
 
 lsp.setup()
@@ -74,6 +79,8 @@ require("typescript").setup({
   },
   server = {
     on_attach = on_attach,
+    root_dir = nvim_lsp.util.root_pattern("package.json"),
+    single_file_support = false,
     capabilities = require('cmp_nvim_lsp')
         .default_capabilities(vim.lsp.protocol.make_client_capabilities())
   }
