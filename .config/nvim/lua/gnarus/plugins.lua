@@ -71,7 +71,9 @@ return packer.startup(function(use)
   use 'nvim-treesitter/nvim-treesitter-context'
   use 'nvim-treesitter/playground'
   use 'mbbill/undotree'
+
   use 'gnarus-g/ts-node-jumps.nvim'
+  use 'gnarus-g/rested.vim'
 
   use 'gpanders/nvim-parinfer'
 
