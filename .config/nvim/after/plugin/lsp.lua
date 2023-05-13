@@ -50,6 +50,8 @@ local on_attach = function(_, bufnr)
   vim.keymap.set('n', '<F2>', '<cmd>lua vim.lsp.buf.rename()<CR>', opts)
   vim.keymap.set('n', '<leader>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
   vim.keymap.set('n', 'gr', '<cmd>lua vim.lsp.buf.references()<CR>', opts)
+
+  lsp.default_keymaps({ buffer = bufnr })
 end
 
 lsp.on_attach(on_attach)
@@ -89,3 +91,28 @@ require("typescript").setup({
 vim.diagnostic.config({
   virtual_text = true,
 })
+
+-- Rested LSP setup
+local configs = require 'lspconfig.configs'
+
+if not configs.rstdls then
+  configs.rstdls = {
+    default_config = {
+      cmd = { "rstd", "lsp" },
+      filetypes = { "rd" },
+      root_dir = function(fname)
+        return nvim_lsp.util.find_git_ancestor(fname)
+      end,
+    },
+  }
+end
+
+nvim_lsp.rstdls.setup({
+  on_attach = on_attach,
+  single_file_support = true,
+  root_dir = nvim_lsp.util.root_pattern(".vars.rd.json", "*.rd"),
+  capabilities = require('cmp_nvim_lsp')
+      .default_capabilities(vim.lsp.protocol.make_client_capabilities())
+})
+
+--[[ vim.lsp.set_log_level("debug"); ]]
