@@ -56,6 +56,17 @@ end
 
 lsp.on_attach(on_attach)
 
+lsp.configure("rust_analyzer", {
+  settings = {
+    ['rust-analyzer'] = {
+      check = {
+        command = "clippy",
+        extraArgs = { "--", "-A", "clippy::new_without_default", "-A", "clippy::needless_return" }
+      }
+    }
+  }
+})
+
 lsp.configure("jsonls", {
   settings = {
     json = {
