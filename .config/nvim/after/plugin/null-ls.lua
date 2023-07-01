@@ -12,11 +12,13 @@ null_ls.setup({
     null_ls.builtins.diagnostics.eslint_d.with({
       condition = function(utils)
         return utils.root_has_file({ "package.json" })
+            and utils.root_has_file_matches(".eslintrc.*")
       end,
     }),
     null_ls.builtins.code_actions.eslint_d.with({
       condition = function(utils)
         return utils.root_has_file({ "package.json" })
+            and utils.root_has_file_matches(".eslintrc.*")
       end,
     }),
     null_ls.builtins.code_actions.gitsigns,
