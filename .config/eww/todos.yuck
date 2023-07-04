@@ -1,23 +1,9 @@
 (defwidget todo [item]
   (box :class "todo" :orientation "h" :space-evenly false :valign "center" :halign "end"
     (label :class "message" :text {item.message} :yalign 1)
-    (box :orientation "v"
-     (progress :class "drag" :visible {item.drag > 0} :valign "center" :value {(item.drag * 5) % 100})
-     (progress :class "priority" :visible {item.priority > 0} :valign "center" :value {(item.priority * 5) % 100}))
-    (button :class "del-btn" :onclick "todo rm ${item.id} ${arraylength(todos) == 1 ? '&& ${EWW_CMD} close todo_list' : ""} && notify-send 'todo ${item.id} deleted!'" "❌")))
+    (button :class "del-btn" :onclick "todo done ${item.id} ${arraylength(todos) == 1 ? '&& ${EWW_CMD} close todo_list' : ""} && notify-send 'todo ${item.id} marked done!'" "❌")))
 
-(defpoll todos :interval "2s" :initial "[]" "todo")
-(defpoll latest_todo :interval "1s" :initial "null" "todo | jq last")
-(defpoll todos_empty :interval "1s" :initial true "todo | jq 'isempty(.[])'")
-
-(defwindow todo_list
-  :monitor 0
-  :stacking "fg"
-  :wm-ignore true
-  :windowtype "dock"
-  :geometry (geometry :y "3%" :height "35%" :width "15%" :anchor "top center")
-  (scroll :vscroll true
-   (box :class "todo-list" :orientation "v" :space-evenly true :halign "end"
-     (for t in todos(todo :item t))))) 
-
+(defpoll todos :interval "2s" :initial "[]" "todo dump -t")
+(defpoll latest_todo :interval "1s" :initial "null" "todo dump -t | jq first")
+(defpoll todos_empty :interval "1s" :initial true "todo dump -t | jq 'isempty(.[])'")
     
