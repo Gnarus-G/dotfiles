@@ -4,7 +4,7 @@
   (box :orientation "h" :class "bar"
     (workspaces :index index)
     (box :orientation "h" :visible {!todos_empty} :space-evenly false :halign "center"
-     (button :onclick 'mynd &' "📜")
+     (button :onclick 'leftwm command "ToggleScratchPad todos"' "📜")
      (todo :item latest_todo))
     (sidestuff)))
 
