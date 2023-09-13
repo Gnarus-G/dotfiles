@@ -121,7 +121,6 @@ end
 nvim_lsp.rstdls.setup({
   on_attach = on_attach,
   single_file_support = true,
-  root_dir = nvim_lsp.util.root_pattern(".vars.rd.json", "*.rd"),
   capabilities = require('cmp_nvim_lsp')
       .default_capabilities(vim.lsp.protocol.make_client_capabilities())
 })
