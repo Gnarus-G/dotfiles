@@ -126,3 +126,4 @@ nvim_lsp.rstdls.setup({
 })
 
 --[[ vim.lsp.set_log_level("debug"); ]]
+--[[ require('vim.lsp.log').set_format_func(vim.inspect) ]]
