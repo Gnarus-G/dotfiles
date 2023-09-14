@@ -111,9 +111,6 @@ if not configs.rstdls then
     default_config = {
       cmd = { "rstd", "lsp" },
       filetypes = { "rd" },
-      root_dir = function(fname)
-        return nvim_lsp.util.find_git_ancestor(fname)
-      end,
     },
   }
 end
