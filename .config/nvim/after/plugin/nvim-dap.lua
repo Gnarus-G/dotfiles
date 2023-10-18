@@ -102,21 +102,43 @@ dap.configurations.svelte = {
   chrome_attach
 }
 
-dap.configurations.cpp = {
-  {
-    name = "Launch file",
-    type = "codelldb",
-    request = "launch",
-    program = function()
-      return vim.fn.input('Path to executable: ', vim.fn.getcwd() .. '/', 'file')
-    end,
-    cwd = '${workspaceFolder}',
-    stopOnEntry = false,
-  },
+local launch_codelldb = {
+  name = "Launch file",
+  type = "codelldb",
+  request = "launch",
+  program = function()
+    return vim.fn.input('Path to executable: ', vim.fn.getcwd() .. '/', 'file')
+  end,
+  args = function()
+    local function mysplit(inputstr, sep)
+      if sep == nil then
+        sep = "%s"
+      end
+      local t = {}
+      for str in string.gmatch(inputstr, "([^" .. sep .. "]+)") do
+        table.insert(t, str)
+      end
+      return t
+    end
+
+    local args = vim.fn.input('Args: ')
+    local args_sequence = mysplit(args)
+
+    return args_sequence
+  end,
+  cwd = '${workspaceFolder}',
+  stopOnEntry = false,
 }
 
-dap.configurations.c = dap.configurations.cpp
-dap.configurations.rust = dap.configurations.cpp
+dap.configurations.cpp = {
+  launch_codelldb
+}
+dap.configurations.c = {
+  launch_codelldb
+}
+dap.configurations.rust = {
+  launch_codelldb,
+}
 
 dapui.setup();
 
