@@ -19,6 +19,15 @@ dap.adapters.chrome = {
   args = { os.getenv("HOME") .. "/dev/microsoft/vscode-chrome-debug/out/src/chromeDebug.js" }
 }
 
+dap.adapters.codelldb = {
+  type = 'server',
+  port = "${port}",
+  executable = {
+    command = 'codelldb',
+    args = { "--port", "${port}" },
+  }
+}
+
 local node_launcher = {
   name = 'Launch',
   type = 'node2',
@@ -92,6 +101,22 @@ dap.configurations.typescriptreact = {
 dap.configurations.svelte = {
   chrome_attach
 }
+
+dap.configurations.cpp = {
+  {
+    name = "Launch file",
+    type = "codelldb",
+    request = "launch",
+    program = function()
+      return vim.fn.input('Path to executable: ', vim.fn.getcwd() .. '/', 'file')
+    end,
+    cwd = '${workspaceFolder}',
+    stopOnEntry = false,
+  },
+}
+
+dap.configurations.c = dap.configurations.cpp
+dap.configurations.rust = dap.configurations.cpp
 
 dapui.setup();
 
