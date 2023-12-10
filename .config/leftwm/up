@@ -1,0 +1,8 @@
+#!/bin/sh
+
+# Making sure we don't double this process up
+ps -e | grep caldi && pkill caldi
+
+festival --server &
+sleep 1 # give festival some time to boot up
+~/.cargo/bin/caldi assistant ~/d/caldi/models/ggml-base.en.bin &> ~/caldi.log &
