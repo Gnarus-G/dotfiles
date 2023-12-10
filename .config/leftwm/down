@@ -1,0 +1,4 @@
+#!/bin/sh
+
+pkill festival
+pkill caldi
