@@ -1,14 +1,11 @@
 local nvim_lsp = require("lspconfig");
-local lsp = require('lsp-zero')
-
-lsp.preset('recommended')
-
-lsp.ensure_installed { 'rust_analyzer', 'tailwindcss', 'dockerls', "cssls", "clangd" }
+local lsp_zero = require('lsp-zero')
 
 local cmp = require("cmp");
 require('cmp-npm').setup({})
-lsp.setup_nvim_cmp({
-  mapping = lsp.defaults.cmp_mappings({
+cmp.setup({
+  formatting = lsp_zero.cmp_format(),
+  mapping = lsp_zero.defaults.cmp_mappings({
     ["<C-b>"] = cmp.mapping(cmp.mapping.scroll_docs(-1), { "i", "c" }),
     ["<C-f>"] = cmp.mapping(cmp.mapping.scroll_docs(1), { "i", "c" }),
     ["<C-Space>"] = cmp.mapping(cmp.mapping.complete(), { "i", "c" }),
@@ -51,52 +48,64 @@ local on_attach = function(_, bufnr)
   vim.keymap.set('n', '<leader>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
   vim.keymap.set('n', 'gr', '<cmd>lua vim.lsp.buf.references()<CR>', opts)
 
-  lsp.default_keymaps({ buffer = bufnr })
+  lsp_zero.default_keymaps({ buffer = bufnr })
 end
 
-lsp.on_attach(on_attach)
+lsp_zero.on_attach(on_attach)
 
-lsp.configure("rust_analyzer", {
-  settings = {
-    ['rust-analyzer'] = {
-      check = {
-        command = "clippy",
-        extraArgs = { "--", "-A", "clippy::new_without_default", "-A", "clippy::needless_return" }
-      }
-    }
-  }
-})
-
-lsp.configure("jsonls", {
-  settings = {
-    json = {
-      schemas = require "schemastore".json.schemas(),
-      validate = { enable = true }
-    }
-  }
-})
-
-lsp.configure("denols", {
-  root_dir = nvim_lsp.util.root_pattern("deno.json", "deno.jsonc"),
-})
-
-lsp.nvim_workspace()
-
-lsp.setup()
-
-require("typescript").setup({
-  disable_commands = false, -- prevent the plugin from creating Vim commands
-  debug = false,            -- enable debug logging for commands
-  go_to_source_definition = {
-    fallback = true,        -- fall back to standard LSP definition on failure
+require('mason').setup({})
+require('mason-lspconfig').setup({
+  ensure_installed = { 'rust_analyzer', 'tailwindcss', 'dockerls', "cssls", "clangd", "lua_ls", "jsonls" },
+  handlers = {
+    lsp_zero.default_setup,
+    lua_ls = function()
+      local lua_opts = lsp_zero.nvim_lua_ls()
+      require('lspconfig').lua_ls.setup(lua_opts)
+    end,
+    tsserver = function()
+      require("typescript").setup({
+        disable_commands = false, -- prevent the plugin from creating Vim commands
+        debug = false,            -- enable debug logging for commands
+        go_to_source_definition = {
+          fallback = true,        -- fall back to standard LSP definition on failure
+        },
+        server = {
+          on_attach = on_attach,
+          root_dir = nvim_lsp.util.root_pattern("package.json"),
+          single_file_support = false,
+          capabilities = require('cmp_nvim_lsp')
+              .default_capabilities(vim.lsp.protocol.make_client_capabilities())
+        }
+      })
+    end,
+    rust_analyzer = function()
+      nvim_lsp.rust_analyzer.setup({
+        settings = {
+          ['rust-analyzer'] = {
+            check = {
+              command = "clippy",
+              extraArgs = { "--", "-A", "clippy::new_without_default", "-A", "clippy::needless_return" }
+            }
+          }
+        }
+      })
+    end,
+    jsonls = function()
+      nvim_lsp.jsonls.setup({
+        settings = {
+          json = {
+            schemas = require "schemastore".json.schemas(),
+            validate = { enable = true }
+          }
+        }
+      })
+    end,
+    denols = function()
+      nvim_lsp.denols.setup({
+        root_dir = nvim_lsp.util.root_pattern("deno.json", "deno.jsonc"),
+      })
+    end
   },
-  server = {
-    on_attach = on_attach,
-    root_dir = nvim_lsp.util.root_pattern("package.json"),
-    single_file_support = false,
-    capabilities = require('cmp_nvim_lsp')
-        .default_capabilities(vim.lsp.protocol.make_client_capabilities())
-  }
 })
 
 vim.diagnostic.config({
