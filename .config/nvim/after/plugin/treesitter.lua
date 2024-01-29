@@ -18,6 +18,5 @@ vim.filetype.add({
   }
 })
 
-local ft_to_parser = require("nvim-treesitter.parsers").filetype_to_parsername
-ft_to_parser.mdx = "markdown"
+require("vim.treesitter.language").register("markdown", "mdx")
 -- Done setting up .mdx parser --
