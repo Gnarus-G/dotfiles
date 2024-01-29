@@ -10,3 +10,14 @@ require 'nvim-treesitter.configs'.setup {
   incremental_selection = { enable = true },
   textobjects = { enable = true }
 }
+
+-- setting .mdx files to use markdown parser --
+vim.filetype.add({
+  extension = {
+    mdx = 'mdx'
+  }
+})
+
+local ft_to_parser = require("nvim-treesitter.parsers").filetype_to_parsername
+ft_to_parser.mdx = "markdown"
+-- Done setting up .mdx parser --
