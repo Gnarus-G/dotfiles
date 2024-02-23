@@ -1,0 +1,22 @@
+#!/usr/bin/sh
+
+
+if [ $# -eq 0 ]
+  then
+    echo "No arguments supplied"
+    echo "usage: last_coredump <name of process>"
+    exit 0
+fi
+
+BIN=$1
+
+CORE_FILE=$(ls /var/lib/systemd/coredump/*$1*  | sort | tail -n1)
+
+sudo zstd -fd $CORE_FILE
+
+CORE_FILE=$(echo $CORE_FILE | rev | cut -f 2- -d '.' | rev)
+
+sudo chmod 644 $CORE_FILE
+
+echo $CORE_FILE
+
