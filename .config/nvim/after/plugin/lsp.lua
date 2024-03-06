@@ -76,7 +76,7 @@ end
 
 require('mason').setup({})
 require('mason-lspconfig').setup({
-  ensure_installed = { 'tailwindcss', 'dockerls', "cssls", "clangd", "lua_ls", "jsonls" },
+  ensure_installed = { 'dockerls', "cssls", "clangd", "lua_ls", "jsonls" },
   handlers = {
     default_setup,
     lua_ls = function()
@@ -132,6 +132,7 @@ require('mason-lspconfig').setup({
   },
 })
 
+-- npm install -g @tailwindcss/language-server
 nvim_lsp.rust_analyzer.setup({
   settings = {
     ['rust-analyzer'] = {
@@ -141,6 +142,19 @@ nvim_lsp.rust_analyzer.setup({
       }
     }
   }
+})
+
+nvim_lsp.tailwindcss.setup({
+  settings = {
+    tailwindCSS = {
+      experimental = {
+        classRegex = {
+          { "cva\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]" },
+          { "cx\\(([^)]*)\\)",  "(?:'|\"|`)([^']*)(?:'|\"|`)" }
+        },
+      },
+    },
+  },
 })
 
 vim.diagnostic.config({
