@@ -76,7 +76,7 @@ end
 
 require('mason').setup({})
 require('mason-lspconfig').setup({
-  ensure_installed = { 'rust_analyzer', 'tailwindcss', 'dockerls', "cssls", "clangd", "lua_ls", "jsonls" },
+  ensure_installed = { 'tailwindcss', 'dockerls', "cssls", "clangd", "lua_ls", "jsonls" },
   handlers = {
     default_setup,
     lua_ls = function()
@@ -110,20 +110,7 @@ require('mason-lspconfig').setup({
           on_attach = on_attach,
           root_dir = nvim_lsp.util.root_pattern("package.json"),
           single_file_support = false,
-          capabilities = require('cmp_nvim_lsp')
-              .default_capabilities(vim.lsp.protocol.make_client_capabilities())
-        }
-      })
-    end,
-    rust_analyzer = function()
-      nvim_lsp.rust_analyzer.setup({
-        settings = {
-          ['rust-analyzer'] = {
-            check = {
-              command = "clippy",
-              extraArgs = { "--", "-A", "clippy::new_without_default", "-A", "clippy::needless_return" }
-            }
-          }
+          capabilities = lsp_capabilities
         }
       })
     end,
@@ -143,6 +130,17 @@ require('mason-lspconfig').setup({
       })
     end
   },
+})
+
+nvim_lsp.rust_analyzer.setup({
+  settings = {
+    ['rust-analyzer'] = {
+      check = {
+        command = "clippy",
+        extraArgs = { "--", "-A", "clippy::new_without_default", "-A", "clippy::needless_return" }
+      }
+    }
+  }
 })
 
 vim.diagnostic.config({
