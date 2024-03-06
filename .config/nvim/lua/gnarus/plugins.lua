@@ -37,7 +37,7 @@ return packer.startup(function(use)
   use 'windwp/nvim-spectre'
 
   use {
-    'VonHeikemen/lsp-zero.nvim',
+    'hrsh7th/nvim-cmp', -- Completions
     requires = {
       -- LSP Support
       { 'neovim/nvim-lspconfig' },
@@ -45,7 +45,6 @@ return packer.startup(function(use)
       { 'williamboman/mason-lspconfig.nvim' },
 
       -- Autocompletion
-      { 'hrsh7th/nvim-cmp' },
       { 'hrsh7th/cmp-buffer' },
       { 'hrsh7th/cmp-path' },
       { 'saadparwaiz1/cmp_luasnip' },
