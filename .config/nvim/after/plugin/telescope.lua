@@ -47,3 +47,12 @@ vim.keymap.set("n", "<leader>fr", builtin.lsp_references)
 -- Git vim.keymap.setpings
 vim.keymap.set("n", "<leader>gc", builtin.git_bcommits)
 vim.keymap.set("n", "<leader>gC", builtin.git_commits)
+
+-- load refactoring Telescope extension
+require("telescope").load_extension("refactoring")
+
+vim.keymap.set(
+  { "n", "x" },
+  "<leader>rr",
+  function() require('telescope').extensions.refactoring.refactors() end
+)
