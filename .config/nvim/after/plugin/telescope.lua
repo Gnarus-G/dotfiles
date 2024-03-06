@@ -47,7 +47,3 @@ vim.keymap.set("n", "<leader>fr", builtin.lsp_references)
 -- Git vim.keymap.setpings
 vim.keymap.set("n", "<leader>gc", builtin.git_bcommits)
 vim.keymap.set("n", "<leader>gC", builtin.git_commits)
-
-telescope.load_extension("git_worktree")
-vim.keymap.set("n", "<leader>W", require('telescope').extensions.git_worktree.create_git_worktree)
-vim.keymap.set("n", "<leader>w", require('telescope').extensions.git_worktree.git_worktrees)
