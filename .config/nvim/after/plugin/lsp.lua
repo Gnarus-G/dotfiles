@@ -1,11 +1,9 @@
 local nvim_lsp = require("lspconfig");
-local lsp_zero = require('lsp-zero')
 
 local cmp = require("cmp");
 require('cmp-npm').setup({})
 cmp.setup({
-  formatting = lsp_zero.cmp_format(),
-  mapping = lsp_zero.defaults.cmp_mappings({
+  mapping = cmp.mapping.preset.insert({
     ["<C-b>"] = cmp.mapping(cmp.mapping.scroll_docs(-1), { "i", "c" }),
     ["<C-f>"] = cmp.mapping(cmp.mapping.scroll_docs(1), { "i", "c" }),
     ["<C-Space>"] = cmp.mapping(cmp.mapping.complete(), { "i", "c" }),
@@ -25,7 +23,19 @@ cmp.setup({
     { name = "buffer" },
     { name = "path" },
   },
+  snippet = {
+    expand = function(args)
+      require('luasnip').lsp_expand(args.body)
+    end,
+  }
 })
+
+-- note: diagnostics are not exclusive to lsp servers
+-- so these can be global keybindings
+vim.keymap.set('n', 'gl', '<cmd>lua vim.diagnostic.open_float()<cr>')
+vim.keymap.set('n', '[d', '<cmd>lua vim.diagnostic.goto_prev()<cr>')
+vim.keymap.set('n', ']d', '<cmd>lua vim.diagnostic.goto_next()<cr>')
+
 --
 -- Use an on_attach function to only map the following keys
 -- after the language server attaches to the current buffer
@@ -47,20 +57,47 @@ local on_attach = function(_, bufnr)
   vim.keymap.set('n', '<F2>', '<cmd>lua vim.lsp.buf.rename()<CR>', opts)
   vim.keymap.set('n', '<leader>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
   vim.keymap.set('n', 'gr', '<cmd>lua vim.lsp.buf.references()<CR>', opts)
-
-  lsp_zero.default_keymaps({ buffer = bufnr })
 end
 
-lsp_zero.on_attach(on_attach)
+vim.api.nvim_create_autocmd('LspAttach', {
+  desc = 'LSP actions',
+  callback = function(event)
+    on_attach(nil, event.buf)
+  end
+})
+
+local lsp_capabilities = require('cmp_nvim_lsp').default_capabilities()
+
+local default_setup = function(server)
+  require('lspconfig')[server].setup({
+    capabilities = lsp_capabilities,
+  })
+end
 
 require('mason').setup({})
 require('mason-lspconfig').setup({
   ensure_installed = { 'rust_analyzer', 'tailwindcss', 'dockerls', "cssls", "clangd", "lua_ls", "jsonls" },
   handlers = {
-    lsp_zero.default_setup,
+    default_setup,
     lua_ls = function()
-      local lua_opts = lsp_zero.nvim_lua_ls()
-      require('lspconfig').lua_ls.setup(lua_opts)
+      require('lspconfig').lua_ls.setup({
+        capabilities = lsp_capabilities,
+        settings = {
+          Lua = {
+            runtime = {
+              version = 'LuaJIT'
+            },
+            diagnostics = {
+              globals = { 'vim' },
+            },
+            workspace = {
+              library = {
+                vim.env.VIMRUNTIME,
+              }
+            }
+          }
+        }
+      })
     end,
     tsserver = function()
       require("typescript").setup({
