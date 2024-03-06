@@ -30,7 +30,6 @@ return packer.startup(function(use)
   use 'tpope/vim-fugitive'
   use 'lewis6991/gitsigns.nvim'
 
-  use 'ThePrimeagen/git-worktree.nvim'
   use 'ThePrimeagen/harpoon'
 
   use { 'nvim-telescope/telescope.nvim', requires = { 'nvim-lua/plenary.nvim' } }
