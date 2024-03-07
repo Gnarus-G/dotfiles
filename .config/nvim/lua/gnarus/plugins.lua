@@ -71,6 +71,8 @@ return packer.startup(function(use)
   use 'gnarus-g/ts-node-jumps.nvim'
   use 'gnarus-g/rested.vim'
 
+  -- for yuck and other lisp like languages
+  -- auto balance parentheses
   use 'gpanders/nvim-parinfer'
 
   use {
