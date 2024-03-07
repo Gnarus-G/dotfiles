@@ -80,7 +80,7 @@ require('mason-lspconfig').setup({
   handlers = {
     default_setup,
     lua_ls = function()
-      require('lspconfig').lua_ls.setup({
+      nvim_lsp.lua_ls.setup({
         capabilities = lsp_capabilities,
         settings = {
           Lua = {
@@ -107,7 +107,6 @@ require('mason-lspconfig').setup({
           fallback = true,        -- fall back to standard LSP definition on failure
         },
         server = {
-          on_attach = on_attach,
           root_dir = nvim_lsp.util.root_pattern("package.json"),
           single_file_support = false,
           capabilities = lsp_capabilities
@@ -116,6 +115,7 @@ require('mason-lspconfig').setup({
     end,
     rust_analyzer = function()
       nvim_lsp.rust_analyzer.setup({
+        capabilities = lsp_capabilities,
         settings = {
           ['rust-analyzer'] = {
             diagnostics = {
@@ -123,7 +123,7 @@ require('mason-lspconfig').setup({
                 "needless_return",
               },
             },
-            check = {
+            checkOnSave = {
               command = "clippy",
               extraArgs = { "--", "-A", "clippy::new_without_default", "-A", "clippy::needless_return" }
             }
@@ -180,7 +180,6 @@ if not configs.rstdls then
 end
 
 nvim_lsp.rstdls.setup({
-  on_attach = on_attach,
   single_file_support = true,
   capabilities = require('cmp_nvim_lsp')
       .default_capabilities(vim.lsp.protocol.make_client_capabilities())
