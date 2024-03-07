@@ -76,7 +76,7 @@ end
 
 require('mason').setup({})
 require('mason-lspconfig').setup({
-  ensure_installed = { 'dockerls', "cssls", "clangd", "lua_ls", "jsonls" },
+  ensure_installed = { 'rust_analyzer', 'dockerls', "cssls", "clangd", "lua_ls", "jsonls" },
   handlers = {
     default_setup,
     lua_ls = function()
@@ -114,6 +114,23 @@ require('mason-lspconfig').setup({
         }
       })
     end,
+    rust_analyzer = function()
+      nvim_lsp.rust_analyzer.setup({
+        settings = {
+          ['rust-analyzer'] = {
+            diagnostics = {
+              disabled = {
+                "needless_return",
+              },
+            },
+            check = {
+              command = "clippy",
+              extraArgs = { "--", "-A", "clippy::new_without_default", "-A", "clippy::needless_return" }
+            }
+          }
+        }
+      })
+    end,
     jsonls = function()
       nvim_lsp.jsonls.setup({
         settings = {
@@ -133,17 +150,6 @@ require('mason-lspconfig').setup({
 })
 
 -- npm install -g @tailwindcss/language-server
-nvim_lsp.rust_analyzer.setup({
-  settings = {
-    ['rust-analyzer'] = {
-      check = {
-        command = "clippy",
-        extraArgs = { "--", "-A", "clippy::new_without_default", "-A", "clippy::needless_return" }
-      }
-    }
-  }
-})
-
 nvim_lsp.tailwindcss.setup({
   settings = {
     tailwindCSS = {
