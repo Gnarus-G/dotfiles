@@ -62,7 +62,7 @@ return packer.startup(function(use)
   use { "rcarriga/nvim-dap-ui", requires = { "mfussenegger/nvim-dap" } }
   use 'theHamsta/nvim-dap-virtual-text'
 
-  use 'jose-elias-alvarez/null-ls.nvim'
+  use 'nvimtools/none-ls.nvim'
   use 'jose-elias-alvarez/typescript.nvim'
 
   use { 'nvim-treesitter/nvim-treesitter', run = ":TSUpdate" }
