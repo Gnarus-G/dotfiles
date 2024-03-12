@@ -185,8 +185,7 @@ end
 
 nvim_lsp.rstdls.setup({
   single_file_support = true,
-  capabilities = require('cmp_nvim_lsp')
-      .default_capabilities(vim.lsp.protocol.make_client_capabilities())
+  capabilities = lsp_capabilities
 })
 
 --[[ vim.lsp.set_log_level("debug"); ]]
