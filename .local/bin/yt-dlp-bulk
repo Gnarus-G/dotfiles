@@ -1,0 +1,15 @@
+#!/usr/bin/sh
+
+set -e
+
+DIR=$1
+mkdir -p $DIR
+cd $DIR
+
+download() {
+  nohup yt-dlp $1 & 
+}
+
+export -f download
+
+cat | xargs -n1 bash -c 'download "$@"' _
