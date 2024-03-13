@@ -4,7 +4,6 @@ require 'nvim-treesitter.configs'.setup {
   auto_install = true,
   autotag = {
     enable = true,
-    filetypes = { "html", "xml", "tsx" }
   },
   highlight = { enable = true },
   incremental_selection = { enable = true },
