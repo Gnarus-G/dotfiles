@@ -80,7 +80,7 @@ end
 
 require('mason').setup({})
 require('mason-lspconfig').setup({
-  ensure_installed = { 'rust_analyzer', 'dockerls', "cssls", "clangd", "lua_ls", "jsonls" },
+  ensure_installed = { 'rust_analyzer', 'tsserver', 'dockerls', "cssls", "clangd", "lua_ls", "jsonls" },
   handlers = {
     default_setup,
     lua_ls = function()
