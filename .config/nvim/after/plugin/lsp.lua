@@ -188,5 +188,27 @@ nvim_lsp.rstdls.setup({
   capabilities = lsp_capabilities
 })
 
+-- cnls setup
+if not configs.cnls then
+  configs.cnls = {
+    default_config = {
+      cmd = { "cnls" },
+      --[[ cmd = { "cargo", "run", "--manifest-path=/home/gnarus/d/cnls/Cargo.toml" }, ]]
+      filetypes = { "javascript", "javascriptreact", "javascript.jsx", "typescript", "typescriptreact", "typescript.tsx" }
+    },
+  }
+end
+
+nvim_lsp.cnls.setup({
+  root_dir = nvim_lsp.util.root_pattern("package.json"),
+  capabilities = lsp_capabilities,
+  settings = {
+    cnls = {
+      scopes = { "att:className,class", "fn:createElement" }
+    }
+  }
+})
+
+
 --[[ vim.lsp.set_log_level("debug"); ]]
 --[[ require('vim.lsp.log').set_format_func(vim.inspect) ]]
