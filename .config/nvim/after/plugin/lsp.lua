@@ -31,6 +31,11 @@ cmp.setup({
     expand = function(args)
       require('luasnip').lsp_expand(args.body)
     end,
+  },
+  formatting = {
+    format = require("lspkind").cmp_format({
+      before = require("tailwind-tools.cmp").lspkind_format
+    })
   }
 })
 
