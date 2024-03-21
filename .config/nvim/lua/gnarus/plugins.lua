@@ -59,7 +59,7 @@ return packer.startup(function(use)
 
   use "b0o/schemastore.nvim"
 
-  use { "rcarriga/nvim-dap-ui", requires = { "mfussenegger/nvim-dap" } }
+  use { "rcarriga/nvim-dap-ui", requires = { "mfussenegger/nvim-dap", "nvim-neotest/nvim-nio" } }
   use 'theHamsta/nvim-dap-virtual-text'
 
   use 'jose-elias-alvarez/null-ls.nvim'
@@ -90,6 +90,13 @@ return packer.startup(function(use)
     requires = {
       { "nvim-treesitter/nvim-treesitter" }
     },
+  }
+
+  use {
+    "luckasRanarison/tailwind-tools.nvim",
+    requires = {
+      { "onsails/lspkind-nvim" }
+    }
   }
 
   -- Automatically set up your configuration after cloning packer.nvim
