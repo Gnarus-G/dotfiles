@@ -93,7 +93,7 @@ return packer.startup(function(use)
   }
 
   use {
-    "luckasRanarison/tailwind-tools.nvim",
+    "gnarus-g/tailwind-tools.nvim",
     requires = {
       { "onsails/lspkind-nvim" }
     }
