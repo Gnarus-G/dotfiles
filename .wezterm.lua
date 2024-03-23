@@ -20,7 +20,7 @@ wezterm.on(
     if title == "" then
       title = tab.active_pane.title
     end
-    return "|" .. tab.tab_index + 1 .. "|" .. title .. "  ";
+    return "|" .. tab.tab_index + 1 .. "| " .. title .. "  ";
   end
 )
 
