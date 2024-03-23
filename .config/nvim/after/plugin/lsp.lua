@@ -94,7 +94,7 @@ require('mason-lspconfig').setup({
         settings = {
           Lua = {
             runtime = {
-              version = 'LuaJIT'
+              version = 'LuaJIT',
             },
             diagnostics = {
               globals = { 'vim' },
@@ -102,6 +102,7 @@ require('mason-lspconfig').setup({
             workspace = {
               library = {
                 vim.env.VIMRUNTIME,
+                vim.fn.expand "~/.local/share/nvim/site/pack/packer/start/"
               }
             }
           }
