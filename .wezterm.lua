@@ -29,8 +29,9 @@ return {
   hide_tab_bar_if_only_one_tab = true,
   tab_bar_at_bottom = true,
   use_fancy_tab_bar = false,
-  font = wezterm.font "Fira Code",
-  font_size = 10,
+  -- paru -S ttf-hack-ligatured
+  font = wezterm.font "Hack JBM Ligatured",
+  font_size = 12,
   harfbuzz_features = { "zero", "ss01", "cv05" },
   color_scheme = "tokyonight",
   window_background_opacity = 0.88,
