@@ -1,6 +1,5 @@
 vim.cmd "let mapleader = \" \""
 
---[[ vim.keymap.set("i", "jk", "<Esc>") ]]
 vim.keymap.set("n", "<leader>e", "<cmd>Lex 25<cr>")
 
 vim.keymap.set("n", "<leader>F", "<cmd>lua require('gnarus.formatting').async()<CR>")
