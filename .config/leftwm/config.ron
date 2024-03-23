@@ -30,8 +30,8 @@
     layout_mode: Tag,
     insert_behavior: Bottom,
     scratchpad: [
-        (name: "Whatever", value: "wezterm start", x: 750, y: 390, height: 720, width: 1080),
-        (name: "Work", value: "wezterm", x: 600, y: 100, height: 1240, width: 1460),
+        (name: "Whatever", value: "/home/gnarus/Downloads/Warp-x86_64.AppImage", x: 750, y: 390, height: 720, width: 1080),
+        (name: "Work", value: "wezterm start -- ~/.cargo/bin/zellij attach -c Work", x: 600, y: 100, height: 1240, width: 1460),
         (name: "todos", value: "mynd", x: 930, y: 390, height: 720, width: 720),
     ],
     window_rules: [],
