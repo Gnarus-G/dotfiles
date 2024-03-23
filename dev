@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 pwd=$(pwd)
-configPaths=(.config/nvim .config/eww .config/leftwm .config/alacritty .tmux.conf .wezterm.lua .zshrc)
+configPaths=(.config/nvim .config/zellij .config/eww .config/leftwm .config/alacritty .tmux.conf .wezterm.lua .zshrc)
 
 for p in ${configPaths[*]}
 do
