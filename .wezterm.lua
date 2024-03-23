@@ -38,35 +38,9 @@ return {
   initial_rows = 50,
   keys = {
     {
-      key = '"',
-      mods = 'CTRL|SHIFT',
-      action = act.SplitVertical {
-        domain = 'CurrentPaneDomain'
-      },
-    },
-    {
-      key = '%',
-      mods = 'CTRL|SHIFT',
-      action = act.SplitHorizontal {
-        domain = 'CurrentPaneDomain'
-      },
-    },
-    {
       key = 'w',
       mods = 'CTRL|SHIFT',
       action = act.CloseCurrentPane { confirm = true },
     },
-    {
-      key = 'p',
-      mods = 'CTRL|SHIFT',
-      action = act.PaneSelect {
-        mode = 'SwapWithActive'
-      },
-    }
   },
-  -- This causes `wezterm` to act as though it was started as
-  -- `wezterm connect unix` by default, connecting to the unix
-  -- domain on startup.
-  -- If you prefer to connect manually, leave out this line.
-  default_gui_startup_args = { 'connect', 'unix' },
 }
