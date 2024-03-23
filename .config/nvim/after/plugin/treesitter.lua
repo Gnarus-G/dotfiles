@@ -1,5 +1,6 @@
+---@diagnostic disable-next-line: missing-fields
 require 'nvim-treesitter.configs'.setup {
-  ensure_installed = { "lua", "rust", "javascript", "typescript", "tsx" },
+  ensure_installed = { "html", "lua", "rust", "javascript", "typescript", "tsx" },
   sync_install = false,
   auto_install = true,
   autotag = {
@@ -7,7 +8,8 @@ require 'nvim-treesitter.configs'.setup {
   },
   highlight = { enable = true },
   incremental_selection = { enable = true },
-  textobjects = { enable = true }
+  textobjects = { enable = true },
+  ignore_install = {}
 }
 
 -- setting .mdx files to use markdown parser --
