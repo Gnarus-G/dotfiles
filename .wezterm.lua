@@ -4,14 +4,19 @@ local act = wezterm.action
 -- Equivalent to POSIX basename(3)
 -- Given "/foo/bar" returns "bar"
 -- Given "c:\\foo\\bar" returns "bar"
+---@param s string
+---@return string
 local function basename(s)
-  return string.gsub(s, '(.*)[/\\](.*)$', '%2');
+  assert(type(s) == "string");
+  local subbed, _ = string.gsub(s, '(.*)[/\\](.*)$', '%2');
+  return subbed
 end
 
 wezterm.on(
   'format-tab-title',
   function(tab, tabs, panes, config, hover, max_width)
-    local title = basename(tab.active_pane.current_working_dir);
+    local cwd = tab.active_pane.current_working_dir.file_path;
+    local title = basename(cwd);
     if title == "" then
       title = tab.active_pane.title
     end
