@@ -30,7 +30,8 @@
     layout_mode: Tag,
     insert_behavior: Bottom,
     scratchpad: [
-        (name: "Whatever", value: "/home/gnarus/Downloads/Warp-x86_64.AppImage", x: 750, y: 390, height: 720, width: 1080),
+        (name: "Whatever", value: "wezterm start --always-new-process -- ~/.cargo/bin/zellij attach -c Whatever", x: 750, y: 390, height: 720, width: 1080),
+        (name: "Warp", value: "/home/gnarus/Downloads/Warp-x86_64.AppImage", x: 750, y: 390, height: 720, width: 1080),
         (name: "Work", value: "wezterm start -- ~/.cargo/bin/zellij attach -c Work", x: 600, y: 100, height: 1240, width: 1460),
         (name: "todos", value: "mynd", x: 930, y: 390, height: 720, width: 720),
     ],
@@ -41,6 +42,7 @@
     focus_new_windows: true,
     keybind: [
         (command: ToggleFullScreen, modifier: ["modkey"], key: "f"),
+        (command: ToggleScratchPad, value: "Warp", modifier: ["modkey", "Alt"], key: "t"),
         (command: ToggleScratchPad, value: "Whatever", modifier: ["modkey"], key: "t"),
         (command: ToggleScratchPad, value: "Work", modifier: ["modkey", "Shift"], key: "t"),
         (command: ToggleScratchPad, value: "todos", modifier: ["modkey", "Shift"], key: "u"),
