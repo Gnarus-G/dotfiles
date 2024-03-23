@@ -273,12 +273,12 @@ themes {
       white 90
       orange 254
   }
-  tokyo-night-dark {
+  ignorant {
       fg 169 177 214
       bg 26 27 38
       black 56 62 90
       red 249 51 87
-      green 158 206 106
+      green "#e2e2e2"
       yellow 224 175 104
       blue 122 162 247
       magenta 187 154 247
@@ -291,7 +291,7 @@ themes {
 // Choose the theme that is specified in the themes section.
 // Default: default
 
-theme "tokyo-night-dark"
+theme "ignorant"
 
 // The name of the default layout to load on startup
 // Default: "default"
