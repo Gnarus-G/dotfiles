@@ -63,7 +63,6 @@ return packer.startup(function(use)
   use 'theHamsta/nvim-dap-virtual-text'
 
   use 'jose-elias-alvarez/null-ls.nvim'
-  use 'jose-elias-alvarez/typescript.nvim'
 
   use { 'nvim-treesitter/nvim-treesitter', run = ":TSUpdate" }
   use 'nvim-treesitter/nvim-treesitter-context'
@@ -97,6 +96,11 @@ return packer.startup(function(use)
     requires = {
       { "onsails/lspkind-nvim" }
     }
+  }
+
+  use {
+    "pmizio/typescript-tools.nvim",
+    requires = { "nvim-lua/plenary.nvim", "neovim/nvim-lspconfig" },
   }
 
   -- Automatically set up your configuration after cloning packer.nvim
