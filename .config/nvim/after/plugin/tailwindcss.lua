@@ -7,16 +7,10 @@ require("tailwind-tools").setup(
       debounce = 200, -- in milliseconds, only applied in insert mode
     },
     conceal = {
+      enabled = true,
       symbol = "󱏿", -- only a single character is allowed
       highlight = { -- extmark highlight options, see :h 'highlight'
         fg = "#38BDF8",
       },
     },
   })
-
-vim.api.nvim_create_autocmd("BufWinEnter", {
-  group = vim.api.nvim_create_augroup("TailwindFold", { clear = true }),
-  callback = function()
-    vim.cmd ":TailwindConcealEnable"
-  end
-})
