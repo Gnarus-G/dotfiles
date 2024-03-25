@@ -110,18 +110,17 @@ require('mason-lspconfig').setup({
       })
     end,
     tsserver = function()
-      require("typescript").setup({
-        disable_commands = false, -- prevent the plugin from creating Vim commands
-        debug = false,            -- enable debug logging for commands
-        go_to_source_definition = {
-          fallback = true,        -- fall back to standard LSP definition on failure
-        },
-        server = {
-          root_dir = nvim_lsp.util.root_pattern("package.json"),
-          single_file_support = false,
-          capabilities = lsp_capabilities
+      require("typescript-tools").setup {
+        settings = {
+          code_lens = "references_only",
+          -- by default code lenses are displayed on all referencable values and for some of you it can
+          -- be too much this option reduce count of them by removing member references from lenses
+          disable_member_code_lens = true,
+          tsserver_file_preferences = {
+            includeInlayParameterNameHints = "all",
+          },
         }
-      })
+      }
     end,
     rust_analyzer = function()
       nvim_lsp.rust_analyzer.setup({
