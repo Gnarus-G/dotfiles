@@ -124,3 +124,5 @@ export PATH="$PNPM_HOME:$PATH"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 alias vim=nvim
 alias cdd='cd $(fd -HIg "**/.git" --base-directory ~/d --strip-cwd-prefix -x echo {//} | fzf | xargs -I % echo ~/d/%)'
+alias jq2env='jq -r "to_entries | .[] | [.key, .value] | join(\"=\")"'
+alias cp2='rsync -aPWh'
