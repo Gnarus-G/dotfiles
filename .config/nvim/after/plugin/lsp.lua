@@ -189,6 +189,7 @@ end
 
 nvim_lsp.rstdls.setup({
   single_file_support = true,
+  root_dir = nvim_lsp.util.root_pattern(".env.rd.json"),
   capabilities = lsp_capabilities
 })
 
