@@ -7,7 +7,6 @@ local function format_filter(client)
     end
   end
   return true;
-
 end
 
 return {
