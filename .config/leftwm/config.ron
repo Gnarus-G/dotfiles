@@ -23,9 +23,13 @@
     ],
     max_window_width: None,
     layouts: [
-        "MainAndVertStack",
+        "Custom",
+        "Fibonacci",
+        "Dwindle",
         "Monocle",
-        "RightWiderLeftStack",
+    ],
+    layout_definitions: [
+        (name: "Custom", flip: None, rotate: South , reserve: None, columns: (flip: None, rotate: North, main: (count: 1, size: 0.5, flip: None, rotate: North, split: Vertical), stack: (flip: None, rotate: North, split: Horizontal), second_stack: None)),
     ],
     layout_mode: Tag,
     insert_behavior: Bottom,
@@ -35,7 +39,9 @@
         (name: "Work", value: "wezterm start -- ~/.cargo/bin/zellij attach -c Work", x: .10, y: .10, height: .80, width: .80),
         (name: "todos", value: "mynd", x: .35, y: .25, height: .50, width: .30),
     ],
-    window_rules: [],
+    window_rules: [
+        (window_title: "Picture-in-Picture", spawn_as_type: Normal),
+    ],
     disable_current_tag_swap: true,
     disable_tile_drag: false,
     focus_behaviour: Sloppy,
@@ -80,6 +86,7 @@
         (command: MoveToTag, value: "7", modifier: ["modkey", "Shift"], key: "7"),
         (command: MoveToTag, value: "8", modifier: ["modkey", "Shift"], key: "8"),
         (command: MoveToTag, value: "9", modifier: ["modkey", "Shift"], key: "9"),
+        (command: RotateTag, modifier: ["modkey"], key: "z")
     ],
     workspaces: [],
 )
