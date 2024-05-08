@@ -46,7 +46,6 @@
         (command: ToggleScratchPad, value: "Whatever", modifier: ["modkey"], key: "t"),
         (command: ToggleScratchPad, value: "Work", modifier: ["modkey", "Shift"], key: "t"),
         (command: ToggleScratchPad, value: "todos", modifier: ["modkey", "Shift"], key: "u"),
-        (command: Execute, value: "wezterm", modifier: ["modkey", "Alt"], key: "t"),
         (command: Execute, value: "rofi -show drun", modifier: ["modkey"], key: "d"),
         (command: CloseWindow, value: "", modifier: ["modkey", "Shift"], key: "q"),
         (command: SoftReload, value: "", modifier: ["modkey", "Shift"], key: "r"),
