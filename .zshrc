@@ -105,6 +105,9 @@ path=($HOME/.local/bin $path)
 # for "cargo install" binaries
 path=($HOME/.cargo/bin $path)
 
+# for "go install" binaries
+path=($HOME/go/bin $path)
+
 # Linux dev
 export MAKEFLAGS="-j16"
 export LLVM="1"
