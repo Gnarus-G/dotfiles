@@ -4,6 +4,6 @@
     (button :class "del-btn" :onclick "~/.local/bin/todo done ${item.id} ${arraylength(todos) == 1 ? '&& ${EWW_CMD} close todo_list' : ""} && notify-send 'todo ${item.id} marked done!'" "❌")))
 
 (defpoll todos :interval "2s" :initial "[]" "~/.local/bin/todo dump -t")
-(defpoll latest_todo :interval "1s" :initial "null" "~/.local/bin/todo dump -t | jq first")
+(defpoll latest_todo :interval "1s" :initial "null" "~/.local/bin/todo dump -t | jq last")
 (defpoll todos_empty :interval "1s" :initial true "~/.local/bin/todo dump -t | jq 'isempty(.[])'")
     
