@@ -213,21 +213,10 @@ vim.diagnostic.config({
   virtual_text = true,
 })
 
--- Rested LSP setup
 local configs = require 'lspconfig.configs'
 
-if not configs.rstdls then
-  configs.rstdls = {
-    default_config = {
-      cmd = { "rstd", "lsp" },
-      filetypes = { "rd" },
-    },
-  }
-end
-
+-- Rested LSP setup
 nvim_lsp.rstdls.setup({
-  single_file_support = true,
-  root_dir = nvim_lsp.util.root_pattern(".env.rd.json"),
   capabilities = lsp_capabilities
 })
 
