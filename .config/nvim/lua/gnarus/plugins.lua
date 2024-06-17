@@ -70,7 +70,15 @@ return packer.startup(function(use)
   use 'mbbill/undotree'
 
   use 'gnarus-g/ts-node-jumps.nvim'
-  use 'gnarus-g/rested.vim'
+
+  use { 'gnarus-g/restedlang.nvim',
+    requires = {
+      { "nvim-treesitter/nvim-treesitter", "neovim/nvim-lspconfig" }
+    },
+    config = function()
+      require("restedlang")
+    end
+  }
 
   -- for yuck and other lisp like languages
   -- auto balance parentheses
