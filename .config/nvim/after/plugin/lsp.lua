@@ -252,6 +252,22 @@ nvim_lsp.cnls.setup({
   }
 })
 
+-- todols setup
+if not configs.todols then
+  configs.todols = {
+    default_config = {
+      cmd = { "todo", "lsp" },
+      filetypes = { "todolang" },
+    },
+  }
+end
+
+nvim_lsp.todols.setup({
+  on_attach = on_attach,
+  single_file_support = true,
+  capabilities = lsp_capabilities
+})
+
 
 --[[ vim.lsp.set_log_level("debug"); ]]
 --[[ require('vim.lsp.log').set_format_func(vim.inspect) ]]
