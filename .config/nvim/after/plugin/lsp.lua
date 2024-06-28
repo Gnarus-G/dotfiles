@@ -66,41 +66,7 @@ local on_attach = function(_, bufnr)
   vim.keymap.set('n', '<leader>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
   vim.keymap.set('n', 'gr', '<cmd>lua vim.lsp.buf.references()<CR>', opts)
 
-  -- codeLens
-  -- auto refresh code lens
-  local codelenses_augroup = vim.api.nvim_create_augroup("codeLenses", { clear = true })
-
-  ---@param buf number
-  ---@return boolean
-  local function supports_code_lenses(buf)
-    local clients = vim.lsp.get_clients({ buffer = buf })
-    for _, client in pairs(clients) do
-      if client.server_capabilities.codeLensProvider then
-        return true
-      end
-    end
-    return false
-  end
-
-  if supports_code_lenses(bufnr) then
-    vim.api.nvim_create_autocmd({ 'CursorHold', 'BufEnter', 'InsertLeave' }, {
-      group = codelenses_augroup,
-      buffer = bufnr,
-      callback = function(event)
-        vim.lsp.codelens.refresh({ bufnr = event.buf })
-      end
-    })
-
-    vim.api.nvim_create_autocmd('LspDetach', {
-      group = codelenses_augroup,
-      buffer = bufnr,
-      callback = function(event)
-        vim.lsp.codelens.clear(event.data.client_id, event.buf)
-      end
-    })
-  end
-
-  vim.keymap.set('n', '<leader>lr', vim.lsp.codelens.run, opts)
+  vim.keymap.set('n', '<leader>lr', vim.lsp.codelens.run, { buffer = bufnr, remap = false })
 end
 
 vim.api.nvim_create_autocmd('LspAttach', {
