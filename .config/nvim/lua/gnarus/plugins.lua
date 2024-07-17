@@ -113,6 +113,10 @@ return packer.startup(function(use)
 
   use "David-Kunz/gen.nvim"
 
+  use {
+    "folke/zen-mode.nvim",
+  }
+
   -- Automatically set up your configuration after cloning packer.nvim
   -- Put this at the end after all plugins
   if packer_bootstrap then
