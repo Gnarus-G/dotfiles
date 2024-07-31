@@ -40,7 +40,11 @@ Dependencies, besides `eww`
 paru -S feh stalonetray picom rofi slock pamixer
 ```
 
-## Fonts
+## Theme & Fonts
+
+```sh
+sudo pacman -S lxappearance-gtk3 adapta-gtk-theme
+```
 
 ```sh
 sudo pacman -S ttf-firacode-nerd
