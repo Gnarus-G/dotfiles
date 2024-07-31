@@ -56,7 +56,7 @@ sudo pacman -S lxappearance-gtk3 adapta-gtk-theme
 ```
 
 ```sh
-sudo pacman -S ttf-firacode-nerd
+sudo pacman -S ttf-firacode-nerd noto-fonts-emoji
 fc-cache -f
 ```
 
