@@ -35,9 +35,18 @@ sudo cp leftwm.desktop /usr/share/xsessions/leftwm.desktop
 rm leftwm.desktop
 ```
 
-Dependencies, besides `eww`
+Dependencies
 ```sh
 paru -S feh stalonetray picom rofi slock pamixer
+```
+
+Eww
+```sh
+mkdir -p ~/d
+git clone https://github.com/elkowar/eww ~/d/eww
+cd ~/d/eww
+cargo build --release --no-default-features --features x11
+sudo install -s -Dm755 target/release/eww -t /usr/bin
 ```
 
 ## Theme & Fonts
@@ -77,3 +86,4 @@ sudo systemctl enable virtlogd.socket --now
 [Nvim from scratch](https://github.com/LunarVim/Neovim-from-scratch)  
 [Lsp Server Configurations](https://github.com/neovim/nvim-lspconfig/blob/master/doc/server_configurations.md)
 [leftwm](https://github.com/leftwm/leftwm)
+[eww](https://elkowar.github.io/eww/#building)
