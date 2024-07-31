@@ -1,4 +1,4 @@
 #!/bin/sh
 
-pkill festival
-pkill caldi
+# pkill festival
+# pkill caldi
