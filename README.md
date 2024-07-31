@@ -35,6 +35,11 @@ sudo cp leftwm.desktop /usr/share/xsessions/leftwm.desktop
 rm leftwm.desktop
 ```
 
+Dependencies, besides `eww`
+```sh
+paru -S feh stalonetray picom rofi slock pamixer
+```
+
 ## Fonts
 
 ```sh
