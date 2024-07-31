@@ -37,10 +37,10 @@ rm leftwm.desktop
 
 Dependencies
 ```sh
-paru -S feh stalonetray picom rofi slock pamixer
+paru -S feh stalonetray picom rofi slock pamixer polybar
 ```
 
-Eww
+#### Eww
 ```sh
 mkdir -p ~/d
 git clone https://github.com/elkowar/eww ~/d/eww
