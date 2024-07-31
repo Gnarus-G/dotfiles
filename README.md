@@ -49,6 +49,20 @@ sudo pacman -S base-devel linux-lts-headers linux-zen-headers
 curl -fsSL https://www.maccel.org/install.sh | sudo sh
 ```
 
+## VirtManager
+
+```sh
+sudo pacman -S qemu-desktop libvirt edk2-ovmf virt-manager dnsmasq
+sudo usermod -aG libvirt,kvm,input $USER
+```
+
+```sh
+sudo virsh net-autostart default
+sudo virsh net-start default
+sudo systemctl enable libvirtd.service --now
+sudo systemctl enable virtlogd.socket --now
+```
+
 ## References
 [How to version control them dotfiles](https://stackoverflow.com/questions/46534290/symlink-dotfiles)  
 [Nvim from scratch](https://github.com/LunarVim/Neovim-from-scratch)  
