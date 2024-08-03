@@ -3,3 +3,6 @@
 # Please adapt and uncomment the following lines:
 name = gnarus-g
 email = g.avet.gnaritas@gmail.com
+
+[pull]
+rebase = true
