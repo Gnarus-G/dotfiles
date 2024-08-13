@@ -1,0 +1,35 @@
+live_config_reload = true
+
+[font]
+size = 12.0
+
+[font.bold]
+family = "FiraCodeNerdFont"
+style = "Bold"
+
+[font.bold_italic]
+family = "FiraCodeNerdFont"
+style = "Bold Italic"
+
+[font.glyph_offset]
+x = 0
+y = 0
+
+[font.italic]
+family = "FiraCodeNerdFont"
+style = "Italic"
+
+[font.normal]
+family = "FiraCodeNerdFont"
+style = "Normal"
+
+[font.offset]
+x = 0
+y = 0
+
+[window]
+opacity = 0.75
+
+# [window.dimensions]
+# columns = 140
+# lines = 50
