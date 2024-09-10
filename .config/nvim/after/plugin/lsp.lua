@@ -86,7 +86,7 @@ end
 
 require('mason').setup({})
 require('mason-lspconfig').setup({
-  ensure_installed = { 'rust_analyzer', 'tsserver', 'dockerls', "cssls", "clangd", "lua_ls", "jsonls" },
+  ensure_installed = { 'rust_analyzer', 'ts_ls', 'dockerls', "cssls", "clangd", "lua_ls", "jsonls" },
   handlers = {
     default_setup,
     lua_ls = function()
@@ -110,7 +110,7 @@ require('mason-lspconfig').setup({
         }
       })
     end,
-    tsserver = function()
+    ts_ls = function()
       require("typescript-tools").setup {
         settings = {
           code_lens = "references_only",
