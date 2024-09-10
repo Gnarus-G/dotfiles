@@ -6,3 +6,5 @@ email = g.avet.gnaritas@gmail.com
 
 [pull]
 rebase = true
+[init]
+	defaultBranch = main
