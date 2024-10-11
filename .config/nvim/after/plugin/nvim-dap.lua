@@ -19,13 +19,10 @@ dap.adapters.chrome = {
   args = { os.getenv("HOME") .. "/dev/microsoft/vscode-chrome-debug/out/src/chromeDebug.js" }
 }
 
-dap.adapters.codelldb = {
-  type = 'server',
-  port = "${port}",
-  executable = {
-    command = 'codelldb',
-    args = { "--port", "${port}" },
-  }
+dap.adapters.gdb = {
+  type = "executable",
+  command = "gdb",
+  args = { "--interpreter=dap", "--eval-command", "set print pretty on" }
 }
 
 local node_launcher = {
@@ -102,9 +99,9 @@ dap.configurations.svelte = {
   chrome_attach
 }
 
-local launch_codelldb = {
+local launch_c_debugger = {
   name = "Launch file",
-  type = "codelldb",
+  type = "gdb",
   request = "launch",
   program = function()
     return vim.fn.input('Path to executable: ', vim.fn.getcwd() .. '/', 'file')
@@ -131,13 +128,16 @@ local launch_codelldb = {
 }
 
 dap.configurations.cpp = {
-  launch_codelldb
+  launch_c_debugger
 }
 dap.configurations.c = {
-  launch_codelldb
+  launch_c_debugger
 }
 dap.configurations.rust = {
-  launch_codelldb,
+  launch_c_debugger,
+}
+dap.configurations.asm = {
+  launch_c_debugger,
 }
 
 dapui.setup();
