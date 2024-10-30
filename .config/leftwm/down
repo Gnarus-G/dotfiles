@@ -1,4 +1,6 @@
 #!/bin/sh
 
+pkill picom
+
 # pkill festival
 # pkill caldi
