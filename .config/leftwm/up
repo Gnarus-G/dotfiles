@@ -1,5 +1,9 @@
 #!/bin/sh
 
+if [ -x "$(command -v picom)" ]; then
+    picom --fade-in-step=1 --fade-out-step=1 --fade-delta=0 &> /dev/null &
+fi
+
 # # Making sure we don't double this process up
 # ps -e | grep caldi && pkill caldi
 #
