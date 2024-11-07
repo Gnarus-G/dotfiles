@@ -52,7 +52,7 @@ end
 beautiful.init(gears.filesystem.get_themes_dir() .. "default/theme.lua")
 
 -- This is used later as the default terminal and editor to run.
-terminal = "alacritty -e zellij attach -c Whatever"
+terminal = "alacritty -e tmux new-session -As Whatever"
 editor = os.getenv("EDITOR") or "vim"
 editor_cmd = "alacritty -e " .. editor
 
