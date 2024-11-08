@@ -1,6 +1,6 @@
 
 [font]
-size = 12.0
+size = 14.0
 
 [font.bold]
 family = "FiraCodeNerdFont"
@@ -27,10 +27,7 @@ x = 0
 y = 0
 
 [window]
-opacity = 0.75
-
-[general]
-live_config_reload = true
+opacity = 0.9
 
 # [window.dimensions]
 # columns = 140

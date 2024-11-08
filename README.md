@@ -74,6 +74,12 @@ sudo pacman -S ttf-firacode-nerd noto-fonts-emoji
 fc-cache -f
 ```
 
+or, after running `./dev` from this dotfiles directory.
+
+```sh
+getfonts.sh
+```
+
 ## Mouse driver
 
 ```sh
