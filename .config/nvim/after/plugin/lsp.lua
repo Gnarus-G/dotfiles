@@ -84,7 +84,9 @@ local default_setup = function(server)
   })
 end
 
-require('mason').setup({})
+require('mason').setup({
+  PATH = "append"
+})
 require('mason-lspconfig').setup({
   ensure_installed = { 'rust_analyzer', 'ts_ls', 'dockerls', "cssls", "clangd", "lua_ls", "jsonls" },
   handlers = {
@@ -135,7 +137,10 @@ require('mason-lspconfig').setup({
             },
             checkOnSave = {
               command = "clippy",
-              extraArgs = { "--", "-A", "clippy::new_without_default", "-A", "clippy::needless_return" }
+            },
+            rustfmt = {
+              overrideCommand = { "rustfmt", "+nightly", "--edition", "2021" },
+              --[[ extraArgs = { "--unstable-features" } ]]
             }
           }
         }
