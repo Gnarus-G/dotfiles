@@ -2,7 +2,7 @@
 
 pwd=$(pwd)
 
-configPaths=(.config/nvim .config/zellij .config/awesome .config/gtk-3.0
+configPaths=(.config/nvim .config/awesome .config/gtk-3.0
   .config/eww .config/leftwm .config/ghostty/config .tmux.conf.local .wezterm.lua
   .config/picom.conf .zshrc .gitconfig .local/bin)
 
