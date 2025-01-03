@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 
 pwd=$(pwd)
-configPaths=(.config/nvim .config/zellij .config/awesome .config/gtk-3.0 \
-  .config/eww .config/leftwm .config/alacritty .tmux.conf.local .wezterm.lua \
+
+configPaths=(.config/nvim .config/zellij .config/awesome .config/gtk-3.0
+  .config/eww .config/leftwm .config/ghostty/config .tmux.conf.local .wezterm.lua
   .config/picom.conf .zshrc .gitconfig .local/bin)
 
-for p in ${configPaths[*]}
-do
+for p in ${configPaths[*]}; do
   rm -rf ~/$p
   ln -s $pwd/$p ~/$p
 done

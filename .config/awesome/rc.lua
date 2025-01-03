@@ -52,9 +52,9 @@ end
 beautiful.init(gears.filesystem.get_themes_dir() .. "default/theme.lua")
 
 -- This is used later as the default terminal and editor to run.
-terminal = "alacritty -e tmux new-session -As Whatever"
+terminal = "ghostty -e tmux new-session -As Whatever"
 editor = os.getenv("EDITOR") or "vim"
-editor_cmd = "alacritty -e " .. editor
+editor_cmd = "ghostty -e " .. editor
 
 -- Default modkey.
 -- Usually, Mod4 is the key with a logo between Control and Alt.
