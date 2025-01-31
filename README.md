@@ -20,13 +20,17 @@ git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:
 cd
 git clone https://github.com/gpakosz/.tmux.git
 ln -s -f .tmux/.tmux.conf
+```
+
+Get default configs with:
+```sh
 cp .tmux/.tmux.conf.local .
 ```
 
 ## Misc. Dependencies
 
 ```sh
-sudo pacman -S fd fzf jq rsync
+sudo pacman -S fd fzf jq
 ```
 
 ## Window Manager
@@ -34,24 +38,11 @@ sudo pacman -S fd fzf jq rsync
 ### LeftWM
 
 ```sh
-cargo install leftwm
-sudo install -s -Dm755 ~/.cargo/bin/leftwm ~/.cargo/bin/leftwm-worker ~/.cargo/bin/lefthk-worker ~/.cargo/bin/leftwm-state ~/.cargo/bin/leftwm-check ~/.cargo/bin/leftwm-command -t /usr/bin
-cat > leftwm.desktop <<EOF
-[Desktop Entry]
-Encoding=UTF-8
-Name=LeftWM
-Comment=A window manager for the adventurer
-Exec=leftwm
-Type=Application
-DesktopNames=LeftWM
-EOF
-sudo cp leftwm.desktop /usr/share/xsessions/leftwm.desktop 
-rm leftwm.desktop
+pacman -S leftwm leftwm-theme feh rofi polybar
 ```
 
-Dependencies
 ```sh
-paru -S feh stalonetray picom rofi slock pamixer polybar
+paru -S stalonetray picom pamixer
 ```
 
 #### Eww
@@ -84,6 +75,9 @@ getfonts.sh
 
 ```sh
 sudo pacman -S base-devel linux-lts-headers linux-zen-headers
+```
+
+```sh
 curl -fsSL https://www.maccel.org/install.sh | sudo sh
 ```
 
