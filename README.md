@@ -101,3 +101,6 @@ sudo systemctl enable virtlogd.socket --now
 [Lsp Server Configurations](https://github.com/neovim/nvim-lspconfig/blob/master/doc/server_configurations.md)
 [leftwm](https://github.com/leftwm/leftwm)
 [eww](https://elkowar.github.io/eww/#building)
+
+## Mounting Drives
+https://github.com/ValveSoftware/Proton/wiki/Using-a-NTFS-disk-with-Linux-and-Windows
