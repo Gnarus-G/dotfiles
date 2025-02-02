@@ -95,12 +95,34 @@ sudo systemctl enable libvirtd.service --now
 sudo systemctl enable virtlogd.socket --now
 ```
 
+## Stable Diffusion Web UI
+```sh
+set -e
+cd ~/d
+git clone https://github.com/AUTOMATIC1111/stable-diffusion-webui
+cd stable-diffusion-webui
+rm -r venv
+sed 's/#\s*python_cmd=".*"/python_cmd="python3.11"/' -i webui-user.sh
+paru -S python311
+./webui.sh
+```
+[Usage Guide](https://stable-diffusion-art.com/models/)
+
+### Forge
+```sh
+cd ~/d/stable-diffusion-webui
+git remote add forge https://github.com/lllyasviel/stable-diffusion-webui-forge
+git branch lllyasviel/main
+git checkout lllyasviel/main
+git fetch forge
+git branch -u forge/main
+git pull
+```
+
 ## References
 [How to version control them dotfiles](https://stackoverflow.com/questions/46534290/symlink-dotfiles)  
 [Nvim from scratch](https://github.com/LunarVim/Neovim-from-scratch)  
 [Lsp Server Configurations](https://github.com/neovim/nvim-lspconfig/blob/master/doc/server_configurations.md)
 [leftwm](https://github.com/leftwm/leftwm)
 [eww](https://elkowar.github.io/eww/#building)
-
-## Mounting Drives
-https://github.com/ValveSoftware/Proton/wiki/Using-a-NTFS-disk-with-Linux-and-Windows
+[Using a NTFS disk with Linux and Windows](https://github.com/ValveSoftware/Proton/wiki/Using-a-NTFS-disk-with-Linux-and-Windows)
