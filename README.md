@@ -29,8 +29,14 @@ cp .tmux/.tmux.conf.local .
 
 ## Misc. Dependencies
 
+Utils
 ```sh
 sudo pacman -S fd fzf jq
+```
+
+Screenshots
+```sh
+sudo pacman -S shotgun satty
 ```
 
 ## Window Manager
