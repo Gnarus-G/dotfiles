@@ -87,6 +87,11 @@ end
 require('mason').setup({
   PATH = "append"
 })
+
+require 'lspconfig'.ocamllsp.setup {
+  capabilities = lsp_capabilities,
+}
+
 require('mason-lspconfig').setup({
   ensure_installed = { 'rust_analyzer', 'ts_ls', 'dockerls', "cssls", "clangd", "lua_ls", "jsonls" },
   handlers = {
