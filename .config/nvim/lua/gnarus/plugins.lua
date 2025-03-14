@@ -117,6 +117,10 @@ return packer.startup(function(use)
     "folke/zen-mode.nvim",
   }
 
+  use {
+    "Marskey/telescope-sg"
+  }
+
   -- Automatically set up your configuration after cloning packer.nvim
   -- Put this at the end after all plugins
   if packer_bootstrap then
