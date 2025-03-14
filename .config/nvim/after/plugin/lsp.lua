@@ -93,6 +93,7 @@ require 'lspconfig'.ocamllsp.setup {
 }
 
 require('mason-lspconfig').setup({
+  automatic_installation = false,
   ensure_installed = { 'rust_analyzer', 'ts_ls', 'dockerls', "cssls", "clangd", "lua_ls", "jsonls" },
   handlers = {
     default_setup,
@@ -135,11 +136,6 @@ require('mason-lspconfig').setup({
         capabilities = lsp_capabilities,
         settings = {
           ['rust-analyzer'] = {
-            diagnostics = {
-              disabled = {
-                "needless_return",
-              },
-            },
             checkOnSave = {
               command = "clippy",
             },
@@ -188,6 +184,72 @@ vim.diagnostic.config({
 })
 
 local configs = require 'lspconfig.configs'
+
+-- LSP AI setup
+if not configs.lsp_ai then
+  configs.lsp_ai = {
+    default_config = {
+      cmd = { "lsp-ai" },
+    },
+  }
+end
+
+local lsp_ai_init_options_json = [[
+{
+  "memory": {
+    "file_store": {}
+  },
+  "models": {
+    "model1": {
+      "type": "ollama",
+      "model": "deepseek-coder-v2:latest"
+    },
+    "model3": {
+      "type": "ollama",
+      "model": "llama3:latest"
+    }
+  },
+  "completion": {
+    "model": "model1",
+    "parameters": {
+      "fim": {
+        "start": "<|fim▁begin|>",
+        "middle": "<|fim▁hole|>",
+        "end": "<|fim▁end|>"
+      },
+      "max_context": 2000,
+      "options": {
+        "num_predict": 32
+      }
+    }
+  },
+  "chat": [
+    {
+      "trigger": "!C",
+      "action_display_name": "Chat",
+      "model": "model3",
+      "parameters": {
+        "max_context": 4096,
+        "max_tokens": 1024,
+        "messages": [
+          {
+            "role": "system",
+            "content": "You are a code assistant chatbot. The user will ask you for assistance coding and you will do you best to answer succinctly and accurately"
+          }
+        ]
+      }
+    }
+  ]
+}
+]]
+
+nvim_lsp.lsp_ai.setup({
+  single_file_support = true,
+  capabilities = lsp_capabilities,
+  log_level = vim.lsp.protocol.MessageType.Info,
+  message_level = vim.lsp.protocol.MessageType.Warning,
+  init_options = vim.fn.json_decode(lsp_ai_init_options_json),
+})
 
 -- Rested LSP setup
 nvim_lsp.rstdls.setup({
