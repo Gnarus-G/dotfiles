@@ -141,7 +141,6 @@ require('mason-lspconfig').setup({
             },
             rustfmt = {
               overrideCommand = { "rustfmt", "+nightly", "--edition", "2021" },
-              --[[ extraArgs = { "--unstable-features" } ]]
             }
           }
         }
@@ -202,44 +201,22 @@ local lsp_ai_init_options_json = [[
   "models": {
     "model1": {
       "type": "ollama",
-      "model": "deepseek-coder-v2:latest"
-    },
-    "model3": {
-      "type": "ollama",
-      "model": "llama3:latest"
+      "model": "deepseek-coder:latest"
     }
   },
   "completion": {
     "model": "model1",
     "parameters": {
       "fim": {
-        "start": "<|fim▁begin|>",
-        "middle": "<|fim▁hole|>",
-        "end": "<|fim▁end|>"
+        "start":  "<｜fim▁begin｜>",
+        "middle": "<｜fim▁hole｜>",
+        "end":    "<｜fim▁end｜>"
       },
-      "max_context": 2000,
       "options": {
-        "num_predict": 32
+        "stop": [ "<｜begin▁of▁sentence｜>", "<｜end▁of▁sentence｜>", "<|EOT|>" ]
       }
     }
-  },
-  "chat": [
-    {
-      "trigger": "!C",
-      "action_display_name": "Chat",
-      "model": "model3",
-      "parameters": {
-        "max_context": 4096,
-        "max_tokens": 1024,
-        "messages": [
-          {
-            "role": "system",
-            "content": "You are a code assistant chatbot. The user will ask you for assistance coding and you will do you best to answer succinctly and accurately"
-          }
-        ]
-      }
-    }
-  ]
+  }
 }
 ]]
 
