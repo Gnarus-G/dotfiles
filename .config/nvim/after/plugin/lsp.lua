@@ -201,7 +201,7 @@ local lsp_ai_init_options_json = [[
   "models": {
     "model1": {
       "type": "ollama",
-      "model": "deepseek-coder:latest"
+      "model": "deepseek-coder:1.3b"
     }
   },
   "completion": {
