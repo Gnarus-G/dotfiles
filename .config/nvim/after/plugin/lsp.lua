@@ -63,7 +63,7 @@ local on_attach = function(_, bufnr)
     '<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<CR>', opts)
   vim.keymap.set('n', '<leader>D', '<cmd>lua vim.lsp.buf.type_definition()<CR>', opts)
   vim.keymap.set('n', '<F2>', '<cmd>lua vim.lsp.buf.rename()<CR>', opts)
-  vim.keymap.set('n', '<leader>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
+  vim.keymap.set({ 'n', 'v' }, '<leader>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
   vim.keymap.set('n', 'gr', '<cmd>lua vim.lsp.buf.references()<CR>', opts)
 
   vim.keymap.set('n', '<leader>lr', vim.lsp.codelens.run, { buffer = bufnr, remap = false })
@@ -193,35 +193,13 @@ if not configs.lsp_ai then
   }
 end
 
-local lsp_ai_init_options_json = [[
-{
-  "memory": {
-    "file_store": {}
-  },
-  "models": {
-    "model1": {
-      "type": "ollama",
-      "model": "deepsoydev"
-    }
-  },
-  "completion": {
-    "model": "model1",
-    "parameters": {
-      "fim": {
-        "start":  "<｜fim▁begin｜>",
-        "middle": "<｜fim▁hole｜>",
-        "end":    "<｜fim▁end｜>"
-      },
-      "options": {
-        "stop": [ "<｜begin▁of▁sentence｜>", "<｜end▁of▁sentence｜>", "<|EOT|>" ]
-      }
-    }
-  }
-}
-]]
-
+local lsp_ai_init_options_json = vim.fn.readfile(
+  vim.api.nvim_call_function("stdpath", { "config" }) ..
+  "/after/plugin/lsp-ai.json"
+)
 nvim_lsp.lsp_ai.setup({
   single_file_support = true,
+  filetypes = { "*" },
   capabilities = lsp_capabilities,
   log_level = vim.lsp.protocol.MessageType.Info,
   message_level = vim.lsp.protocol.MessageType.Warning,
