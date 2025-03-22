@@ -3,26 +3,9 @@
     "file_store": {}
   },
   "models": {
-    "model1": {
-      "type": "ollama",
-      "model": "deepsoydev"
-    },
     "model2": {
       "type": "ollama",
       "model": "deepseek-coder-v2"
-    }
-  },
-  "completion": {
-    "model": "model1",
-    "parameters": {
-      "fim": {
-        "start":  "<｜fim▁begin｜>",
-        "middle": "<｜fim▁hole｜>",
-        "end":    "<｜fim▁end｜>"
-      },
-      "options": {
-        "stop": [ "<｜begin▁of▁sentence｜>", "<｜end▁of▁sentence｜>", "<|EOT|>" ]
-      }
     }
   },
   "actions": [
