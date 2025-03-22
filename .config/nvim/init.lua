@@ -28,3 +28,14 @@ vim.g.clipboard = {
   },
   cache_enabled = 1
 }
+
+-- Create some new filetypes
+vim.filetype.add({
+  extension = {
+    mdx = 'mdx',
+    ["Modelfile"] = 'modelfile',
+  },
+  filename = {
+    ["Modelfile"] = 'modelfile',
+  }
+})
