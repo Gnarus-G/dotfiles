@@ -1,4 +1,4 @@
-FROM deepseek-coder:base
+FROM deepseek-coder-v2:16b-lite-base-q4_0
 
 TEMPLATE {{ .Prompt }}
 PARAMETER temperature 0.2
