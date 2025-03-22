@@ -184,28 +184,6 @@ vim.diagnostic.config({
 
 local configs = require 'lspconfig.configs'
 
--- LSP AI setup
-if not configs.lsp_ai then
-  configs.lsp_ai = {
-    default_config = {
-      cmd = { "lsp-ai" },
-    },
-  }
-end
-
-local lsp_ai_init_options_json = vim.fn.readfile(
-  vim.api.nvim_call_function("stdpath", { "config" }) ..
-  "/after/plugin/lsp-ai.json"
-)
-nvim_lsp.lsp_ai.setup({
-  single_file_support = true,
-  filetypes = { "*" },
-  capabilities = lsp_capabilities,
-  log_level = vim.lsp.protocol.MessageType.Info,
-  message_level = vim.lsp.protocol.MessageType.Warning,
-  init_options = vim.fn.json_decode(lsp_ai_init_options_json),
-})
-
 -- Rested LSP setup
 nvim_lsp.rstdls.setup({
   capabilities = lsp_capabilities
@@ -217,7 +195,7 @@ if not configs.cnls then
     default_config = {
       cmd = { "cnls" },
       --[[ cmd = { "cargo", "run", "--manifest-path=/home/gnarus/d/cnls/Cargo.toml" }, ]]
-      filetypes = { "javascript", "javascriptreact", "javascript.jsx", "typescript", "typescriptreact", "typescript.tsx" }
+      filetypes = { "ocaml", "javascript", "javascriptreact", "javascript.jsx", "typescript", "typescriptreact", "typescript.tsx" }
     },
   }
 end
