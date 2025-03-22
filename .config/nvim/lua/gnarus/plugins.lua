@@ -123,23 +123,6 @@ return packer.startup(function(use)
 
   use {
     'jacob411/Ollama-Copilot',
-    config = function()
-      require("OllamaCopilot").setup {
-        model_name = "deepsoydev",
-        stream_suggestion = false,
-        python_command = "/home/gnarus/.local/share/nvim/site/pack/packer/start/Ollama-Copilot/viper.sh",
-        filetypes = { ".*" },
-        ollama_model_opts = {
-          num_predict = 40,
-          temperature = 0.1,
-        },
-        keymaps = {
-          suggestion = '<leader>os',
-          reject = '<leader>or',
-          insert_accept = '<Tab>',
-        },
-      }
-    end
   }
 
   -- Automatically set up your configuration after cloning packer.nvim
