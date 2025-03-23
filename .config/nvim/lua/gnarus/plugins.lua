@@ -125,6 +125,21 @@ return packer.startup(function(use)
     'jacob411/Ollama-Copilot',
   }
 
+  use 'HakonHarnes/img-clip.nvim'
+
+  use {
+    'yetone/avante.nvim',
+    branch = 'main',
+    run = 'make',
+    requires = {
+      'nvim-treesitter/nvim-treesitter',
+      'stevearc/dressing.nvim',
+      'nvim-lua/plenary.nvim',
+      'MunifTanjim/nui.nvim',
+      'MeanderingProgrammer/render-markdown.nvim'
+    }
+  }
+
   -- Automatically set up your configuration after cloning packer.nvim
   -- Put this at the end after all plugins
   if packer_bootstrap then
