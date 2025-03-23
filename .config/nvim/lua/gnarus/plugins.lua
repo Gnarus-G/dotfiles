@@ -111,8 +111,6 @@ return packer.startup(function(use)
     requires = { "nvim-lua/plenary.nvim", "neovim/nvim-lspconfig" },
   }
 
-  use "David-Kunz/gen.nvim"
-
   use {
     "folke/zen-mode.nvim",
   }
