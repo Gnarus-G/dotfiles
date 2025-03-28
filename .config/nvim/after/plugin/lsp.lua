@@ -1,6 +1,8 @@
 local nvim_lsp = require("lspconfig");
 
-local cmp = require("cmp");
+local cmp = require "cmp"
+local compare = cmp.config.compare
+
 require('cmp-npm').setup({})
 cmp.setup({
   mapping = cmp.mapping.preset.insert({
@@ -19,10 +21,10 @@ cmp.setup({
     completion = cmp.config.window.bordered(),
   },
   sources = cmp.config.sources({
-    { name = "npm",     keyword_length = 4 },
     { name = "nvim_lsp" },
     { name = "nvim_lua" },
     { name = "luasnip" },
+    { name = "npm",      keyword_length = 4 },
     { name = "buffer" },
     { name = "path" },
   }),
@@ -35,7 +37,16 @@ cmp.setup({
     format = require("lspkind").cmp_format({
       before = require("tailwind-tools.cmp").lspkind_format
     })
-  }
+  },
+  sorting = {
+    priority_weight = 1.0,
+    comparators = {
+      compare.score, -- Jupyter kernel completion shows prior to LSP
+      compare.recently_used,
+      compare.locality,
+      -- ...
+    },
+  },
 })
 
 -- note: diagnostics are not exclusive to lsp servers
