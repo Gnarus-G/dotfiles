@@ -1,7 +1,7 @@
 require("avante").setup {
   -- add any opts here
   -- for example
-  provider = "ollama",
+  provider = "claude",
   ollama = {
     endpoint = "http://localhost:11434",
     model = "deepseek-coder-v2",

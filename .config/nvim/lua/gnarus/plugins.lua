@@ -131,6 +131,7 @@ return packer.startup(function(use)
     run = 'make',
     requires = {
       'nvim-treesitter/nvim-treesitter',
+      "rcarriga/nvim-notify",
       'stevearc/dressing.nvim',
       'nvim-lua/plenary.nvim',
       'MunifTanjim/nui.nvim',
