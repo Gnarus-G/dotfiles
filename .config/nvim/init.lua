@@ -12,7 +12,7 @@ vim.api.nvim_create_autocmd("BufWritePre", {
 vim.api.nvim_create_autocmd("TextYankPost", {
   group = vim.api.nvim_create_augroup("HighlightYank", { clear = true }),
   callback = function()
-    require 'vim.highlight'.on_yank({ timeout = 40 })
+    vim.hl.on_yank({ timeout = 40 })
   end
 })
 
