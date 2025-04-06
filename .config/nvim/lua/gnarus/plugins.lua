@@ -119,10 +119,6 @@ return packer.startup(function(use)
     "Marskey/telescope-sg"
   }
 
-  use {
-    'jacob411/Ollama-Copilot',
-  }
-
   use 'HakonHarnes/img-clip.nvim'
 
   use {
