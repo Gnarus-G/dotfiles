@@ -112,10 +112,6 @@ return packer.startup(function(use)
   }
 
   use {
-    "folke/zen-mode.nvim",
-  }
-
-  use {
     "Marskey/telescope-sg"
   }
 
