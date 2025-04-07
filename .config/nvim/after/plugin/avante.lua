@@ -1,5 +1,6 @@
 require("avante").setup {
   provider = "claude",
+  enable_claude_text_editor_tool_mode = true,
   auto_suggestions_provider = "claude",
   suggestion = {
     debounce = 300,
@@ -15,6 +16,9 @@ require("avante").setup {
     provider = "ollama",                    -- The provider to use for RAG service (e.g. openai or ollama)
     llm_model = "gemma3",                   -- The LLM model to use for RAG service
     embed_model = "nomic-embed-text",       -- The embedding model to use for RAG service
+  },
+  windows = {
+    width = 40, -- Width as a percentage of screen width
   },
   vendors = {},
   mappings = {
