@@ -21,6 +21,9 @@ require('lualine').setup {
     lualine_a = { 'mode' },
     lualine_b = { 'branch', 'diff', 'diagnostics' },
     lualine_c = { { 'filename', path = 1, file_status = true } },
+    lualine_w = {
+      { require('mcphub.extensions.lualine') },
+    },
     lualine_x = { 'encoding', 'fileformat', 'filetype' },
     lualine_y = { 'progress' },
     lualine_z = { 'location' }
