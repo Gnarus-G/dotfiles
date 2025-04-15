@@ -34,8 +34,8 @@
     layout_mode: Tag,
     insert_behavior: Bottom,
     scratchpad: [
-        (name: "Whatever", value: "ghostty -e tmux new-session -As Whatever", x: .25, y: .25, height: .50, width: .50),
-        (name: "Work", value: "ghostty -e tmux new-session -As Work", x: .10, y: .10, height: .80, width: .80),
+        (name: "Whatever", value: "ghostty", args: ["-e", "tmux", "new-session", "-As", "Whatever"], x: .25, y: .25, height: .50, width: .50),
+        (name: "Work", value: "ghostty", args: ["-e", "tmux", "new-session", "-As", "Work"], x: .10, y: .10, height: .80, width: .80),
         (name: "todos", value: "~/.local/bin/mynd", x: .35, y: .25, height: .50, width: .30),
     ],
     window_rules: [
