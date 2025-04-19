@@ -1,7 +1,7 @@
 require("avante").setup {
-  provider = "claude",
+  provider = "gemini",
   enable_claude_text_editor_tool_mode = false,
-  auto_suggestions_provider = "ollama",
+  auto_suggestions_provider = "gemini",
   suggestion = {
     debounce = 300,
     throttle = 300,
@@ -11,6 +11,9 @@ require("avante").setup {
     timeout = 30000, -- Timeout in milliseconds
     temperature = 0,
     max_tokens = 4096,
+  },
+  gemini = {
+    model = "gemini-2.5-pro-preview-03-25"
   },
   ollama = {
     endpoint = "http://localhost:11434",
