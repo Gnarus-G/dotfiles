@@ -118,26 +118,36 @@ return packer.startup(function(use)
   use 'HakonHarnes/img-clip.nvim'
 
   use {
-    --[[ 'yetone/avante.nvim', ]]
-    'Yeastiest/avantegeminitools',
-    branch = 'main',
-    run = 'make',
-    requires = {
-      'nvim-treesitter/nvim-treesitter',
-      "rcarriga/nvim-notify",
-      'stevearc/dressing.nvim',
-      'nvim-lua/plenary.nvim',
-      'MunifTanjim/nui.nvim',
-      'MeanderingProgrammer/render-markdown.nvim'
-    }
-  }
-
-  use {
     "ravitemer/mcphub.nvim",
     run = ":MCPHub",
     requires = {
       'nvim-lua/plenary.nvim',
       'MunifTanjim/nui.nvim'
+    }
+  }
+
+  use {
+    "olimorris/codecompanion.nvim",
+    branch = 'main',
+    requires = {
+      'ravitemer/mcphub.nvim', -- Ensure mcphub.nvim is loaded first
+      "nvim-lua/plenary.nvim",
+      "nvim-treesitter/nvim-treesitter",
+    }
+  }
+
+  use {
+    'Yeastiest/avantegeminitools',
+    branch = 'main',
+    run = 'make',
+    requires = {
+      'nvim-treesitter/nvim-treesitter',
+      "ravitemer/mcphub.nvim",
+      "rcarriga/nvim-notify",
+      'stevearc/dressing.nvim',
+      'nvim-lua/plenary.nvim',
+      'MunifTanjim/nui.nvim',
+      'MeanderingProgrammer/render-markdown.nvim'
     }
   }
 
