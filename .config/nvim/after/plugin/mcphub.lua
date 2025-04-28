@@ -3,7 +3,7 @@ require("mcphub").setup({
   config = vim.fn.expand("~/.config/mcphub/servers.json"), -- Absolute path to config file location (will create if not exists)
   native_servers = {},                                     -- add your native servers here
 
-  auto_approve = false,                                    -- Auto approve mcp tool calls
+  auto_approve = true,                                     -- Auto approve mcp tool calls
   -- Extensions configuration
   extensions = {
     avante = {
