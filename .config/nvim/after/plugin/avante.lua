@@ -7,7 +7,6 @@ require("avante").setup {
     throttle = 300,
   },
   claude = {
-    model = "claude-3-5-sonnet-20241022",
     timeout = 30000, -- Timeout in milliseconds
     temperature = 0,
     max_tokens = 4096,
