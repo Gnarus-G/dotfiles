@@ -118,7 +118,8 @@ return packer.startup(function(use)
   use 'HakonHarnes/img-clip.nvim'
 
   use {
-    'yetone/avante.nvim',
+    --[[ 'yetone/avante.nvim', ]]
+    'Yeastiest/avantegeminitools',
     branch = 'main',
     run = 'make',
     requires = {
