@@ -1,7 +1,7 @@
 require("avante").setup {
   provider = "gemini",
   enable_claude_text_editor_tool_mode = false,
-  auto_suggestions_provider = "gemini",
+  auto_suggestions_provider = "gemini_flash",
   suggestion = {
     debounce = 300,
     throttle = 300,
@@ -49,7 +49,12 @@ require("avante").setup {
   windows = {
     width = 40, -- Width as a percentage of screen width
   },
-  vendors = {},
+  vendors = {
+    gemini_flash = {
+      __inherited_from = 'gemini',
+      model = 'gemini-2.5-flash-preview-04-17',
+    },
+  },
   mappings = {
     suggestion = {
       accept = "<M-l>",
