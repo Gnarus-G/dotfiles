@@ -2,7 +2,7 @@ local function gemini_pro()
   return require("codecompanion.adapters").extend("gemini", {
     schema = {
       model = {
-        default = "gemini-2.5-pro-exp-03-25",
+        default = "gemini-2.5-pro-preview-03-25",
       },
     },
   })
