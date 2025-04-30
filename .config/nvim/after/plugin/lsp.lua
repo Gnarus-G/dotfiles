@@ -21,13 +21,17 @@ cmp.setup({
     completion = cmp.config.window.bordered(),
   },
   sources = cmp.config.sources({
+    { name = 'minuet' },
     { name = "nvim_lsp" },
     { name = "nvim_lua" },
     { name = "luasnip" },
-    { name = "npm",      keyword_length = 4 },
+    { name = "npm",     keyword_length = 4 },
     { name = "buffer" },
     { name = "path" },
   }),
+  performance = {
+    fetching_timeout = 2000, -- for LLM responses by minuet
+  },
   snippet = {
     expand = function(args)
       require('luasnip').lsp_expand(args.body)
