@@ -36,7 +36,7 @@ require("avante").setup {
     "bash",
   },
   behaviour = {
-    auto_suggestions = true,            -- Experimental stage
+    auto_suggestions = false,           -- Experimental stage
     enable_cursor_planning_mode = true, -- enable cursor planning mode!
   },
   rag_service = {
@@ -57,7 +57,7 @@ require("avante").setup {
   },
   mappings = {
     suggestion = {
-      accept = "<M-l>",
+      accept = "<Tab>",
       next = "<M-]>",
       prev = "<M-[>",
       dismiss = "<C-]>",
