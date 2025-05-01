@@ -1,5 +1,6 @@
 require('minuet').setup {
   provider = 'gemini',
+  n_completions = 3, -- The less the faster, but it's nice to cycle through some options sometimes I guess
   cmp = {
     enable_auto_complete = true,
   },
@@ -23,7 +24,7 @@ require('minuet').setup {
   },
   provider_options = {
     gemini = {
-      model = 'gemini-2.5-flash-preview-04-17',
+      model = 'gemini-2.5-flash-preview-04-17', -- 'gemini-2.0-flash' or 'gemini-2.0-flash-lite' would be even faster
       optional = {
         generationConfig = {
           -- When using `gemini-2.5-flash`, it is recommended to entirely
