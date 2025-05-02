@@ -132,8 +132,10 @@ nvim_lsp.tailwindcss.setup({
     tailwindCSS = {
       experimental = {
         classRegex = {
-          { "cva\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]" },
-          { "cx\\(([^)]*)\\)",  "(?:'|\"|`)([^']*)(?:'|\"|`)" }
+          { "cva\\(([^)]*)\\)",       "[\"'`]([^\"'`]*).*?[\"'`]" },
+          { "cx\\(([^)]*)\\)",        "(?:'|\"|`)([^']*)(?:'|\"|`)" },
+          { "classes=\\{([^}]*)\\}",  "[\"'`]([^\"'`]*).*?[\"'`]" },
+          { "className\\: '([^']*)'", } -- https://github.com/tailwindlabs/tailwindcss/issues/7553
         },
       },
     },
@@ -167,7 +169,7 @@ nvim_lsp.cnls.setup({
   capabilities = lsp_capabilities,
   settings = {
     cnls = {
-      scopes = { "att:className,class", "fn:createElement" }
+      scopes = { "att:className,class,classes,*ClassName", "fn:createElement,cva", "prop:className" }
     }
   }
 })
