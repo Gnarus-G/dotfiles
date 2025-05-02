@@ -64,6 +64,11 @@ local node_attach = {
   type = 'node2',
   request = 'attach',
   processId = require 'dap.utils'.pick_process,
+  cwd = vim.fn.getcwd(),
+  sourceMaps = true,
+  resolveSourceMapLocations = { "${workspaceFolder}/**",
+    "!**/node_modules/**" },
+  skipFiles = { "${workspaceFolder}/node_modules/**/*.js" },
 }
 
 local chrome_attach = {
