@@ -1,7 +1,18 @@
-require("avante").setup {
-  provider = "gemini",
+local ollama_api_base = os.getenv("OLLAMA_API_BASE") or "http://localhost:11434"
+
+-- Determine provider and models based on GEMINI_API_KEY
+local provider_name = "gemini"
+local auto_suggestions_provider_name = "gemini_flash" -- Default suggestions provider
+if os.getenv("GEMINI_API_KEY") == nil then
+  provider_name = "ollama"
+  auto_suggestions_provider_name = "ollama_suggestions" -- Use ollama provider for suggestions
+end
+
+---@class avante.Config
+local config = {
+  provider = provider_name,                                   -- Use the determined provider
   enable_claude_text_editor_tool_mode = false,
-  auto_suggestions_provider = "gemini_flash",
+  auto_suggestions_provider = auto_suggestions_provider_name, -- Use the determined suggestions provider
   suggestion = {
     debounce = 300,
     throttle = 300,
@@ -15,8 +26,8 @@ require("avante").setup {
     model = "gemini-2.5-pro-preview-03-25"
   },
   ollama = {
-    endpoint = "http://localhost:11434",
-    model = "cogito",
+    endpoint = ollama_api_base,
+    model = "qwen3",
     temperature = 0,
     timeout = 30000,              -- Timeout in milliseconds, increase this for reasoning models
     max_completion_tokens = 8192, -- Increase this to include reasoning tokens (for reasoning models)
@@ -54,6 +65,10 @@ require("avante").setup {
       __inherited_from = 'gemini',
       model = 'gemini-2.5-flash-preview-04-17',
     },
+    ollama_suggestions = {
+      __inherited_from = "ollama",
+      model = "qwen2.5-coder:3b"
+    }
   },
   mappings = {
     suggestion = {
@@ -75,6 +90,8 @@ require("avante").setup {
     }
   end,
 }
+
+require("avante").setup(config)
 
 -- views can only be fully collapsed with the global statusline
 vim.opt.laststatus = 3
