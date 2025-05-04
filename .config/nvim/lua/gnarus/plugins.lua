@@ -120,7 +120,7 @@ return packer.startup(function(use)
 
   use {
     "ravitemer/mcphub.nvim",
-    run = ":MCPHub",
+    run = "npm install -g mcp-hub@latest",
     requires = {
       'nvim-lua/plenary.nvim',
       'MunifTanjim/nui.nvim'
