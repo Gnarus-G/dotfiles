@@ -71,7 +71,7 @@ require("codecompanion").setup({
     log_level = "ERROR", -- TRACE|DEBUG|ERROR|INFO
   },
   adapters = {
-    gemini = adapter_and_default_model("gemini", "gemini-2.5-pro-preview-03-25"),
+    gemini = adapter_and_default_model("gemini", "gemini-2.5-pro-preview-05-06"),
     gemini_flash = adapter_and_default_model("gemini", "gemini-2.0-flash"),
     ollama = adapter_and_default_model("ollama", "qwen3", ollama_adapter_opts),
   },
