@@ -131,7 +131,8 @@ return packer.startup(function(use)
     "olimorris/codecompanion.nvim",
     branch = 'main',
     requires = {
-      'ravitemer/mcphub.nvim', -- Ensure mcphub.nvim is loaded first
+      'ravitemer/mcphub.nvim',
+      "ravitemer/codecompanion-history.nvim",
       "nvim-lua/plenary.nvim",
       "nvim-treesitter/nvim-treesitter",
     }
