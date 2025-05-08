@@ -109,7 +109,14 @@ return packer.startup(function(use)
 
   use {
     "pmizio/typescript-tools.nvim",
-    requires = { "nvim-lua/plenary.nvim", "neovim/nvim-lspconfig" },
+    requires = {
+      "nvim-lua/plenary.nvim",
+      "neovim/nvim-lspconfig",
+      'dmmulroy/ts-error-translator.nvim' -- optional
+    },
+    config = function()
+      require("ts-error-translator").setup()
+    end
   }
 
   use {
