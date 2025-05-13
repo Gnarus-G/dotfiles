@@ -3,7 +3,7 @@ local ollama_api_base = os.getenv("OLLAMA_API_BASE") or "http://localhost:11434"
 -- Base options defined separately
 local base_opts = {
   provider = 'gemini',
-  n_completions = 3, -- The less the faster, but it's nice to cycle through some options sometimes I guess
+  n_completions = 2, -- The less the faster, but it's nice to cycle through some options sometimes I guess
 }
 
 -- when no gemini api key then use ollama
