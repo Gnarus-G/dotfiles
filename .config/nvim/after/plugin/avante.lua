@@ -23,7 +23,10 @@ local config = {
     max_tokens = 4096,
   },
   gemini = {
-    model = "gemini-2.5-pro-preview-05-06"
+    model = "gemini-2.5-pro-preview-05-06",
+    timeout = 30000,
+    temperature = 0,
+    max_tokens = 8192,
   },
   ollama = {
     endpoint = ollama_api_base,
@@ -51,7 +54,7 @@ local config = {
     enable_cursor_planning_mode = true, -- enable cursor planning mode!
   },
   rag_service = {
-    enabled = true,                         -- Enables the RAG service
+    enabled = false,                        -- Enables the RAG service
     host_mount = os.getenv("HOME") .. "/d", -- Host mount path for the rag service
     provider = "ollama",                    -- The provider to use for RAG service (e.g. openai or ollama)
     llm_model = "gemma3",                   -- The LLM model to use for RAG service
