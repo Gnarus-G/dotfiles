@@ -44,7 +44,7 @@ local function adapter_and_default_model(adapter, model, extra_opts)
   return require("codecompanion.adapters").extend(adapter, opts)
 end
 
-require("codecompanion").setup({
+local opts = {
   strategies = {
     chat = {
       adapter = chat_adapter_name,
@@ -104,4 +104,6 @@ require("codecompanion").setup({
       }
     },
   }
-})
+}
+
+require("codecompanion").setup(opts)
