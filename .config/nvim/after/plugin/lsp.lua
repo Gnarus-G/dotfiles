@@ -1,5 +1,3 @@
-local nvim_lsp = require("lspconfig");
-
 -- note: diagnostics are not exclusive to lsp servers
 -- so these can be global keybindings
 vim.keymap.set('n', 'gl', '<cmd>lua vim.diagnostic.open_float()<cr>')
@@ -40,94 +38,76 @@ vim.api.nvim_create_autocmd('LspAttach', {
 
 local lsp_capabilities = require('cmp_nvim_lsp').default_capabilities()
 
-local default_setup = function(server)
-  require('lspconfig')[server].setup({
-    capabilities = lsp_capabilities,
-  })
-end
-
-require('mason').setup({
-  PATH = "append"
+require('mason').setup({ PATH = "append" })
+require('mason-lspconfig').setup({
+  ensure_installed = { 'rust_analyzer', 'ts_ls', 'dockerls', "cssls", "clangd", "lua_ls", "jsonls" },
+  automatic_enable = true
 })
 
-require 'lspconfig'.ocamllsp.setup {
+vim.lsp.config("ocamllsp", {
   capabilities = lsp_capabilities,
-}
+})
 
-require('mason-lspconfig').setup({
-  automatic_installation = false,
-  ensure_installed = { 'rust_analyzer', 'ts_ls', 'dockerls', "cssls", "clangd", "lua_ls", "jsonls" },
-  handlers = {
-    default_setup,
-    lua_ls = function()
-      nvim_lsp.lua_ls.setup({
-        capabilities = lsp_capabilities,
-        settings = {
-          Lua = {
-            runtime = {
-              version = 'LuaJIT',
-            },
-            diagnostics = {
-              globals = { 'vim' },
-            },
-            workspace = {
-              library = {
-                vim.env.VIMRUNTIME,
-                vim.fn.expand "~/.local/share/nvim/site/pack/packer/start/"
-              }
-            }
-          }
-        }
-      })
-    end,
-    ts_ls = function()
-      require("typescript-tools").setup {
-        settings = {
-          code_lens = "references_only",
-          -- by default code lenses are displayed on all referencable values and for some of you it can
-          -- be too much this option reduce count of them by removing member references from lenses
-          disable_member_code_lens = true,
-          tsserver_file_preferences = {
-            includeInlayParameterNameHints = "all",
-          },
+vim.lsp.config("lua_ls", {
+  capabilities = lsp_capabilities,
+  settings = {
+    Lua = {
+      runtime = {
+        version = 'LuaJIT',
+      },
+      diagnostics = {
+        globals = { 'vim' },
+      },
+      workspace = {
+        library = {
+          vim.env.VIMRUNTIME,
+          vim.fn.expand "~/.local/share/nvim/site/pack/packer/start/"
         }
       }
-    end,
-    rust_analyzer = function()
-      nvim_lsp.rust_analyzer.setup({
-        capabilities = lsp_capabilities,
-        settings = {
-          ['rust-analyzer'] = {
-            checkOnSave = {
-              command = "clippy",
-            },
-            rustfmt = {
-              overrideCommand = { "rustfmt", "+nightly", "--edition", "2021" },
-            }
-          }
-        }
-      })
-    end,
-    jsonls = function()
-      nvim_lsp.jsonls.setup({
-        settings = {
-          json = {
-            schemas = require "schemastore".json.schemas(),
-            validate = { enable = true }
-          }
-        }
-      })
-    end,
-    denols = function()
-      nvim_lsp.denols.setup({
-        root_dir = nvim_lsp.util.root_pattern("deno.json", "deno.jsonc"),
-      })
-    end
-  },
+    }
+  }
 })
 
--- npm install -g @tailwindcss/language-server
-nvim_lsp.tailwindcss.setup({
+vim.lsp.config("rust_analyzer", {
+  capabilities = lsp_capabilities,
+  settings = {
+    ['rust-analyzer'] = {
+      checkOnSave = {
+        command = "clippy",
+      },
+      rustfmt = {
+        overrideCommand = { "rustfmt", "+nightly", "--edition", "2021" },
+      }
+    }
+  }
+})
+
+vim.lsp.config("jsonls", {
+  settings = {
+    json = {
+      schemas = require "schemastore".json.schemas(),
+      validate = { enable = true }
+    }
+  }
+})
+
+vim.lsp.config("denols", {
+  root_markers = { "deno.json", "deno.jsonc" },
+})
+
+require("typescript-tools").setup {
+  settings = {
+    code_lens = "references_only",
+    -- by default code lenses are displayed on all referencable values and for some of you it can
+    -- be too much this option reduce count of them by removing member references from lenses
+    disable_member_code_lens = true,
+    tsserver_file_preferences = {
+      includeInlayParameterNameHints = "all",
+    },
+  }
+}
+
+vim.lsp.config("tailwindcss", {
   settings = {
     tailwindCSS = {
       experimental = {
@@ -139,33 +119,21 @@ nvim_lsp.tailwindcss.setup({
         },
       },
     },
-  },
+  }
 })
 
 vim.diagnostic.config({
   virtual_text = true,
 })
 
-local configs = require 'lspconfig.configs'
-
--- Rested LSP setup
-nvim_lsp.rstdls.setup({
+vim.lsp.config("rstdls", {
   capabilities = lsp_capabilities
 })
 
--- cnls setup
-if not configs.cnls then
-  configs.cnls = {
-    default_config = {
-      cmd = { "cnls" },
-      --[[ cmd = { "cargo", "run", "--manifest-path=/home/gnarus/d/cnls/Cargo.toml" }, ]]
-      filetypes = { "ocaml", "javascript", "javascriptreact", "javascript.jsx", "typescript", "typescriptreact", "typescript.tsx" }
-    },
-  }
-end
-
-nvim_lsp.cnls.setup({
-  root_dir = nvim_lsp.util.root_pattern("package.json"),
+vim.lsp.config("cnls", {
+  cmd = { "cnls" },
+  filetypes = { "javascriptreact", "typescriptreact" },
+  root_markers = { "package.json" },
   capabilities = lsp_capabilities,
   settings = {
     cnls = {
@@ -174,22 +142,14 @@ nvim_lsp.cnls.setup({
   }
 })
 
--- todols setup
-if not configs.todols then
-  configs.todols = {
-    default_config = {
-      cmd = { "todo", "lsp" },
-      filetypes = { "todolang" },
-    },
-  }
-end
-
-nvim_lsp.todols.setup({
-  on_attach = on_attach,
+vim.lsp.config("todols", {
+  cmd = { "todo", "lsp" },
+  filetypes = { "todolang" },
   single_file_support = true,
   capabilities = lsp_capabilities
 })
 
+vim.lsp.enable { "cnls", "todols" }
 
 --[[ vim.lsp.set_log_level("debug"); ]]
 --[[ require('vim.lsp.log').set_format_func(vim.inspect) ]]
