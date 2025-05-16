@@ -48,6 +48,67 @@ local opts = {
   strategies = {
     chat = {
       adapter = chat_adapter_name,
+      roles = {
+        ---The header name for the LLM's messages
+        ---@type string|fun(adapter: CodeCompanion.Adapter): string
+        llm = function(adapter)
+          return "CodeCompanion (" .. adapter.name .. ")"
+        end,
+      },
+      slash_commands = {
+        ["git_files"] = {
+          description = "List git files",
+          ---@param chat CodeCompanion.Chat
+          callback = function(chat)
+            local handle = io.popen("git ls-files")
+            if handle ~= nil then
+              local result = handle:read("*a")
+              handle:close()
+              chat:add_reference({ role = "user", content = result }, "git", "<git_files>")
+            else
+              return vim.notify("No git files available", vim.log.levels.INFO, { title = "CodeCompanion" })
+            end
+          end,
+          opts = {
+            contains_code = false,
+          },
+        },
+        ["git_changed_files"] = {
+          description = "List git changed files",
+          ---@param chat CodeCompanion.Chat
+          callback = function(chat)
+            local handle = io.popen("git diff --name-only")
+            if handle ~= nil then
+              local result = handle:read("*a")
+              handle:close()
+              chat:add_reference({ role = "user", content = result }, "git", "<git_changed_files>")
+            else
+              return vim.notify("No git changed files available", vim.log.levels.INFO, { title = "CodeCompanion" })
+            end
+          end,
+          opts = {
+            contains_code = false,
+          },
+        },
+        ["git_modified_or_added_files"] = {
+          description = "List git modified or added files",
+          ---@param chat CodeCompanion.Chat
+          callback = function(chat)
+            local handle = io.popen("git status --porcelain | grep -v '^??' | awk '{ print $2 }'")
+            if handle ~= nil then
+              local result = handle:read("*a")
+              handle:close()
+              chat:add_reference({ role = "user", content = result }, "git", "<git_modified_or_added_files>")
+            else
+              return vim.notify("No git modified or added files available", vim.log.levels.INFO,
+                { title = "CodeCompanion" })
+            end
+          end,
+          opts = {
+            contains_code = false,
+          },
+        }
+      },
     },
     inline = {
       adapter = inline_adapter_name,
@@ -66,7 +127,16 @@ local opts = {
       adapter = cmd_adapter_name
     }
   },
-  display = { chat = { window = { position = "right" } } },
+  display = {
+    diff = {
+      enabled = true,
+      close_chat_at = 80,   -- Close an open chat buffer if the total columns of your display are less than...
+      layout = "vertical",  -- vertical|horizontal split for default provider
+      opts = { "internal", "filler", "closeoff", "algorithm:patience", "followwrap", "linematch:120" },
+      provider = "default", -- default|mini_diff
+    },
+    chat = { window = { position = "right" }, show_settings = true }
+  },
   opts = {
     log_level = "ERROR", -- TRACE|DEBUG|ERROR|INFO
   },
