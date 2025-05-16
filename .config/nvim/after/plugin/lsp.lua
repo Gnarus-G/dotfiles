@@ -1,3 +1,15 @@
+-- For lsp's that work on the same filetypes
+---@param exclude string[]
+---@param bufnr number
+local function stop_clients(exclude, bufnr)
+  local active_clients = vim.lsp.get_clients({ bufnr = bufnr })
+  for _, active_client in ipairs(active_clients) do
+    if vim.tbl_contains(exclude, active_client.name) then
+      vim.lsp.stop_client(active_client.id)
+    end
+  end
+end
+
 -- note: diagnostics are not exclusive to lsp servers
 -- so these can be global keybindings
 vim.keymap.set('n', 'gl', '<cmd>lua vim.diagnostic.open_float()<cr>')
@@ -40,7 +52,7 @@ local lsp_capabilities = require('cmp_nvim_lsp').default_capabilities()
 
 require('mason').setup({ PATH = "append" })
 require('mason-lspconfig').setup({
-  ensure_installed = { 'rust_analyzer', 'dockerls', "cssls", "clangd", "lua_ls", "jsonls" },
+  ensure_installed = { 'rust_analyzer', 'ts_ls', 'dockerls', "cssls", "clangd", "lua_ls", "jsonls" },
   automatic_enable = true
 })
 
@@ -91,11 +103,20 @@ vim.lsp.config("jsonls", {
   }
 })
 
-vim.lsp.config("denols", {
-  root_markers = { "deno.json", "deno.jsonc" },
+vim.lsp.config("ts_ls", {
+  root_markers = { 'package.json', 'tsconfig.json', 'jsconfig.json' },
 })
+vim.lsp.enable("ts_ls", false)
 
 require("typescript-tools").setup {
+  on_attach = function(client, bufnr)
+    stop_clients({ "denols" }, bufnr)
+    -- Disable document formatting capabilities, we use prettierd with none-ls
+    client.server_capabilities.documentFormattingProvider = false
+    client.server_capabilities.documentRangeFormattingProvider = false
+  end,
+  single_file_support = false,
+  root_dir = require('lspconfig.util').root_pattern('package.json', 'tsconfig.json', 'jsconfig.json'),
   settings = {
     code_lens = "references_only",
     -- by default code lenses are displayed on all referencable values and for some of you it can
@@ -106,6 +127,11 @@ require("typescript-tools").setup {
     },
   }
 }
+
+vim.lsp.config("denols", {
+  single_file_support = true,
+  root_markers = { 'deno.json', 'deno.jsonc', }
+})
 
 vim.lsp.config("tailwindcss", {
   settings = {
