@@ -141,6 +141,7 @@ local opts = {
     log_level = "ERROR", -- TRACE|DEBUG|ERROR|INFO
   },
   adapters = {
+    claude_haiku = adapter_and_default_model("anthropic", "claude-3-5-haiku-20241022"),
     gemini = adapter_and_default_model("gemini", "gemini-2.5-pro-preview-05-06"),
     gemini_flash = adapter_and_default_model("gemini", "gemini-2.0-flash"),
     ollama = adapter_and_default_model("ollama", "qwen3", ollama_adapter_opts),
