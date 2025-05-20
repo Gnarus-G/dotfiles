@@ -49,6 +49,7 @@ local config = {
     "rename_dir",
     "delete_dir",
     "bash",
+    "fetch"
   },
   behaviour = {
     auto_suggestions = false,           -- Experimental stage
