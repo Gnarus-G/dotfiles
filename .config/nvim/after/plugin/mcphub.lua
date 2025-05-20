@@ -48,4 +48,6 @@ require("mcphub").setup({
     file_path = nil,
     prefix = "MCPHub",
   },
+  shutdown_delay = 600000,
+  auto_toggle_mcp_servers = true
 })
