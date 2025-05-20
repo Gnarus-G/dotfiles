@@ -110,10 +110,16 @@ vim.lsp.enable("ts_ls", false)
 
 require("typescript-tools").setup {
   on_attach = function(client, bufnr)
-    stop_clients({ "denols" }, bufnr)
     -- Disable document formatting capabilities, we use prettierd with none-ls
     client.server_capabilities.documentFormattingProvider = false
     client.server_capabilities.documentRangeFormattingProvider = false
+
+    vim.api.nvim_create_autocmd("LspAttach", {
+      desc = 'Stop denols in favor of typescript-tools',
+      callback = function(_)
+        stop_clients({ "denols" }, bufnr)
+      end
+    })
   end,
   single_file_support = false,
   root_dir = require('lspconfig.util').root_pattern('package.json', 'tsconfig.json', 'jsconfig.json'),
