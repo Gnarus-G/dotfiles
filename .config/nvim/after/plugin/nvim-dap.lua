@@ -273,4 +273,4 @@ local function refresh_dapui_layout()
   dapui.open({})
 end
 
-vim.keymap.set("n", "<leader>Dr", refresh_dapui_layout, { desc = "Refresh DAP UI Layout" })
+vim.api.nvim_create_user_command('DapUIRefresh', refresh_dapui_layout, { desc = "Refresh DAP UI Layout" })
