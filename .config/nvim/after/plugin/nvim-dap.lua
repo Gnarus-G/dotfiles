@@ -136,7 +136,6 @@ local launch_exe_debugger = {
     return args_sequence
   end,
   cwd = '${workspaceFolder}',
-  stopOnEntry = false,
 }
 
 ---@class dap.Adapter
@@ -145,18 +144,10 @@ local attach_exe_debugger = {
   type = "gdb",
   request = "attach",
   pid = function()
-    local co = coroutine.running()
-    vim.ui.input({ prompt = "Executable name (filter): ", completion = "command" }, vim.schedule_wrap(function(input)
-      coroutine.resume(co, input)
-    end))
-    local name = coroutine.yield()
-    return require("dap.utils").pick_process({ filter = name })
+    return dap_utils.pick_process()
   end,
   cwd = '${workspaceFolder}',
-  stopOnEntry = false,
 }
-
-
 
 dap.configurations.cpp = {
   launch_exe_debugger,
