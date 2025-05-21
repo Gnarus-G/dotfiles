@@ -61,6 +61,7 @@ return packer.startup(function(use)
   use "b0o/schemastore.nvim"
 
   use { "rcarriga/nvim-dap-ui", requires = { "mfussenegger/nvim-dap", "nvim-neotest/nvim-nio", "rcarriga/cmp-dap" } }
+  use { "rcarriga/nvim-notify" }
   use 'theHamsta/nvim-dap-virtual-text'
   use "nvim-telescope/telescope-dap.nvim"
 
@@ -142,7 +143,6 @@ return packer.startup(function(use)
     requires = {
       'nvim-treesitter/nvim-treesitter',
       "ravitemer/mcphub.nvim",
-      "rcarriga/nvim-notify",
       'stevearc/dressing.nvim',
       'nvim-lua/plenary.nvim',
       'MunifTanjim/nui.nvim',
