@@ -53,7 +53,7 @@ local setup_opts = {
       model = 'claude-3-5-haiku-20241022',
     },
     gemini = {
-      model = 'gemini-2.0-flash',
+      model = 'gemini-2.5-flash-preview-05-20',
       optional = {
         generationConfig = {
           -- When using `gemini-2.5-flash`, it is recommended to entirely
