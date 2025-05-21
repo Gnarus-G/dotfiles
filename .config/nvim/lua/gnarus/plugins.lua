@@ -60,7 +60,7 @@ return packer.startup(function(use)
 
   use "b0o/schemastore.nvim"
 
-  use { "rcarriga/nvim-dap-ui", requires = { "mfussenegger/nvim-dap", "nvim-neotest/nvim-nio" } }
+  use { "rcarriga/nvim-dap-ui", requires = { "mfussenegger/nvim-dap", "nvim-neotest/nvim-nio", "rcarriga/cmp-dap" } }
   use 'theHamsta/nvim-dap-virtual-text'
   use "nvim-telescope/telescope-dap.nvim"
 
