@@ -1,5 +1,17 @@
 local dap = require 'dap'
 local dapui = require 'dapui'
+local dap_utils = require('dap.utils')
+
+local function string_split(inputstr, sep)
+  if sep == nil then
+    sep = "%s"
+  end
+  local t = {}
+  for str in string.gmatch(inputstr, "([^" .. sep .. "]+)") do
+    table.insert(t, str)
+  end
+  return t
+end
 
 vim.keymap.set("n", "<leader>b", ":lua require'dap'.toggle_breakpoint()<cr>")
 vim.keymap.set("n", "<leader>B", ":lua require'dap'.set_breakpoint(vim.fn.input('Breakpoint condition: '))<cr>")
@@ -64,7 +76,7 @@ local node_attach = {
   name = 'Attach to process',
   type = 'node2',
   request = 'attach',
-  processId = require 'dap.utils'.pick_process,
+  processId = dap_utils.pick_process,
   cwd = vim.fn.getcwd(),
   sourceMaps = true,
   resolveSourceMapLocations = { "${workspaceFolder}/**",
@@ -106,45 +118,52 @@ dap.configurations.svelte = {
 }
 
 ---@class dap.Adapter
-local launch_c_debugger = {
-  name = "Launch file",
+local launch_exe_debugger = {
+  name = "Launch executable file",
   type = "gdb",
   request = "launch",
   program = function()
-    return vim.fn.input('Path to executable: ', vim.fn.getcwd() .. '/', 'file')
+    return dap_utils.pick_file({ executables = true, })
   end,
   args = function()
-    local function mysplit(inputstr, sep)
-      if sep == nil then
-        sep = "%s"
-      end
-      local t = {}
-      for str in string.gmatch(inputstr, "([^" .. sep .. "]+)") do
-        table.insert(t, str)
-      end
-      return t
-    end
-
     local args = vim.fn.input('Args: ')
-    local args_sequence = mysplit(args)
-
+    local args_sequence = string_split(args)
     return args_sequence
   end,
   cwd = '${workspaceFolder}',
   stopOnEntry = false,
 }
 
+---@class dap.Adapter
+local attach_exe_debugger = {
+  name = "Select and attach to process",
+  type = "gdb",
+  request = "attach",
+  pid = function()
+    local name = vim.fn.input('Executable name (filter): ')
+    return require("dap.utils").pick_process({ filter = name })
+  end,
+  cwd = '${workspaceFolder}',
+  stopOnEntry = false,
+}
+
+
+
 dap.configurations.cpp = {
-  launch_c_debugger
+  launch_exe_debugger,
+  attach_exe_debugger,
 }
 dap.configurations.c = {
-  launch_c_debugger
+  launch_exe_debugger,
+  attach_exe_debugger,
 }
 dap.configurations.rust = {
-  launch_c_debugger,
+  launch_exe_debugger,
+  attach_exe_debugger,
 }
 dap.configurations.asm = {
-  launch_c_debugger,
+  launch_exe_debugger,
+  attach_exe_debugger,
 }
 
 dapui.setup();
