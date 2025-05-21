@@ -1,4 +1,5 @@
-local dap, dapui = require 'dap', require 'dapui'
+local dap = require 'dap'
+local dapui = require 'dapui'
 
 vim.keymap.set("n", "<leader>b", ":lua require'dap'.toggle_breakpoint()<cr>")
 vim.keymap.set("n", "<leader>B", ":lua require'dap'.set_breakpoint(vim.fn.input('Breakpoint condition: '))<cr>")
@@ -104,6 +105,7 @@ dap.configurations.svelte = {
   chrome_attach
 }
 
+---@class dap.Adapter
 local launch_c_debugger = {
   name = "Launch file",
   type = "gdb",
