@@ -2,6 +2,8 @@ local dap = require 'dap'
 local dapui = require 'dapui'
 local dap_utils = require('dap.utils')
 
+require("telescope").load_extension("dap")
+
 local function string_split(inputstr, sep)
   if sep == nil then
     sep = "%s"
