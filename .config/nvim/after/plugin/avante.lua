@@ -24,7 +24,7 @@ local config = {
     max_tokens = 4096,
   },
   gemini = {
-    model = "gemini-2.5-flash-preview-04-17",
+    model = "gemini-2.5-pro-preview-05-06",
     timeout = 30000,
     temperature = 0,
     max_tokens = 8192,
