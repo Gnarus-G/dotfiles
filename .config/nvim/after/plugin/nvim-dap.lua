@@ -40,6 +40,11 @@ dap.adapters.gdb = {
   args = { "--interpreter=dap", "--eval-command", "set print pretty on" }
 }
 
+dap.adapters.codelldb = {
+  type = "executable",
+  command = "codelldb", -- or if not in $PATH: "/absolute/path/to/codelldb"
+}
+
 local node_launcher = {
   name = 'Launch',
   type = 'node2',
@@ -122,7 +127,8 @@ dap.configurations.svelte = {
 ---@class dap.Adapter
 local launch_exe_debugger = {
   name = "Launch executable file",
-  type = "gdb",
+  -- if codelldb is not available, use gdb
+  type = vim.fn.executable("codelldb") == 1 and "codelldb" or "gdb",
   request = "launch",
   program = function()
     return dap_utils.pick_file({ executables = true, })
@@ -141,8 +147,8 @@ local launch_exe_debugger = {
 ---@class dap.Adapter
 local attach_exe_debugger = {
   name = "Select and attach to process",
-  type = "gdb",
-  request = "attach",
+  type = "codelldb",
+  request = "attach", -- if attach isn't working, try: https://askubuntu.com/questions/41629/after-upgrade-gdb-wont-attach-to-process
   pid = function()
     return dap_utils.pick_process()
   end,
