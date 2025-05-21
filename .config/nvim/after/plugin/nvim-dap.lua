@@ -1,5 +1,5 @@
-local dap = require 'dap'
-local dapui = require 'dapui'
+local dap = require('dap')
+local dapui = require('dapui')
 local dap_utils = require('dap.utils')
 
 require("telescope").load_extension("dap")
@@ -166,7 +166,35 @@ dap.configurations.asm = {
   attach_exe_debugger,
 }
 
-dapui.setup();
+local configs = {
+  layouts = {
+    {
+      -- You can change the order of elements in the sidebar
+      elements = {
+        -- Provide IDs as strings or tables with "id" and "size" keys
+        {
+          id = "scopes",
+          size = 0.45, -- Can be float or integer > 1
+        },
+        { id = "breakpoints", size = 0.15 },
+        { id = "stacks",      size = 0.25 },
+        { id = "watches",     size = 0.15 },
+      },
+      size = 50,
+      position = "left", -- Can be "left" or "right"
+    },
+    {
+      elements = {
+        "repl",
+        "console",
+      },
+      size = 10,
+      position = "bottom", -- Can be "bottom" or "top"
+    },
+  },
+}
+
+dapui.setup(configs);
 
 dap.listeners.after.event_initialized["dapui_listener"] = function()
   dapui.open({})
@@ -232,3 +260,11 @@ require("nvim-dap-virtual-text").setup({
   virt_text_win_col = nil -- position the virtual text at a fixed window column (starting from the first text column) ,
   -- e.g. 80 to position at column 80, see `:h nvim_buf_set_extmark()`
 })
+
+local function refresh_dapui_layout()
+  dapui.close({})
+  dapui.setup(configs)
+  dapui.open({})
+end
+
+vim.keymap.set("n", "<leader>Dr", refresh_dapui_layout, { desc = "Refresh DAP UI Layout" })
