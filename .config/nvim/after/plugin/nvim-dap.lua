@@ -128,8 +128,11 @@ local launch_exe_debugger = {
     return dap_utils.pick_file({ executables = true, })
   end,
   args = function()
-    local args = vim.fn.input('Args: ')
-    local args_sequence = string_split(args)
+    local co = coroutine.running()
+    vim.ui.input({ prompt = "Args: ", completion = "arglist" }, vim.schedule_wrap(function(input)
+      coroutine.resume(co, string_split(input))
+    end))
+    local args_sequence = coroutine.yield()
     return args_sequence
   end,
   cwd = '${workspaceFolder}',
@@ -142,7 +145,11 @@ local attach_exe_debugger = {
   type = "gdb",
   request = "attach",
   pid = function()
-    local name = vim.fn.input('Executable name (filter): ')
+    local co = coroutine.running()
+    vim.ui.input({ prompt = "Executable name (filter): ", completion = "command" }, vim.schedule_wrap(function(input)
+      coroutine.resume(co, input)
+    end))
+    local name = coroutine.yield()
     return require("dap.utils").pick_process({ filter = name })
   end,
   cwd = '${workspaceFolder}',
