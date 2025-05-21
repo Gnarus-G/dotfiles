@@ -97,3 +97,21 @@ cmp.setup.cmdline(':', {
   }),
   matching = { disallow_symbol_nonprefix_matching = false }
 })
+
+-- gdb doesn't support this, since it gives `nil` on `:lua= require("dap").session().capabilities.supportsCompletionsRequest`
+cmp.setup.filetype({ "dap-repl", "dapui_watches" }, {
+  enabled = function()
+    local buf = vim.api.nvim_get_current_buf()
+    return require("cmp_dap").is_dap_buffer(buf)
+  end,
+  sources = cmp.config.sources({
+    { name = "dap" },
+  }),
+  formatting = {
+    format = require("lspkind").cmp_format({
+      menu = {
+        dap = "[dap]",
+      },
+    })
+  },
+})
