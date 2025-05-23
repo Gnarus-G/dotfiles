@@ -103,16 +103,84 @@ vim.opt.laststatus = 3
 
 -- avante cmp settings
 local cmp = require("cmp")
-cmp.setup.filetype({ "AvanteInput", "AvantePromptInput" }, {
-  sources = cmp.config.sources({
+cmp.setup.filetype("AvanteInput", {
+  sources = cmp.config.sources(
+  -- Group 1: Avante's specific sources (queried first)
     {
-      name = 'buffer',
-      option = {
-        get_bufnrs = require('cmp_utils').get_visible_buffers
+      { name = 'avante_commands' }, -- Uses '/' trigger, can't overwrite
+      { name = 'avante_mentions', },
+    },
+    -- Group 2: Your general purpose sources (fallback or complementary)
+    {
+      { name = 'path', },
+      {
+        name = 'buffer',
+        option = {
+          get_bufnrs = require("cmp_utils").get_visible_buffers,
+        }
       },
     },
-  }, {
-    { name = 'minuet' },
-    { name = 'path' }
-  })
+    -- Group 3
+    {
+      { name = 'minuet' }
+    }
+  ),
+  formatting = {
+    format = require("lspkind").cmp_format({
+      menu = {
+        avante_commands = "[AvanteCommand]",
+        avante_mentions = "[AvanteMention]",
+      }
+    })
+  },
+})
+
+cmp.setup.filetype("AvantePromptInput", {
+  sources = cmp.config.sources(
+    {
+      { name = 'avante_prompt_mentions', },
+    },
+    {
+      { name = 'path', },
+      {
+        name = 'buffer',
+        option = {
+          get_bufnrs = require("cmp_utils").get_visible_buffers,
+        }
+      },
+    },
+    {
+      { name = 'minuet' }
+    }
+  ),
+  formatting = {
+    format = require("lspkind").cmp_format({
+      menu = {
+        avante_prompt_mentions = "[AvantePromptMention]",
+      }
+    })
+  },
+})
+
+-- Using `#` in the avante input often changes the filetype to `conf`
+-- This mitigates that issue
+local avante_ft_group = vim.api.nvim_create_augroup("AvanteFiletypeLock", { clear = true })
+vim.api.nvim_create_autocmd({ "FileType" }, {
+  group = avante_ft_group,
+  pattern = "AvanteInput", -- Only act when the filetype is initially AvanteInput
+  callback = function(args)
+    -- This nested autocmd will run when text changes IN an AvanteInput buffer
+    vim.api.nvim_create_autocmd({ "TextChanged", "TextChangedI" }, {
+      buffer = args.buf, -- Act only on this specific buffer
+      once = false,      -- Keep this active for the buffer's lifetime
+      callback = function()
+        if vim.bo[args.buf].filetype ~= "AvanteInput" then
+          vim.schedule(function() -- vim.schedule to avoid issues during event processing
+            vim.bo[args.buf].filetype = "AvanteInput"
+            --[[ vim.notify("Filetype reset to AvanteInput for buffer " .. args.buf, vim.log.levels.INFO) ]]
+          end)
+        end
+      end,
+    })
+  end,
 })
