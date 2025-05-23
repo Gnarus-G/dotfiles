@@ -100,3 +100,18 @@ require("avante").setup(config)
 
 -- views can only be fully collapsed with the global statusline
 vim.opt.laststatus = 3
+
+-- avante cmp settings
+local cmp = require("cmp")
+cmp.setup.filetype({ "AvanteInput", "AvantePromptInput" }, {
+  sources = cmp.config.sources({
+    { name = 'minuet' },
+    {
+      name = 'buffer',
+      option = {
+        get_bufnrs = require('cmp_utils').get_visible_buffers
+      },
+    },
+    { name = 'path' }
+  })
+})

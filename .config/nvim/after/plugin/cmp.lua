@@ -31,7 +31,12 @@ cmp.setup({
     { name = "nvim_lsp" },
     { name = "nvim_lua" },
     { name = "luasnip" },
-    { name = "buffer" },
+    {
+      name = "buffer",
+      option = {
+        get_bufnrs = require "cmp_utils".get_visible_buffers
+      }
+    },
     { name = "path" },
   }),
   performance = {
