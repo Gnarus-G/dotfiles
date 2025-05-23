@@ -105,13 +105,14 @@ vim.opt.laststatus = 3
 local cmp = require("cmp")
 cmp.setup.filetype({ "AvanteInput", "AvantePromptInput" }, {
   sources = cmp.config.sources({
-    { name = 'minuet' },
     {
       name = 'buffer',
       option = {
         get_bufnrs = require('cmp_utils').get_visible_buffers
       },
     },
+  }, {
+    { name = 'minuet' },
     { name = 'path' }
   })
 })
