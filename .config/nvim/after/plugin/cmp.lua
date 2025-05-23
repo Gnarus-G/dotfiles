@@ -26,19 +26,21 @@ cmp.setup({
     completion = cmp.config.window.bordered(),
     documentation = cmp.config.window.bordered(),
   },
-  sources = cmp.config.sources({
-    { name = 'minuet' },
-    { name = "nvim_lsp" },
-    { name = "nvim_lua" },
-    { name = "luasnip" },
-    {
-      name = "buffer",
-      option = {
-        get_bufnrs = require "cmp_utils".get_visible_buffers
-      }
+  sources = cmp.config.sources(
+    { -- Group 1
+      { name = 'minuet' },
+      { name = "nvim_lsp" },
+      { name = "nvim_lua" },
+      { name = "luasnip" },
     },
-    { name = "path" },
-  }),
+    { -- Group 2 (Fallback)
+      {
+        name = "buffer",
+        option = { get_bufnrs = require "cmp_utils".get_visible_buffers }
+      },
+      { name = "path" },
+    }
+  ),
   performance = {
     fetching_timeout = 2000, -- for LLM responses by minuet
   },
@@ -77,11 +79,11 @@ cmp.setup({
 require('cmp-npm').setup({})
 cmp.setup.filetype('json', {
   sources = cmp.config.sources({
-    { name = 'npm', keyword_length = 4 } -- Enable npm source for json
+    { name = 'npm', keyword_length = 4 }
   }, {
-    { name = 'nvim_lsp' },               -- Keep LSP suggestions (jsonls)
-    { name = 'buffer' },                 -- Keep buffer suggestions
-    { name = 'path' }                    -- Keep path suggestions
+    { name = 'nvim_lsp' },
+    { name = 'buffer' },
+    { name = 'path' }
   })
 })
 
