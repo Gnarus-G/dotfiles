@@ -122,14 +122,3 @@ cmp.setup.filetype({ "dap-repl", "dapui_watches" }, {
     })
   },
 })
-
--- for those basic inputs from vim.ui.input
-cmp.setup.filetype("DressingInput", {
-  sources = cmp.config.sources({
-    { name = "path" },
-    {
-      name = "buffer",
-      option = { get_bufnrs = require "cmp_utils".get_visible_buffers }
-    }
-  })
-})
