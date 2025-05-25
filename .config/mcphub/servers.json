@@ -1,0 +1,40 @@
+{
+  "mcpServers": {
+    "github.com/zcaceres/fetch-mcp": {
+      "disabled": false,
+      "args": ["/home/gnarus/.mcphub/servers/fetch-mcp/dist/index.js"],
+      "command": "node"
+    },
+    "github.com/modelcontextprotocol/servers/tree/main/src/filesystem": {
+      "disabled": false,
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "--mount",
+        "type=bind,src=/home/gnarus/,dst=/home",
+        "mcp/filesystem",
+        "/home"
+      ],
+      "command": "docker"
+    },
+    "ez-web-search-mcp": {
+      "disabled": false,
+      "args": ["/home/gnarus/.mcphub/servers/ez-web-search-mcp/build/index.js"],
+      "command": "node"
+    },
+    "searxng": {
+      "disabled": false,
+      "command": "npx",
+      "args": ["-y", "mcp-searxng"],
+      "env": {
+        "SEARXNG_URL": "https://metasearx.com/"
+      }
+    }
+  },
+  "nativeMCPServers": {
+    "neovim": {
+      "disabled": false
+    }
+  }
+}
