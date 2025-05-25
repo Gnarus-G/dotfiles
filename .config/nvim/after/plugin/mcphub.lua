@@ -49,5 +49,6 @@ require("mcphub").setup({
     prefix = "MCPHub",
   },
   shutdown_delay = 600000,
-  auto_toggle_mcp_servers = true
+  auto_toggle_mcp_servers = true,
+  mcp_request_timeout = 60000
 })
