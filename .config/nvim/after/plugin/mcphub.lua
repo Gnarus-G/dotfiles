@@ -52,3 +52,5 @@ require("mcphub").setup({
   auto_toggle_mcp_servers = true,
   mcp_request_timeout = 60000
 })
+
+require "mcphub_servers.todo_server"
