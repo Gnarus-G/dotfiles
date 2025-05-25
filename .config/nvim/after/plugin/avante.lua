@@ -62,6 +62,10 @@ local config = {
     llm_model = "gemma3",                   -- The LLM model to use for RAG service
     embed_model = "nomic-embed-text",       -- The embedding model to use for RAG service
   },
+  web_search_engine = {
+    provider = "searxng",
+    proxy = nil
+  },
   windows = {
     width = 40, -- Width as a percentage of screen width
   },
