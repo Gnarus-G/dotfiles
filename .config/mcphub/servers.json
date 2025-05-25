@@ -28,9 +28,9 @@
         "-i",
         "--rm",
         "--mount",
-        "type=bind,src=~/,dst=/home",
+        "type=bind,src=~/,dst=/home/gnarus",
         "mcp/filesystem",
-        "/home"
+        "~/"
       ],
       "disabled": false,
       "command": "docker"
