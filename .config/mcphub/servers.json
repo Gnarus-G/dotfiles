@@ -5,22 +5,27 @@
     }
   },
   "mcpServers": {
-    "searxng": {
-      "disabled": false,
-      "args": ["-y", "mcp-searxng"],
-      "env": {
-        "SEARXNG_URL": "https://metasearx.com/"
-      },
-      "command": "npx"
-    },
-    "github.com/zcaceres/fetch-mcp": {
-      "args": ["/home/gnarus/.mcphub/servers/fetch-mcp/dist/index.js"],
-      "disabled": false,
-      "command": "node"
-    },
     "git": {
+      "args": ["mcp-server-git"],
       "command": "uvx",
-      "args": ["mcp-server-git"]
+      "disabled": false
+    },
+    "github.com/github/github-mcp-server": {
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "-e",
+        "GITHUB_PERSONAL_ACCESS_TOKEN",
+        "-e",
+        "GITHUB_DYNAMIC_TOOLSETS=1",
+        "ghcr.io/github/github-mcp-server"
+      ],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": ""
+      },
+      "disabled": false
     },
     "github.com/modelcontextprotocol/servers/tree/main/src/filesystem": {
       "args": [
@@ -32,8 +37,21 @@
         "mcp/filesystem",
         "/home/gnarus/"
       ],
+      "command": "docker",
+      "disabled": false
+    },
+    "github.com/zcaceres/fetch-mcp": {
+      "args": ["/home/gnarus/.mcphub/servers/fetch-mcp/dist/index.js"],
+      "command": "node",
+      "disabled": false
+    },
+    "searxng": {
+      "args": ["-y", "mcp-searxng"],
+      "command": "npx",
       "disabled": false,
-      "command": "docker"
+      "env": {
+        "SEARXNG_URL": "https://metasearx.com/"
+      }
     }
   }
 }
