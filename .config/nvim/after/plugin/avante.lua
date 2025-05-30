@@ -27,7 +27,7 @@ local config = {
     model = "gemini-2.5-pro-preview-05-06",
     timeout = 30000,
     temperature = 0,
-    max_tokens = 8192,
+    max_tokens = 8192 * 3,
   },
   ollama = {
     endpoint = ollama_api_base,
@@ -44,6 +44,7 @@ local config = {
     "read_file",
     "create_file",
     "rename_file",
+    "replace_in_file",
     "delete_file",
     "create_dir",
     "rename_dir",
