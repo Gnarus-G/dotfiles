@@ -24,7 +24,7 @@ require('lualine').setup {
     lualine_w = {
       { require('mcphub.extensions.lualine') },
     },
-    lualine_x = { 'encoding', 'fileformat', 'filetype' },
+    lualine_x = { 'encoding', 'fileformat', 'filetype', { require('mcphub.extensions.lualine') }, },
     lualine_y = { 'progress' },
     lualine_z = { 'location' }
   },
