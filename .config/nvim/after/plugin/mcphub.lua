@@ -1,7 +1,7 @@
 -- some extra mcp servers to reinstall:
 -- web_search: https://github.com/ihor-sokoliuk/mcp-searxng, https://github.com/Gnarus-G/ez-web-search-mcp
-
-require("mcphub").setup({
+local mcphub = require("mcphub");
+mcphub.setup({
   port = 37373,                                            -- Default port for MCP Hub
   config = vim.fn.expand("~/.config/mcphub/servers.json"), -- Absolute path to config file location (will create if not exists)
   native_servers = {},                                     -- add your native servers here
