@@ -1,5 +1,8 @@
 local ollama_api_base = os.getenv("OLLAMA_API_BASE") or "http://localhost:11434"
 
+local minuet_config = require('minuet.config')
+local dynamic_context = require('minuet_extra_context')
+
 -- Base options defined separately
 local base_opts = {
   provider = 'gemini',
@@ -53,6 +56,20 @@ local setup_opts = {
       model = 'claude-3-5-haiku-20241022',
     },
     gemini = {
+      chat_input = {
+        -- New template with placeholders for dynamic content
+        -- The order here dictates where your custom content will appear relative to the standard context.
+        -- This example places it BEFORE the standard {{{language}}}, {{{tab}}}, etc.
+        template = "{{{extra_files_content}}}\n" .. minuet_config.default_chat_input_prefix_first.template,
+        -- Function for the new placeholder
+        extra_files_content = function()
+          local content = dynamic_context.get_formatted_context()
+          if content ~= '' then
+            content = '<extra_files_content>\n' .. content .. '\n</extra_files_content>'
+          end
+          return content
+        end,
+      },
       model = 'gemini-2.5-flash-preview-05-20',
       optional = {
         generationConfig = {
