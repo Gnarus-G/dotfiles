@@ -138,6 +138,17 @@ return packer.startup(function(use)
   use { "folke/snacks.nvim" }
 
   use {
+    "olimorris/codecompanion.nvim",
+    branch = 'main',
+    requires = {
+      'ravitemer/mcphub.nvim',
+      "ravitemer/codecompanion-history.nvim",
+      "nvim-lua/plenary.nvim",
+      "nvim-treesitter/nvim-treesitter",
+    }
+  }
+
+  use {
     'yetone/avante.nvim',
     branch = 'main',
     run = 'make',
