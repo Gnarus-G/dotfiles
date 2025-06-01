@@ -56,4 +56,17 @@ mcphub.setup({
   mcp_request_timeout = 60000
 })
 
+local plugins_dir = vim.fn.stdpath("data") .. "/site/pack/packer/start/"
+vim.iter(vim.fn.systemlist("ls -1 " .. plugins_dir)):map(function(name) return name, plugins_dir .. name end)
+    :each(function(name, path)
+      mcphub.add_resource("Plugins", {
+        name        = "location: " .. name,
+        description = "Directory for the source code of the installed neovim plugin",
+        uri         = "nvim://plugin/" .. name,
+        handler     = function(_req, res)
+          res:text(path):send()
+        end
+      })
+    end)
+
 require "mcphub_servers.todo_server"
