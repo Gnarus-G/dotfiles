@@ -72,7 +72,9 @@ local setup_opts = {
           return content
         end,
         chat_context = function()
-          return "<chat_context>\n" .. chat_context.get_formatted_context("codecompanion") .. "\n</chat_context>"
+          local content = chat_context.get_formatted_context("codecompanion")
+          content = table.concat({ content, chat_context.get_formatted_context("avante") }, "\n")
+          return "<chat_context>\n" .. content .. "\n</chat_context>"
         end
       },
       model = 'gemini-2.5-flash-preview-05-20',
@@ -124,7 +126,3 @@ vim.api.nvim_create_user_command('MinuetShowContext', function()
     vim.notify("(none)", vim.log.levels.INFO)
   end
 end, { nargs = 0 })
-
--- the llm I used for the chat context is 'gemini-2.5-pro-preview-05-06'.
--- the last question I asked in the chat is about:
--- 'lua not having a switch statement'.
