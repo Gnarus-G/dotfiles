@@ -121,7 +121,7 @@ cmp.setup.filetype("AvanteInput", {
       {
         name = 'buffer',
         option = {
-          get_bufnrs = require("cmp_utils").get_visible_buffers,
+          get_bufnrs = require("gnarus.utils").get_visible_buffers,
         }
       },
     },
@@ -150,7 +150,7 @@ cmp.setup.filetype("AvantePromptInput", {
       {
         name = 'buffer',
         option = {
-          get_bufnrs = require("cmp_utils").get_visible_buffers,
+          get_bufnrs = require("gnarus.utils").get_visible_buffers,
         }
       },
     },
