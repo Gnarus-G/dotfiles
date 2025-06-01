@@ -1,20 +1,22 @@
 local M = {}
 
 -- declare union type
----@alias LlmChatFileType "codecompanion" | "Avante"
+---@alias LlmChatType "codecompanion" | "avante"
 
----@type table<LlmChatFileType, integer>
+---@type table<LlmChatType, integer>
 M.nofile_buffers = {} -- A list of buffer of buftype="nofile" with desired content
 
 ---@param buf integer
----@param filetype "codecompanion" | "Avante"
-function M.add_buffer_for_filetype(buf, filetype)
-  M.nofile_buffers[filetype] = buf
+---@param llmtype LlmChatType
+function M.add_buffer_for(buf, llmtype)
+  M.nofile_buffers[llmtype] = buf
+  vim.notify("Added buffer " .. buf .. " for " .. llmtype, vim.log.levels.INFO)
 end
 
----@param filetype LlmChatFileType
-function M.clear_for_filetype(filetype)
-  M.nofile_buffers[filetype] = nil
+---@param llmtype LlmChatType
+function M.clear_for(llmtype)
+  M.nofile_buffers[llmtype] = nil
+  vim.notify("Cleared buffer for " .. llmtype, vim.log.levels.INFO)
 end
 
 function M.clear()
@@ -26,15 +28,15 @@ function M.is_empty()
 end
 
 --- Handling CodeCompanion buffers
-local group = vim.api.nvim_create_augroup("CodeCompanionHooks", {})
+local codecompanion_hooks_group = vim.api.nvim_create_augroup("CodeCompanionHooks", {})
 vim.api.nvim_create_autocmd({ "User" }, {
   pattern = "CodeCompanionChat*",
-  group = group,
+  group = codecompanion_hooks_group,
   callback = function(event)
     local match_statement = {
-      CodeCompanionChatOpened = function() M.add_buffer_for_filetype(event.buf, "codecompanion") end,
-      CodeCompanionChatClosed = function() M.clear_for_filetype("codecompanion") end,
-      CodeCompanionChatHidden = function() M.clear_for_filetype("codecompanion") end,
+      CodeCompanionChatOpened = function() M.add_buffer_for(event.buf, "codecompanion") end,
+      CodeCompanionChatClosed = function() M.clear_for("codecompanion") end,
+      CodeCompanionChatHidden = function() M.clear_for("codecompanion") end,
     }
     vim.notify("Got CodeCompanionChat event: " .. event.match, vim.log.levels.INFO)
     if match_statement[event.match] then
@@ -43,7 +45,28 @@ vim.api.nvim_create_autocmd({ "User" }, {
   end,
 })
 
----@param ft LlmChatFileType
+local avante_open_close_group = vim.api.nvim_create_augroup("AvanteOpenClose", { clear = true })
+vim.api.nvim_create_autocmd({ "BufWinEnter" }, {
+  group = avante_open_close_group,
+  pattern = "*",
+  callback = function(args)
+    if vim.bo[args.buf].filetype == "Avante" then
+      M.add_buffer_for(args.buf, "avante")
+    end
+  end,
+})
+
+vim.api.nvim_create_autocmd({ "BufWipeout" }, {
+  group = avante_open_close_group,
+  pattern = "*",
+  callback = function(args)
+    if vim.bo[args.buf].filetype == "Avante" then
+      M.clear_for("avante")
+    end
+  end,
+})
+
+---@param ft LlmChatType
 ---@return string
 function M.get_formatted_context(ft)
   local bufnr = M.nofile_buffers[ft]
