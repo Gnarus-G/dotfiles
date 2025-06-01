@@ -1,4 +1,3 @@
--- ~/.config/nvim/lua/my_minuet_context.lua
 local M = {}
 
 ---@type string[]
@@ -170,19 +169,5 @@ vim.api.nvim_create_user_command('MinuetRemoveFile', function(opts)
   end
 end, { nargs = "?", complete = 'file' })
 
-vim.api.nvim_create_user_command('MinuetClear', function()
-  M.clear()
-end, { nargs = 0 })
-
-vim.api.nvim_create_user_command('MinuetShowContext', function()
-  local files = M.dynamic_files
-
-  vim.notify("--- Dynamic Files ---", vim.log.levels.INFO)
-  if #files > 0 then
-    for _, f in ipairs(files) do vim.notify("- " .. f, vim.log.levels.INFO) end
-  else
-    vim.notify("(none)", vim.log.levels.INFO)
-  end
-end, { nargs = 0 })
 
 return M
