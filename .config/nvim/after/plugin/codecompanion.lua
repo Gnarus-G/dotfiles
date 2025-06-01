@@ -142,7 +142,7 @@ local opts = {
   },
   adapters = {
     claude_haiku = adapter_and_default_model("anthropic", "claude-3-5-haiku-20241022"),
-    gemini = adapter_and_default_model("gemini", "gemini-2.5-pro-preview-04-17"),
+    gemini = adapter_and_default_model("gemini", "gemini-2.5-pro-preview-05-06"),
     gemini_flash = adapter_and_default_model("gemini", "gemini-2.0-flash"),
     ollama = adapter_and_default_model("ollama", "qwen3", ollama_adapter_opts),
   },
@@ -163,7 +163,7 @@ local opts = {
         -- Automatically generate titles for new chats
         auto_generate_title = true,
         ---On exiting and entering neovim, loads the last chat on opening chat
-        continue_last_chat = false,
+        continue_last_chat = true,
         ---When chat is cleared with `gx` delete the chat from history
         delete_on_clearing_chat = true,
         -- Picker interface ("telescope" or "default")
@@ -172,9 +172,13 @@ local opts = {
         enable_logging = false,
         ---Directory path to save the chats
         dir_to_save = vim.fn.stdpath("data") .. "/codecompanion-history",
+
+        max_history = 10
       }
     },
   }
 }
 
 require("codecompanion").setup(opts)
+
+vim.g.codecompanion_auto_tool_mode = true
