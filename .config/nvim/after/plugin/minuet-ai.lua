@@ -1,7 +1,8 @@
 local ollama_api_base = os.getenv("OLLAMA_API_BASE") or "http://localhost:11434"
 
 local minuet_config = require('minuet.config')
-local dynamic_context = require('minuet_extra_context')
+local extra_context = require('minuet_extra_context')
+local chat_context = require('minuet_chat_context')
 
 -- Base options defined separately
 local base_opts = {
@@ -60,15 +61,19 @@ local setup_opts = {
         -- New template with placeholders for dynamic content
         -- The order here dictates where your custom content will appear relative to the standard context.
         -- This example places it BEFORE the standard {{{language}}}, {{{tab}}}, etc.
-        template = "{{{extra_files_content}}}\n" .. minuet_config.default_chat_input_prefix_first.template,
+        template = "{{{chat_context}}}\n{{{extra_files_content}}}\n" ..
+            minuet_config.default_chat_input_prefix_first.template,
         -- Function for the new placeholder
         extra_files_content = function()
-          local content = dynamic_context.get_formatted_context()
+          local content = extra_context.get_formatted_context()
           if content ~= '' then
             content = '<extra_files_content>\n' .. content .. '\n</extra_files_content>'
           end
           return content
         end,
+        chat_context = function()
+          return "<chat_context>\n" .. chat_context.get_formatted_context("codecompanion") .. "\n</chat_context>"
+        end
       },
       model = 'gemini-2.5-flash-preview-05-20',
       optional = {
@@ -95,3 +100,31 @@ local setup_opts = {
 }
 
 require('minuet').setup(vim.tbl_extend('force', setup_opts, base_opts))
+
+vim.api.nvim_create_user_command('MinuetClear', function()
+  extra_context.clear()
+  chat_context.clear()
+end, { nargs = 0 })
+
+vim.api.nvim_create_user_command('MinuetShowContext', function()
+  local files = extra_context.dynamic_files
+  vim.notify("--- Dynamic Files ---", vim.log.levels.INFO)
+  if #files > 0 then
+    for _, f in ipairs(files) do vim.notify("- " .. f, vim.log.levels.INFO) end
+  else
+    vim.notify("(none)", vim.log.levels.INFO)
+  end
+
+  vim.notify("--- Chat Context Buffers ---", vim.log.levels.INFO)
+  if not chat_context.is_empty() then
+    for ft, b in pairs(chat_context.nofile_buffers) do
+      vim.notify("- " .. b .. " " .. ft, vim.log.levels.INFO)
+    end
+  else
+    vim.notify("(none)", vim.log.levels.INFO)
+  end
+end, { nargs = 0 })
+
+-- the llm I used for the chat context is 'gemini-2.5-pro-preview-05-06'.
+-- the last question I asked in the chat is about:
+-- 'lua not having a switch statement'.
