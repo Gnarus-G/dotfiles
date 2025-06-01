@@ -36,7 +36,7 @@ cmp.setup({
     { -- Group 2 (Fallback)
       {
         name = "buffer",
-        option = { get_bufnrs = require "cmp_utils".get_visible_buffers }
+        option = { get_bufnrs = require "gnarus.utils".get_visible_buffers }
       },
       { name = "path" },
     }
