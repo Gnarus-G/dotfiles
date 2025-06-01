@@ -1,45 +1,83 @@
 {
   "mcpServers": {
     "kokoro-tts-mcp": {
-      "disabled": false,
       "args": [
         "-c",
         "uv --directory $HOME/.mcphub/servers/kokoro-tts-mcp run python mcp-tts.py"
       ],
+      "custom_instructions": {
+        "text": "Once you have the produced mp3 file's path, use the `execute_command` from the `neovim` server to run `ffplay` to play the audio."
+      },
+      "disabled": false,
       "env": {
-        "HOME": "",
+        "TTS_VOICE": "af_nicole",
         "MP3_FOLDER": "${HOME}/Music/kokoro-tts",
         "TTS_SPEED": "0.8",
         "MP3_RETENTION_DAYS": "7",
         "TTS_LANGUAGE": "en-us",
+        "DEBUG": "true",
         "S3_ENABLED": "false",
         "KOKORO_MODEL_PATH": "${HOME}/.mcphub/servers/kokoro-tts-mcp/kokoro-v1.0.onnx",
         "KOKORO_VOICES_PATH": "${HOME}/.mcphub/servers/kokoro-tts-mcp/voices-v1.0.bin",
-        "DEBUG": "true",
-        "TTS_VOICE": "af_nicole"
+        "HOME": ""
       },
       "command": "sh"
     },
     "web-browser-mcp-server": {
+      "args": [
+        "tool",
+        "run",
+        "web-browser-mcp-server"
+      ],
       "env": {
         "REQUEST_TIMEOUT": "30"
       },
-      "args": ["tool", "run", "web-browser-mcp-server"],
       "command": "uv"
     },
     "searxng": {
+      "args": [
+        "-y",
+        "mcp-searxng"
+      ],
       "disabled": false,
       "env": {
         "SEARXNG_URL": "https://metasearx.com/"
       },
-      "args": ["-y", "mcp-searxng"],
       "command": "npx"
     },
-    "github.com/github/github-mcp-server": {
+    "github.com/modelcontextprotocol/servers/tree/main/src/filesystem": {
+      "args": [
+        "-c",
+        "npx -y @modelcontextprotocol/server-filesystem $HOME/d/ $HOME/.local/share/nvim"
+      ],
+      "custom_instructions": {
+        "text": "If you failed to edit a file, re-read it first before attempting another edit."
+      },
       "disabled": false,
       "env": {
-        "GITHUB_PERSONAL_ACCESS_TOKEN": ""
+        "HOME": ""
       },
+      "command": "sh"
+    },
+    "git": {
+      "args": [
+        "mcp-server-git"
+      ],
+      "disabled": false,
+      "command": "uvx"
+    },
+    "github.com/zcaceres/fetch-mcp": {
+      "args": [
+        "-c",
+        "$HOME/.mcphub/servers/fetch-mcp/dist/index.js"
+      ],
+      "disabled": false,
+      "env": {
+        "HOME": ""
+      },
+      "command": "sh"
+    },
+    "github.com/github/github-mcp-server": {
       "args": [
         "run",
         "-i",
@@ -50,31 +88,11 @@
         "GITHUB_DYNAMIC_TOOLSETS=1",
         "ghcr.io/github/github-mcp-server"
       ],
-      "command": "docker"
-    },
-    "git": {
-      "disabled": false,
-      "args": ["mcp-server-git"],
-      "command": "uvx"
-    },
-    "github.com/zcaceres/fetch-mcp": {
-      "disabled": false,
-      "args": ["-c", "$HOME/.mcphub/servers/fetch-mcp/dist/index.js"],
-      "command": "sh",
-      "env": {
-        "HOME": ""
-      }
-    },
-    "github.com/modelcontextprotocol/servers/tree/main/src/filesystem": {
       "disabled": false,
       "env": {
-        "HOME": ""
+        "GITHUB_PERSONAL_ACCESS_TOKEN": ""
       },
-      "args": [
-        "-c",
-        "npx -y @modelcontextprotocol/server-filesystem $HOME/d/ $HOME/.local/share/nvim"
-      ],
-      "command": "sh"
+      "command": "docker"
     }
   },
   "nativeMCPServers": {
