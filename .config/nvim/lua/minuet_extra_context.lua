@@ -15,23 +15,23 @@ end
 function M.add_file(filepath)
   filepath = vim.fn.expand(filepath) -- ensuring expansion
   if vim.fn.filereadable(filepath) == 0 then
-    vim.notify("DynamicContext: File not readable: " .. filepath, vim.log.levels.WARN)
+    vim.notify("MinuetExtraFilesContext: File not readable: " .. filepath, vim.log.levels.WARN)
     return
   end
 
   if is_file_of_current_buffer(filepath) then
-    vim.notify("DynamicContext: Refusing to add current buffer to dynamic context.", vim.log.levels.INFO)
+    vim.notify("MinuetExtraFilesContext: Refusing to add current buffer to dynamic context.", vim.log.levels.INFO)
     return
   end
 
   for _, existing_path in ipairs(M.dynamic_files) do
     if existing_path == filepath then
-      vim.notify("DynamicContext: File already added: " .. filepath, vim.log.levels.INFO)
+      vim.notify("MinuetExtraFilesContext: File already added: " .. filepath, vim.log.levels.INFO)
       return
     end
   end
   table.insert(M.dynamic_files, filepath)
-  vim.notify("DynamicContext: Added file: " .. vim.fn.fnamemodify(filepath, ":~:."))
+  vim.notify("MinuetExtraFilesContext: Added file: " .. vim.fn.fnamemodify(filepath, ":~:."))
 end
 
 --- Removes a file from the dynamic context list
@@ -45,16 +45,16 @@ function M.remove_file(filepath)
   local removed = original_count > #M.dynamic_files
 
   if removed then
-    vim.notify("DynamicContext: Removed file: " .. vim.fn.fnamemodify(filepath, ":~:."))
+    vim.notify("MinuetExtraFilesContext: Removed file: " .. vim.fn.fnamemodify(filepath, ":~:."))
   else
-    vim.notify("DynamicContext: File not found in list: " .. vim.fn.fnamemodify(filepath, ":~:."),
+    vim.notify("MinuetExtraFilesContext: File not found in list: " .. vim.fn.fnamemodify(filepath, ":~:."),
       vim.log.levels.INFO)
   end
 end
 
 function M.clear()
   M.dynamic_files = {}
-  vim.notify("DynamicContext: Cleared all files.")
+  vim.notify("MinuetExtraFilesContext: Cleared all files.")
 end
 
 --- Adds a buffer to the dynamic context list
@@ -68,13 +68,13 @@ function M.add_buffer(buf_identifier)
   end
 
   if bufnr == -1 or not vim.api.nvim_buf_is_valid(bufnr) then
-    vim.notify("DynamicContext: Invalid buffer identifier: " .. tostring(buf_identifier), vim.log.levels.WARN)
+    vim.notify("MinuetExtraFilesContext: Invalid buffer identifier: " .. tostring(buf_identifier), vim.log.levels.WARN)
     return
   end
 
   local filepath = vim.api.nvim_buf_get_name(bufnr)
   if filepath == "" then
-    vim.notify("DynamicContext: Cannot add unnamed buffer " .. tostring(bufnr), vim.log.levels.WARN)
+    vim.notify("MinuetExtraFilesContext: Cannot add unnamed buffer " .. tostring(bufnr), vim.log.levels.WARN)
     return
   end
 
@@ -88,7 +88,7 @@ function M.get_formatted_context()
     local expanded_path = vim.fn.expand(filepath)
     local file = io.open(expanded_path, "r")
     if not file then
-      vim.notify("DynamicContext: Could not open " .. expanded_path, vim.log.levels.WARN)
+      vim.notify("MinuetExtraFilesContext: Could not open " .. expanded_path, vim.log.levels.WARN)
       return ""
     end
     local content = file:read("*a")
@@ -143,7 +143,7 @@ vim.api.nvim_create_user_command('MinuetRemoveFile', function(opts)
     M.remove_file(opts.fargs[1])
   else
     if #M.dynamic_files == 0 then
-      vim.notify("DynamicContext: No files in list to remove.", vim.log.levels.INFO)
+      vim.notify("MinuetExtraFilesContext: No files in list to remove.", vim.log.levels.INFO)
       return
     end
 
