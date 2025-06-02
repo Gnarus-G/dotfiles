@@ -126,6 +126,8 @@ return packer.startup(function(use)
 
   use 'HakonHarnes/img-clip.nvim'
 
+  use { "echasnovski/mini.diff", }
+
   use {
     "ravitemer/mcphub.nvim",
     --[[ run = "npm install -g mcp-hub@latest", ]]
@@ -145,6 +147,7 @@ return packer.startup(function(use)
       "ravitemer/codecompanion-history.nvim",
       "nvim-lua/plenary.nvim",
       "nvim-treesitter/nvim-treesitter",
+      "echasnovski/mini.diff"
     }
   }
 
