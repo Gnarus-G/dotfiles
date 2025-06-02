@@ -53,8 +53,8 @@ local config = {
     "fetch"
   },
   behaviour = {
-    auto_suggestions = false,           -- Experimental stage
-    enable_cursor_planning_mode = true, -- enable cursor planning mode!
+    auto_suggestions = false, -- Experimental stage
+    auto_apply_diff_after_generation = true,
   },
   rag_service = {
     enabled = true,                         -- Enables the RAG service
