@@ -21,6 +21,7 @@ end
 
 function M.clear()
   M.nofile_buffers = {}
+  vim.notify("Cleared all buffers", vim.log.levels.INFO)
 end
 
 function M.is_empty()
@@ -38,7 +39,6 @@ vim.api.nvim_create_autocmd({ "User" }, {
       CodeCompanionChatClosed = function() M.clear_for("codecompanion") end,
       CodeCompanionChatHidden = function() M.clear_for("codecompanion") end,
     }
-    vim.notify("Got CodeCompanionChat event: " .. event.match, vim.log.levels.INFO)
     if match_statement[event.match] then
       match_statement[event.match]()
     end
