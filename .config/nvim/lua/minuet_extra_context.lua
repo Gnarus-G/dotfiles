@@ -19,11 +19,6 @@ function M.add_file(filepath)
     return
   end
 
-  if is_file_of_current_buffer(filepath) then
-    vim.notify("MinuetExtraFilesContext: Refusing to add current buffer to dynamic context.", vim.log.levels.INFO)
-    return
-  end
-
   for _, existing_path in ipairs(M.dynamic_files) do
     if existing_path == filepath then
       vim.notify("MinuetExtraFilesContext: File already added: " .. filepath, vim.log.levels.INFO)
@@ -96,15 +91,28 @@ function M.get_formatted_context()
     return content or ""
   end
 
-  local combined_content = ""
-  for _, filepath in ipairs(M.dynamic_files) do
-    local file_content = read_file_content(filepath)
-    if file_content and file_content ~= "" then
-      combined_content = combined_content ..
-          "\n\n--- Content from file: " ..
-          vim.fn.fnamemodify(filepath, ":t") .. " ---\n" .. file_content .. "\n--- End of file content ---"
-    end
-  end
+  local combined_content = vim.iter(M.dynamic_files)
+      :filter(function(filepath)
+        return not is_file_of_current_buffer(filepath)
+      end)
+      :map(
+      ---@return string, string
+        function(filepath)
+          return read_file_content(filepath), filepath
+        end)
+      :filter(function(content, _)
+        return content ~= ""
+      end)
+      :map(function(content, filepath)
+        return "\n\n--- Content from file: " ..
+            vim.fn.fnamemodify(filepath, ":t") .. " ---\n" .. content .. "\n--- End of file content ---"
+      end)
+      :fold("", function(acc, val)
+        return acc .. val
+      end)
+
+  --[[ vim.notify("Commbined Content", vim.log.levels.DEBUG) ]]
+  --[[ vim.notify(combined_content, vim.log.levels.DEBUG) ]]
   return combined_content
 end
 
