@@ -1,83 +1,80 @@
 {
-  "nativeMCPServers": {
-    "neovim": {
-      "disabled": false,
-      "disabled_tools": [
-        "write_file",
-        "read_file",
-        "move_item",
-        "list_directory",
-        "replace_in_file"
-      ]
-    }
-  },
   "mcpServers": {
-    "github.com/modelcontextprotocol/servers/tree/main/src/filesystem": {
-      "env": {
-        "HOME": ""
-      },
-      "disabled": false,
-      "args": [
-        "-c",
-        "npx -y @modelcontextprotocol/server-filesystem $HOME/d/ $HOME/.config/nvim/ $HOME/.local/share/nvim/"
-      ],
-      "command": "sh",
-      "custom_instructions": {
-        "text": "**Important Notes**:\n- Always get the current working directory with the command `pwd`\n- Using the output of `pwd` as a base, only use absolute paths as in input to the `filesystem` tool\n- If you failed to edit a file, re-read it first before attempting another edit."
-      }
-    },
-    "web-browser-mcp-server": {
-      "args": ["tool", "run", "web-browser-mcp-server"],
-      "command": "uv",
-      "env": {
-        "REQUEST_TIMEOUT": "30"
-      }
-    },
-    "git": {
-      "disabled": false,
-      "args": ["mcp-server-git"],
-      "command": "uvx"
-    },
     "kokoro-tts-mcp": {
       "env": {
         "TTS_VOICE": "af_nicole",
-        "MP3_FOLDER": "${HOME}/Music/kokoro-tts",
         "DEBUG": "true",
+        "MP3_FOLDER": "${HOME}/Music/kokoro-tts",
+        "HOME": "",
         "TTS_SPEED": "0.8",
         "MP3_RETENTION_DAYS": "7",
         "TTS_LANGUAGE": "en-us",
         "S3_ENABLED": "false",
         "KOKORO_MODEL_PATH": "${HOME}/.mcphub/servers/kokoro-tts-mcp/kokoro-v1.0.onnx",
-        "KOKORO_VOICES_PATH": "${HOME}/.mcphub/servers/kokoro-tts-mcp/voices-v1.0.bin",
-        "HOME": ""
+        "KOKORO_VOICES_PATH": "${HOME}/.mcphub/servers/kokoro-tts-mcp/voices-v1.0.bin"
       },
-      "disabled": false,
       "args": [
         "-c",
         "uv --directory $HOME/.mcphub/servers/kokoro-tts-mcp run python mcp-tts.py"
       ],
-      "command": "sh",
       "custom_instructions": {
         "text": "Once you have the produced mp3 file's path, use the `execute_command` from the `neovim` server to run `ffplay` to play the audio."
-      }
-    },
-    "searxng": {
+      },
       "disabled": false,
-      "args": ["-y", "mcp-searxng"],
-      "command": "npx",
-      "env": {
-        "SEARXNG_URL": "https://metasearx.com/"
-      }
+      "command": "sh"
     },
-    "github.com/zcaceres/fetch-mcp": {
-      "disabled": false,
-      "args": ["-c", "$HOME/.mcphub/servers/fetch-mcp/dist/index.js"],
-      "command": "sh",
+    "github.com/modelcontextprotocol/servers/tree/main/src/filesystem": {
       "env": {
         "HOME": ""
-      }
+      },
+      "args": [
+        "-c",
+        "npx -y @modelcontextprotocol/server-filesystem $HOME/d/ $HOME/.config/nvim/ $HOME/.local/share/nvim/"
+      ],
+      "custom_instructions": {
+        "text": "**Important Notes**:\n- Always get the current working directory with the command `pwd`\n- Using the output of `pwd` as a base, only use absolute paths as in input to the `filesystem` tool\n- If you failed to edit a file, re-read it first before attempting another edit."
+      },
+      "disabled": false,
+      "command": "sh"
+    },
+    "searxng": {
+      "env": {
+        "SEARXNG_URL": "https://metasearx.com/"
+      },
+      "command": "npx",
+      "disabled": false,
+      "args": [
+        "-y",
+        "mcp-searxng"
+      ]
+    },
+    "github.com/zcaceres/fetch-mcp": {
+      "env": {
+        "HOME": ""
+      },
+      "command": "sh",
+      "disabled": false,
+      "args": [
+        "-c",
+        "$HOME/.mcphub/servers/fetch-mcp/dist/index.js"
+      ]
+    },
+    "web-browser-mcp-server": {
+      "command": "uv",
+      "env": {
+        "REQUEST_TIMEOUT": "30"
+      },
+      "args": [
+        "tool",
+        "run",
+        "web-browser-mcp-server"
+      ]
     },
     "github.com/github/github-mcp-server": {
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": ""
+      },
+      "command": "docker",
       "disabled": false,
       "args": [
         "run",
@@ -88,11 +85,31 @@
         "-e",
         "GITHUB_DYNAMIC_TOOLSETS=1",
         "ghcr.io/github/github-mcp-server"
-      ],
-      "command": "docker",
-      "env": {
-        "GITHUB_PERSONAL_ACCESS_TOKEN": ""
+      ]
+    },
+    "git": {
+      "command": "uvx",
+      "disabled": false,
+      "args": [
+        "mcp-server-git"
+      ]
+    }
+  },
+  "nativeMCPServers": {
+    "Plugins": {
+      "custom_instructions": {
+        "text": "When provided a plugin's source code location, always attempt to search and read through it before answering anything."
       }
+    },
+    "neovim": {
+      "disabled": false,
+      "disabled_tools": [
+        "write_file",
+        "read_file",
+        "move_item",
+        "list_directory",
+        "replace_in_file"
+      ]
     }
   }
 }
