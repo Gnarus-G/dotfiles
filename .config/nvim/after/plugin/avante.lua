@@ -2,7 +2,7 @@ local ollama_api_base = os.getenv("OLLAMA_API_BASE") or "http://localhost:11434"
 
 -- Determine provider and models based on GEMINI_API_KEY
 local provider_name = "gemini"
-local auto_suggestions_provider_name = "gemini_flash" -- Default suggestions provider
+local auto_suggestions_provider_name = "gemini" -- Default suggestions provider
 if os.getenv("GEMINI_API_KEY") == nil then
   provider_name = "ollama"
   auto_suggestions_provider_name = "ollama_suggestions" -- Use ollama provider for suggestions
@@ -17,26 +17,45 @@ local config = {
     debounce = 300,
     throttle = 300,
   },
-  claude = {
-    model = "claude-3-5-sonnet-20241022",
-    timeout = 30000, -- Timeout in milliseconds
-    temperature = 0,
-    max_tokens = 4096,
-  },
-  gemini = {
-    model = "gemini-2.5-pro-preview-05-06",
-    timeout = 30000,
-    temperature = 0,
-    max_tokens = 8192 * 3,
-  },
-  ollama = {
-    endpoint = ollama_api_base,
-    model = "qwen3",
-    temperature = 0,
-    timeout = 30000,              -- Timeout in milliseconds, increase this for reasoning models
-    max_completion_tokens = 8192, -- Increase this to include reasoning tokens (for reasoning models)
-    reasoning_effort = "medium",  -- low|medium|high, only used for reasoning models
-    num_ctx = 4096,               -- deepseek-coder-v2 is up to 163840
+  providers = {
+    claude = {
+      model = "claude-3-5-sonnet-20241022",
+      timeout = 30000, -- Timeout in milliseconds
+      extra_request_body = {
+        temperature = 0,
+        max_tokens = 4096,
+      }
+    },
+    gemini = {
+      model = 'gemini-2.5-flash-preview-05-20',
+      timeout = 30000,
+      extra_request_body = {
+        generationConfig = {
+          temperature = 0.75,
+        },
+      },
+    },
+    ollama = {
+      endpoint = ollama_api_base,
+      model = "qwen3",
+      timeout = 30000, -- Timeout in milliseconds, increase this for reasoning models
+      extra_request_body = {
+        options = {
+          max_completion_tokens = 8192, -- Increase this to include reasoning tokens (for reasoning models)
+          reasoning_effort = "medium",  -- low|medium|high, only used for reasoning models
+          num_ctx = 4096,               -- deepseek-coder-v2 is up to 163840
+          keep_alive = "10m",
+        },
+      },
+    },
+    gemini_next = {
+      __inherited_from = 'gemini',
+      model = 'gemini-2.5-pro-preview-05-06',
+    },
+    ollama_suggestions = {
+      __inherited_from = "ollama",
+      model = "qwen2.5-coder:3b"
+    }
   },
   disabled_tools = {
     "list_files",
@@ -69,16 +88,6 @@ local config = {
   },
   windows = {
     width = 40, -- Width as a percentage of screen width
-  },
-  vendors = {
-    gemini_flash = {
-      __inherited_from = 'gemini',
-      model = 'gemini-2.0-flash',
-    },
-    ollama_suggestions = {
-      __inherited_from = "ollama",
-      model = "qwen2.5-coder:3b"
-    }
   },
   mappings = {
     suggestion = {
