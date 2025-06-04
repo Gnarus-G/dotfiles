@@ -97,6 +97,44 @@ local config = {
       dismiss = "<C-]>",
     },
   },
+  ---@type AvanteSlashCommand[]
+  slash_commands = {
+    {
+      name        = "select_files",
+      description = "Select files",
+      details     =
+      'Select from under $HOME, under specific directories: "d", ".local", ".config", "bin", <...user-selected-ones>',
+      callback    = function(sidebar, args, cb)
+        local home = os.getenv("HOME") .. "/"
+        Snacks.picker.files({
+          prompt = "Select files to include in context",
+          hidden = true,
+          dirs = vim.iter(vim.tbl_extend("keep", { "d", ".local", ".config", "bin" }, args and vim.split(args, ",") or {}))
+              :filter(function(dir) return dir ~= nil end)
+              :map(function(dir) return home .. dir end)
+              :totable(),
+          confirm = function(picker)
+            picker:close()
+            local selected = picker:selected({ fallback = true }) or {}
+            local formatted_files = vim.iter(selected)
+                :map(function(item)
+                  return item.path or item.file or item.text
+                end)
+                :map(function(path)
+                  return string.format("- <file>%s</file>", path)
+                end)
+                :fold("*More Selected files:*", function(acc, f) return acc .. "\n" .. f end)
+
+            local value = formatted_files .. "\n" .. sidebar:get_input_value()
+            sidebar:set_input_value(value)
+            sidebar:focus_input()
+
+            if cb then cb(args) end
+          end,
+        })
+      end,
+    },
+  },
   -- The system_prompt type supports both a string and a function that returns a string. Using a function here allows dynamically updating the prompt with mcphub
   system_prompt = function()
     local hub = require("mcphub").get_hub_instance()
