@@ -74,7 +74,7 @@ function M.get_formatted_context(ft)
     return ""
   end
   local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
-  return "<" .. ft .. ">" .. table.concat(lines, "\n") .. "</" .. ft .. ">"
+  return "<chat_with:" .. ft .. ">" .. table.concat(lines, "\n") .. "</chat_with:" .. ft .. ">"
 end
 
 return M
