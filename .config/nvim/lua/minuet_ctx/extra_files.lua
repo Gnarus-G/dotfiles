@@ -1,14 +1,7 @@
 local M = {}
 
 ---@type string[]
-M.dynamic_files = {} -- A list of file paths
-
-local function is_file_of_current_buffer(filepath)
-  local current_buf_filepath = vim.api.nvim_buf_get_name(0)
-  local full_filepath = vim.fn.fnamemodify(filepath, ":p")
-  local full_current_buf_filepath = vim.fn.fnamemodify(current_buf_filepath, ":p")
-  return full_filepath == full_current_buf_filepath
-end
+M._dynamic_files = {} -- A list of file paths
 
 --- Adds a file to the dynamic context list
 --- @param filepath string The path to the file
@@ -19,13 +12,13 @@ function M.add_file(filepath)
     return
   end
 
-  for _, existing_path in ipairs(M.dynamic_files) do
+  for _, existing_path in ipairs(M._dynamic_files) do
     if existing_path == filepath then
       vim.notify("MinuetExtraFilesContext: File already added: " .. filepath, vim.log.levels.INFO)
       return
     end
   end
-  table.insert(M.dynamic_files, filepath)
+  table.insert(M._dynamic_files, filepath)
   vim.notify("MinuetExtraFilesContext: Added file: " .. vim.fn.fnamemodify(filepath, ":~:."))
 end
 
@@ -33,11 +26,11 @@ end
 --- @param filepath string The path to the file
 function M.remove_file(filepath)
   filepath = vim.fn.expand(filepath) -- Ensure filepath is expanded
-  local original_count = #M.dynamic_files
-  M.dynamic_files = vim.iter(M.dynamic_files):filter(function(path)
+  local original_count = #M._dynamic_files
+  M._dynamic_files = vim.iter(M._dynamic_files):filter(function(path)
     return path ~= filepath --
   end):totable()
-  local removed = original_count > #M.dynamic_files
+  local removed = original_count > #M._dynamic_files
 
   if removed then
     vim.notify("MinuetExtraFilesContext: Removed file: " .. vim.fn.fnamemodify(filepath, ":~:."))
@@ -48,7 +41,7 @@ function M.remove_file(filepath)
 end
 
 function M.clear()
-  M.dynamic_files = {}
+  M._dynamic_files = {}
   vim.notify("MinuetExtraFilesContext: Cleared all files.")
 end
 
@@ -74,46 +67,6 @@ function M.add_buffer(buf_identifier)
   end
 
   M.add_file(filepath)
-end
-
---- Gets all current dynamic context as a formatted string
-function M.get_formatted_context()
-  -- Helper function to read a file's content
-  local function read_file_content(filepath)
-    local expanded_path = vim.fn.expand(filepath)
-    local file = io.open(expanded_path, "r")
-    if not file then
-      vim.notify("MinuetExtraFilesContext: Could not open " .. expanded_path, vim.log.levels.WARN)
-      return ""
-    end
-    local content = file:read("*a")
-    file:close()
-    return content or ""
-  end
-
-  local combined_content = vim.iter(M.dynamic_files)
-      :filter(function(filepath)
-        return not is_file_of_current_buffer(filepath)
-      end)
-      :map(
-      ---@return string, string
-        function(filepath)
-          return read_file_content(filepath), filepath
-        end)
-      :filter(function(content, _)
-        return content ~= ""
-      end)
-      :map(function(content, filepath)
-        return "\n\n--- Content from file: " ..
-            vim.fn.fnamemodify(filepath, ":t") .. " ---\n" .. content .. "\n--- End of file content ---"
-      end)
-      :fold("", function(acc, val)
-        return acc .. val
-      end)
-
-  --[[ vim.notify("Commbined Content", vim.log.levels.DEBUG) ]]
-  --[[ vim.notify(combined_content, vim.log.levels.DEBUG) ]]
-  return combined_content
 end
 
 -- Commands for Minuet Dynamic Context
@@ -150,13 +103,13 @@ vim.api.nvim_create_user_command('MinuetRemoveFile', function(opts)
   if opts.fargs[1] then
     M.remove_file(opts.fargs[1])
   else
-    if #M.dynamic_files == 0 then
+    if #M._dynamic_files == 0 then
       vim.notify("MinuetExtraFilesContext: No files in list to remove.", vim.log.levels.INFO)
       return
     end
 
     local picker_items = {}
-    for _, full_path in ipairs(M.dynamic_files) do
+    for _, full_path in ipairs(M._dynamic_files) do
       table.insert(picker_items, {
         value = full_path,
         formatted = vim.fn.fnamemodify(full_path, ":t") .. " (" .. vim.fn.fnamemodify(full_path, ":~:.") .. ")"
@@ -177,5 +130,9 @@ vim.api.nvim_create_user_command('MinuetRemoveFile', function(opts)
   end
 end, { nargs = "?", complete = 'file' })
 
+
+function M.files()
+  return vim.deepcopy(M._dynamic_files)
+end
 
 return M
