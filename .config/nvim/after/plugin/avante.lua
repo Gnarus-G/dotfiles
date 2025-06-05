@@ -100,7 +100,7 @@ local config = {
   ---@type AvanteSlashCommand[]
   slash_commands = {
     {
-      name        = "select_files",
+      name        = "files",
       description = "Select files",
       details     =
       'Select from under $HOME, under specific directories: "d", ".local", ".config", "bin", <...user-selected-ones>',
@@ -116,18 +116,23 @@ local config = {
           confirm = function(picker)
             picker:close()
             local selected = picker:selected({ fallback = true }) or {}
-            local formatted_files = vim.iter(selected)
+            selected = vim.iter(selected)
                 :map(function(item)
                   return item.path or item.file or item.text
-                end)
-                :map(function(path)
-                  return string.format("- <file>%s</file>", path)
-                end)
-                :fold("*More Selected files:*", function(acc, f) return acc .. "\n" .. f end)
+                end):totable()
 
-            local value = formatted_files .. "\n" .. sidebar:get_input_value()
-            sidebar:set_input_value(value)
-            sidebar:focus_input()
+            local Utils = require("avante.utils")
+
+            local file_selector = sidebar.file_selector;
+            for _, file in ipairs(selected) do
+              local project_root = Utils.get_project_root()
+              local rel_path = Utils.make_relative_path(file, project_root)
+              if not vim.tbl_contains(file_selector.selected_filepaths, rel_path) then
+                table.insert(file_selector.selected_filepaths,
+                  rel_path)
+              end
+            end
+            file_selector:emit("update")
 
             if cb then cb(args) end
           end,
