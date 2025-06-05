@@ -112,5 +112,8 @@ end, { nargs = 0 })
 harpoon_ctx.sync()
 
 return {
+  files = function()
+    return vim.tbl_extend("force", extra_files.files(), harpoon_ctx.files())
+  end,
   get_formatted_context = get_formatted_context
 }
