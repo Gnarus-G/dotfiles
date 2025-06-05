@@ -78,10 +78,13 @@ vim.api.nvim_create_user_command('MinuetAddFile', function()
   Snacks.picker.files({
     cwd = home,
     hidden = true,
-    confirm = function(picker, item)
+    confirm = function(picker, _)
       picker:close()
-      local filepath = item.cwd .. "/" .. item.file
-      M.add_file(filepath)
+      local selected = picker:selected({ fallback = true })
+      for _, item in ipairs(selected) do
+        local filepath = item.cwd .. "/" .. item.file
+        M.add_file(filepath)
+      end
     end,
   })
 end, { nargs = 0 })
@@ -91,9 +94,14 @@ vim.api.nvim_create_user_command('MinuetAddBuffer', function(opts)
     M.add_buffer(opts.fargs[1])
   else
     Snacks.picker.buffers({
-      confirm = function(picker, item)
+      confirm = function(picker, _)
         picker:close()
-        M.add_file(item.file)
+        local selected = picker:selected({ fallback = true })
+        for _, item in ipairs(selected) do
+          if item.file then
+            M.add_file(item.file)
+          end
+        end
       end,
     })
   end
