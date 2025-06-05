@@ -2,7 +2,7 @@ local Utils = require("avante.utils")
 local ollama_api_base = os.getenv("OLLAMA_API_BASE") or "http://localhost:11434"
 
 -- Determine provider and models based on GEMINI_API_KEY
-local provider_name = "gemini"
+local provider_name = "gemini_next"
 local auto_suggestions_provider_name = "gemini" -- Default suggestions provider
 if os.getenv("GEMINI_API_KEY") == nil then
   provider_name = "ollama"
@@ -58,6 +58,7 @@ local config = {
       model = "qwen2.5-coder:3b"
     }
   },
+  mode = "legacy",
   disabled_tools = {
     "list_files",
     "search_files",
@@ -108,7 +109,7 @@ local config = {
       callback    = function(sidebar, args, cb)
         local home = os.getenv("HOME") .. "/"
         Snacks.picker.files({
-          prompt = "Select files to include in context",
+          prompt = "Select files:",
           hidden = true,
           dirs = vim.iter(vim.tbl_extend("keep", { "d", ".local", ".config", "bin" }, args and vim.split(args, ",") or {}))
               :filter(function(dir) return dir ~= nil end)

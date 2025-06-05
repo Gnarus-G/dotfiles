@@ -56,6 +56,52 @@ local opts = {
         end,
       },
       slash_commands = {
+        ["files"] = {
+          description =
+          'Select from under $HOME, under specific directories: "d", ".local", ".config", "bin"',
+          ---@param chat CodeCompanion.Chat
+          callback = function(chat)
+            local home = os.getenv("HOME") .. "/"
+            Snacks.picker.files({
+              prompt = "Select files:",
+              hidden = true,
+              dirs = vim.iter({ "d", ".local", ".config", "bin" })
+                  :filter(function(dir) return dir ~= nil end)
+                  :map(function(dir) return home .. dir end)
+                  :totable(),
+              confirm = function(picker)
+                picker:close()
+                local selected = picker:selected({ fallback = true }) or {}
+                vim.iter(selected)
+                    :map(function(item)
+                      return item.path or item.file or item.text
+                    end)
+                    :each(function(file)
+                      chat:add_reference({ role = "user", content = vim.fn.readfile(file) }, file,
+                        "<file>" .. file .. "</file>")
+                    end)
+              end,
+            })
+          end,
+          opts = {
+            contains_code = false,
+          },
+        },
+        ["minuet_selected_files"] = {
+          name = "minuet_selected_files",
+          description = "Load in minuet extra files",
+          details = "Load files from minuet_ctx into the selected files",
+          callback = function(chat)
+            local minuet_ctx = require("minuet_ctx")
+            for _, file_path in ipairs(minuet_ctx.files()) do
+              chat:add_reference({ role = "user", content = vim.fn.readfile(file_path) }, file_path,
+                "<file>" .. file_path .. "</file>")
+            end
+          end,
+          opts = {
+            contains_code = false,
+          },
+        },
         ["git_files"] = {
           description = "List git files",
           ---@param chat CodeCompanion.Chat
