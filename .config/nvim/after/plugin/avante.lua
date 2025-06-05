@@ -1,3 +1,4 @@
+local Utils = require("avante.utils")
 local ollama_api_base = os.getenv("OLLAMA_API_BASE") or "http://localhost:11434"
 
 -- Determine provider and models based on GEMINI_API_KEY
@@ -121,8 +122,6 @@ local config = {
                   return item.path or item.file or item.text
                 end):totable()
 
-            local Utils = require("avante.utils")
-
             local file_selector = sidebar.file_selector;
             for _, file in ipairs(selected) do
               local project_root = Utils.get_project_root()
@@ -139,6 +138,25 @@ local config = {
         })
       end,
     },
+    {
+      name = "minuet_selected_files",
+      description = "Load in minuet extra files",
+      details = "Load files from minuet_ctx into the selected files",
+      callback = function(sidebar, args, cb)
+        local minuet_ctx = require("minuet_ctx")
+        local file_selector = sidebar.file_selector
+
+        for _, file_path in ipairs(minuet_ctx.files()) do
+          local project_root = Utils.get_project_root()
+          local rel_path = Utils.make_relative_path(file_path, project_root)
+          if not vim.tbl_contains(file_selector.selected_filepaths, rel_path) then
+            table.insert(file_selector.selected_filepaths, rel_path)
+          end
+          file_selector:emit("update")
+        end
+        if cb then cb(args) end
+      end,
+    }
   },
   -- The system_prompt type supports both a string and a function that returns a string. Using a function here allows dynamically updating the prompt with mcphub
   system_prompt = function()
