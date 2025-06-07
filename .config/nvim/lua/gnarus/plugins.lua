@@ -164,7 +164,8 @@ return packer.startup(function(use)
       "ravitemer/mcphub.nvim",
       'nvim-lua/plenary.nvim',
       'MunifTanjim/nui.nvim',
-      'MeanderingProgrammer/render-markdown.nvim'
+      'MeanderingProgrammer/render-markdown.nvim',
+      'folke/snacks.nvim'
     }
   }
 
