@@ -20,7 +20,6 @@ local config = {
   },
   providers = {
     claude = {
-      model = "claude-3-5-sonnet-20241022",
       timeout = 30000, -- Timeout in milliseconds
       extra_request_body = {
         temperature = 0,
@@ -30,6 +29,7 @@ local config = {
     gemini = {
       model = 'gemini-2.5-flash-preview-05-20',
       timeout = 30000,
+      use_ReAct_prompt = false,
       extra_request_body = {
         generationConfig = {
           temperature = 0.75,
@@ -98,6 +98,10 @@ local config = {
       prev = "<M-[>",
       dismiss = "<C-]>",
     },
+  },
+  input = {
+    provider = "snacks",
+    provider_opts = {},
   },
   ---@type AvanteSlashCommand[]
   slash_commands = {
