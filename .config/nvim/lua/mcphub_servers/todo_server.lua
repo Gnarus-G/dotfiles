@@ -88,13 +88,13 @@ local function get_todos_from_todo_as_markdown_list()
     local todo_id = todo.id or tostring(i) -- Fallback to index if id is missing
     local title = todo.message or todo.title or "No Title"
     local description = todo.description or todo.desc or ""
-    local status = todo.status or "N/A"
-    local reminder_date = todo.due_date or todo.reminder_date or "Not set"
+    local is_done = todo.done or "false"
+    local created_at = todo.created_at
 
     markdown = markdown .. string.format("### Task %d (ID: %s): %s\n", i, todo_id, title)
     markdown = markdown .. string.format("- Description: %s\n", description)
-    markdown = markdown .. string.format("- Status: %s\n", status)
-    markdown = markdown .. string.format("- Reminder Date: %s\n", reminder_date)
+    markdown = markdown .. string.format("- Done: %s\n", is_done)
+    markdown = markdown .. string.format("- Created At: %s\n", created_at)
     markdown = markdown .. "\n"
   end
 
