@@ -1,3 +1,4 @@
+-- Your instructions here
 local ollama_adapter_opts = {
   env = {
     url = os.getenv("OLLAMA_API_BASE") or "http://localhost:11434"
@@ -56,6 +57,30 @@ local opts = {
         end,
       },
       slash_commands = {
+        ["dir"] = {
+          description = "Select files from your home and add them as references to the current chat",
+          ---@param chat CodeCompanion.Chat
+          callback = function(chat)
+            local home = vim.loop.os_homedir()
+            local dirs_therein = vim.fn.systemlist("find " .. home .. " -maxdepth 2 -type d")
+
+            vim.ui.select(dirs_therein, {
+                prompt = "Select"
+              },
+              function(dir)
+                local files_in_dir = vim.fn.systemlist("find " .. dir .. " -maxdepth 1 -type f")
+                vim.iter(files_in_dir)
+                    :each(function(file)
+                      local content_as_string = io.open(file, "r"):read("*a")
+                      chat:add_reference({ role = "user", content = content_as_string }, file,
+                        "<file>" .. file .. "</file>")
+                    end)
+              end)
+          end,
+          opts = {
+            contains_code = false,
+          },
+        },
         ["files"] = {
           description =
           'Select from under $HOME, under specific directories: "d", ".local", ".config", "bin"',
@@ -77,7 +102,8 @@ local opts = {
                       return item.path or item.file or item.text
                     end)
                     :each(function(file)
-                      chat:add_reference({ role = "user", content = vim.fn.readfile(file) }, file,
+                      local content_as_string = io.open(file, "r"):read("*a")
+                      chat:add_reference({ role = "user", content = content_as_string }, file,
                         "<file>" .. file .. "</file>")
                     end)
               end,
@@ -88,13 +114,12 @@ local opts = {
           },
         },
         ["minuet_selected_files"] = {
-          name = "minuet_selected_files",
           description = "Load in minuet extra files",
-          details = "Load files from minuet_ctx into the selected files",
           callback = function(chat)
             local minuet_ctx = require("minuet_ctx")
             for _, file_path in ipairs(minuet_ctx.files()) do
-              chat:add_reference({ role = "user", content = vim.fn.readfile(file_path) }, file_path,
+              local content = io.open(file_path, "r"):read("*a")
+              chat:add_reference({ role = "user", content = content }, file_path,
                 "<file>" .. file_path .. "</file>")
             end
           end,
@@ -226,5 +251,9 @@ local opts = {
 }
 
 require("codecompanion").setup(opts)
+
+vim.keymap.set("n", "<leader>cc", "<cmd>CodeCompanionChat<cr>", { desc = "CodeCompanion Chat" })
+vim.keymap.set("n", "<leader>cp", "<cmd>CodeCompanionActions<cr>", { desc = "CodeCompanion Actions" })
+vim.keymap.set("n", "<leader>cs", "<cmd>CodeCompanion<cr>", { desc = "CodeCompanion Inline" })
 
 vim.g.codecompanion_auto_tool_mode = true
