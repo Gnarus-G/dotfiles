@@ -10,7 +10,8 @@ local opts = {
     "--no-auto-commits",
     "--pretty",
     "--stream",
-    "--watch"
+    "--watch",
+    "--yes-always"
   },
   -- Automatically reload buffers changed by Aider (requires vim.o.autoread = true)
   auto_reload = false,
