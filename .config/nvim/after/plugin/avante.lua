@@ -65,7 +65,7 @@ local config = {
     "read_file",
     "create_file",
     "rename_file",
-    --[[ "replace_in_file", ]]
+    "replace_in_file",
     "delete_file",
     "create_dir",
     "rename_dir",
