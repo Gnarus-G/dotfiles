@@ -155,6 +155,8 @@ return packer.startup(function(use)
     }
   }
 
+  use 'GeorgesAlkhouri/nvim-aider'
+
   use {
     'yetone/avante.nvim',
     branch = 'main',
