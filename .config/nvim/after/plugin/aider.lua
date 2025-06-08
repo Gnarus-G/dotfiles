@@ -6,9 +6,11 @@ local opts = {
   aider_cmd = "aider",
   -- Command line arguments passed to aider
   args = {
+    "--model gemini",
     "--no-auto-commits",
     "--pretty",
     "--stream",
+    "--watch"
   },
   -- Automatically reload buffers changed by Aider (requires vim.o.autoread = true)
   auto_reload = false,
