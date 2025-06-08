@@ -62,7 +62,7 @@ local opts = {
           ---@param chat CodeCompanion.Chat
           callback = function(chat)
             local home = vim.loop.os_homedir()
-            local dirs_therein = vim.fn.systemlist("find " .. home .. " -maxdepth 2 -type d")
+            local dirs_therein = vim.fn.systemlist("find " .. home .. " -maxdepth 5 -type d")
 
             vim.ui.select(dirs_therein, {
                 prompt = "Select"
