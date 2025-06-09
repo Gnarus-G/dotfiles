@@ -253,7 +253,7 @@ local opts = {
 require("codecompanion").setup(opts)
 
 vim.keymap.set("n", "<leader>cc", "<cmd>CodeCompanionChat<cr>", { desc = "CodeCompanion Chat" })
+vim.keymap.set({ "n", "v" }, "<leader>cs", "<cmd>CodeCompanion<cr>", { desc = "CodeCompanion Inline" })
 vim.keymap.set("n", "<leader>cp", "<cmd>CodeCompanionActions<cr>", { desc = "CodeCompanion Actions" })
-vim.keymap.set("n", "<leader>cs", "<cmd>CodeCompanion<cr>", { desc = "CodeCompanion Inline" })
 
 vim.g.codecompanion_auto_tool_mode = true
