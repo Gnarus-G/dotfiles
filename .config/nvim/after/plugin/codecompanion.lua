@@ -212,9 +212,10 @@ local opts = {
     log_level = "ERROR", -- TRACE|DEBUG|ERROR|INFO
   },
   adapters = {
-    claude_haiku = adapter_and_default_model("anthropic", "claude-3-5-haiku-20241022"),
-    gemini = adapter_and_default_model("gemini", "gemini-2.5-pro-preview-05-06"),
+    gemini = adapter_and_default_model("gemini", "gemini-2.5-pro-preview-06-05"),
+    gemini_flash_next = adapter_and_default_model("gemini", "gemini-2.5-flash-preview-05-20"),
     gemini_flash = adapter_and_default_model("gemini", "gemini-2.0-flash"),
+    claude_haiku = adapter_and_default_model("anthropic", "claude-3-5-haiku-20241022"),
     ollama = adapter_and_default_model("ollama", "qwen3", ollama_adapter_opts),
   },
   extensions = {
@@ -252,7 +253,27 @@ local opts = {
 
 require("codecompanion").setup(opts)
 
-vim.keymap.set("n", "<leader>cc", "<cmd>CodeCompanionChat<cr>", { desc = "CodeCompanion Chat" })
+vim.keymap.set("n", "<leader>cc", function()
+  local models = vim.iter(pairs(opts.adapters)):map(
+        function(key, value)
+          return {
+            name = key,
+            model = value.schema.model.default
+          }
+        end)
+      :totable()
+
+  vim.ui.select(models, {
+    prompt = "Select an adapter:",
+    format_item = function(item) return item.name .. " (" .. item.model .. ")" end,
+  }, function(item)
+    if item then
+      return vim.cmd(":CodeCompanionChat " .. item.name .. " <cr>")
+    end
+    vim.notify("No adapter selected", vim.log.levels.WARN)
+  end)
+end, { desc = "CodeCompanion Chat" })
+
 vim.keymap.set({ "n", "v" }, "<leader>cs", "<cmd>CodeCompanion<cr>", { desc = "CodeCompanion Inline" })
 vim.keymap.set("n", "<leader>cp", "<cmd>CodeCompanionActions<cr>", { desc = "CodeCompanion Actions" })
 
