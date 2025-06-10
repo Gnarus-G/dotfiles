@@ -139,21 +139,6 @@ vim.lsp.config("denols", {
   root_markers = { 'deno.json', 'deno.jsonc', }
 })
 
-vim.lsp.config("tailwindcss", {
-  settings = {
-    tailwindCSS = {
-      experimental = {
-        classRegex = {
-          { "cva\\(([^)]*)\\)",       "[\"'`]([^\"'`]*).*?[\"'`]" },
-          { "cx\\(([^)]*)\\)",        "(?:'|\"|`)([^']*)(?:'|\"|`)" },
-          { "classes=\\{([^}]*)\\}",  "[\"'`]([^\"'`]*).*?[\"'`]" },
-          { "className\\: '([^']*)'", } -- https://github.com/tailwindlabs/tailwindcss/issues/7553
-        },
-      },
-    },
-  }
-})
-
 vim.diagnostic.config({
   virtual_text = true,
 })

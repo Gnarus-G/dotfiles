@@ -1,3 +1,5 @@
+local lsp_capabilities = require('cmp_nvim_lsp').default_capabilities()
+
 require("tailwind-tools").setup(
   {
     document_color = {
@@ -13,4 +15,34 @@ require("tailwind-tools").setup(
         fg = "#38BDF8",
       },
     },
+    server = {
+      override = true,
+      capabilities = lsp_capabilities,
+      settings = {
+        classAttributes = { "class", "className", "ngClass", "class:list", "classes" },
+        classFunctions = { "cva", "cx" },
+        experimental = {
+          classRegex = {
+            --[[ { "cva\\(([^)]*)\\)",       "[\"'`]([^\"'`]*).*?[\"'`]" }, ]]
+            --[[ { "cx\\(([^)]*)\\)",        "(?:'|\"|`)([^']*)(?:'|\"|`)" }, ]]
+            --[[ { "classes=\\{([^}]*)\\}",  "[\"'`]([^\"'`]*).*?[\"'`]" }, ]]
+            { "className\\: '([^']*)'", } -- https://github.com/tailwindlabs/tailwindcss/issues/7553
+          },
+        },
+      }
+    },
+    cmp = {
+      highlight = "foreground",
+    },
+    telescope = {
+      utilities = {
+        callback = function(_name, _css) end,
+      },
+    },
+    extension = {
+      queries = {},
+      patterns = {},
+    },
+    keymaps = {},
+
   })
