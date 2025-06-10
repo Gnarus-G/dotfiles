@@ -55,6 +55,7 @@ return packer.startup(function(use)
     'saadparwaiz1/cmp_luasnip',
     'hrsh7th/cmp-nvim-lsp',
     'hrsh7th/cmp-nvim-lua',
+    "onsails/lspkind-nvim",
 
     -- Snippets
     'L3MON4D3/LuaSnip',
@@ -107,8 +108,11 @@ return packer.startup(function(use)
 
   use {
     "luckasRanarison/tailwind-tools.nvim",
+    run = ":UpdateRemotePlugins",
     requires = {
-      { "onsails/lspkind-nvim" }
+      {
+        "nvim-treesitter/nvim-treesitter",
+      }
     }
   }
 
