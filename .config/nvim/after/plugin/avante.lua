@@ -2,8 +2,8 @@ local Utils = require("avante.utils")
 local ollama_api_base = os.getenv("OLLAMA_API_BASE") or "http://localhost:11434"
 
 -- Determine provider and models based on GEMINI_API_KEY
-local provider_name = "gemini_next"
-local auto_suggestions_provider_name = "gemini" -- Default suggestions provider
+local provider_name = "gemini"
+local auto_suggestions_provider_name = "gemini_fast" -- Default suggestions provider
 if os.getenv("GEMINI_API_KEY") == nil then
   provider_name = "ollama"
   auto_suggestions_provider_name = "ollama_suggestions" -- Use ollama provider for suggestions
@@ -52,6 +52,10 @@ local config = {
     gemini_next = {
       __inherited_from = 'gemini',
       model = 'gemini-2.5-pro-preview-06-05',
+    },
+    gemini_fast = {
+      __inherited_from = 'gemini',
+      model = 'gemini-2.0-flash',
     },
     ollama_suggestions = {
       __inherited_from = "ollama",
