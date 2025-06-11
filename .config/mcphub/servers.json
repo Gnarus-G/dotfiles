@@ -1,63 +1,32 @@
 {
+  "nativeMCPServers": {
+    "Plugins": {
+      "custom_instructions": {
+        "text": "When provided a plugin's source code location, always attempt to search and read through it before answering anything."
+      }
+    },
+    "neovim": {
+      "disabled_tools": [],
+      "custom_instructions": {
+        "text": "**Important Notes**:\n- Always get the current working directory with the command `pwd` before try to access files.\n- Using the output of `pwd` as a base, only use absolute paths as in input to the mcp server.\n- If `replace_in_file` fails, then use `read_file` and then `edit_file` tool from the mcp server.\n - If that still fails, re-read it first before next attempting a `write_file`."
+      },
+      "disabled": false
+    }
+  },
   "mcpServers": {
-    "kokoro-tts-mcp": {
-      "env": {
-        "MP3_FOLDER": "${HOME}/Music/kokoro-tts",
-        "TTS_SPEED": "0.8",
-        "MP3_RETENTION_DAYS": "7",
-        "TTS_LANGUAGE": "en-us",
-        "S3_ENABLED": "false",
-        "KOKORO_MODEL_PATH": "${HOME}/.mcphub/servers/kokoro-tts-mcp/kokoro-v1.0.onnx",
-        "KOKORO_VOICES_PATH": "${HOME}/.mcphub/servers/kokoro-tts-mcp/voices-v1.0.bin",
-        "TTS_VOICE": "af_nicole",
-        "DEBUG": "true",
-        "HOME": ""
-      },
-      "args": [
-        "-c",
-        "uv --directory $HOME/.mcphub/servers/kokoro-tts-mcp run python mcp-tts.py"
-      ],
-      "disabled": false,
+    "github.com/zcaceres/fetch-mcp": {
       "command": "sh",
-      "custom_instructions": {
-        "text": "Once you have the produced mp3 file's path, use the `execute_command` from the `neovim` server to run `ffplay` to play the audio."
-      }
-    },
-    "searxng": {
-      "disabled": false,
-      "command": "npx",
-      "args": [
-        "-y",
-        "mcp-searxng"
-      ],
-      "env": {
-        "SEARXNG_URL": "https://metasearx.com/"
-      }
-    },
-    "github.com/modelcontextprotocol/servers/tree/main/src/filesystem": {
       "env": {
         "HOME": ""
       },
-      "args": [
-        "-c",
-        "npx -y @modelcontextprotocol/server-filesystem $HOME/d/ $HOME/.config/nvim/ $HOME/.local/share/nvim/"
-      ],
-      "disabled": true,
-      "command": "sh",
-      "custom_instructions": {
-        "text": "**Important Notes**:\n- Always get the current working directory with the command `pwd` before try to access files\n- Using the output of `pwd` as a base, only use absolute paths as in input to the `filesystem` tool\n- If `replace_in_file` fails, then use `read_file` and then `edit_file` tool from the `filesystem` mcp server\n - If that still fails, re-read it first before next attempting a `write_file`."
-      }
-    },
-    "git": {
-      "disabled": false,
-      "command": "uvx",
-      "args": [
-        "mcp-server-git"
-      ]
+      "args": ["-c", "${HOME}/.mcphub/servers/fetch-mcp/dist/index.js"],
+      "disabled": false
     },
     "github.com/github/github-mcp-server": {
-      "disabled": false,
       "command": "docker",
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": ""
+      },
       "args": [
         "run",
         "-i",
@@ -68,46 +37,63 @@
         "GITHUB_DYNAMIC_TOOLSETS=1",
         "ghcr.io/github/github-mcp-server"
       ],
+      "disabled": false
+    },
+    "git": {
+      "command": "uvx",
+      "args": ["mcp-server-git"],
+      "disabled": false
+    },
+    "searxng": {
+      "command": "npx",
       "env": {
-        "GITHUB_PERSONAL_ACCESS_TOKEN": ""
+        "SEARXNG_URL": "https://metasearx.com/"
+      },
+      "args": ["-y", "mcp-searxng"],
+      "disabled": false
+    },
+    "github.com/modelcontextprotocol/servers/tree/main/src/filesystem": {
+      "command": "sh",
+      "env": {
+        "HOME": ""
+      },
+      "disabled": false,
+      "args": [
+        "-c",
+        "npx -y @modelcontextprotocol/server-filesystem $HOME/d/ $HOME/.config/nvim/ $HOME/.local/share/nvim/"
+      ],
+      "custom_instructions": {
+        "text": "**Important Notes**:\n- Always get the current working directory with the command `pwd` before try to access files\n- Using the output of `pwd` as a base, only use absolute paths as in input to the `filesystem` tool\n- If `replace_in_file` fails, then use `read_file` and then `edit_file` tool from the `filesystem` mcp server\n - If that still fails, re-read it first before next attempting a `write_file`."
+      }
+    },
+    "kokoro-tts-mcp": {
+      "command": "sh",
+      "env": {
+        "S3_ENABLED": "false",
+        "KOKORO_MODEL_PATH": "${HOME}/.mcphub/servers/kokoro-tts-mcp/kokoro-v1.0.onnx",
+        "KOKORO_VOICES_PATH": "${HOME}/.mcphub/servers/kokoro-tts-mcp/voices-v1.0.bin",
+        "TTS_VOICE": "af_nicole",
+        "DEBUG": "true",
+        "MP3_FOLDER": "${HOME}/Music/kokoro-tts",
+        "HOME": "",
+        "TTS_SPEED": "0.8",
+        "MP3_RETENTION_DAYS": "7",
+        "TTS_LANGUAGE": "en-us"
+      },
+      "disabled": false,
+      "args": [
+        "-c",
+        "uv --directory $HOME/.mcphub/servers/kokoro-tts-mcp run python mcp-tts.py"
+      ],
+      "custom_instructions": {
+        "text": "Once you have the produced mp3 file's path, use the `execute_command` from the `neovim` server to run `ffplay` to play the audio."
       }
     },
     "web-browser-mcp-server": {
       "command": "uv",
-      "args": [
-        "tool",
-        "run",
-        "web-browser-mcp-server"
-      ],
+      "args": ["tool", "run", "web-browser-mcp-server"],
       "env": {
         "REQUEST_TIMEOUT": "30"
-      }
-    },
-    "github.com/zcaceres/fetch-mcp": {
-      "disabled": false,
-      "command": "sh",
-      "args": [
-        "-c",
-        "$HOME/.mcphub/servers/fetch-mcp/dist/index.js"
-      ],
-      "env": {
-        "HOME": ""
-      }
-    }
-  },
-  "nativeMCPServers": {
-    "neovim": {
-      "disabled": false,
-      "custom_instructions": {
-        "text": "**Important Notes**:\n- Always get the current working directory with the command `pwd` before try to access files.\n- Using the output of `pwd` as a base, only use absolute paths as in input to the mcp server.\n- If `replace_in_file` fails, then use `read_file` and then `edit_file` tool from the mcp server.\n - If that still fails, re-read it first before next attempting a `write_file`."
-      },
-      "disabled_tools": [
-        
-      ]
-    },
-    "Plugins": {
-      "custom_instructions": {
-        "text": "When provided a plugin's source code location, always attempt to search and read through it before answering anything."
       }
     }
   }
