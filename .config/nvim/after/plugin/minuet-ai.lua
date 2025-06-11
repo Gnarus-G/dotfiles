@@ -65,16 +65,17 @@ local setup_opts = {
         -- Function for the new placeholder
         extra_context = extra_context.get_formatted_context
       },
-      model = 'gemini-2.5-flash-preview-05-20',
-      optional = {
-        generationConfig = {
-          -- When using `gemini-2.5-flash`, it is recommended to entirely
-          -- disable thinking for faster completion retrieval.
-          thinkingConfig = {
-            thinkingBudget = 0,
-          },
-        },
-      },
+      model = 'gemini-2.0-flash',
+      --[[ model = 'gemini-2.5-flash-preview-05-20', ]]
+      --[[ optional = { ]]
+      --[[   generationConfig = { ]]
+      --[[     -- When using `gemini-2.5-flash`, it is recommended to entirely ]]
+      --[[     -- disable thinking for faster completion retrieval. ]]
+      --[[     thinkingConfig = { ]]
+      --[[       thinkingBudget = 0, ]]
+      --[[     }, ]]
+      --[[   }, ]]
+      --[[ }, ]]
     },
     openai_fim_compatible = {
       name = "Ollama",
