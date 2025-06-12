@@ -1,21 +1,28 @@
 # .dotfiles
+
 ## Zsh
+
 ### [oh-my-zsh](https://github.com/ohmyzsh/ohmyzsh)
+
 ```sh
 wget https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh
 sh install.sh
 ```
+
 ### [autosuggestions](https://github.com/zsh-users/zsh-autosuggestions)
+
 ```sh
 git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
 ```
 
 ### [syntax-highlighting](https://github.com/zsh-users/zsh-syntax-highlighting)
+
 ```bash
 git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
 ```
 
 ## [Tmux](https://github.com/gpakosz/.tmux)
+
 ```sh
 cd
 git clone https://github.com/gpakosz/.tmux.git
@@ -23,6 +30,7 @@ ln -s -f .tmux/.tmux.conf
 ```
 
 Get default configs with:
+
 ```sh
 cp .tmux/.tmux.conf.local .
 ```
@@ -30,11 +38,13 @@ cp .tmux/.tmux.conf.local .
 ## Misc. Dependencies
 
 Utils
+
 ```sh
 sudo pacman -S fd fzf jq
 ```
 
 Screenshots
+
 ```sh
 sudo pacman -S shotgun satty
 ```
@@ -52,6 +62,7 @@ paru -S stalonetray picom pamixer
 ```
 
 #### Eww
+
 ```sh
 mkdir -p ~/d
 git clone https://github.com/elkowar/eww ~/d/eww
@@ -103,6 +114,7 @@ sudo systemctl enable virtlogd.socket --now
 ```
 
 ## Stable Diffusion Web UI
+
 ```sh
 set -e
 cd ~/d
@@ -113,9 +125,11 @@ sed 's/#\s*python_cmd=".*"/python_cmd="python3.11"/' -i webui-user.sh
 paru -S python311
 ./webui.sh
 ```
+
 [Usage Guide](https://stable-diffusion-art.com/models/)
 
 ### Forge
+
 ```sh
 cd ~/d/stable-diffusion-webui
 git remote add forge https://github.com/lllyasviel/stable-diffusion-webui-forge
@@ -126,7 +140,22 @@ git branch -u forge/main
 git pull
 ```
 
+## Must-have tools
+
+### Install [x-cmd](https://www.x-cmd.com/start/get-started)
+
+```sh
+eval "$(curl https://get.x-cmd.com)"
+```
+
+### Install [oterm](https://ggozad.github.io/oterm/)
+
+```sh
+uvx oterm
+```
+
 ## References
+
 [How to version control them dotfiles](https://stackoverflow.com/questions/46534290/symlink-dotfiles)  
 [Nvim from scratch](https://github.com/LunarVim/Neovim-from-scratch)  
 [Lsp Server Configurations](https://github.com/neovim/nvim-lspconfig/blob/master/doc/server_configurations.md)
