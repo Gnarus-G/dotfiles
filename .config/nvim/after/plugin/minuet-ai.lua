@@ -64,7 +64,7 @@ local setup_opts = {
     },
     openai_fim_compatible = {
       name = "Ollama",
-      model = 'qwen2.5-coder:3b',
+      model = 'qwen2.5-coder:0.5b',
       api_key = "TERM",
       end_point = ollama_api_base .. '/v1/completions',
       optional = {

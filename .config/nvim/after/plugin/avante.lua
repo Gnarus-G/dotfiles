@@ -38,7 +38,7 @@ local config = {
     },
     ollama = {
       endpoint = ollama_api_base,
-      model = "qwen3",
+      model = "qwen2.5-coder:3b",
       timeout = 30000, -- Timeout in milliseconds, increase this for reasoning models
       extra_request_body = {
         options = {
@@ -59,7 +59,7 @@ local config = {
     },
     ollama_suggestions = {
       __inherited_from = "ollama",
-      model = "qwen2.5-coder:3b"
+      model = "qwen2.5-coder:0.5b"
     }
   },
   mode = "legacy",

@@ -3,16 +3,6 @@ local ollama_adapter_opts = {
   env = {
     url = os.getenv("OLLAMA_API_BASE") or "http://localhost:11434"
   },
-  schema = {
-    model = {
-      default = "qwen3"
-    },
-    choices = {
-      "qwenn3",
-      "qwenn2.5",
-      "cogito"
-    }
-  },
   parameters = {
     sync = true
   }
@@ -216,7 +206,7 @@ local opts = {
     gemini_flash_next = adapter_and_default_model("gemini", "gemini-2.5-flash-preview-05-20"),
     gemini_flash = adapter_and_default_model("gemini", "gemini-2.0-flash"),
     claude_haiku = adapter_and_default_model("anthropic", "claude-3-5-haiku-20241022"),
-    ollama = adapter_and_default_model("ollama", "qwen3", ollama_adapter_opts),
+    ollama = adapter_and_default_model("ollama", "qwen2.5-coder:3b", ollama_adapter_opts),
   },
   extensions = {
     mcphub = {
