@@ -24,7 +24,15 @@ require('lualine').setup {
     lualine_w = {
       { require('mcphub.extensions.lualine') },
     },
-    lualine_x = { 'encoding', 'fileformat', 'filetype', { require('mcphub.extensions.lualine') }, },
+    lualine_x = {
+      {
+        require 'minuet.lualine',
+        display_name = "both",
+        provider_model_separator = ' :: ',
+        display_on_idle = true,
+      },
+      'encoding', 'fileformat', 'filetype',
+      { require('mcphub.extensions.lualine') }, },
     lualine_y = { 'progress' },
     lualine_z = { 'location' }
   },
