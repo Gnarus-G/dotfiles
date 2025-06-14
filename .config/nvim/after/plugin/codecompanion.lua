@@ -1,4 +1,3 @@
--- Your instructions here
 local ollama_adapter_opts = {
   env = {
     url = os.getenv("OLLAMA_API_BASE") or "http://localhost:11434"
@@ -10,7 +9,7 @@ local ollama_adapter_opts = {
 
 -- Determine adapter names based on GEMINI_API_KEY
 local chat_adapter_name = "gemini"
-local inline_adapter_name = "gemini_flash"
+local inline_adapter_name = "gemini_fastest"
 local cmd_adapter_name = "gemini"
 
 if os.getenv("GEMINI_API_KEY") == nil then
@@ -202,9 +201,9 @@ local opts = {
     log_level = "ERROR", -- TRACE|DEBUG|ERROR|INFO
   },
   adapters = {
-    gemini = adapter_and_default_model("gemini", "gemini-2.5-pro-preview-06-05"),
-    gemini_flash_next = adapter_and_default_model("gemini", "gemini-2.5-flash-preview-05-20"),
-    gemini_flash = adapter_and_default_model("gemini", "gemini-2.0-flash"),
+    gemini = adapter_and_default_model("gemini", "gemini-2.5-flash-preview-05-20"),
+    gemini_pro = adapter_and_default_model("gemini", "gemini-2.5-pro-preview-06-05"),
+    gemini_fastest = adapter_and_default_model("gemini", "gemini-2.0-flash"),
     claude_haiku = adapter_and_default_model("anthropic", "claude-3-5-haiku-20241022"),
     ollama = adapter_and_default_model("ollama", "qwen2.5-coder:3b", ollama_adapter_opts),
   },
