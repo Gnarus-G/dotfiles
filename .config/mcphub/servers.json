@@ -95,6 +95,10 @@
       "env": {
         "REQUEST_TIMEOUT": "30"
       }
+    },
+    "github.com/upstash/context7-mcp": {
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp"]
     }
   }
 }
