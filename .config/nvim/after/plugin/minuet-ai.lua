@@ -57,25 +57,10 @@ local setup_opts = {
     },
     gemini = {
       chat_input = {
-        -- New template with placeholders for dynamic content
-        -- The order here dictates where your custom content will appear relative to the standard context.
-        -- This example places it BEFORE the standard {{{language}}}, {{{tab}}}, etc.
         template = "{{{extra_context}}}\n" ..
             minuet_config.default_chat_input_prefix_first.template,
-        -- Function for the new placeholder
         extra_context = extra_context.get_formatted_context
       },
-      model = 'gemini-2.0-flash',
-      --[[ model = 'gemini-2.5-flash-preview-05-20', ]]
-      --[[ optional = { ]]
-      --[[   generationConfig = { ]]
-      --[[     -- When using `gemini-2.5-flash`, it is recommended to entirely ]]
-      --[[     -- disable thinking for faster completion retrieval. ]]
-      --[[     thinkingConfig = { ]]
-      --[[       thinkingBudget = 0, ]]
-      --[[     }, ]]
-      --[[   }, ]]
-      --[[ }, ]]
     },
     openai_fim_compatible = {
       name = "Ollama",
@@ -87,6 +72,33 @@ local setup_opts = {
         top_p = 0.9,
       },
     },
+  },
+  presets = {
+    next = {
+      provider_options = {
+        gemini = {
+          model = 'gemini-2.5-flash-preview-05-20',
+          chat_input = {
+            -- New template with placeholders for dynamic content
+            -- The order here dictates where your custom content will appear relative to the standard context.
+            -- This example places it BEFORE the standard {{{language}}}, {{{tab}}}, etc.
+            template = "{{{extra_context}}}\n" ..
+                minuet_config.default_chat_input_prefix_first.template,
+            -- Function for the new placeholder
+            extra_context = extra_context.get_formatted_context
+          },
+          optional = {
+            generationConfig = {
+              -- When using `gemini-2.5-flash`, it is recommended to entirely
+              -- disable thinking for faster completion retrieval.
+              thinkingConfig = {
+                thinkingBudget = 0,
+              },
+            },
+          },
+        },
+      }
+    }
   }
 }
 
