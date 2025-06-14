@@ -20,14 +20,7 @@ cmp.setup({
       end
     end,
     ['<C-e>'] = cmp.mapping.abort(),
-    ['<CR>'] = cmp.mapping(function(fallback)
-      -- use the internal non-blocking call to check if cmp is visible
-      if cmp.core.view:visible() then
-        cmp.confirm { select = false }
-      else
-        fallback()
-      end
-    end),
+    ['<CR>'] = cmp.mapping.confirm({ select = false }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
   }),
   window = {
     completion = cmp.config.window.bordered(),
