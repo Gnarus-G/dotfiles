@@ -14,19 +14,76 @@
     }
   },
   "mcpServers": {
-    "github.com/zcaceres/fetch-mcp": {
+    "searxng": {
+      "disabled": false,
+      "env": {
+        "SEARXNG_URL": "https://metasearx.com/"
+      },
+      "command": "npx",
+      "args": ["-y", "mcp-searxng"]
+    },
+    "github.com/modelcontextprotocol/servers/tree/main/src/filesystem": {
       "command": "sh",
+      "args": [
+        "-c",
+        "npx -y @modelcontextprotocol/server-filesystem $HOME/d/ $HOME/.config/nvim/ $HOME/.local/share/nvim/"
+      ],
       "env": {
         "HOME": ""
       },
-      "args": ["-c", "${HOME}/.mcphub/servers/fetch-mcp/dist/index.js"],
+      "custom_instructions": {
+        "text": "**Important Notes**:\n- Always get the current working directory with the command `pwd` before try to access files\n- Using the output of `pwd` as a base, only use absolute paths as in input to the `filesystem` tool\n- If `replace_in_file` fails, then use `read_file` and then `edit_file` tool from the `filesystem` mcp server\n - If that still fails, re-read it first before next attempting a `write_file`."
+      },
       "disabled": false
     },
+    "web-browser-mcp-server": {
+      "env": {
+        "REQUEST_TIMEOUT": "30"
+      },
+      "command": "uv",
+      "args": ["tool", "run", "web-browser-mcp-server"]
+    },
+    "kokoro-tts-mcp": {
+      "command": "sh",
+      "args": [
+        "-c",
+        "uv --directory $HOME/.mcphub/servers/kokoro-tts-mcp run python mcp-tts.py"
+      ],
+      "env": {
+        "MP3_FOLDER": "${HOME}/Music/kokoro-tts",
+        "TTS_SPEED": "0.8",
+        "MP3_RETENTION_DAYS": "7",
+        "TTS_LANGUAGE": "en-us",
+        "S3_ENABLED": "false",
+        "KOKORO_MODEL_PATH": "${HOME}/.mcphub/servers/kokoro-tts-mcp/kokoro-v1.0.onnx",
+        "HOME": "",
+        "KOKORO_VOICES_PATH": "${HOME}/.mcphub/servers/kokoro-tts-mcp/voices-v1.0.bin",
+        "DEBUG": "true",
+        "TTS_VOICE": "af_nicole"
+      },
+      "custom_instructions": {
+        "text": "Once you have the produced mp3 file's path, use the `execute_command` from the `neovim` server to run `ffplay` to play the audio."
+      },
+      "disabled": false
+    },
+    "github.com/zcaceres/fetch-mcp": {
+      "disabled": false,
+      "env": {
+        "HOME": ""
+      },
+      "command": "sh",
+      "args": ["-c", "${HOME}/.mcphub/servers/fetch-mcp/dist/index.js"]
+    },
+    "github.com/upstash/context7-mcp": {
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp"]
+    },
     "github.com/github/github-mcp-server": {
-      "command": "docker",
+      "disabled": false,
       "env": {
         "GITHUB_PERSONAL_ACCESS_TOKEN": ""
       },
+      "command": "docker",
       "args": [
         "run",
         "-i",
@@ -36,69 +93,20 @@
         "-e",
         "GITHUB_DYNAMIC_TOOLSETS=1",
         "ghcr.io/github/github-mcp-server"
-      ],
-      "disabled": false
+      ]
+    },
+    "github.com/modelcontextprotocol/servers/tree/main/src/sequentialthinking": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+    },
+    "github.com/modelcontextprotocol/servers/tree/main/src/memory": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-memory"]
     },
     "git": {
+      "disabled": false,
       "command": "uvx",
-      "args": ["mcp-server-git"],
-      "disabled": false
-    },
-    "searxng": {
-      "command": "npx",
-      "env": {
-        "SEARXNG_URL": "https://metasearx.com/"
-      },
-      "args": ["-y", "mcp-searxng"],
-      "disabled": false
-    },
-    "github.com/modelcontextprotocol/servers/tree/main/src/filesystem": {
-      "command": "sh",
-      "env": {
-        "HOME": ""
-      },
-      "disabled": false,
-      "args": [
-        "-c",
-        "npx -y @modelcontextprotocol/server-filesystem $HOME/d/ $HOME/.config/nvim/ $HOME/.local/share/nvim/"
-      ],
-      "custom_instructions": {
-        "text": "**Important Notes**:\n- Always get the current working directory with the command `pwd` before try to access files\n- Using the output of `pwd` as a base, only use absolute paths as in input to the `filesystem` tool\n- If `replace_in_file` fails, then use `read_file` and then `edit_file` tool from the `filesystem` mcp server\n - If that still fails, re-read it first before next attempting a `write_file`."
-      }
-    },
-    "kokoro-tts-mcp": {
-      "command": "sh",
-      "env": {
-        "S3_ENABLED": "false",
-        "KOKORO_MODEL_PATH": "${HOME}/.mcphub/servers/kokoro-tts-mcp/kokoro-v1.0.onnx",
-        "KOKORO_VOICES_PATH": "${HOME}/.mcphub/servers/kokoro-tts-mcp/voices-v1.0.bin",
-        "TTS_VOICE": "af_nicole",
-        "DEBUG": "true",
-        "MP3_FOLDER": "${HOME}/Music/kokoro-tts",
-        "HOME": "",
-        "TTS_SPEED": "0.8",
-        "MP3_RETENTION_DAYS": "7",
-        "TTS_LANGUAGE": "en-us"
-      },
-      "disabled": false,
-      "args": [
-        "-c",
-        "uv --directory $HOME/.mcphub/servers/kokoro-tts-mcp run python mcp-tts.py"
-      ],
-      "custom_instructions": {
-        "text": "Once you have the produced mp3 file's path, use the `execute_command` from the `neovim` server to run `ffplay` to play the audio."
-      }
-    },
-    "web-browser-mcp-server": {
-      "command": "uv",
-      "args": ["tool", "run", "web-browser-mcp-server"],
-      "env": {
-        "REQUEST_TIMEOUT": "30"
-      }
-    },
-    "github.com/upstash/context7-mcp": {
-      "command": "npx",
-      "args": ["-y", "@upstash/context7-mcp"]
+      "args": ["mcp-server-git"]
     }
   }
 }
