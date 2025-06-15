@@ -63,13 +63,13 @@ local setup_opts = {
       },
     },
     openai_fim_compatible = {
-      name = "Ollama",
-      model = 'qwen2.5-coder:0.5b',
+      name = "Ollama FIM",
+      model = 'qwen2.5-coder:3b',
       api_key = "TERM",
       end_point = ollama_api_base .. '/v1/completions',
       optional = {
-        max_tokens = 56,
-        top_p = 0.9,
+        max_tokens = 256,
+        stop = { '\n\n' },
       },
     },
   },
