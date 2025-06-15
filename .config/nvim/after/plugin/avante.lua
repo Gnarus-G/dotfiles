@@ -3,17 +3,14 @@ local ollama_api_base = os.getenv("OLLAMA_API_BASE") or "http://localhost:11434"
 
 -- Determine provider and models based on GEMINI_API_KEY
 local provider_name = "gemini"
-local auto_suggestions_provider_name = "gemini_fast" -- Default suggestions provider
 if os.getenv("GEMINI_API_KEY") == nil then
   provider_name = "ollama"
-  auto_suggestions_provider_name = "ollama_suggestions" -- Use ollama provider for suggestions
 end
 
 ---@class avante.Config
 local config = {
-  provider = provider_name,                                   -- Use the determined provider
+  provider = provider_name, -- Use the determined provider
   enable_claude_text_editor_tool_mode = false,
-  auto_suggestions_provider = auto_suggestions_provider_name, -- Use the determined suggestions provider
   suggestion = {
     debounce = 300,
     throttle = 300,
@@ -36,19 +33,6 @@ local config = {
         },
       },
     },
-    ollama = {
-      endpoint = ollama_api_base,
-      model = "qwen2.5-coder:3b",
-      timeout = 30000, -- Timeout in milliseconds, increase this for reasoning models
-      extra_request_body = {
-        options = {
-          max_completion_tokens = 8192, -- Increase this to include reasoning tokens (for reasoning models)
-          reasoning_effort = "medium",  -- low|medium|high, only used for reasoning models
-          num_ctx = 4096,               -- deepseek-coder-v2 is up to 163840
-          keep_alive = "10m",
-        },
-      },
-    },
     gemini_next = {
       __inherited_from = 'gemini',
       model = 'gemini-2.5-pro-preview-06-05',
@@ -57,10 +41,15 @@ local config = {
       __inherited_from = 'gemini',
       model = 'gemini-2.0-flash',
     },
-    ollama_suggestions = {
+    ollama = {
       __inherited_from = "ollama",
-      model = "qwen2.5-coder:0.5b"
-    }
+      endpoint = ollama_api_base,
+      model = "qwen3:1.7b",
+      extra_request_body = {
+        think = true,
+        keep_alive = "30m",
+      },
+    },
   },
   mode = "legacy",
   disabled_tools = {
@@ -78,15 +67,11 @@ local config = {
     "fetch"
   },
   behaviour = {
-    auto_suggestions = false, -- Experimental stage
+    auto_suggestions = false,
     auto_apply_diff_after_generation = true,
   },
   rag_service = {
-    enabled = true,                         -- Enables the RAG service
-    host_mount = os.getenv("HOME") .. "/d", -- Host mount path for the rag service
-    provider = "ollama",                    -- The provider to use for RAG service (e.g. openai or ollama)
-    llm_model = "gemma3",                   -- The LLM model to use for RAG service
-    embed_model = "nomic-embed-text",       -- The embedding model to use for RAG service
+    enabled = false, -- Enables the RAG service
   },
   web_search_engine = {
     provider = "searxng",
