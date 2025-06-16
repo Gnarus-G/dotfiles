@@ -51,7 +51,7 @@ local config = {
       },
     },
   },
-  mode = "legacy",
+  mode = "agentic",
   disabled_tools = {
     "list_files",
     "search_files",
