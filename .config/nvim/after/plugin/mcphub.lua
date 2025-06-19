@@ -1,5 +1,9 @@
 -- some extra mcp servers to reinstall:
 -- web_search: https://github.com/ihor-sokoliuk/mcp-searxng, https://github.com/Gnarus-G/ez-web-search-mcp
+
+
+
+---@type MCPHub
 local mcphub = require("mcphub");
 mcphub.setup({
   port = 37373,                                            -- Default port for MCP Hub
@@ -68,5 +72,62 @@ vim.iter(vim.fn.systemlist("ls -1 " .. plugins_dir)):map(function(name) return n
         end
       })
     end)
+
+mcphub.add_resource("Minuet", {
+  name = "minuet_ctx",
+  description = "content files minuet is using",
+  uri = "nvim://minuet_ctx",
+  handler = function(_req, res)
+    local minuet = require("minuet_ctx")
+    local file_paths = minuet.files()
+    res:text(vim.json.encode(file_paths))
+        :send()
+  end
+})
+
+mcphub.add_resource("git", {
+  name = "unstaged",
+  description = "list of files not staged for commit in current git repository",
+  uri = "git://unstaged",
+  mimeType = "application/json",
+  handler = function(_req, res)
+    local ok, output = pcall(vim.fn.system, "git status --porcelain")
+    if not ok then
+      res:error("Failed to get unstaged files", {
+        error = output
+      })
+      return
+    end
+    local unstaged_files = {}
+    for line in string.gmatch(output, "[^\r\n]+") do
+      local status = string.sub(line, 1, 2)
+      local file = string.sub(line, 4)
+      if status:match("^ [MADRCU?]") or status:match("^[MADRCU?] ") then
+        table.insert(unstaged_files, file)
+      end
+    end
+    res:text(vim.json.encode(unstaged_files)):send()
+  end
+})
+
+mcphub.add_prompt("Help", {
+  name = "dafuq",
+  description = "Explain why this error is happening",
+  arguments = { {
+    name = "error",
+    description = "Error message",
+    type = "string",
+    required = true,
+  } },
+  handler = function(req, res)
+    res:resource({
+      uri = "neovim://buffer",
+      mimeType = "text/plain"
+    }):resource({
+      uri = "git://unstaged",
+      mimeType = "application/json"
+    }):text("Explain why this error is happening in great detail: \n```txt\n" .. req.params.error .. "\n```"):send()
+  end
+})
 
 require "mcphub_servers.todo_server"
