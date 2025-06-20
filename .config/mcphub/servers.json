@@ -1,74 +1,93 @@
 {
+  "nativeMCPServers": {
+    "neovim": {
+      "custom_instructions": {
+        "text": "**Important Notes**:\n- If `replace_in_file` fails, then use `read_file` and then `write_file` tool from the mcp server."
+      },
+      "disabled_tools": [
+        
+      ],
+      "disabled": false
+    },
+    "Plugins": {
+      "custom_instructions": {
+        "text": "When provided a plugin's source code location, always attempt to search and read through it before answering anything."
+      }
+    }
+  },
   "mcpServers": {
     "searxng": {
-      "command": "npx",
       "disabled": false,
-      "args": ["-y", "mcp-searxng"],
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-searxng"
+      ],
       "env": {
         "SEARXNG_URL": "https://metasearx.com/"
       }
     },
     "think-mcp": {
-      "command": "uvx",
       "disabled": false,
-      "args": ["think-mcp"],
+      "command": "uvx",
+      "args": [
+        "think-mcp"
+      ],
       "enabled": true
     },
-    "github.com/zcaceres/fetch-mcp": {
-      "command": "sh",
-      "disabled": false,
-      "args": ["-c", "${HOME}/.mcphub/servers/fetch-mcp/dist/index.js"],
-      "env": {
-        "HOME": ""
-      }
-    },
     "mcp-rag-local": {
-      "command": "sh",
       "disabled": false,
+      "command": "sh",
       "args": [
         "-c",
         "uv --directory ${HOME}/.mcphub/servers/mcp-rag-local run main.py"
       ],
       "env": {
         "CHROMADB_PORT": "8321",
-        "HOME": "",
-        "OLLAMA_PORT": "11434"
+        "OLLAMA_PORT": "11434",
+        "HOME": ""
       }
     },
     "github.com/modelcontextprotocol/servers/tree/main/src/sequentialthinking": {
-      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"],
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-sequential-thinking"
+      ],
       "command": "npx"
     },
     "github.com/upstash/context7-mcp": {
-      "args": ["-y", "@upstash/context7-mcp"],
+      "args": [
+        "-y",
+        "@upstash/context7-mcp"
+      ],
       "command": "npx"
     },
     "kokoro-tts-mcp": {
-      "command": "sh",
       "custom_instructions": {
         "text": "Once you have the produced mp3 file's path, use the `execute_command` from the `neovim` server to run `ffplay` to play the audio."
       },
+      "disabled": false,
+      "command": "sh",
       "args": [
         "-c",
         "uv --directory $HOME/.mcphub/servers/kokoro-tts-mcp run python mcp-tts.py"
       ],
-      "disabled": false,
       "env": {
-        "MP3_FOLDER": "${HOME}/Music/kokoro-tts",
-        "HOME": "",
-        "TTS_VOICE": "af_nicole",
         "KOKORO_VOICES_PATH": "${HOME}/.mcphub/servers/kokoro-tts-mcp/voices-v1.0.bin",
-        "DEBUG": "true",
-        "TTS_SPEED": "0.8",
+        "HOME": "",
         "KOKORO_MODEL_PATH": "${HOME}/.mcphub/servers/kokoro-tts-mcp/kokoro-v1.0.onnx",
+        "DEBUG": "true",
         "S3_ENABLED": "false",
         "MP3_RETENTION_DAYS": "7",
-        "TTS_LANGUAGE": "en-us"
+        "TTS_LANGUAGE": "en-us",
+        "MP3_FOLDER": "${HOME}/Music/kokoro-tts",
+        "TTS_SPEED": "0.8",
+        "TTS_VOICE": "af_nicole"
       }
     },
     "github.com/github/github-mcp-server": {
-      "command": "docker",
       "disabled": false,
+      "command": "docker",
       "args": [
         "run",
         "-i",
@@ -82,19 +101,16 @@
       "env": {
         "GITHUB_PERSONAL_ACCESS_TOKEN": ""
       }
-    }
-  },
-  "nativeMCPServers": {
-    "neovim": {
-      "disabled": false,
-      "disabled_tools": [],
-      "custom_instructions": {
-        "text": "**Important Notes**:\n- Prefer this mcp server for all file operations\n- Always get the current working directory with the command `pwd` before try to access files.\n- Using the output of `pwd` as a base, only use absolute paths as in input to the mcp server.\n- If `replace_in_file` fails, then use `read_file` and then `edit_file` tool from the mcp server.\n - If that still fails, re-read it first before next attempting a `write_file`."
-      }
     },
-    "Plugins": {
-      "custom_instructions": {
-        "text": "When provided a plugin's source code location, always attempt to search and read through it before answering anything."
+    "github.com/zcaceres/fetch-mcp": {
+      "disabled": false,
+      "command": "sh",
+      "args": [
+        "-c",
+        "${HOME}/.mcphub/servers/fetch-mcp/dist/index.js"
+      ],
+      "env": {
+        "HOME": ""
       }
     }
   }

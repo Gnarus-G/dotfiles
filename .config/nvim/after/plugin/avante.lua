@@ -7,6 +7,11 @@ if os.getenv("GEMINI_API_KEY") == nil then
   provider_name = "ollama"
 end
 
+local disabled_tools = {
+  "replace_in_file",
+  "view"
+}
+
 ---@class avante.Config
 local config = {
   provider = provider_name, -- Use the determined provider
@@ -32,6 +37,7 @@ local config = {
           temperature = 0.75,
         },
       },
+      disabled_tools = disabled_tools
     },
     gemini_next = {
       __inherited_from = 'gemini',
@@ -51,7 +57,7 @@ local config = {
       },
     },
   },
-  mode = "agentic",
+  mode = "legacy",
   behaviour = {
     auto_suggestions = false,
     auto_apply_diff_after_generation = true,
