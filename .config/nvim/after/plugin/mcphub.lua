@@ -110,7 +110,7 @@ mcphub.add_resource("git", {
   end
 })
 
-mcphub.add_prompt("Help", {
+mcphub.add_prompt("nani?", {
   name = "dafuq",
   description = "Explain why this error is happening",
   arguments = { {
