@@ -153,8 +153,7 @@ mcphub.add_prompt("refactor", {
         })
         :user()
         :text("Refactor code according to following details: \n---\n" .. req.params.prompt .. "\n---")
-        :text("Reference any docs if necessary through the Context7 mcp server tools")
-        :user()
+        :text("Reference any docs if necessary through the `Context7` mcp server tools")
         :text("Do not add uncessary comments, especially ones that don't add new information to the code.")
 
     return res:send()
