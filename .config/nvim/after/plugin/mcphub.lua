@@ -63,7 +63,7 @@ mcphub.setup({
 local plugins_dir = vim.fn.stdpath("data") .. "/site/pack/packer/start/"
 vim.iter(vim.fn.systemlist("ls -1 " .. plugins_dir)):map(function(name) return name, plugins_dir .. name end)
     :each(function(name, path)
-      mcphub.add_resource("Plugins", {
+      mcphub.add_resource("plugins", {
         name        = "location: " .. name,
         description = "Directory for the source code of the installed neovim plugin",
         uri         = "nvim://plugin/" .. name,
@@ -73,7 +73,7 @@ vim.iter(vim.fn.systemlist("ls -1 " .. plugins_dir)):map(function(name) return n
       })
     end)
 
-mcphub.add_resource("Minuet", {
+mcphub.add_resource("minuet", {
   name = "minuet_ctx",
   description = "content files minuet is using",
   uri = "nvim://minuet_ctx",
@@ -120,13 +120,44 @@ mcphub.add_prompt("nani?", {
     required = true,
   } },
   handler = function(req, res)
-    res:resource({
-      uri = "neovim://buffer",
-      mimeType = "text/plain"
-    }):resource({
-      uri = "git://unstaged",
-      mimeType = "application/json"
-    }):text("Explain why this error is happening in great detail: \n```txt\n" .. req.params.error .. "\n```"):send()
+    res:system()
+        :resource({
+          uri = "neovim://buffer",
+          mimeType = "text/plain"
+        })
+        :resource({
+          uri = "git://unstaged",
+          mimeType = "application/json"
+        })
+        :user()
+        :text("Explain why this error is happening in great detail: \n```txt\n" .. req.params.error .. "\n```")
+        :send()
+  end
+})
+
+mcphub.add_prompt("refactor", {
+  name = "translate",
+  description = "Refactor by translating one pattern/library to another",
+  arguments = { {
+    name = "prompt",
+    description = "Details about the desired refactor",
+    type = "string",
+    required = true,
+  } },
+  handler = function(req, res)
+    res
+        :system()
+        :resource({
+          uri = "neovim://buffer",
+          mimeType = "text/plain"
+        })
+        :user()
+        :text("Refactor code according to following details: \n---\n" .. req.params.prompt .. "\n---")
+        :text("Reference any docs if necessary through the Context7 mcp server tools")
+        :user()
+        :text("Do not add uncessary comments, especially ones that don't add new information to the code.")
+
+    return res:send()
   end
 })
 
