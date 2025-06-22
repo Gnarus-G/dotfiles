@@ -31,7 +31,7 @@ local config = {
     gemini = {
       model = 'gemini-2.5-flash-preview-05-20',
       timeout = 30000,
-      use_ReAct_prompt = false,
+      use_ReAct_prompt = true,
       extra_request_body = {
         generationConfig = {
           temperature = 0.75,
@@ -57,7 +57,7 @@ local config = {
       },
     },
   },
-  mode = "legacy",
+  mode = "agentic",
   behaviour = {
     auto_suggestions = false,
     auto_apply_diff_after_generation = true,
@@ -147,7 +147,10 @@ local config = {
   -- The system_prompt type supports both a string and a function that returns a string. Using a function here allows dynamically updating the prompt with mcphub
   system_prompt = function()
     local hub = require("mcphub").get_hub_instance()
-    return hub and hub:get_active_servers_prompt() or ""
+    if not hub then return "" end
+    local prompt = hub:get_active_servers_prompt()
+    --[[ prompt = prompt .. "\n----\nONLY USER TOOLS FROM AN MCP SERVER!!!!!!!!!!!!11" ]]
+    return prompt
   end,
   -- The custom_tools type supports both a list and a function that returns a list. Using a function here prevents requiring mcphub before it's loaded
   custom_tools = function()

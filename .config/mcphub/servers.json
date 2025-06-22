@@ -1,89 +1,67 @@
 {
   "mcpServers": {
-    "mcp-rag-local": {
+    "github.com/zcaceres/fetch-mcp": {
       "env": {
-        "OLLAMA_PORT": "11434",
-        "CHROMADB_PORT": "8321",
         "HOME": ""
       },
+      "command": "sh",
       "disabled": false,
       "args": [
         "-c",
-        "uv --directory ${HOME}/.mcphub/servers/mcp-rag-local run main.py"
-      ],
-      "command": "sh"
-    },
-    "think-mcp": {
-      "enabled": true,
-      "disabled": false,
-      "args": [
-        "think-mcp"
-      ],
-      "command": "uvx"
+        "${HOME}/.mcphub/servers/fetch-mcp/dist/index.js"
+      ]
     },
     "searxng": {
       "env": {
         "SEARXNG_URL": "https://metasearx.com/"
       },
+      "command": "npx",
       "disabled": false,
       "args": [
         "-y",
         "mcp-searxng"
-      ],
-      "command": "npx"
-    },
-    "github.com/zcaceres/fetch-mcp": {
-      "env": {
-        "HOME": ""
-      },
-      "disabled": false,
-      "args": [
-        "-c",
-        "${HOME}/.mcphub/servers/fetch-mcp/dist/index.js"
-      ],
-      "command": "sh"
+      ]
     },
     "Context7": {
+      "command": "npx",
       "args": [
         "-y",
         "@upstash/context7-mcp"
-      ],
-      "command": "npx"
+      ]
     },
-    "kokoro-tts-mcp": {
-      "args": [
-        "-c",
-        "uv --directory $HOME/.mcphub/servers/kokoro-tts-mcp run python mcp-tts.py"
-      ],
+    "think-mcp": {
       "disabled": false,
-      "custom_instructions": {
-        "text": "Once you have the produced mp3 file's path, use the `execute_command` from the `neovim` server to run `ffplay` to play the audio."
-      },
-      "env": {
-        "KOKORO_VOICES_PATH": "${HOME}/.mcphub/servers/kokoro-tts-mcp/voices-v1.0.bin",
-        "KOKORO_MODEL_PATH": "${HOME}/.mcphub/servers/kokoro-tts-mcp/kokoro-v1.0.onnx",
-        "S3_ENABLED": "false",
-        "MP3_RETENTION_DAYS": "7",
-        "TTS_LANGUAGE": "en-us",
-        "MP3_FOLDER": "${HOME}/Music/kokoro-tts",
-        "TTS_SPEED": "0.8",
-        "TTS_VOICE": "af_nicole",
-        "HOME": "",
-        "DEBUG": "true"
-      },
-      "command": "sh"
+      "command": "uvx",
+      "enabled": true,
+      "args": [
+        "think-mcp"
+      ]
     },
     "github.com/modelcontextprotocol/servers/tree/main/src/sequentialthinking": {
+      "command": "npx",
       "args": [
         "-y",
         "@modelcontextprotocol/server-sequential-thinking"
-      ],
-      "command": "npx"
+      ]
+    },
+    "mcp-rag-local": {
+      "env": {
+        "CHROMADB_PORT": "8321",
+        "OLLAMA_PORT": "11434",
+        "HOME": ""
+      },
+      "command": "sh",
+      "disabled": false,
+      "args": [
+        "-c",
+        "uv --directory ${HOME}/.mcphub/servers/mcp-rag-local run main.py"
+      ]
     },
     "github.com/github/github-mcp-server": {
       "env": {
         "GITHUB_PERSONAL_ACCESS_TOKEN": ""
       },
+      "command": "docker",
       "disabled": false,
       "args": [
         "run",
@@ -94,23 +72,50 @@
         "-e",
         "GITHUB_DYNAMIC_TOOLSETS=1",
         "ghcr.io/github/github-mcp-server"
+      ]
+    },
+    "kokoro-tts-mcp": {
+      "env": {
+        "S3_ENABLED": "false",
+        "MP3_RETENTION_DAYS": "7",
+        "TTS_LANGUAGE": "en-us",
+        "MP3_FOLDER": "${HOME}/Music/kokoro-tts",
+        "HOME": "",
+        "KOKORO_MODEL_PATH": "${HOME}/.mcphub/servers/kokoro-tts-mcp/kokoro-v1.0.onnx",
+        "TTS_VOICE": "af_nicole",
+        "TTS_SPEED": "0.8",
+        "KOKORO_VOICES_PATH": "${HOME}/.mcphub/servers/kokoro-tts-mcp/voices-v1.0.bin",
+        "DEBUG": "true"
+      },
+      "custom_instructions": {
+        "text": "Once you have the produced mp3 file's path, use the `execute_command` from the `neovim` server to run `ffplay` to play the audio."
+      },
+      "args": [
+        "-c",
+        "uv --directory $HOME/.mcphub/servers/kokoro-tts-mcp run python mcp-tts.py"
       ],
-      "command": "docker"
+      "disabled": false,
+      "command": "sh"
     }
   },
   "nativeMCPServers": {
-    "neovim": {
-      "custom_instructions": {
-        "text": "**Important Notes**:\n- If `replace_in_file` fails, then use `read_file` and then `write_file` tool from the mcp server."
-      },
-      "disabled_tools": [
-        
-      ],
-      "disabled": false
-    },
     "Plugins": {
       "custom_instructions": {
         "text": "When provided a plugin's source code location, always attempt to search and read through it before answering anything."
+      }
+    },
+    "nvim": {
+      "custom_instructions": {
+        "text": "Search inside the plugin paths to find the source code files."
+      }
+    },
+    "neovim": {
+      "disabled_tools": [
+        
+      ],
+      "disabled": false,
+      "custom_instructions": {
+        "text": "**Important Notes**:\n- If `replace_in_file` fails, then use `read_file` and then `write_file` tool from the mcp server."
       }
     }
   }
