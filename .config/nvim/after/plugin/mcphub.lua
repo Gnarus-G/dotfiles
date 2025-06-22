@@ -61,14 +61,21 @@ mcphub.setup({
 })
 
 local plugins_dir = vim.fn.stdpath("data") .. "/site/pack/packer/start/"
-vim.iter(vim.fn.systemlist("ls -1 " .. plugins_dir)):map(function(name) return name, plugins_dir .. name end)
-    :each(function(name, path)
-      mcphub.add_resource("plugins", {
-        name        = "location: " .. name,
-        description = "Directory for the source code of the installed neovim plugin",
+vim.iter(vim.fn.readdir(plugins_dir))
+    :each(function(name)
+      local path = plugins_dir .. name
+      mcphub.add_resource("nvim", {
+        name        = name,
+        mimeType    = "application/json",
+        description = "Path to the source code of the installed neovim plugin",
         uri         = "nvim://plugin/" .. name,
         handler     = function(_req, res)
-          res:text(path):send()
+          local data = {
+            name = name,
+            path = path,
+            is_dir = vim.fn.isdirectory(path) == 1,
+          }
+          res:text(vim.json.encode(data)):send()
         end
       })
     end)
@@ -153,8 +160,10 @@ mcphub.add_prompt("refactor", {
         })
         :user()
         :text("Refactor code according to following details: \n---\n" .. req.params.prompt .. "\n---")
-        :text("Reference any docs if necessary through the `Context7` mcp server tools")
+        :system()
         :text("Do not add uncessary comments, especially ones that don't add new information to the code.")
+        :user()
+        :text("Reference any docs if necessary through the `Context7` mcp server tools")
 
     return res:send()
   end
