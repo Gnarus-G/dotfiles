@@ -64,7 +64,7 @@ local plugins_dir = vim.fn.stdpath("data") .. "/site/pack/packer/start/"
 vim.iter(vim.fn.readdir(plugins_dir))
     :each(function(name)
       local path = plugins_dir .. name
-      mcphub.add_resource("nvim", {
+      mcphub.add_resource("gnarus", {
         name        = name,
         mimeType    = "application/json",
         description = "Path to the source code of the installed neovim plugin",
@@ -80,11 +80,12 @@ vim.iter(vim.fn.readdir(plugins_dir))
       })
     end)
 
-mcphub.add_resource("minuet", {
-  name = "minuet_ctx",
+mcphub.add_resource("gnarus", {
+  name        = "minuet_ctx",
   description = "content files minuet is using",
-  uri = "nvim://minuet_ctx",
-  handler = function(_req, res)
+  uri         = "nvim://minuet_ctx",
+  mimeType    = "application/json",
+  handler     = function(_req, res)
     local minuet = require("minuet_ctx")
     local file_paths = minuet.files()
     res:text(vim.json.encode(file_paths))
@@ -92,7 +93,7 @@ mcphub.add_resource("minuet", {
   end
 })
 
-mcphub.add_resource("git", {
+mcphub.add_resource("gnarus", {
   name = "unstaged",
   description = "list of files not staged for commit in current git repository",
   uri = "git://unstaged",
@@ -117,8 +118,8 @@ mcphub.add_resource("git", {
   end
 })
 
-mcphub.add_prompt("nani?", {
-  name = "dafuq",
+mcphub.add_prompt("gnarus", {
+  name = "dafuq?",
   description = "Explain why this error is happening",
   arguments = { {
     name = "error",
@@ -142,8 +143,8 @@ mcphub.add_prompt("nani?", {
   end
 })
 
-mcphub.add_prompt("refactor", {
-  name = "translate",
+mcphub.add_prompt("gnarus", {
+  name = "refactor",
   description = "Refactor by translating one pattern/library to another",
   arguments = { {
     name = "prompt",
@@ -158,12 +159,10 @@ mcphub.add_prompt("refactor", {
           uri = "neovim://buffer",
           mimeType = "text/plain"
         })
-        :user()
-        :text("Refactor code according to following details: \n---\n" .. req.params.prompt .. "\n---")
-        :system()
         :text("Do not add uncessary comments, especially ones that don't add new information to the code.")
         :user()
-        :text("Reference any docs if necessary through the `Context7` mcp server tools")
+        :text("Refactor code according to following details: \n---\n" ..
+          req.params.prompt .. "\n---\n" .. "Reference any docs if necessary through the `Context7` mcp server tools")
 
     return res:send()
   end
