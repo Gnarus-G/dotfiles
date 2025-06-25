@@ -166,7 +166,6 @@ return packer.startup(function(use)
     branch = 'main',
     run = 'make',
     requires = {
-      'nvim-treesitter/nvim-treesitter',
       "ravitemer/mcphub.nvim",
       'nvim-lua/plenary.nvim',
       'MunifTanjim/nui.nvim',
