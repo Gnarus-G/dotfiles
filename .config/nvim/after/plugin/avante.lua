@@ -31,7 +31,7 @@ local config = {
     gemini = {
       model = 'gemini-2.5-flash',
       timeout = 30000,
-      use_ReAct_prompt = true,
+      use_ReAct_prompt = false,
       extra_request_body = {
         generationConfig = {
           temperature = 0.75,
@@ -57,7 +57,7 @@ local config = {
       },
     },
   },
-  mode = "agentic",
+  mode = "legacy",
   behaviour = {
     auto_suggestions = false,
     auto_apply_diff_after_generation = true,
@@ -147,9 +147,13 @@ local config = {
   -- The system_prompt type supports both a string and a function that returns a string. Using a function here allows dynamically updating the prompt with mcphub
   system_prompt = function()
     local hub = require("mcphub").get_hub_instance()
-    if not hub then return "" end
-    local prompt = hub:get_active_servers_prompt()
-    prompt = prompt .. "\n----\nONLY USER TOOLS FROM MCP SERVERS!!!!!!!!!!!!11"
+    local prompt =
+    "---\nATTENTION: The `replace_in_file` tool is currently disabled due to known issues. Please refrain from using it.\n---"
+    if not hub then return prompt end
+
+    prompt = prompt .. "\n\n" .. hub:get_active_servers_prompt()
+    prompt = prompt ..
+        "\n----\nATTENTION: For all tool usage, you must exclusively use the `use_mcp_tool` from the connected MCP servers."
     return prompt
   end,
   -- The custom_tools type supports both a list and a function that returns a list. Using a function here prevents requiring mcphub before it's loaded
