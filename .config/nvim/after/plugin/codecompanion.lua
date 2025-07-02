@@ -34,6 +34,18 @@ local function adapter_and_default_model(adapter, model, extra_opts)
   return require("codecompanion.adapters").extend(adapter, opts)
 end
 
+---@param filepath string should be relative
+local function add_file_to_codecompanion_chat(filepath, chat)
+  local filetype = vim.fn.getbufvar(vim.api.nvim_get_current_buf(), "&filetype")
+  local content = io.open(filepath, "r"):read("*a")
+  local title = "<attachment filepath=\"" .. filepath .. "\">"
+  local body = "Here is the content from the file:\n\n" .. "```" .. filetype .. "\n" .. content
+  local footer = "```\n</attachment>"
+
+  chat:add_reference({ role = "user", content = title .. body .. footer }, filepath,
+    "<file>" .. filepath .. "</file>")
+end
+
 local opts = {
   strategies = {
     chat = {
@@ -106,10 +118,8 @@ local opts = {
           description = "Load in minuet extra files",
           callback = function(chat)
             local minuet_ctx = require("minuet_ctx")
-            for _, file_path in ipairs(minuet_ctx.files()) do
-              local content = io.open(file_path, "r"):read("*a")
-              chat:add_reference({ role = "user", content = content }, file_path,
-                "<file>" .. file_path .. "</file>")
+            for _, filepath in ipairs(minuet_ctx.files()) do
+              add_file_to_codecompanion_chat(filepath, chat)
             end
           end,
           opts = {
