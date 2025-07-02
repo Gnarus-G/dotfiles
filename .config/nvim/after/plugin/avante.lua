@@ -29,7 +29,7 @@ local config = {
       }
     },
     gemini = {
-      model = 'gemini-2.5-flash-preview-05-20',
+      model = 'gemini-2.5-flash',
       timeout = 30000,
       use_ReAct_prompt = true,
       extra_request_body = {
@@ -41,7 +41,7 @@ local config = {
     },
     gemini_next = {
       __inherited_from = 'gemini',
-      model = 'gemini-2.5-pro-preview-06-05',
+      model = 'gemini-2.5-pro',
     },
     gemini_fast = {
       __inherited_from = 'gemini',
@@ -149,7 +149,7 @@ local config = {
     local hub = require("mcphub").get_hub_instance()
     if not hub then return "" end
     local prompt = hub:get_active_servers_prompt()
-    --[[ prompt = prompt .. "\n----\nONLY USER TOOLS FROM AN MCP SERVER!!!!!!!!!!!!11" ]]
+    prompt = prompt .. "\n----\nONLY USER TOOLS FROM MCP SERVERS!!!!!!!!!!!!11"
     return prompt
   end,
   -- The custom_tools type supports both a list and a function that returns a list. Using a function here prevents requiring mcphub before it's loaded
