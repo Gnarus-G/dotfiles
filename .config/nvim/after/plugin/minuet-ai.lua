@@ -56,7 +56,7 @@ local setup_opts = {
       model = 'claude-3-5-haiku-20241022',
     },
     gemini = {
-      model = "gemini-2.5-flash-preview-05-20",
+      model = "gemini-2.5-flash-lite-preview-06-17",
       chat_input = {
         -- New template with placeholders for dynamic content
         -- The order here dictates where your custom content will appear relative to the standard context.
