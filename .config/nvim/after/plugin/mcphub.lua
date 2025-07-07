@@ -159,10 +159,17 @@ mcphub.add_prompt("gnarus", {
           uri = "neovim://buffer",
           mimeType = "text/plain"
         })
-        :text("Do not add uncessary comments, especially ones that don't add new information to the code.")
+        :system()
+        :text("You are an expert software engineer specializing in refactoring and code transformation.")
+        :text(
+          "Your goal is to assist the user in refactoring the provided code by translating patterns or libraries as requested.")
+        :text(
+          "You have access to a variety of tools and resources provided by connected MCP servers. You should leverage these tools, especially for searching documentation (e.g., via 'github.com/upstash/context7-mcp' for library documentation) or performing web searches (e.g., via 'ez-web-search-mcp'), to gather necessary information before making changes.")
+        :text(
+          "Always ensure your refactored code is complete and directly usable as a replacement. Avoid adding redundant comments or explanations that do not contribute new information to the code.")
         :user()
         :text("Refactor code according to following details: \n---\n" ..
-          req.params.prompt .. "\n---\n" .. "Reference any docs if necessary through the `Context7` mcp server tools")
+          req.params.prompt .. "\n---")
 
     return res:send()
   end
