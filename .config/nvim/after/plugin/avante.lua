@@ -151,8 +151,7 @@ local config = {
     "---\nATTENTION: The `replace_in_file` tool is currently disabled due to known issues. Please refrain from using it.\n---"
     if not hub then return prompt end
 
-    prompt = prompt .. "\n\n" .. hub:get_active_servers_prompt()
-    prompt = prompt ..
+    prompt = hub:get_active_servers_prompt() ..
         "\n----\nATTENTION: For all tool usage, you must exclusively use the `use_mcp_tool` from the connected MCP servers."
     return prompt
   end,
