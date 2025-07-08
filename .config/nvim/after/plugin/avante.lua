@@ -57,7 +57,7 @@ local config = {
       },
     },
   },
-  mode = "legacy",
+  mode = "agentic",
   behaviour = {
     auto_suggestions = false,
     auto_apply_diff_after_generation = true,
@@ -152,7 +152,8 @@ local config = {
     if not hub then return prompt end
 
     prompt = hub:get_active_servers_prompt() ..
-        "\n----\nATTENTION: For all tool usage, you must exclusively use the `use_mcp_tool` from the connected MCP servers."
+        "\n----\nATTENTION: For all file operations (read, write, delete, move, `replace_in_file`), you must use the `neovim` MCP server tools." ..
+        "\nATTENTION: For all other tool usage, you must exclusively use the `use_mcp_tool` with the connected MCP servers."
     return prompt
   end,
   -- The custom_tools type supports both a list and a function that returns a list. Using a function here prevents requiring mcphub before it's loaded
