@@ -15,6 +15,10 @@
     "github.com/zcaceres/fetch-mcp": {
       "command": "sh",
       "args": ["-c", "node ${HOME}/.mcphub/servers/fetch-mcp/dist/index.js"]
+    },
+    "vectorcode-mcp-server": {
+      "command": "vectorcode-mcp-server",
+      "args": []
     }
   },
   "nativeMCPServers": {
