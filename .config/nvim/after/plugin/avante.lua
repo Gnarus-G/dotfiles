@@ -20,6 +20,7 @@ local config = {
     debounce = 300,
     throttle = 300,
   },
+  disabled_tools = disabled_tools,
   providers = {
     claude = {
       timeout = 30000, -- Timeout in milliseconds
@@ -37,7 +38,6 @@ local config = {
           temperature = 0.75,
         },
       },
-      disabled_tools = disabled_tools
     },
     gemini_next = {
       __inherited_from = 'gemini',
