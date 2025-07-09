@@ -175,4 +175,26 @@ mcphub.add_prompt("gnarus", {
   end
 })
 
+mcphub.add_prompt("gnarus", {
+  name = "PR-summary",
+  description = "Create a summary of PR with the changes in the current branch",
+  handler = function(_, res)
+    local ok, diff_output = pcall(vim.fn.system, "git fetch --prune --all && git diff origin/main")
+    if not ok then
+      res:error("Failed to get git diff", { error = diff_output })
+      return
+    end
+
+    res:system()
+        :text(
+          "You are an expert software engineer responsible for generating concise and informative pull request summaries.")
+        :text(
+          "Your goal is to summarize the provided git diff into a clear and comprehensive pull request description. Focus on the main changes, their purpose, and any significant impacts.")
+        :user()
+        :text("Create a PR summary based on the following git diff:\n```diff\n" .. diff_output .. "\n```")
+
+    return res:send()
+  end
+})
+
 require "mcphub_servers.todo_server"
