@@ -5,34 +5,62 @@
         "-c",
         "node ${HOME}/.mcphub/servers/ez-web-search-mcp/build/index.js"
       ],
-      "disabled": false,
-      "command": "sh"
+      "command": "sh",
+      "custom_instructions": {
+        "text": "Also *consider* tools from the `context7-mcp` server to get *more recent*, *more trustworthy* information."
+      },
+      "disabled": false
     },
     "github.com/upstash/context7-mcp": {
       "args": ["-y", "@upstash/context7-mcp"],
+      "custom_instructions": {
+        "text": "- When asked for information on libraries, APIs, tools, systems, or technology, **always** use this tool."
+      },
       "command": "npx"
     },
-    "github.com/zcaceres/fetch-mcp": {
-      "command": "sh",
-      "args": ["-c", "node ${HOME}/.mcphub/servers/fetch-mcp/dist/index.js"]
-    },
     "vectorcode-mcp-server": {
-      "command": "vectorcode-mcp-server",
-      "args": []
+      "args": [],
+      "command": "vectorcode-mcp-server"
+    },
+    "sequentialthinking": {
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"],
+      "command": "npx",
+      "autoApprove": ["sequentialthinking"]
+    },
+    "github.com/zcaceres/fetch-mcp": {
+      "args": ["-c", "node ${HOME}/.mcphub/servers/fetch-mcp/dist/index.js"],
+      "command": "sh"
     }
   },
   "nativeMCPServers": {
-    "neovim": {
-      "disabled_tools": [],
-      "custom_instructions": {
-        "text": "**Important Notes**:\n- Always use this mcp server's tools for file operations\n- If `replace_in_file` fails, then use `read_file` and then `write_file` tool from the mcp server."
-      },
-      "disabled": false
+    "todo_management": {
+      "autoApprove": ["list_todos", "create_todo"]
     },
     "gnarus": {
       "custom_instructions": {
         "text": "Consider these two points:\n- When provided a plugin's source code location, always attempt to search and read through it before answering anything.\n- Search inside the nvim://plugin/.. paths to find the source code (lua) files for any of our neovim plugins."
       }
+    },
+    "mcphub": {
+      "autoApprove": ["get_current_servers"]
+    },
+    "neovim": {
+      "disabled": false,
+      "disabled_tools": [],
+      "custom_instructions": {
+        "text": "**Important Notes**:\n- Always use this mcp server's tools for file operations\n- If `replace_in_file` fails, then use `read_file` and then `write_file` tool from the mcp server."
+      },
+      "autoApprove": [
+        "execute_lua",
+        "execute_command",
+        "read_file",
+        "delete_item",
+        "move_item",
+        "find_files",
+        "list_directory",
+        "write_file",
+        "replace_in_file"
+      ]
     }
   }
 }
