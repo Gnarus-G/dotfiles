@@ -1,38 +1,72 @@
 {
-  "mcpServers": {
-    "ez-web-search-mcp": {
-      "args": [
-        "-c",
-        "node ${HOME}/.mcphub/servers/ez-web-search-mcp/build/index.js"
-      ],
-      "disabled": false,
-      "command": "sh"
-    },
-    "github.com/upstash/context7-mcp": {
-      "args": ["-y", "@upstash/context7-mcp"],
-      "command": "npx"
-    },
-    "github.com/zcaceres/fetch-mcp": {
-      "command": "sh",
-      "args": ["-c", "node ${HOME}/.mcphub/servers/fetch-mcp/dist/index.js"]
-    },
-    "vectorcode-mcp-server": {
-      "command": "vectorcode-mcp-server",
-      "args": []
-    }
-  },
   "nativeMCPServers": {
-    "neovim": {
-      "disabled_tools": [],
-      "custom_instructions": {
-        "text": "**Important Notes**:\n- Always use this mcp server's tools for file operations\n- If `replace_in_file` fails, then use `read_file` and then `write_file` tool from the mcp server."
-      },
-      "disabled": false
+    "mcphub": {
+      "autoApprove": [
+        "get_current_servers"
+      ]
     },
     "gnarus": {
       "custom_instructions": {
         "text": "Consider these two points:\n- When provided a plugin's source code location, always attempt to search and read through it before answering anything.\n- Search inside the nvim://plugin/.. paths to find the source code (lua) files for any of our neovim plugins."
       }
+    },
+    "neovim": {
+      "disabled": false,
+      "disabled_tools": [
+        
+      ],
+      "custom_instructions": {
+        "text": "**Important Notes**:\n- Always use this mcp server's tools for file operations\n- If `replace_in_file` fails, then use `read_file` and then `write_file` tool from the mcp server."
+      },
+      "autoApprove": [
+        "read_file"
+      ]
+    }
+  },
+  "mcpServers": {
+    "vectorcode-mcp-server": {
+      "command": "vectorcode-mcp-server",
+      "args": [
+        
+      ]
+    },
+    "github.com/zcaceres/fetch-mcp": {
+      "command": "sh",
+      "args": [
+        "-c",
+        "node ${HOME}/.mcphub/servers/fetch-mcp/dist/index.js"
+      ]
+    },
+    "github.com/upstash/context7-mcp": {
+      "command": "npx",
+      "custom_instructions": {
+        "text": "- When asked for information on libraries, APIs, tools, systems, or technology, **always** use this tool."
+      },
+      "args": [
+        "-y",
+        "@upstash/context7-mcp"
+      ]
+    },
+    "sequentialthinking": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-sequential-thinking"
+      ],
+      "autoApprove": [
+        "sequentialthinking"
+      ]
+    },
+    "ez-web-search-mcp": {
+      "command": "sh",
+      "disabled": false,
+      "custom_instructions": {
+        "text": "Also *consider* tools from the `context7-mcp` server to get *more recent*, *more trustworthy* information."
+      },
+      "args": [
+        "-c",
+        "node ${HOME}/.mcphub/servers/ez-web-search-mcp/build/index.js"
+      ]
     }
   }
 }
