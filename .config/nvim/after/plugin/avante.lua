@@ -8,6 +8,7 @@ if os.getenv("GEMINI_API_KEY") == nil then
 end
 
 local disabled_tools = {
+  "web_search",
   "replace_in_file",
   "view"
 }
@@ -65,10 +66,6 @@ local config = {
   rag_service = {
     enabled = false, -- Enables the RAG service
   },
-  web_search_engine = {
-    provider = "searxng",
-    proxy = nil
-  },
   windows = {
     width = 40, -- Width as a percentage of screen width
   },
@@ -79,10 +76,6 @@ local config = {
       prev = "<M-[>",
       dismiss = "<C-]>",
     },
-  },
-  input = {
-    provider = "snacks",
-    provider_opts = {},
   },
   ---@type AvanteSlashCommand[]
   slash_commands = {
@@ -148,12 +141,12 @@ local config = {
   system_prompt = function()
     local hub = require("mcphub").get_hub_instance()
     local prompt =
-    "---\nATTENTION: The `replace_in_file` tool is currently disabled due to known issues. Please refrain from using it.\n---"
+    "---\nATTENTION: The `view` and `replace_in_file` tools are currently disabled due to known issues. Please refrain from using them.\n---"
     if not hub then return prompt end
 
     prompt = hub:get_active_servers_prompt() ..
-        "\n----\nATTENTION: For all file operations (read, write, delete, move, `replace_in_file`), you must use the `neovim` MCP server tools." ..
-        "\nATTENTION: For all other tool usage, you must exclusively use the `use_mcp_tool` with the connected MCP servers."
+        "\n----\nATTENTION: For **all** tool usage, you must *exclusively* use the `use_mcp_tool` and `access_mcp_resource` tools with the connected MCP servers." ..
+        "\nATTENTION: For all file operations (read, write, delete, move, `replace_in_file`), you must use the `neovim` MCP server tools."
     return prompt
   end,
   -- The custom_tools type supports both a list and a function that returns a list. Using a function here prevents requiring mcphub before it's loaded
