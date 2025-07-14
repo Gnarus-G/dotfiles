@@ -27,6 +27,16 @@
       "command": "npx",
       "autoApprove": ["sequentialthinking"]
     },
+    "tts": {
+      "command": "tts-mcp",
+      "disabled": false,
+      "env": {
+        "HIMITHER_TTS_LOG_FILE": "/tmp/tts-mcp-server.log",
+        "RUST_LOG": "debug",
+        "XDG_RUNTIME_DIR": "/run/user/1000",
+        "DBUS_SESSION_BUS_ADDRESS": "unix:path=/run/user/1000/bus"
+      }
+    },
     "github.com/zcaceres/fetch-mcp": {
       "args": ["-c", "node ${HOME}/.mcphub/servers/fetch-mcp/dist/index.js"],
       "command": "sh"
