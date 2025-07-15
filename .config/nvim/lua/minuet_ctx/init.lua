@@ -47,7 +47,6 @@ end
 
 local function get_formatted_chats_context()
   local formatted_chats = vim.iter({
-        llm_chats.get_formatted_context("avante"),
         llm_chats.get_formatted_context("codecompanion")
       })
       :filter(function(chat) return chat ~= "" end)

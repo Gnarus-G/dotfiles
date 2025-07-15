@@ -161,19 +161,6 @@ return packer.startup(function(use)
 
   use 'GeorgesAlkhouri/nvim-aider'
 
-  use {
-    'yetone/avante.nvim',
-    branch = 'main',
-    run = 'make',
-    requires = {
-      "ravitemer/mcphub.nvim",
-      'nvim-lua/plenary.nvim',
-      'MunifTanjim/nui.nvim',
-      'MeanderingProgrammer/render-markdown.nvim',
-      'folke/snacks.nvim'
-    }
-  }
-
   use { 'milanglacier/minuet-ai.nvim', }
 
   -- Automatically set up your configuration after cloning packer.nvim
