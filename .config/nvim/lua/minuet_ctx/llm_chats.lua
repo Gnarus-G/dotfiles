@@ -1,7 +1,7 @@
 local M = {}
 
 -- declare union type
----@alias LlmChatType "codecompanion" | "avante"
+---@alias LlmChatType "codecompanion"
 
 ---@type table<LlmChatType, integer>
 M.nofile_buffers = {} -- A list of buffer of buftype="nofile" with desired content
@@ -41,27 +41,6 @@ vim.api.nvim_create_autocmd({ "User" }, {
     }
     if match_statement[event.match] then
       match_statement[event.match]()
-    end
-  end,
-})
-
-local avante_open_close_group = vim.api.nvim_create_augroup("AvanteOpenClose", { clear = true })
-vim.api.nvim_create_autocmd({ "BufWinEnter" }, {
-  group = avante_open_close_group,
-  pattern = "*",
-  callback = function(args)
-    if vim.bo[args.buf].filetype == "Avante" then
-      M.add_buffer_for(args.buf, "avante")
-    end
-  end,
-})
-
-vim.api.nvim_create_autocmd({ "BufWipeout" }, {
-  group = avante_open_close_group,
-  pattern = "*",
-  callback = function(args)
-    if vim.bo[args.buf].filetype == "Avante" then
-      M.clear_for("avante")
     end
   end,
 })
