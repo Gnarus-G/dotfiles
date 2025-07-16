@@ -84,9 +84,7 @@ vim.lsp.config("rust_analyzer", {
   capabilities = lsp_capabilities,
   settings = {
     ['rust-analyzer'] = {
-      checkOnSave = {
-        command = "clippy",
-      },
+      checkOnSave = true,
       rustfmt = {
         overrideCommand = { "rustfmt", "+nightly", "--edition", "2021" },
       }
