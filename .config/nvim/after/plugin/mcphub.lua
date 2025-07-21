@@ -218,4 +218,25 @@ mcphub.add_prompt("gnarus", {
   end
 })
 
+mcphub.add_prompt("gnarus", {
+  name = "curlify",
+  description = "Parse and convert text to a `curl` command.",
+  arguments = {
+    {
+      name = "text",
+      description = "Text to convert to curl command",
+      type = "string",
+      required = true,
+    },
+  },
+  handler = function(req, res)
+    res:system()
+        :text(
+          "You are an expert at parsing text and converting it to a `curl` command. You will receive an arbitrary text and you will generate a `curl` command based on it.")
+        :user()
+        :text("Convert the following text to a `curl` command: \n```\n" .. req.params.text .. "\n```")
+    return res:send()
+  end
+})
+
 require "mcphub_servers.todo_server"
