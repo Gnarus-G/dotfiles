@@ -23,18 +23,7 @@ local setup_opts = {
     enable_auto_complete = true,
   },
   virtualtext = {
-    auto_trigger_ft = {
-      "rust",
-      "python",
-      "lua",
-      "typescript",
-      "typescriptreact",
-      "go",
-      "javascript",
-      "javascripttreact",
-      "html",
-      "css",
-    },
+    auto_trigger_ft = {},
     show_on_completion_menu = true,
     keymap = {
       -- accept whole completion
