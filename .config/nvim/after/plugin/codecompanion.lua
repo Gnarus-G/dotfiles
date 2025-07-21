@@ -215,7 +215,7 @@ local opts = {
     gemini_pro = adapter_and_default_model("gemini", "gemini-2.5-pro"),
     gemini_fastest = adapter_and_default_model("gemini", "gemini-2.0-flash"),
     claude_haiku = adapter_and_default_model("anthropic", "claude-3-5-haiku-20241022"),
-    ollama = adapter_and_default_model("ollama", "qwen2.5-coder:3b", ollama_adapter_opts),
+    ollama = adapter_and_default_model("ollama", "qwen3", ollama_adapter_opts),
   },
   extensions = {
     mcphub = {
