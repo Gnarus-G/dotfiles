@@ -115,9 +115,9 @@ mcphub.add_resource("gnarus", {
 })
 
 mcphub.add_resource("gnarus", {
-  name = "unstaged",
-  description = "list of files not staged for commit in current git repository",
-  uri = "git://unstaged",
+  name = "working-files",
+  description = "list of files not yet committed in current git repository, excluding untracked files.",
+  uri = "git://status",
   mimeType = "application/json",
   handler = function(_req, res)
     local ok, output = pcall(vim.fn.system, "git status --porcelain")

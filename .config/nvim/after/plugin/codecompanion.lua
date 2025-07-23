@@ -126,32 +126,15 @@ local opts = {
             contains_code = false,
           },
         },
-        ["git_files"] = {
-          description = "List git files",
-          ---@param chat CodeCompanion.Chat
-          callback = function(chat)
-            local handle = io.popen("git ls-files")
-            if handle ~= nil then
-              local result = handle:read("*a")
-              handle:close()
-              chat:add_reference({ role = "user", content = result }, "git", "<git_files>")
-            else
-              return vim.notify("No git files available", vim.log.levels.INFO, { title = "CodeCompanion" })
-            end
-          end,
-          opts = {
-            contains_code = false,
-          },
-        },
-        ["git_changed_files"] = {
-          description = "List git changed files",
+        ["git_unstaged_files"] = {
+          description = "List git unstaged files",
           ---@param chat CodeCompanion.Chat
           callback = function(chat)
             local handle = io.popen("git diff --name-only")
             if handle ~= nil then
               local result = handle:read("*a")
               handle:close()
-              chat:add_reference({ role = "user", content = result }, "git", "<git_changed_files>")
+              chat:add_reference({ role = "user", content = result }, "git", "<git_changed_files/>")
             else
               return vim.notify("No git changed files available", vim.log.levels.INFO, { title = "CodeCompanion" })
             end
@@ -161,14 +144,14 @@ local opts = {
           },
         },
         ["git_modified_or_added_files"] = {
-          description = "List git modified or added files",
+          description = "List git unstaged or staged files",
           ---@param chat CodeCompanion.Chat
           callback = function(chat)
             local handle = io.popen("git status --porcelain | grep -v '^??' | awk '{ print $2 }'")
             if handle ~= nil then
               local result = handle:read("*a")
               handle:close()
-              chat:add_reference({ role = "user", content = result }, "git", "<git_modified_or_added_files>")
+              chat:add_reference({ role = "user", content = result }, "git", "<git_modified_or_added_files/>")
             else
               return vim.notify("No git modified or added files available", vim.log.levels.INFO,
                 { title = "CodeCompanion" })
