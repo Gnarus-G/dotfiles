@@ -5,6 +5,7 @@ pwd=$(pwd)
 configPaths=(
   .config/nvim
   .config/mcphub
+  .config/opencode
   .config/awesome
   .config/gtk-3.0
   .config/eww .config/leftwm
