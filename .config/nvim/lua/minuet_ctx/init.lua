@@ -1,6 +1,6 @@
 local extra_files = require("minuet_ctx.extra_files")
 local llm_chats = require("minuet_ctx.llm_chats")
-local harpoon_ctx = require("minuet_ctx.harpoon")
+local harpoon_ctx = nil -- Lazy-loaded to avoid circular dependency
 
 local function is_file_of_current_buffer(filepath)
   local current_buf_filepath = vim.api.nvim_buf_get_name(0)
@@ -19,6 +19,11 @@ local function get_formatted_files_context()
     local content = file:read("*a")
     file:close()
     return content or ""
+  end
+
+  -- Lazy-load harpoon context to avoid circular dependency
+  if not harpoon_ctx then
+    harpoon_ctx = require("minuet_ctx.harpoon")
   end
 
   local files = vim.tbl_extend("force", extra_files.files(), harpoon_ctx.files())
@@ -95,6 +100,10 @@ vim.api.nvim_create_user_command('MinuetShowContext', function()
   end
 
   vim.notify("--- Harpoon Files ---", vim.log.levels.INFO)
+  -- Lazy-load harpoon context to avoid circular dependency
+  if not harpoon_ctx then
+    harpoon_ctx = require("minuet_ctx.harpoon")
+  end
   local harpoon_files = harpoon_ctx.files()
   if #harpoon_files > 0 then
     for _, f in ipairs(harpoon_files) do vim.notify("- " .. f, vim.log.levels.INFO) end
@@ -108,10 +117,22 @@ vim.api.nvim_create_user_command('MinuetShowContext', function()
   --[[ vim.notify(combined_content, vim.log.levels.DEBUG) ]]
 end, { nargs = 0 })
 
-harpoon_ctx.sync()
+
+-- Sync minuet context with harpoon files at startup
+vim.defer_fn(function()
+  if not harpoon_ctx then
+    harpoon_ctx = require("minuet_ctx.harpoon")
+  end
+  harpoon_ctx.sync()
+end, 100)
+
 
 return {
   files = function()
+    -- Lazy-load harpoon context to avoid circular dependency
+    if not harpoon_ctx then
+      harpoon_ctx = require("minuet_ctx.harpoon")
+    end
     return vim.tbl_extend("force", extra_files.files(), harpoon_ctx.files())
   end,
   get_formatted_context = get_formatted_context
