@@ -1,4 +1,6 @@
-vim.cmd "let mapleader = \" \""
+-- Make sure to setup `mapleader` before loading lazy.nvim so that mappings are correct
+vim.g.mapleader = " "
+vim.g.maplocalleader = "\\"
 
 vim.keymap.set("n", "<leader>F", "<cmd>lua require('gnarus.formatting').async()<CR>")
 

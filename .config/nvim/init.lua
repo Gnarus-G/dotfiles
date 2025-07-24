@@ -1,7 +1,7 @@
 require "gnarus.options"
-require "gnarus.plugins"
 require "gnarus.remaps"
 require "gnarus.formatting"
+require "gnarus.lazy"
 
 -- highlight_yank
 vim.api.nvim_create_autocmd("TextYankPost", {
@@ -29,6 +29,8 @@ vim.filetype.add({
   extension = {
     mdx = 'mdx',
     ["Modelfile"] = 'modelfile',
+    todo = 'todolang',
+    td = 'todolang',
   },
   filename = {
     ["Modelfile"] = 'modelfile',
