@@ -1,3 +1,5 @@
 packer_compiled.lua
 .luarc.json
 .aider*
+.local
+.opencode
