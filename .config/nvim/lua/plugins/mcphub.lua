@@ -129,22 +129,14 @@ return {
       uri = "git://status",
       mimeType = "application/json",
       handler = function(_req, res)
-        local ok, output = pcall(vim.fn.system, "git status --porcelain")
-        if not ok then
+        local files, output = require "gnarus.utils".git_modified_or_added_files()
+        if output then
           res:error("Failed to get unstaged files", {
             error = output
           })
           return
         end
-        local unstaged_files = {}
-        for line in string.gmatch(output, "[^\r\n]+") do
-          local status = string.sub(line, 1, 2)
-          local file = string.sub(line, 4)
-          if status:match("^ [MADRCU?]") or status:match("^[MADRCU?] ") then
-            table.insert(unstaged_files, file)
-          end
-        end
-        res:text(vim.json.encode(unstaged_files)):send()
+        res:text(vim.json.encode(files)):send()
       end
     })
 
@@ -205,6 +197,21 @@ return {
       end
     })
 
+    mcphub.add_resource("gnarus", {
+      name        = "branch-diff",
+      description = "Git diff between current branch and origin/main",
+      uri         = "git://branch-diff",
+      mimeType    = "text/plain",
+      handler     = function(_req, res)
+        local ok, diff_output = pcall(vim.fn.system, "git fetch --prune --all && git diff origin/main")
+        if not ok then
+          res:error("Failed to get git diff", { error = diff_output })
+          return
+        end
+        res:text(diff_output):send()
+      end
+    })
+
     mcphub.add_prompt("gnarus", {
       name = "PR-summary",
       description = "Create a summary of PR with the changes in the current branch",
@@ -215,7 +222,7 @@ return {
           return
         end
 
-        res:system()
+        return res:system()
             :text(
               "You are an expert software engineer responsible for generating concise and informative pull request summaries.")
             :text(
@@ -223,7 +230,7 @@ return {
             :user()
             :text("Create a PR summary based on the following git diff:\n```diff\n" .. diff_output .. "\n```")
 
-        return res:send()
+            :send()
       end
     })
 
