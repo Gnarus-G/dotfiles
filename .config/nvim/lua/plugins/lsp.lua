@@ -9,16 +9,6 @@ return {
       "b0o/schemastore.nvim",
     },
     config = function()
-      -- For lsp's that work on the same filetypes
-      local function stop_clients(exclude, bufnr)
-        local active_clients = vim.lsp.get_clients({ bufnr = bufnr })
-        for _, active_client in ipairs(active_clients) do
-          if vim.tbl_contains(exclude, active_client.name) then
-            vim.lsp.stop_client(active_client.id)
-          end
-        end
-      end
-
       -- Global diagnostic keybindings
       vim.keymap.set('n', 'gl', '<cmd>lua vim.diagnostic.open_float()<cr>')
       vim.keymap.set('n', '[d', '<cmd>lua vim.diagnostic.goto_prev()<cr>')
@@ -163,4 +153,3 @@ return {
     lazy = true,
   },
 }
-
