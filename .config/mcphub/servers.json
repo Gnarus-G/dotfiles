@@ -1,10 +1,7 @@
 {
   "mcpServers": {
     "context7-mcp": {
-      "args": [
-        "-y",
-        "@upstash/context7-mcp"
-      ],
+      "args": ["-y", "@upstash/context7-mcp"],
       "command": "npx",
       "custom_instructions": {
         "text": "- When asked for information on libraries, APIs, tools, systems, or technology, **always** use this tool."
@@ -22,20 +19,12 @@
       "disabled": false
     },
     "fetch-mcp": {
-      "args": [
-        "-c",
-        "node ${HOME}/.mcphub/servers/fetch-mcp/dist/index.js"
-      ],
+      "args": ["-c", "node ${HOME}/.mcphub/servers/fetch-mcp/dist/index.js"],
       "command": "sh"
     },
     "sequentialthinking": {
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-sequential-thinking"
-      ],
-      "autoApprove": [
-        "sequentialthinking"
-      ],
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"],
+      "autoApprove": ["sequentialthinking"],
       "command": "npx"
     },
     "tts": {
@@ -63,9 +52,7 @@
       }
     },
     "mcphub": {
-      "autoApprove": [
-        "get_current_servers"
-      ]
+      "autoApprove": ["get_current_servers"]
     },
     "neovim": {
       "autoApprove": [
@@ -84,13 +71,6 @@
       },
       "disabled": false,
       "disabled_tools": []
-    },
-    "todo_management": {
-      "autoApprove": [
-        "list_todos",
-        "create_todo"
-      ],
-      "disabled": true
     }
   }
 }
