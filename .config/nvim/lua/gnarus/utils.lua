@@ -17,10 +17,28 @@ return {
         end)
         :totable()
   end,
-  get_buffer_text_content =
+
   ---@param buf number
   ---@return string
-      function(buf)
-        return table.concat(vim.api.nvim_buf_get_lines(buf, 0, -1, false), "\n")
+  get_buffer_text_content = function(buf)
+    return table.concat(vim.api.nvim_buf_get_lines(buf, 0, -1, false), "\n")
+  end,
+
+  ---@return table<string>?
+  ---@return string?
+  git_modified_or_added_files = function()
+    local ok, output = pcall(vim.fn.system, "git status --porcelain")
+    if not ok then
+      return nil, output
+    end
+    local unstaged_files = {}
+    for line in string.gmatch(output, "[^\r\n]+") do
+      local status = string.sub(line, 1, 2)
+      local file = string.sub(line, 4)
+      if status:match("^ [MADRCU?]") or status:match("^[MADRCU?] ") then
+        table.insert(unstaged_files, file)
       end
+    end
+    return unstaged_files, nil
+  end
 }

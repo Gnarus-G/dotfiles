@@ -158,14 +158,13 @@ return {
               description = "List git unstaged or staged files",
               ---@param chat CodeCompanion.Chat
               callback = function(chat)
-                local handle = io.popen("git status --porcelain | grep -v '^??' | awk '{ print $2 }'")
-                if handle ~= nil then
-                  local result = handle:read("*a")
-                  handle:close()
-                  chat:add_reference({ role = "user", content = result }, "git", "<git_modified_or_added_files/>")
-                else
-                  return vim.notify("No git modified or added files available", vim.log.levels.INFO,
+                local result, err = require("gnarus.utils").git_modified_or_added_files()
+                if result == nil then
+                  return vim.notify("No git modified or added files available: " .. err, vim.log.levels.INFO,
                     { title = "CodeCompanion" })
+                end
+                for _, filepath in ipairs(result) do
+                  add_file_to_codecompanion_chat(filepath, chat)
                 end
               end,
               opts = {
