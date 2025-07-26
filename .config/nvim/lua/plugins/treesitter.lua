@@ -4,7 +4,6 @@ return {
     event = { "BufReadPost", "BufNewFile" },
     build = ":TSUpdate",
     dependencies = {
-      "nvim-treesitter/nvim-treesitter-context",
       "nvim-treesitter/playground",
     },
     config = function()
@@ -23,15 +22,8 @@ return {
     end,
   },
   {
-    "nvim-treesitter/nvim-treesitter-context",
-    dependencies = { "nvim-treesitter/nvim-treesitter" },
-    event = { "BufReadPost", "BufNewFile" },
-    opts = {},
-  },
-  {
     "nvim-treesitter/playground",
     dependencies = { "nvim-treesitter/nvim-treesitter" },
     cmd = { "TSPlaygroundToggle", "TSHighlightCapturesUnderCursor" },
   },
 }
-
