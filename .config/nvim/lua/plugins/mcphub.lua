@@ -254,8 +254,5 @@ return {
         return res:send()
       end
     })
-
-    -- Load the todo server
-    require "mcphub_servers.todo_server"
   end,
 }
