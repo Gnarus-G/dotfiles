@@ -42,6 +42,11 @@ return {
       provider_options = {
         claude = {
           model = 'claude-3-5-haiku-20241022',
+          chat_input = {
+            template = "{{{extra_context}}}\n" ..
+                minuet_config.default_chat_input_prefix_first.template,
+            extra_context = extra_context.get_formatted_context
+          },
         },
         gemini = {
           model = "gemini-2.5-flash",
