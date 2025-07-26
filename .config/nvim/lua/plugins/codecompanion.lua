@@ -137,23 +137,6 @@ return {
                 contains_code = false,
               },
             },
-            ["git_unstaged_files"] = {
-              description = "List git unstaged files",
-              ---@param chat CodeCompanion.Chat
-              callback = function(chat)
-                local handle = io.popen("git diff --name-only")
-                if handle ~= nil then
-                  local result = handle:read("*a")
-                  handle:close()
-                  chat:add_reference({ role = "user", content = result }, "git", "<git_changed_files/>")
-                else
-                  return vim.notify("No git changed files available", vim.log.levels.INFO, { title = "CodeCompanion" })
-                end
-              end,
-              opts = {
-                contains_code = false,
-              },
-            },
             ["git_modified_or_added_files"] = {
               description = "List git unstaged or staged files",
               ---@param chat CodeCompanion.Chat
