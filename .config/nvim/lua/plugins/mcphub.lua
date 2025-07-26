@@ -166,6 +166,26 @@ local function add_prompts_and_resources(mcphub)
       return res:send()
     end
   })
+
+  mcphub.add_prompt("gnarus", {
+    name = "enhance-prompt",
+    description = "Enhance a prompt of the user to make it more effective",
+    arguments = {
+      {
+        name = "prompt",
+        description = "Prompt to be improved",
+        type = "string",
+        required = true,
+      },
+    },
+    handler = function(req, res)
+      return res:system()
+          :text("You are an expert prompt engineer who understands context and communication strategies.")
+          :text("Improve the given prompt by making it more specific, clear, and actionable.")
+          :user()
+          :text("Enhance this prompt:\n" .. req.params.prompt .. "\n")
+    end
+  })
 end
 
 return {
