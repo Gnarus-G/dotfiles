@@ -20,7 +20,7 @@ return {
 
     -- Determine adapter names based on GEMINI_API_KEY
     local chat_adapter_name = "gemini"
-    local inline_adapter_name = "gemini_fastest"
+    local inline_adapter_name = "gemini_fast"
     local cmd_adapter_name = "gemini"
 
     if os.getenv("GEMINI_API_KEY") == nil then
@@ -187,9 +187,13 @@ return {
         log_level = "ERROR", -- TRACE|DEBUG|ERROR|INFO
       },
       adapters = {
-        gemini = adapter_and_default_model("gemini", "gemini-2.5-flash"),
+        gemini_fast = adapter_and_default_model("gemini", "gemini-2.5-flash"),
+        gemini = adapter_and_default_model("gemini", "gemini-2.5-flash", {
+          parameters = {
+            reasoning_effort = "none"
+          }
+        }),
         gemini_pro = adapter_and_default_model("gemini", "gemini-2.5-pro"),
-        gemini_fastest = adapter_and_default_model("gemini", "gemini-2.0-flash"),
         claude_haiku = adapter_and_default_model("anthropic", "claude-3-5-haiku-20241022"),
         ollama = adapter_and_default_model("ollama", "qwen3", ollama_adapter_opts),
       },
