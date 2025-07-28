@@ -64,7 +64,8 @@
         "find_files",
         "list_directory",
         "write_file",
-        "replace_in_file"
+        "replace_in_file",
+        "edit_file"
       ],
       "custom_instructions": {
         "text": "**Important Notes**:\n- Always use this mcp server's tools for file operations\n- If `replace_in_file` fails, then use `read_file` and then `write_file` tool from the mcp server."
