@@ -1,3 +1,4 @@
+---@param mcphub MCPHub
 local function add_prompts_and_resources(mcphub)
   -- Add plugin resources
   local plugins_dir = vim.fn.stdpath("data") .. "/lazy/"
@@ -186,6 +187,25 @@ local function add_prompts_and_resources(mcphub)
           :text("Enhance this prompt:\n" .. req.params.prompt .. "\n")
     end
   })
+
+  mcphub.add_prompt("gnarus", {
+    name = "prompt_sum",
+    description =
+    "Generate an effective prompt that captures the user's desires expressed throughout the current chat.",
+    handler = function(req, res)
+      local full_prompt = "You are a master at generating high-quality prompts. " ..
+          "Your task is to take a summary of a conversation and generate a single, concise, and effective prompt " ..
+          "that captures the user's ultimate goal or desire expressed throughout that conversation. " ..
+          "The generated prompt should be suitable for use with a powerful language model to achieve the user's objective. " ..
+          "Please provide only the optimized prompt, without any additional explanations or formatting."
+      return res:system()
+          :text(full_prompt)
+          :user()
+          :text(
+            "Summarize the following conversation to extract the my ultimate goal and generate a single, concise, and effective prompt based on it:")
+          :send()
+    end
+  })
 end
 
 return {
@@ -195,6 +215,7 @@ return {
   },
   build = "npm install -g mcp-hub@latest", -- Installs `mcp-hub` node binary globally
   config = function()
+    ---@type MCPHub
     local mcphub = require("mcphub")
     mcphub.setup({
       --- `mcp-hub` binary related options-------------------
