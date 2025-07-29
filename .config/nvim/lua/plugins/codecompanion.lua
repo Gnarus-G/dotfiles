@@ -68,6 +68,42 @@ return {
               return "CodeCompanion (" .. adapter.name .. ")"
             end,
           },
+          tools = {
+            groups = {
+              ["read_only"] = {
+                description = "A custom agent combining tools",
+                system_prompt = "Read files from the filesystem to acquire any missing context.",
+                tools = {
+                  "neovim__list_directory",
+                  "neovim__find_files",
+                  "neovim__read_file",
+                  "neovim__read_multiple_files",
+                },
+                opts = {
+                  collapse_tools = false, -- When true, show as a single group reference instead of individual tools
+                },
+              },
+              ["smart_dev"] = {
+                description = "A custom agent combining tools",
+                system_prompt =
+                "You're a meticulous software engineer who always looks things up before making decisions.",
+                tools = {
+                  "neovim__list_directory",
+                  "neovim__find_files",
+                  "neovim__read_file",
+                  "neovim__read_multiple_files",
+                  "neovim__write_file",
+                  "neovim__edit_file",
+                  "context7_mcp__resolve_library_id",
+                  "context7_mcp__get_library_docs",
+                  "ez_web_search_mcp__search"
+                },
+                opts = {
+                  collapse_tools = false, -- When true, show as a single group reference instead of individual tools
+                },
+              },
+            }
+          },
           slash_commands = {
             ["dir"] = {
               description = "Select files from your home and add them as references to the current chat",
