@@ -148,35 +148,38 @@ local function add_prompts_and_resources(mcphub)
   })
 
   mcphub.add_prompt("gnarus", {
-    name = "commit_help",
-    description = "Help write a commit message",
+    name = "git-commit-summary",
+    description = "Genearate a commit message based on the changes against the provided git branch.",
     arguments = function()
       -- Get git branches
-      local branches = vim.fn.systemlist("git branch --format='%(refname:short)'")
-
+      local branches = vim.fn.systemlist("git branch --all --format='%(refname:short)'")
       return {
         {
           name = "branch",
           description = "Target branch",
           default = "main",
-          -- Use actual branches
           enum = branches
         }
       }
     end,
     handler = function(req, res)
-      --[[ local diff_output = vim.fn.system("git fetch --prune --all && git diff " .. req.params.branch); ]]
+      local ok, diff_output = pcall(vim.fn.system, "git fetch --prune --all && git diff --staged " .. req.params.branch);
+      if not ok then
+        return res:error("Failed to get git diff", { error = diff_output })
+      end
+
+      if vim.fn.empty(diff_output) == 1 then
+        return res:error("There are no staged changes in the git repo")
+      end
+
       return res
           :system()
-          :text(string.format(
-            "Help write a commit for branch: %s",
-            req.params.branch
-          ))
           :text(
-            "The subject line should be 50 chars max, and should start with an imperative verb. (e.g. 'Add frontend unit tests')")
+            "You are a knowledgeable and experienced software developer. Your task is to provide helpful and accurate information about Git commit messages. " ..
+            "The subject line of a commit should be 50 characters max, and should start with an imperative verb. (e.g. 'Add frontend unit tests')\n\nBody: The body of a commit should explain the 'what' and 'why' of the commit, not the 'how'. It should be wrapped at 72 characters." ..
+            "\n\nFooter: The footer of a commit should contain any information that is not part of the subject or body. (e.g. 'Fixes #123', 'Closes #456', 'BREAKING CHANGE: ...')")
           :user()
-          :text("@{neovim__execute_command}\n") -- assumes codecompanion
-          --[[ :text("Git diff:\n```diff\n" .. diff_output .. "\n```\n") ]]
+          :text("Git diff:\n```diff\n" .. diff_output .. "\n```\n")
           :send()
     end
   })
