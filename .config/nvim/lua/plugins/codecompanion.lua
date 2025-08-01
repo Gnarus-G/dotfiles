@@ -13,6 +13,14 @@ return {
       env = {
         url = os.getenv("OLLAMA_API_BASE") or "http://localhost:11434"
       },
+      schema = {
+        temperature = {
+          default = 0
+        },
+        keep_alive = {
+          default = '30m',
+        }
+      },
       parameters = {
         sync = true
       }
@@ -212,10 +220,10 @@ return {
       display = {
         diff = {
           enabled = true,
-          close_chat_at = 80,   -- Close an open chat buffer if the total columns of your display are less than...
-          layout = "vertical",  -- vertical|horizontal split for default provider
+          close_chat_at = 80,     -- Close an open chat buffer if the total columns of your display are less than...
+          layout = "vertical",    -- vertical|horizontal split for default provider
           opts = { "internal", "filler", "closeoff", "algorithm:patience", "followwrap", "linematch:120" },
-          provider = "default", -- default|mini_diff
+          provider = "mini_diff", -- default|mini_diff
         },
         chat = { window = { position = "right" }, show_settings = true }
       },
@@ -223,10 +231,15 @@ return {
         log_level = "ERROR", -- TRACE|DEBUG|ERROR|INFO
       },
       adapters = {
-        gemini_fast = adapter_and_default_model("gemini", "gemini-2.5-flash"),
-        gemini = adapter_and_default_model("gemini", "gemini-2.5-flash", {
-          parameters = {
-            reasoning_effort = "none"
+        gemini = adapter_and_default_model("gemini", "gemini-2.5-flash"),
+        gemini_fast = adapter_and_default_model("gemini", "gemini-2.5-flash", {
+          schema = {
+            temperature = {
+              default = 0
+            },
+            reasoning_effort = {
+              default = "none"
+            }
           }
         }),
         gemini_pro = adapter_and_default_model("gemini", "gemini-2.5-pro"),
@@ -355,14 +368,21 @@ return {
         format_item = function(item) return item.name .. " (" .. item.model .. ")" end,
       }, function(item)
         if item then
-          return vim.cmd(":CodeCompanionChat " .. item.name .. " <cr>")
+          -- Execute the CodeCompanionChat command directly with the selected adapter name.
+          vim.cmd("CodeCompanionChat " .. item.name)
+        else
+          vim.notify("No adapter selected", vim.log.levels.WARN)
         end
-        vim.notify("No adapter selected", vim.log.levels.WARN)
       end)
     end, { desc = "CodeCompanion Chat" })
 
-    vim.keymap.set({ "n", "v" }, "<leader>cs", "<cmd>CodeCompanion<cr>", { desc = "CodeCompanion Inline" })
-    vim.keymap.set("n", "<leader>cp", "<cmd>CodeCompanionActions<cr>", { desc = "CodeCompanion Actions" })
+    vim.keymap.set("n", "<leader>cs", "<cmd>CodeCompanion<cr>", { desc = "CodeCompanion Inline" })
+    vim.keymap.set({ "v" }, "<leader>cs", ":'<,'>CodeCompanion<cr>", { desc = "CodeCompanion Inline" })
+
+    vim.keymap.set({ "n", "v" }, "<leader>ct", "<cmd>CodeCompanionChat Toggle<cr>", { desc = "CodeCompanion Toggle" })
+
+    vim.keymap.set({ "n", "v" }, "<leader>cp", "<cmd>CodeCompanionActions<cr>",
+      { desc = "CodeCompanion Actions", noremap = true, silent = true })
 
     vim.g.codecompanion_auto_tool_mode = true
   end,
