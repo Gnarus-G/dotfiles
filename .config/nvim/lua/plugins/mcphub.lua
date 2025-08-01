@@ -148,6 +148,40 @@ local function add_prompts_and_resources(mcphub)
   })
 
   mcphub.add_prompt("gnarus", {
+    name = "commit_help",
+    description = "Help write a commit message",
+    arguments = function()
+      -- Get git branches
+      local branches = vim.fn.systemlist("git branch --format='%(refname:short)'")
+
+      return {
+        {
+          name = "branch",
+          description = "Target branch",
+          default = "main",
+          -- Use actual branches
+          enum = branches
+        }
+      }
+    end,
+    handler = function(req, res)
+      --[[ local diff_output = vim.fn.system("git fetch --prune --all && git diff " .. req.params.branch); ]]
+      return res
+          :system()
+          :text(string.format(
+            "Help write a commit for branch: %s",
+            req.params.branch
+          ))
+          :text(
+            "The subject line should be 50 chars max, and should start with an imperative verb. (e.g. 'Add frontend unit tests')")
+          :user()
+          :text("@{neovim__execute_command}\n") -- assumes codecompanion
+          --[[ :text("Git diff:\n```diff\n" .. diff_output .. "\n```\n") ]]
+          :send()
+    end
+  })
+
+  mcphub.add_prompt("gnarus", {
     name = "curlify",
     description = "Parse and convert text to a `curl` command.",
     arguments = {
