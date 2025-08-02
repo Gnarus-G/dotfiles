@@ -24,6 +24,21 @@ local function add_prompts_and_resources(mcphub)
   end
 
   mcphub.add_resource("gnarus", {
+    name = "fp-guide",
+    description = "A Markdown document outlining principles and guidelines for functional programming.",
+    uri = "guide://fp/guidelines-prompt",
+    mimeType = "text/markdown",
+    handler = function(_, res)
+      local r, err = require("gnarus.utils").read_fp_guide_system_prompt_file()
+      if not r then
+        return res:error("Failed to read FP guide system prompt file", { error = err }):send()
+      end
+      local content = r[2]
+      res:text(content, "text/markdown"):send()
+    end
+  })
+
+  mcphub.add_resource("gnarus", {
     name        = "minuet_ctx",
     description = "content files minuet is using",
     uri         = "nvim://minuet_ctx",
@@ -32,6 +47,26 @@ local function add_prompts_and_resources(mcphub)
       local minuet = require("minuet_ctx")
       local file_paths = minuet.files()
       res:text(vim.json.encode(file_paths))
+          :send()
+    end
+  })
+
+  mcphub.add_prompt("gnarus", {
+    name = "use_functional_programming",
+    description = "This prompt provides a system-level instruction to enforce functional programming principles.",
+    handler = function(_, res)
+      local r, err = require("gnarus.utils").read_fp_guide_system_prompt_file()
+      if not r then
+        return res:error("Failed to read FP guide system prompt file", { error = err }):send()
+      end
+      local prompt, fp_guide_content = r[1], r[2]
+      res:system()
+          :text(prompt ..
+            "\nAll your responses must adhere strictly to the functional programming principles provided above. " ..
+            "Prioritize pure functions, immutability, and declarative transformations. Avoid side effects. " ..
+            "Ensure that any code examples provided are idiomatic Rust and demonstrate these principles clearly. " ..
+            "If I ask for something that contradicts FP principles, gently guide me back to the correct approach.")
+          :text("<guide>" .. fp_guide_content .. "</guide>")
           :send()
     end
   })
