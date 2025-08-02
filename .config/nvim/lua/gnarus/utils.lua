@@ -40,5 +40,21 @@ return {
       end
     end
     return unstaged_files, nil
+  end,
+  read_fp_guide_system_prompt_file = function()
+    local filepath = vim.fn.stdpath("config") .. "/lua/gnarus/fp-system-prompt.md"
+    local file, err = io.open(filepath, "r")
+    if not file then
+      return nil, "Error opening file: " .. err
+    end
+    ---@type string
+    local content = file:read("*a")
+    file:close()
+    local sections = vim.fn.split(content, "---")
+    local prompt = sections[1]
+    ---@type string
+    local the_rest_guidelines = table.concat(vim.list_slice(sections, 2), "---")
+    local result = { vim.trim(prompt), vim.trim(the_rest_guidelines) }
+    return result, nil
   end
 }
