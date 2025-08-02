@@ -11,7 +11,7 @@ local function add_prompts_and_resources(mcphub)
             mimeType    = "application/json",
             description = "Path to the source code of the installed neovim plugin",
             uri         = "nvim://plugin/" .. name,
-            handler     = function(_req, res)
+            handler     = function(_, res)
               local data = {
                 name = name,
                 path = path,
@@ -43,7 +43,7 @@ local function add_prompts_and_resources(mcphub)
     description = "content files minuet is using",
     uri         = "nvim://minuet_ctx",
     mimeType    = "application/json",
-    handler     = function(_req, res)
+    handler     = function(_, res)
       local minuet = require("minuet_ctx")
       local file_paths = minuet.files()
       res:text(vim.json.encode(file_paths))
@@ -76,11 +76,11 @@ local function add_prompts_and_resources(mcphub)
     description = "list of files not yet committed in current git repository, excluding untracked files.",
     uri = "git://status",
     mimeType = "application/json",
-    handler = function(_req, res)
-      local files, output = require "gnarus.utils".git_modified_or_added_files()
-      if output then
+    handler = function(_, res)
+      local files, err = require "gnarus.utils".git_modified_or_added_files()
+      if err then
         res:error("Failed to get unstaged files", {
-          error = output
+          error = err
         })
         return
       end
@@ -150,7 +150,7 @@ local function add_prompts_and_resources(mcphub)
     description = "Git diff between current branch and origin/main",
     uri         = "git://branch-diff",
     mimeType    = "text/plain",
-    handler     = function(_req, res)
+    handler     = function(_, res)
       local ok, diff_output = pcall(vim.fn.system, "git fetch --prune --all && git diff origin/main")
       if not ok then
         res:error("Failed to get git diff", { error = diff_output })
@@ -264,7 +264,7 @@ local function add_prompts_and_resources(mcphub)
     name = "prompt_sum",
     description =
     "Generate an effective prompt that captures the user's desires expressed throughout the current chat.",
-    handler = function(req, res)
+    handler = function(_, res)
       local full_prompt = "You are a master at generating high-quality prompts. " ..
           "Your task is to take a summary of a conversation and generate a single, concise, and effective prompt " ..
           "that captures the user's ultimate goal or desire expressed throughout that conversation. " ..
@@ -353,11 +353,14 @@ return {
         },
       },
       json_decode = nil, -- Custom JSON parser function (e.g., require('json5').parse for JSON5 support)
+      ---@param hub MCPHub.Hub
       on_ready = function(hub)
         -- Called when hub is ready
+        vim.notify("MCPHub is ready and listening on port " .. hub.port, vim.log.levels.INFO)
       end,
       on_error = function(err)
         -- Called on errors
+        vim.notify("MCPHub error: " .. vim.inspect(err), vim.log.levels.ERROR)
       end,
       log = {
         level = vim.log.levels.WARN,
@@ -365,10 +368,6 @@ return {
         file_path = nil,
         prefix = "MCPHub",
       },
-
-      -- Global environment variables available to all MCP servers
-      -- Can be a table or a function(context) -> table
-      global_env = {},
     })
 
     add_prompts_and_resources(mcphub)
