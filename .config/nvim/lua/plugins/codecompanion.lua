@@ -1,70 +1,67 @@
+local ollama_adapter_opts = {
+  env = {
+    url = os.getenv("OLLAMA_API_BASE") or "http://localhost:11434"
+  },
+  schema = {
+    temperature = {
+      default = 0
+    },
+    keep_alive = {
+      default = '30m',
+    }
+  },
+  parameters = {
+    sync = true
+  }
+}
+
+-- Determine adapter names based on GEMINI_API_KEY
+local chat_adapter_name = "gemini"
+local inline_adapter_name = "gemini_fast"
+local cmd_adapter_name = "gemini"
+
+if os.getenv("GEMINI_API_KEY") == nil then
+  chat_adapter_name = "ollama"
+  inline_adapter_name = "ollama"
+  cmd_adapter_name = "ollama"
+end
+
+---@param adapter string
+---@param model string
+---@param extra_opts table?
+local function adapter_and_default_model(adapter, model, extra_opts)
+  local opts = vim.tbl_deep_extend("force", extra_opts or {},
+    {
+      schema = {
+        model = {
+          default = model
+        }
+      },
+    }
+  );
+  return require("codecompanion.adapters").extend(adapter, opts)
+end
+
+---@param filepath string should be relative
+local function add_file_to_codecompanion_chat(filepath, chat)
+  local filetype = vim.fn.getbufvar(vim.api.nvim_get_current_buf(), "&filetype")
+  local content = io.open(filepath, "r"):read("*a")
+  local title = "<attachment filepath=\"" .. filepath .. "\">"
+  local body = "Here is the content from the file:\n\n" .. "```" .. filetype .. "\n" .. content
+  local footer = "```\n</attachment>"
+
+  chat:add_reference({ role = "user", content = title .. body .. footer }, filepath,
+    "<file>" .. filepath .. "</file>")
+end
+
 return {
   "olimorris/codecompanion.nvim",
   dependencies = {
-    "nvim-lua/plenary.nvim",
+    { "nvim-lua/plenary.nvim", branch = "master" },
     "nvim-treesitter/nvim-treesitter",
-    "hrsh7th/nvim-cmp",
-    "nvim-telescope/telescope.nvim",
-    "stevearc/dressing.nvim",
     "ravitemer/codecompanion-history.nvim",
   },
   config = function()
-    local ollama_adapter_opts = {
-      env = {
-        url = os.getenv("OLLAMA_API_BASE") or "http://localhost:11434"
-      },
-      schema = {
-        temperature = {
-          default = 0
-        },
-        keep_alive = {
-          default = '30m',
-        }
-      },
-      parameters = {
-        sync = true
-      }
-    }
-
-    -- Determine adapter names based on GEMINI_API_KEY
-    local chat_adapter_name = "gemini"
-    local inline_adapter_name = "gemini_fast"
-    local cmd_adapter_name = "gemini"
-
-    if os.getenv("GEMINI_API_KEY") == nil then
-      chat_adapter_name = "ollama"
-      inline_adapter_name = "ollama"
-      cmd_adapter_name = "ollama"
-    end
-
-    ---@param adapter string
-    ---@param model string
-    ---@param extra_opts table?
-    local function adapter_and_default_model(adapter, model, extra_opts)
-      local opts = vim.tbl_deep_extend("force", extra_opts or {},
-        {
-          schema = {
-            model = {
-              default = model
-            }
-          },
-        }
-      );
-      return require("codecompanion.adapters").extend(adapter, opts)
-    end
-
-    ---@param filepath string should be relative
-    local function add_file_to_codecompanion_chat(filepath, chat)
-      local filetype = vim.fn.getbufvar(vim.api.nvim_get_current_buf(), "&filetype")
-      local content = io.open(filepath, "r"):read("*a")
-      local title = "<attachment filepath=\"" .. filepath .. "\">"
-      local body = "Here is the content from the file:\n\n" .. "```" .. filetype .. "\n" .. content
-      local footer = "```\n</attachment>"
-
-      chat:add_reference({ role = "user", content = title .. body .. footer }, filepath,
-        "<file>" .. filepath .. "</file>")
-    end
-
     local opts = {
       strategies = {
         chat = {
@@ -350,7 +347,6 @@ return {
         }
       }
     }
-
     require("codecompanion").setup(opts)
 
     vim.keymap.set("n", "<leader>cc", function()
@@ -382,8 +378,28 @@ return {
       end)
     end, { desc = "CodeCompanion Chat" })
 
-    vim.keymap.set("n", "<leader>cs", "<cmd>CodeCompanion<cr>", { desc = "CodeCompanion Inline" })
-    vim.keymap.set({ "v" }, "<leader>cs", ":'<,'>CodeCompanion<cr>", { desc = "CodeCompanion Inline" })
+    local function inline_prompt_input_with_cmd(cmd)
+      return function(buf)
+        print(vim.inspect(buf))
+        vim.ui.input({
+          prompt = "Prompt",
+          win = {
+            bo = {
+              filetype = "codecompanion_inline"
+            }
+          }
+        }, function(value)
+          if value and value ~= "" then
+            vim.cmd(cmd .. " " .. value)
+          end
+        end)
+      end
+    end
+
+    vim.keymap.set("n", "<leader>cs", inline_prompt_input_with_cmd("CodeCompanion"),
+      { desc = "CodeCompanion Inline" })
+    vim.keymap.set({ "v" }, "<leader>cs", inline_prompt_input_with_cmd("'<,'>CodeCompanion"),
+      { desc = "CodeCompanion Inline" })
 
     vim.keymap.set({ "n", "v" }, "<leader>ct", "<cmd>CodeCompanionChat Toggle<cr>", { desc = "CodeCompanion Toggle" })
 
@@ -391,5 +407,51 @@ return {
       { desc = "CodeCompanion Actions", noremap = true, silent = true })
 
     vim.g.codecompanion_auto_tool_mode = true
+
+    (function()
+      local cmp = require("cmp")
+      cmp.setup.filetype("codecompanion", {
+        formatting = {
+          format = require("lspkind").cmp_format({
+            menu = {
+              codecompanion_tools = "[tool]",
+              codecompanion_variables = "[var]",
+              codecompanion_models = "[model]",
+              codecompanion_slash_commands = "[cmd]",
+            },
+          })
+        },
+      })
+
+      local slash = require("codecompanion.providers.completion.cmp.slash_commands")
+      local tools = require("codecompanion.providers.completion.cmp.tools")
+      local variables = require("codecompanion.providers.completion.cmp.variables")
+
+      local function is_codecompanion_filetype()
+        return vim.bo.filetype == "codecompanion" or vim.bo.filetype == "codecompanion_inline"
+      end
+      slash.is_available = is_codecompanion_filetype
+      tools.is_available = is_codecompanion_filetype
+      variables.is_available = is_codecompanion_filetype
+
+      cmp.setup.filetype("codecompanion_inline", {
+        sources = cmp.config.sources({
+          { name = "codecompanion_slash_commands" },
+          { name = "codecompanion_tools" },
+          { name = "codecompanion_variables" },
+          { name = "buffer" },
+          { name = "path" },
+        }),
+        formatting = {
+          format = require("lspkind").cmp_format({
+            menu = {
+              codecompanion_tools = "[tool]",
+              codecompanion_variables = "[var]",
+              codecompanion_slash_commands = "[cmd]",
+            },
+          })
+        },
+      })
+    end)()
   end,
 }
