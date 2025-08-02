@@ -354,7 +354,13 @@ return {
     require("codecompanion").setup(opts)
 
     vim.keymap.set("n", "<leader>cc", function()
-      local models = vim.iter(pairs(opts.adapters)):map(
+      local models = vim.iter(pairs(opts.adapters))
+          :filter(
+          ---@param key string
+            function(key)
+              return not key:find("claude")
+            end)
+          :map(
             function(key, value)
               return {
                 name = key,
