@@ -19,12 +19,19 @@
       "command": ["npx", "-y", "@upstash/context7-mcp"]
     },
     "ez-web-search-mcp": {
-      "enabled": false,
       "type": "local",
       "command": [
         "sh",
         "-c",
         "node ${HOME}/.mcphub/servers/ez-web-search-mcp/build/index.js"
+      ]
+    },
+    "sequentialthinking": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "@modelcontextprotocol/server-sequential-thinking"
       ]
     },
     "tts": {
