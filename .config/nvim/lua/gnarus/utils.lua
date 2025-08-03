@@ -7,7 +7,6 @@ local is_too_much = function(buf)
 end
 
 return {
-  -- Filters out files that are too large (greater than 1 Megabyte)
   ---@return integer[]
   get_visible_buffers = function()
     return vim.iter(vim.api.nvim_list_wins())
@@ -17,7 +16,19 @@ return {
         end)
         :totable()
   end,
-
+  ---@return integer[]
+  get_loaded_buffers = function()
+    return vim.iter(vim.api.nvim_list_bufs())
+        :filter(function(buf)
+          return not is_too_much(buf)
+        end)
+        -- loaded or hidden buffers
+        :filter(function(buf)
+          return vim.api.nvim_buf_is_loaded(buf)
+              and vim.api.nvim_buf_get_name(buf) ~= ""
+        end)
+        :totable()
+  end,
   ---@param buf number
   ---@return string
   get_buffer_text_content = function(buf)
