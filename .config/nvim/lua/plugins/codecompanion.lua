@@ -300,9 +300,9 @@ return {
               end
             },
             ---On exiting and entering neovim, loads the last chat on opening chat
-            continue_last_chat = false,
+            continue_last_chat = true,
             ---When chat is cleared with `gx` delete the chat from history
-            delete_on_clearing_chat = false,
+            delete_on_clearing_chat = true,
             ---Directory path to save the chats
             dir_to_save = vim.fn.stdpath("data") .. "/codecompanion-history",
             ---Enable detailed logging for history extension
@@ -370,17 +370,16 @@ return {
         format_item = function(item) return item.name .. " (" .. item.model .. ")" end,
       }, function(item)
         if item then
-          -- Execute the CodeCompanionChat command directly with the selected adapter name.
-          vim.cmd("CodeCompanionChat " .. item.name)
+          vim.cmd.CodeCompanionChat(item.name)
         else
           vim.notify("No adapter selected", vim.log.levels.WARN)
         end
       end)
-    end, { desc = "CodeCompanion Chat" })
+    end, { desc = "CodeCompanion, Pick a model and Chat" })
 
-    local function inline_prompt_input_with_cmd(cmd)
-      return function(buf)
-        print(vim.inspect(buf))
+    ---@param cb fun(prompt: string)
+    local function inline_prompt_input_with_cmd(cb)
+      return function()
         vim.ui.input({
           prompt = "Prompt",
           win = {
@@ -390,18 +389,24 @@ return {
           }
         }, function(value)
           if value and value ~= "" then
-            vim.cmd(cmd .. " " .. value)
+            cb(value)
           end
         end)
       end
     end
 
-    vim.keymap.set("n", "<leader>cs", inline_prompt_input_with_cmd("CodeCompanion"),
-      { desc = "CodeCompanion Inline" })
-    vim.keymap.set({ "v" }, "<leader>cs", inline_prompt_input_with_cmd("'<,'>CodeCompanion"),
-      { desc = "CodeCompanion Inline" })
+    vim.keymap.set("n", "<leader>cs", inline_prompt_input_with_cmd(function(value)
+        vim.cmd.CodeCompanion(value)
+      end),
+      { desc = "CodeCompanion Inline", noremap = true, silent = true })
 
-    vim.keymap.set({ "n", "v" }, "<leader>ct", "<cmd>CodeCompanionChat Toggle<cr>", { desc = "CodeCompanion Toggle" })
+    vim.keymap.set({ "v" }, "<leader>cs", inline_prompt_input_with_cmd(function(value)
+        vim.cmd(":'<,'>CodeCompanion " .. value)
+      end),
+      { desc = "CodeCompanion Inline", noremap = true, silent = true })
+
+    vim.keymap.set({ "n", "v" }, "<leader>ct", "<cmd>CodeCompanionChat Toggle<cr>",
+      { desc = "CodeCompanion Toggle", noremap = true, silent = true })
 
     vim.keymap.set({ "n", "v" }, "<leader>cp", "<cmd>CodeCompanionActions<cr>",
       { desc = "CodeCompanion Actions", noremap = true, silent = true })
