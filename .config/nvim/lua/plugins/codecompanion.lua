@@ -428,34 +428,43 @@ return {
         },
       })
 
-      local slash = require("codecompanion.providers.completion.cmp.slash_commands")
-      local tools = require("codecompanion.providers.completion.cmp.tools")
-      local variables = require("codecompanion.providers.completion.cmp.variables")
+      vim.api.nvim_create_autocmd("FileType", {
+        pattern = "codecompanion_inline",
+        callback = function()
+          local completion = "codecompanion.providers.completion.cmp"
+          local slash = require(completion .. ".slash_commands")
+          local tools = require(completion .. ".tools")
+          local variables = require(completion .. ".variables")
 
-      local function is_codecompanion_filetype()
-        return vim.bo.filetype == "codecompanion" or vim.bo.filetype == "codecompanion_inline"
-      end
-      slash.is_available = is_codecompanion_filetype
-      tools.is_available = is_codecompanion_filetype
-      variables.is_available = is_codecompanion_filetype
+          local function is_codecompanion_filetype()
+            return vim.tbl_contains({ "codecompanion", "codecompanion_inline" }, vim.bo.filetype)
+          end
+          slash.is_available = is_codecompanion_filetype
+          tools.is_available = is_codecompanion_filetype
+          variables.is_available = is_codecompanion_filetype
 
-      cmp.setup.filetype("codecompanion_inline", {
-        sources = cmp.config.sources({
-          { name = "codecompanion_slash_commands" },
-          { name = "codecompanion_tools" },
-          { name = "codecompanion_variables" },
-          { name = "buffer" },
-          { name = "path" },
-        }),
-        formatting = {
-          format = require("lspkind").cmp_format({
-            menu = {
-              codecompanion_tools = "[tool]",
-              codecompanion_variables = "[var]",
-              codecompanion_slash_commands = "[cmd]",
+          cmp.setup.filetype("codecompanion_inline", {
+            sources = cmp.config.sources({
+              { name = "codecompanion_slash_commands" },
+              { name = "codecompanion_tools" },
+              { name = "codecompanion_variables" },
+              { name = "buffer" },
+              { name = "path" },
+            }),
+            formatting = {
+              format = require("lspkind").cmp_format({
+                menu = {
+                  codecompanion_tools = "[tool]",
+                  codecompanion_variables = "[var]",
+                  codecompanion_slash_commands = "[cmd]",
+                },
+              })
             },
           })
-        },
+          -- returning true will remove this autocmd
+          -- now that the completion sources are registered
+          return true
+        end,
       })
     end)()
   end,
