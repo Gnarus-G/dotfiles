@@ -50,7 +50,7 @@ return {
           {
             {
               name = "buffer",
-              option = { get_bufnrs = require "gnarus.utils".get_visible_buffers }
+              option = { get_bufnrs = require "gnarus.utils".get_loaded_buffers }
             },
             { name = "path" },
           }
