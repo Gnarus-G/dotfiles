@@ -4,6 +4,7 @@ return {
     dependencies = {
       "rcarriga/nvim-dap-ui",
       "theHamsta/nvim-dap-virtual-text",
+      "nvim-telescope/telescope.nvim",
       "nvim-telescope/telescope-dap.nvim",
       "nvim-neotest/nvim-nio",
     },
@@ -238,7 +239,8 @@ return {
         { text = 'ﳁ', texthl = 'DapBreakpoint', linehl = 'DapBreakpoint', numhl = 'DapBreakpoint' })
       vim.fn.sign_define('DapBreakpointRejected',
         { text = '', texthl = 'DapBreakpoint', linehl = 'DapBreakpoint', numhl = 'DapBreakpoint' })
-      vim.fn.sign_define('DapLogPoint', { text = '', texthl = 'DapLogPoint', linehl = 'DapLogPoint', numhl = 'DapLogPoint' })
+      vim.fn.sign_define('DapLogPoint',
+        { text = '', texthl = 'DapLogPoint', linehl = 'DapLogPoint', numhl = 'DapLogPoint' })
       vim.fn.sign_define('DapStopped', { text = '', texthl = 'DapStopped', linehl = 'DapStopped', numhl = 'DapStopped' })
 
       -- Virtual Text Setup
@@ -294,3 +296,4 @@ return {
     end,
   },
 }
+
