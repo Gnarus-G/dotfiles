@@ -67,5 +67,26 @@ return {
     local the_rest_guidelines = table.concat(vim.list_slice(sections, 2), "---")
     local result = { vim.trim(prompt), vim.trim(the_rest_guidelines) }
     return result, nil
+  end,
+  --- Determine values based on environment variables in priority order
+  ---@generic T
+  ---@param map table<string | "__default", T> a map of environment variable names to their corresponding values.
+  ---@param order string[]
+  ---@return T
+  env_var_cascade = function(map, order)
+    local function get_env_var_value(env_var_name)
+      return os.getenv(env_var_name)
+    end
+
+    for _, env_var_name in ipairs(order) do
+      local value = map[env_var_name]
+      assert(value, string.format("value for env_var_name `%s` is required", env_var_name))
+      if get_env_var_value(env_var_name) then
+        return value
+      end
+    end
+
+    -- Fallback to the default if no environment variable is found
+    return map.__default
   end
 }

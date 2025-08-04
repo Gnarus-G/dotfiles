@@ -1,30 +1,22 @@
-local ollama_adapter_opts = {
-  env = {
-    url = os.getenv("OLLAMA_API_BASE") or "http://localhost:11434"
-  },
-  schema = {
-    temperature = {
-      default = 0
-    },
-    keep_alive = {
-      default = '30m',
-    }
-  },
-  parameters = {
-    sync = true
-  }
-}
+local env_cascade = require("gnarus.utils").env_var_cascade
 
--- Determine adapter names based on GEMINI_API_KEY
-local chat_adapter_name = "gemini"
-local inline_adapter_name = "gemini_fast"
-local cmd_adapter_name = "gemini"
+local chat_adapter_name = env_cascade({
+  OPENAI_API_KEY = "openai_fast",
+  GEMINI_API_KEY = "gemini",
+  __default = "ollama"
+}, { "OPENAI_API_KEY", "GEMINI_API_KEY" })
 
-if os.getenv("GEMINI_API_KEY") == nil then
-  chat_adapter_name = "ollama"
-  inline_adapter_name = "ollama"
-  cmd_adapter_name = "ollama"
-end
+local inline_adapter_name = env_cascade({
+  OPENAI_API_KEY = "openai_fast_low_thinking",
+  GEMINI_API_KEY = "gemini_fast",
+  __default = "ollama"
+}, { "OPENAI_API_KEY", "GEMINI_API_KEY" })
+
+local cmd_adapter_name = env_cascade({
+  OPENAI_API_KEY = "openai_fast_low_thinking",
+  GEMINI_API_KEY = "gemini_fast_low_thinking",
+  __default = "ollama"
+}, { "OPENAI_API_KEY", "GEMINI_API_KEY" })
 
 ---@param adapter string
 ---@param model string
@@ -227,9 +219,24 @@ return {
       opts = {
         log_level = "ERROR", -- TRACE|DEBUG|ERROR|INFO
       },
+      -- tier list:
+      -- gpt-4.1
+      -- gemini-2.5-pro - probaly too expensive to be worth it ever while gpt-4.1 is better and slightly cheaper
+      -- gpt-4.1-mini
+      -- gemini-2.5-flash
       adapters = {
         openai = adapter_and_default_model("openai", "gpt-4.1"),
         openai_fast = adapter_and_default_model("openai", "gpt-4.1-mini"),
+        openai_fast_low_thinking = adapter_and_default_model("openai", "gpt-4.1-mini", {
+          schema = {
+            temperature = {
+              default = 0
+            },
+            reasoning_effort = {
+              default = "low"
+            }
+          }
+        }),
         gemini = adapter_and_default_model("gemini", "gemini-2.5-flash"),
         gemini_fast = adapter_and_default_model("gemini", "gemini-2.5-flash", {
           schema = {
@@ -245,7 +252,22 @@ return {
         claude_haiku = adapter_and_default_model("anthropic", "claude-3-5-haiku-20241022"),
         claude_sonnet = adapter_and_default_model("anthropic", "claude-sonnet-4-20250514"),
         claude_opus = adapter_and_default_model("anthropic", "claude-opus-4-20250514"),
-        ollama = adapter_and_default_model("ollama", "qwen3", ollama_adapter_opts),
+        ollama = adapter_and_default_model("ollama", "qwen3", {
+          env = {
+            url = os.getenv("OLLAMA_API_BASE") or "http://localhost:11434"
+          },
+          schema = {
+            temperature = {
+              default = 0
+            },
+            keep_alive = {
+              default = '30m',
+            }
+          },
+          parameters = {
+            sync = true
+          }
+        }),
       },
       extensions = {
         mcphub = {
