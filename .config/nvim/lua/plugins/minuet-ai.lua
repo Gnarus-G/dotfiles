@@ -95,7 +95,8 @@ return {
       __default = { "openai_fim_compatible", 1 }
     }, { "GEMINI_API_KEY", "OPENAI_API_KEY" })
     local provider, n_completions = config[1], config[2]
-    vim.notify(string.format("Minuet AI configured with provider: %s, completions: %s", provider, n_completions))
+    vim.notify(string.format("Minuet AI configured with provider: %s, completions: %s", provider, n_completions),
+      vim.log.levels.DEBUG)
 
     require('minuet').setup(vim.tbl_extend('force', opts, {
       provider = provider,
