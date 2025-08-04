@@ -228,6 +228,8 @@ return {
         log_level = "ERROR", -- TRACE|DEBUG|ERROR|INFO
       },
       adapters = {
+        openai = adapter_and_default_model("openai", "gpt-4.1"),
+        openai_fast = adapter_and_default_model("openai", "gpt-4.1-mini"),
         gemini = adapter_and_default_model("gemini", "gemini-2.5-flash"),
         gemini_fast = adapter_and_default_model("gemini", "gemini-2.5-flash", {
           schema = {
