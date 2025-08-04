@@ -1,29 +1,16 @@
+local env_cascade = require("gnarus.utils").env_var_cascade
+
 return {
   "milanglacier/minuet-ai.nvim",
   dependencies = { "nvim-lua/plenary.nvim" },
   event = "InsertEnter",
   config = function()
-    local ollama_api_base = os.getenv("OLLAMA_API_BASE") or "http://localhost:11434"
+    local ollama_api_base         = os.getenv("OLLAMA_API_BASE") or "http://localhost:11434"
 
-    local minuet_config = require('minuet.config')
-    local extra_context = require('minuet_ctx')
+    local minuet_config           = require('minuet.config')
+    local extra_context           = require('minuet_ctx')
 
-    -- Base options defined separately
-    local base_opts = {
-      provider = 'gemini',
-      n_completions = 2,
-    }
-
-    -- when no gemini api key then use ollama
-    if os.getenv("GEMINI_API_KEY") == nil then
-      base_opts = {
-        provider = 'openai_fim_compatible',
-        n_completions = 1
-      }
-    end
-
-    -- Main configuration table for minuet.setup
-    local setup_opts = {
+    local opts                    = {
       cmp = {
         enable_auto_complete = true,
       },
@@ -41,6 +28,7 @@ return {
       },
       provider_options = {
         claude = {
+          max_tokens = 512,
           model = 'claude-3-5-haiku-20241022',
           chat_input = {
             template = "{{{extra_context}}}\n" ..
@@ -70,6 +58,9 @@ return {
                 minuet_config.default_chat_input_prefix_first.template,
             extra_context = extra_context.get_formatted_context
           },
+          optional = {
+            max_tokens = 256,
+          },
         },
         openai_fim_compatible = {
           name = "Ollama FIM",
@@ -98,6 +89,17 @@ return {
       }
     }
 
-    require('minuet').setup(vim.tbl_extend('force', setup_opts, base_opts))
+    local config                  = env_cascade({
+      OPENAI_API_KEY = { "openai", 2 },
+      GEMINI_API_KEY = { "gemini", 3 },
+      __default = { "openai_fim_compatible", 1 }
+    }, { "GEMINI_API_KEY", "OPENAI_API_KEY" })
+    local provider, n_completions = config[1], config[2]
+    vim.notify(string.format("Minuet AI configured with provider: %s, completions: %s", provider, n_completions))
+
+    require('minuet').setup(vim.tbl_extend('force', opts, {
+      provider = provider,
+      n_completions = n_completions,
+    }))
   end,
 }
