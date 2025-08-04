@@ -63,6 +63,14 @@ return {
             },
           },
         },
+        openai = {
+          model = "gpt-4.1-nano",
+          chat_input = {
+            template = "{{{extra_context}}}\n" ..
+                minuet_config.default_chat_input_prefix_first.template,
+            extra_context = extra_context.get_formatted_context
+          },
+        },
         openai_fim_compatible = {
           name = "Ollama FIM",
           model = 'qwen2.5-coder:3b',
