@@ -27,6 +27,7 @@ return {
           --[[ { icon = " ", key = "r", desc = "Recent Files", action = "<leader>fo" }, ]]
           { icon = " ", key = "p", desc = "Projects", action = "<leader>fp" },
           { icon = " ", key = "c", desc = "Config", action = ":e ~/.config/nvim/init.lua" },
+          { icon = " ", key = "u", desc = "Update Plugins", action = ":Lazy sync" },
           { icon = " ", key = "q", desc = "Quit", action = ":qa" },
         },
       },
