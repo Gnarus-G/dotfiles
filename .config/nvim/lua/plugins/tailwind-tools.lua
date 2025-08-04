@@ -2,6 +2,7 @@ return {
   "luckasRanarison/tailwind-tools.nvim",
   dependencies = {
     "nvim-treesitter/nvim-treesitter",
+    "nvim-telescope/telescope.nvim",
     "hrsh7th/nvim-cmp",
   },
   config = function()
@@ -54,3 +55,4 @@ return {
       })
   end,
 }
+
