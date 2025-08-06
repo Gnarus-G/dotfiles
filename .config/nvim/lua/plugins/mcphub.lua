@@ -151,7 +151,8 @@ local function add_prompts_and_resources(mcphub)
     uri         = "git://branch-diff",
     mimeType    = "text/plain",
     handler     = function(_, res)
-      local ok, diff_output = pcall(vim.fn.system, "git fetch --prune --all && git diff origin/main")
+      local ok, diff_output = pcall(vim.fn.system,
+        "git fetch --prune --all && git diff $(git merge-base origin/main HEAD)")
       if not ok then
         res:error("Failed to get git diff", { error = diff_output })
         return
@@ -164,7 +165,8 @@ local function add_prompts_and_resources(mcphub)
     name = "PR-summary",
     description = "Create a summary of PR with the changes in the current branch",
     handler = function(_, res)
-      local ok, diff_output = pcall(vim.fn.system, "git fetch --prune --all && git diff origin/main")
+      local ok, diff_output = pcall(vim.fn.system,
+        "git fetch --prune --all && git diff $(git merge-base origin/main HEAD)")
       if not ok then
         res:error("Failed to get git diff", { error = diff_output })
         return
@@ -188,11 +190,13 @@ local function add_prompts_and_resources(mcphub)
     arguments = function()
       -- Get git branches
       local branches = vim.fn.systemlist("git branch --all --format='%(refname:short)'")
+      local current_branch = vim.fn.system("git rev-parse --abbrev-ref HEAD")
+      current_branch = vim.trim(current_branch)
       return {
         {
           name = "branch",
-          description = "Target branch",
-          default = "main",
+          description = "Target branch (defaults to the current one)",
+          default = current_branch,
           enum = branches
         }
       }
