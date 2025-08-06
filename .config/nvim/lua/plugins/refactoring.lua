@@ -12,6 +12,24 @@ return {
       "<leader>rr",
       function() require('refactoring').select_refactor() end,
       mode = { "n", "x" },
+      -- limit keys to supported filetypes
+      ft = {
+        "c",
+        "cpp",
+        "cs",
+        "go",
+        "java",
+        "javascript",
+        "lua",
+        "php",
+        "powershell",
+        "python",
+        "ruby",
+        "typescript",
+        "typescriptreact",
+        "vim",
+        "vue",
+      },
     }
     -- Note that not all refactor support both normal and visual mode
   },
