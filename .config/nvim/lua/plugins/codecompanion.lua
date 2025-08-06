@@ -46,6 +46,125 @@ local function add_file_to_codecompanion_chat(filepath, chat)
     "<file>" .. filepath .. "</file>")
 end
 
+local function setup_extra_keymaps(opts)
+  vim.keymap.set("n", "<leader>cc", function()
+    local models = vim.iter(pairs(opts.adapters))
+        :filter(
+        ---@param key string
+          function(key)
+            return not key:find("claude")
+          end)
+        :map(
+          function(key, value)
+            return {
+              name = key,
+              model = value.schema.model.default
+            }
+          end)
+        :totable()
+
+    vim.ui.select(models, {
+      prompt = "Select an adapter:",
+      format_item = function(item) return item.name .. " (" .. item.model .. ")" end,
+    }, function(item)
+      if item then
+        vim.cmd.CodeCompanionChat(item.name)
+      else
+        vim.notify("No adapter selected", vim.log.levels.WARN)
+      end
+    end)
+  end, { desc = "CodeCompanion, Pick a model and Chat" })
+
+  ---@param cb fun(prompt: string)
+  local function inline_prompt_input_with_cmd(cb)
+    return function()
+      vim.ui.input({
+        prompt = "Prompt",
+        win = {
+          bo = {
+            filetype = "codecompanion_inline"
+          }
+        }
+      }, function(value)
+        if value and value ~= "" then
+          cb(value)
+        end
+      end)
+    end
+  end
+
+  vim.keymap.set("n", "<leader>cs", inline_prompt_input_with_cmd(function(value)
+      vim.cmd.CodeCompanion(value)
+    end),
+    { desc = "CodeCompanion Inline", noremap = true, silent = true })
+
+  vim.keymap.set({ "v" }, "<leader>cs", inline_prompt_input_with_cmd(function(value)
+      vim.cmd(":'<,'>CodeCompanion " .. value)
+    end),
+    { desc = "CodeCompanion Inline", noremap = true, silent = true })
+
+  vim.keymap.set({ "n", "v" }, "<leader>ct", "<cmd>CodeCompanionChat Toggle<cr>",
+    { desc = "CodeCompanion Toggle", noremap = true, silent = true })
+
+  vim.keymap.set({ "n", "v" }, "<leader>cp", "<cmd>CodeCompanionActions<cr>",
+    { desc = "CodeCompanion Actions", noremap = true, silent = true })
+end
+
+local function extend_cmp_completions()
+  local cmp = require("cmp")
+  cmp.setup.filetype("codecompanion", {
+    formatting = {
+      format = require("lspkind").cmp_format({
+        menu = {
+          codecompanion_tools = "[tool]",
+          codecompanion_variables = "[var]",
+          codecompanion_models = "[model]",
+          codecompanion_slash_commands = "[cmd]",
+        },
+      })
+    },
+  })
+
+  vim.api.nvim_create_autocmd("FileType", {
+    pattern = "codecompanion_inline",
+    callback = function()
+      local completion = "codecompanion.providers.completion.cmp"
+      local slash = require(completion .. ".slash_commands")
+      local tools = require(completion .. ".tools")
+      local variables = require(completion .. ".variables")
+
+      local function is_codecompanion_filetype()
+        return vim.tbl_contains({ "codecompanion", "codecompanion_inline" }, vim.bo.filetype)
+      end
+      slash.is_available = is_codecompanion_filetype
+      tools.is_available = is_codecompanion_filetype
+      variables.is_available = is_codecompanion_filetype
+
+      cmp.setup.filetype("codecompanion_inline", {
+        sources = cmp.config.sources({
+          { name = "codecompanion_slash_commands" },
+          { name = "codecompanion_tools" },
+          { name = "codecompanion_variables" },
+          { name = "buffer" },
+          { name = "path" },
+        }),
+        formatting = {
+          format = require("lspkind").cmp_format({
+            menu = {
+              codecompanion_tools = "[tool]",
+              codecompanion_variables = "[var]",
+              codecompanion_slash_commands = "[cmd]",
+            },
+          })
+        },
+      })
+      -- returning true will remove this autocmd
+      -- now that the completion sources are registered
+      return true
+    end,
+  })
+end
+
 return {
   "olimorris/codecompanion.nvim",
   dependencies = {
@@ -373,123 +492,10 @@ return {
     }
     require("codecompanion").setup(opts)
 
-    vim.keymap.set("n", "<leader>cc", function()
-      local models = vim.iter(pairs(opts.adapters))
-          :filter(
-          ---@param key string
-            function(key)
-              return not key:find("claude")
-            end)
-          :map(
-            function(key, value)
-              return {
-                name = key,
-                model = value.schema.model.default
-              }
-            end)
-          :totable()
-
-      vim.ui.select(models, {
-        prompt = "Select an adapter:",
-        format_item = function(item) return item.name .. " (" .. item.model .. ")" end,
-      }, function(item)
-        if item then
-          vim.cmd.CodeCompanionChat(item.name)
-        else
-          vim.notify("No adapter selected", vim.log.levels.WARN)
-        end
-      end)
-    end, { desc = "CodeCompanion, Pick a model and Chat" })
-
-    ---@param cb fun(prompt: string)
-    local function inline_prompt_input_with_cmd(cb)
-      return function()
-        vim.ui.input({
-          prompt = "Prompt",
-          win = {
-            bo = {
-              filetype = "codecompanion_inline"
-            }
-          }
-        }, function(value)
-          if value and value ~= "" then
-            cb(value)
-          end
-        end)
-      end
-    end
-
-    vim.keymap.set("n", "<leader>cs", inline_prompt_input_with_cmd(function(value)
-        vim.cmd.CodeCompanion(value)
-      end),
-      { desc = "CodeCompanion Inline", noremap = true, silent = true })
-
-    vim.keymap.set({ "v" }, "<leader>cs", inline_prompt_input_with_cmd(function(value)
-        vim.cmd(":'<,'>CodeCompanion " .. value)
-      end),
-      { desc = "CodeCompanion Inline", noremap = true, silent = true })
-
-    vim.keymap.set({ "n", "v" }, "<leader>ct", "<cmd>CodeCompanionChat Toggle<cr>",
-      { desc = "CodeCompanion Toggle", noremap = true, silent = true })
-
-    vim.keymap.set({ "n", "v" }, "<leader>cp", "<cmd>CodeCompanionActions<cr>",
-      { desc = "CodeCompanion Actions", noremap = true, silent = true })
-
     vim.g.codecompanion_auto_tool_mode = true
 
-    (function()
-      local cmp = require("cmp")
-      cmp.setup.filetype("codecompanion", {
-        formatting = {
-          format = require("lspkind").cmp_format({
-            menu = {
-              codecompanion_tools = "[tool]",
-              codecompanion_variables = "[var]",
-              codecompanion_models = "[model]",
-              codecompanion_slash_commands = "[cmd]",
-            },
-          })
-        },
-      })
 
-      vim.api.nvim_create_autocmd("FileType", {
-        pattern = "codecompanion_inline",
-        callback = function()
-          local completion = "codecompanion.providers.completion.cmp"
-          local slash = require(completion .. ".slash_commands")
-          local tools = require(completion .. ".tools")
-          local variables = require(completion .. ".variables")
-
-          local function is_codecompanion_filetype()
-            return vim.tbl_contains({ "codecompanion", "codecompanion_inline" }, vim.bo.filetype)
-          end
-          slash.is_available = is_codecompanion_filetype
-          tools.is_available = is_codecompanion_filetype
-          variables.is_available = is_codecompanion_filetype
-
-          cmp.setup.filetype("codecompanion_inline", {
-            sources = cmp.config.sources({
-              { name = "codecompanion_slash_commands" },
-              { name = "codecompanion_tools" },
-              { name = "codecompanion_variables" },
-              { name = "buffer" },
-              { name = "path" },
-            }),
-            formatting = {
-              format = require("lspkind").cmp_format({
-                menu = {
-                  codecompanion_tools = "[tool]",
-                  codecompanion_variables = "[var]",
-                  codecompanion_slash_commands = "[cmd]",
-                },
-              })
-            },
-          })
-          -- returning true will remove this autocmd
-          -- now that the completion sources are registered
-          return true
-        end,
-      })
-    end)()
+    setup_extra_keymaps(opts)
+    extend_cmp_completions()
   end,
 }
