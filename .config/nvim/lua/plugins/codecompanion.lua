@@ -34,6 +34,12 @@ local function adapter_and_default_model(adapter, model, extra_opts)
   return require("codecompanion.adapters").extend(adapter, opts)
 end
 
+---@param adapter CodeCompanion.Adapter
+---@return string
+local function llm_role_title(adapter)
+  return "CodeCompanion (" .. adapter.name .. ")"
+end
+
 ---@param filepath string should be relative
 ---@param chat CodeCompanion.Chat
 local function add_file_to_codecompanion_chat(filepath, chat)
@@ -91,20 +97,49 @@ local function setup_extra_keymaps(codecompanion, adapters)
           function(key, value)
             return {
               name = key,
-              model = value.schema.model.default
+              args = value
             }
           end)
         :totable()
 
     vim.ui.select(models, {
       prompt = "Select an adapter:",
-      format_item = function(item) return item.name .. " (" .. item.model .. ")" end,
+      format_item = function(item) return item.name .. " (" .. item.args.schema.model.default .. ")" end,
     }, function(item)
-      if item then
-        vim.cmd.CodeCompanionChat(item.name)
-      else
-        vim.notify("No adapter selected", vim.log.levels.WARN)
+      if not item then
+        return vim.notify("No adapter selected", vim.log.levels.WARN)
       end
+      local chat = codecompanion.last_chat()
+      if not chat then
+        codecompanion.chat({ fargs = { item.name } });
+        return
+      end
+
+      local adapter = chat.adapter.new(item.args)
+      if adapter == nil then
+        return vim.notify("Failed to get adapter from string: " .. item.name, vim.log.levels.ERROR)
+      end
+      chat.adapter = adapter
+
+      local settings = chat.adapter:make_from_schema()
+      if not settings then
+        return vim.notify("Failed to make settings from schema for adapter: " .. item.name, vim.log.levels.ERROR)
+      end
+
+      chat:apply_settings(settings) -- this call only works if `show_settings` is false
+      vim.notify("Changed adapter settings: " .. vim.inspect(settings), vim.log.levels.DEBUG)
+
+      chat.ui = require("codecompanion.strategies.chat.ui").new({
+        adapter = chat.adapter,
+        chat_id = chat.id,
+        chat_bufnr = chat.bufnr,
+        roles = { user = "Me", llm = llm_role_title },
+        settings = chat.settings,
+        winnr = chat.ui.winnr,
+        tokens = chat.ui.tokens
+      })
+
+      chat.ui:open()
     end)
   end, { desc = "CodeCompanion, Pick a model and Chat" })
 
@@ -138,6 +173,9 @@ local function setup_extra_keymaps(codecompanion, adapters)
 
   vim.keymap.set({ "n", "v" }, "<leader>ct", "<cmd>CodeCompanionChat Toggle<cr>",
     { desc = "CodeCompanion Toggle", noremap = true, silent = true })
+
+  vim.keymap.set({ "n", "v" }, "<leader>cl", "<cmd>CodeCompanionHistory<cr>",
+    { desc = "CodeCompanion Browse Last Chat", noremap = true, silent = true })
 
   vim.keymap.set({ "n", "v" }, "<leader>cp", "<cmd>CodeCompanionActions<cr>",
     { desc = "CodeCompanion Actions", noremap = true, silent = true })
@@ -213,9 +251,7 @@ return {
           roles = {
             ---The header name for the LLM's messages
             ---@type string|fun(adapter: CodeCompanion.Adapter): string
-            llm = function(adapter)
-              return "CodeCompanion (" .. adapter.name .. ")"
-            end,
+            llm = llm_role_title,
           },
           tools = {
             groups = {
@@ -366,7 +402,7 @@ return {
           opts = { "internal", "filler", "closeoff", "algorithm:patience", "followwrap", "linematch:120" },
           provider = "mini_diff", -- default|mini_diff
         },
-        chat = { window = { position = "right" }, show_settings = true }
+        chat = { window = { position = "right" }, show_settings = false }
       },
       opts = {
         log_level = "ERROR", -- TRACE|DEBUG|ERROR|INFO
