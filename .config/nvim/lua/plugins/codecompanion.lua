@@ -35,15 +35,16 @@ local function adapter_and_default_model(adapter, model, extra_opts)
 end
 
 ---@param filepath string should be relative
+---@param chat CodeCompanion.Chat
 local function add_file_to_codecompanion_chat(filepath, chat)
-  local filetype = vim.fn.getbufvar(vim.api.nvim_get_current_buf(), "&filetype")
+  local filetype = vim.filetype.match({ filename = filepath })
   local content = io.open(filepath, "r"):read("*a")
   local title = "<attachment filepath=\"" .. filepath .. "\">"
   local body = "Here is the content from the file:\n\n" .. "```" .. filetype .. "\n" .. content
   local footer = "```\n</attachment>"
 
-  chat:add_reference({ role = "user", content = title .. body .. footer }, filepath,
-    "<file>" .. filepath .. "</file>")
+  chat:add_context({ role = "user", content = title .. body .. footer }, filepath,
+    "<file>" .. vim.fn.fnamemodify(filepath, ":~:.") .. "</file>")
 end
 
 local function setup_extra_keymaps(opts)
@@ -490,7 +491,10 @@ return {
         }
       }
     }
-    require("codecompanion").setup(opts)
+    ---@class CodeCompanion
+    ---@diagnostic disable-next-line: assign-type-mismatch
+    local codecompanion = require("codecompanion")
+    codecompanion.setup(opts)
 
     vim.g.codecompanion_auto_tool_mode = true
 
