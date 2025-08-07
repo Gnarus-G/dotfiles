@@ -47,9 +47,41 @@ local function add_file_to_codecompanion_chat(filepath, chat)
     "<file>" .. vim.fn.fnamemodify(filepath, ":~:.") .. "</file>")
 end
 
-local function setup_extra_keymaps(opts)
+---@param codecompanion CodeCompanion
+---@param adapters table<string, CodeCompanion.AdapterArgs>
+local function setup_extra_keymaps(codecompanion, adapters)
+  vim.api.nvim_create_autocmd("FileType", {
+    pattern = "NvimTree",
+    callback = function()
+      vim.keymap.set("n",
+        "<leader>cf",
+        function()
+          ---@type boolean, nvim_tree.api.Node
+          local ok, node = pcall(require("nvim-tree.api").tree.get_node_under_cursor);
+          if not ok or node == nil then
+            return vim.notify("Could not get node under cursor in NvimTree", vim.log.levels.WARN,
+              { title = "CodeCompanion" })
+          end
+
+          local chat = codecompanion.last_chat() or codecompanion.chat();
+          if not chat then
+            return vim.notify("Failed to get chat instance.", vim.log.levels.ERROR, { title = "CodeCompanion" })
+          end
+
+          chat.ui:open();
+
+          if node.type == "file" then
+            add_file_to_codecompanion_chat(node.absolute_path, chat)
+          elseif node.type == "directory" then
+          end
+        end,
+        { desc = "Select file in NvimTree and add to codecompanion chat", buffer = true }
+      )
+    end
+  })
+
   vim.keymap.set("n", "<leader>cc", function()
-    local models = vim.iter(pairs(opts.adapters))
+    local models = vim.iter(pairs(adapters))
         :filter(
         ---@param key string
           function(key)
@@ -444,7 +476,7 @@ return {
               end
             },
             ---On exiting and entering neovim, loads the last chat on opening chat
-            continue_last_chat = true,
+            continue_last_chat = false,
             ---When chat is cleared with `gx` delete the chat from history
             delete_on_clearing_chat = true,
             ---Directory path to save the chats
@@ -498,8 +530,7 @@ return {
 
     vim.g.codecompanion_auto_tool_mode = true
 
-
-    setup_extra_keymaps(opts)
+    setup_extra_keymaps(codecompanion, opts.adapters)
     extend_cmp_completions()
   end,
 }
