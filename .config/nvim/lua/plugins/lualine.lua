@@ -41,6 +41,9 @@ return {
             provider_model_separator = ' :: ',
             display_on_idle = true,
           },
+          {
+            require "gnarus.codecompanion-lualine-ext"
+          },
           'encoding', 'fileformat', 'filetype',
           {
             function()
@@ -67,4 +70,3 @@ return {
     })
   end,
 }
-
