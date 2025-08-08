@@ -264,3 +264,167 @@ All generated code must:
 - Keep side effects at the **boundaries** (I/O, DB, network)
 - Encapsulate concurrency with **effect wrappers** or **actors**
 - Use a **custom actor trait** in Rust — never external actor frameworks
+
+--
+
+# Advanced Examples
+
+## Python program
+
+Of course. This is an excellent way to frame the information. Here are the functional programming guidelines structured as a "Don't / Do" guide, using the evolution of our script as the primary example. This is designed to be a clear directive for an LLM on how to produce high-quality, functional code.
+
+---
+
+### Guidelines for Producing High-Quality, Functional Python Code
+
+The goal is to write code that is robust, testable, and maintainable. This is achieved by separating logic from actions and making data flow explicit.
+
+---
+
+### 1. Separating Logic from Actions (Side Effects)
+
+#### **Don't: Mix logic and side effects in one function.**
+
+A single function should not be responsible for fetching data, transforming it, and then printing it. This creates a monolithic block that is impossible to test and difficult to reuse.
+
+```python
+# DON'T DO THIS
+def get_and_print_user_summary(user_id: str):
+    # Side Effect: Network I/O
+    response = requests.post("https://api.example.com/info", json={"user": user_id})
+    if response.status_code != 200:
+        # Side Effect: Console I/O
+        print("Error fetching data")
+        return
+
+    # Logic: Data Transformation
+    raw_data = response.json()
+    name = raw_data['name'].upper()
+    is_active = "Active" if raw_data['status'] == 1 else "Inactive"
+
+    # Side Effect: Console I/O
+    print(f"User Summary for {user_id}:")
+    print(f"  Name: {name}")
+    print(f"  Status: {is_active}")
+```
+
+#### **Do: Separate pure logic into a "Functional Core" and side effects into an "Imperative Shell."**
+
+The core logic should only consist of pure functions that transform data. The shell handles all interaction with the outside world (network, console, etc.).
+
+```python
+# DO THIS INSTEAD
+
+# --- Functional Core (Pure, Testable Logic) ---
+def process_user_data(raw_data: dict) -> dict:
+    return {
+        "name": raw_data['name'].upper(),
+        "status": "Active" if raw_data['status'] == 1 else "Inactive"
+    }
+
+# --- Imperative Shell (Handles Side Effects) ---
+def fetch_user_data(user_id: str) -> dict:
+    response = requests.post("https://api.example.com/info", json={"user": user_id})
+    response.raise_for_status()
+    return response.json()
+
+def display_summary(user_id: str, summary: dict):
+    print(f"User Summary for {user_id}:")
+    print(f"  Name: {summary['name']}")
+    print(f"  Status: {summary['status']}")
+
+# The shell orchestrates the pure functions
+def main_workflow(user_id: str):
+    raw_data = fetch_user_data(user_id)
+    summary_data = process_user_data(raw_data)
+    display_summary(user_id, summary_data)
+```
+
+---
+
+### 2. Handling Errors as Data
+
+#### **Don't: Use exceptions for control flow.**
+
+`try...except` blocks are themselves a form of side effect that breaks the linear flow of data. Overusing them for recoverable errors makes code harder to follow and compose.
+
+```python
+# DON'T DO THIS
+def run_pipeline(user_id: str):
+    try:
+        raw_data = fetch_user_data(user_id)
+        summary_data = process_user_data(raw_data)
+        display_summary(user_id, summary_data)
+    except Exception as e:
+        print(f"An error occurred: {e}")
+```
+
+#### **Do: Use a `Result` monad to treat errors as explicit return values.**
+
+This creates a "railway" where operations are chained together. The pipeline continues as long as things are successful and gracefully handles the first failure without crashing.
+
+```python
+# DO THIS INSTEAD
+from returns.result import Success, safe
+
+# Functions now return a Result[Success, Failure]
+@safe
+def fetch_user_data(user_id: str) -> Result[dict, Exception]:
+    # ... returns response.json() on success, or Failure(exception) on error
+
+@safe
+def process_user_data(raw_data: dict) -> Result[dict, Exception]:
+    # ... returns summary dict on success, or Failure(exception) on error
+
+# The main logic is a clean, readable pipeline
+def main_workflow(user_id: str):
+    (
+        Success(user_id)
+        .bind(fetch_user_data)
+        .bind(process_user_data)
+        .map(lambda summary: display_summary(user_id, summary))
+        .alt(lambda error: print(f"An error occurred: {error}")) # Handles any failure
+    )
+```
+
+---
+
+### 3. Using Types for Clarity
+
+#### **Don't: Pass generic dictionaries between functions.**
+
+Signatures like `def process(data: dict) -> dict:` are not self-documenting. To understand the data structure, one must read the entire function implementation.
+
+```python
+# DON'T DO THIS
+def process_data(raw_data: dict) -> dict:
+    # What keys are in raw_data? What does the output dict contain?
+    # No one knows without reading the code.
+    return {"processed_name": raw_data["name"].upper()}
+```
+
+#### **Do: Use custom types (`TypedDict`) to define explicit data contracts.**
+
+This makes function signatures self-documenting and enables static analysis tools to catch errors before runtime.
+
+```python
+# DO THIS INSTEAD
+from typing import TypedDict
+
+class RawUserData(TypedDict):
+    name: str
+    status: int
+
+class ProcessedSummary(TypedDict):
+    name: str
+    status: str
+
+def process_data(raw_data: RawUserData) -> ProcessedSummary:
+    # The data contract is perfectly clear from the signature alone.
+    return {
+        "name": raw_data['name'].upper(),
+        "status": "Active" if raw_data['status'] == 1 else "Inactive"
+    }
+```
+
+---
