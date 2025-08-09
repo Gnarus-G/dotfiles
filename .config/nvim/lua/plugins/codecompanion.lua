@@ -79,6 +79,13 @@ local function setup_extra_keymaps(codecompanion, adapters)
           if node.type == "file" then
             add_file_to_codecompanion_chat(node.absolute_path, chat)
           elseif node.type == "directory" then
+            local all_files = vim.tbl_filter(function(f) return vim.fn.filereadable(f) == 1 end,
+              vim.fn.systemlist("fd --type f --max-depth 2 . " .. node.absolute_path))
+
+            vim.iter(all_files)
+                :each(function(file)
+                  add_file_to_codecompanion_chat(file, chat)
+                end)
           end
         end,
         { desc = "Select file in NvimTree and add to codecompanion chat", buffer = true }
@@ -295,17 +302,19 @@ return {
               ---@param chat CodeCompanion.Chat
               callback = function(chat)
                 local home = vim.loop.os_homedir()
-                local dirs_therein = vim.fn.systemlist("find " .. home .. " -maxdepth 5 -type d")
+                local dirs_therein = vim.fn.systemlist("fd --type d --max-depth 6 . " .. home)
 
                 vim.ui.select(dirs_therein, {
                     prompt = "Select"
                   },
                   function(dir)
-                    local files_in_dir = vim.fn.systemlist("find " .. dir .. " -maxdepth 1 -type f")
+                    local files_in_dir = vim.tbl_filter(function(f) return vim.fn.filereadable(f) == 1 end,
+                      vim.fn.systemlist("fd --type f --max-depth 2 . " .. dir))
+
                     vim.iter(files_in_dir)
                         :each(function(file)
                           local content_as_string = io.open(file, "r"):read("*a")
-                          chat:add_reference({ role = "user", content = content_as_string }, file,
+                          chat:add_context({ role = "user", content = content_as_string }, file,
                             "<file>" .. file .. "</file>")
                         end)
                   end)
@@ -335,9 +344,7 @@ return {
                           return item.path or item.file or item.text
                         end)
                         :each(function(file)
-                          local content_as_string = io.open(file, "r"):read("*a")
-                          chat:add_reference({ role = "user", content = content_as_string }, file,
-                            "<file>" .. file .. "</file>")
+                          add_file_to_codecompanion_chat(file, chat)
                         end)
                   end,
                 })
