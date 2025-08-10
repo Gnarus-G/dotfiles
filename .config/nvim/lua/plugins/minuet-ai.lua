@@ -90,10 +90,9 @@ return {
     }
 
     local config                  = env_cascade({
-      OPENAI_API_KEY = { "openai", 2 },
-      GEMINI_API_KEY = { "gemini", 3 },
-      __default = { "openai_fim_compatible", 1 }
-    }, { "GEMINI_API_KEY", "OPENAI_API_KEY" })
+      { vars = { "GNARUS_ALLOW_VENDOR_LLM", "OPENAI_API_KEY" }, value = { "openai", 2, } },
+      { vars = { "GNARUS_ALLOW_VENDOR_LLM", "GEMINI_API_KEY" }, value = { "gemini", 3 } }
+    }, { "openai_fim_compatible", 1 })
     local provider, n_completions = config[1], config[2]
     vim.notify(string.format("Minuet AI configured with provider: %s, completions: %s", provider, n_completions),
       vim.log.levels.DEBUG)
