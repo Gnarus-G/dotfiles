@@ -63,12 +63,13 @@ return {
           },
         },
         openai_fim_compatible = {
-          name = "Ollama FIM",
-          model = 'qwen2.5-coder:3b',
+          name = "ollama",
+          model = 'qwen2.5-coder:7b',
           api_key = "TERM",
           end_point = ollama_api_base .. '/v1/completions',
           optional = {
             max_tokens = 256,
+            top_p = 0.9,
             stop = { '\n\n' },
           },
         },
