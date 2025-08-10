@@ -2,16 +2,17 @@ return {
   "folke/snacks.nvim",
   priority = 1000,
   lazy = false,
-  opts = {
-    dashboard = {
-      enabled = true,
-      width = 60,
-      row = nil,
-      col = nil,
-      pane_gap = 4,
-      autokeys = "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
-      preset = {
-        header = { [[
+  opts = function()
+    return {
+      dashboard = {
+        enabled = true,
+        width = 60,
+        row = nil,
+        col = nil,
+        pane_gap = 4,
+        autokeys = "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
+        preset = {
+          header = { [[
 
      ██████╗ ███╗   ██╗ █████╗ ██████╗ ██╗   ██╗███████╗
     ██╔════╝ ████╗  ██║██╔══██╗██╔══██╗██║   ██║██╔════╝
@@ -19,92 +20,93 @@ return {
     ██║   ██║██║╚██╗██║██╔══██║██╔══██╗██║   ██║╚════██║
     ╚██████╔╝██║ ╚████║██║  ██║██║  ██║╚██████╔╝███████║
      ╚═════╝ ╚═╝  ╚═══╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚══════╝]],
+          },
+          keys = {
+            { icon = " ", key = "f", desc = "Find File", action = "<leader>ff" },
+            { icon = " ", key = "n", desc = "New File", action = ":ene | startinsert" },
+            --[[ { icon = " ", key = "g", desc = "Live Grep", action = "<leader>fg" }, ]]
+            --[[ { icon = " ", key = "r", desc = "Recent Files", action = "<leader>fo" }, ]]
+            { icon = " ", key = "p", desc = "Projects", action = "<leader>fp" },
+            { icon = " ", key = "c", desc = "Config", action = ":e ~/.config/nvim/init.lua" },
+            { icon = " ", key = "u", desc = "Update Plugins", action = ":Lazy sync" },
+            { icon = " ", key = "q", desc = "Quit", action = ":qa" },
+          },
         },
-        keys = {
-          { icon = " ", key = "f", desc = "Find File", action = "<leader>ff" },
-          { icon = " ", key = "n", desc = "New File", action = ":ene | startinsert" },
-          --[[ { icon = " ", key = "g", desc = "Live Grep", action = "<leader>fg" }, ]]
-          --[[ { icon = " ", key = "r", desc = "Recent Files", action = "<leader>fo" }, ]]
-          { icon = " ", key = "p", desc = "Projects", action = "<leader>fp" },
-          { icon = " ", key = "c", desc = "Config", action = ":e ~/.config/nvim/init.lua" },
-          { icon = " ", key = "u", desc = "Update Plugins", action = ":Lazy sync" },
-          { icon = " ", key = "q", desc = "Quit", action = ":qa" },
+        formats = {
+          key = function(item) return { { "[", hl = "Special" }, { item.key, hl = "Keyword" }, { "]", hl = "Special" } } end,
+          icon = function(item) return item.icon and { item.icon, hl = "Type" } or nil end,
+          desc = function(item) return item.desc and { item.desc, hl = "Comment" } or nil end,
+          header = { "%s", align = "center" }
+        },
+        sections = {
+          { section = "header" },
+          { section = "keys", gap = 1, padding = 1 },
+          { icon = " ", title = "Recent Files", section = "recent_files", indent = 2, padding = { 2, 2 } },
+          --[[ { icon = " ", title = "Projects", section = "projects", indent = 2, padding = 2 }, ]]
+          function()
+            local in_git = Snacks.git.get_root() ~= nil
+            local cmds = {
+              {
+                icon = " ",
+                title = "Git Status",
+                cmd = "git --no-pager diff --stat -B -M -C",
+                height = 5,
+              },
+              {
+                title = "Open Issues",
+                cmd = "gh issue list -L 5",
+                key = "i",
+                action = function()
+                  vim.fn.jobstart("gh issue list --web", { detach = true })
+                end,
+                icon = " ",
+                height = 3,
+              },
+              {
+                icon = " ",
+                title = "Open PRs",
+                cmd = "gh pr list -L 3",
+                key = "P",
+                action = function()
+                  vim.fn.jobstart("gh pr list --web", { detach = true })
+                end,
+                height = 2,
+              },
+            }
+            return vim.tbl_map(function(cmd)
+              return vim.tbl_extend("force", {
+                section = "terminal",
+                enabled = in_git,
+                padding = 1,
+                ttl = 5 * 60,
+                indent = 3,
+              }, cmd)
+            end, cmds)
+          end,
+          { section = "startup" },
         },
       },
-      formats = {
-        key = function(item) return { { "[", hl = "Special" }, { item.key, hl = "Keyword" }, { "]", hl = "Special" } } end,
-        icon = function(item) return item.icon and { item.icon, hl = "Type" } or nil end,
-        desc = function(item) return item.desc and { item.desc, hl = "Comment" } or nil end,
-        header = { "%s", align = "center" }
+      image = { enabled = true },
+      bigfile = { enabled = true },
+      explorer = { enabled = true },
+      indent = { enabled = true },
+      input = { enabled = true },
+      notifier = { enabled = true },
+      picker = { enabled = true },
+      quickfile = { enabled = true },
+      scope = { enabled = true },
+      statuscolumn = { enabled = true },
+      words = { enabled = true },
+      styles = {
+        input = {
+          bo = {
+            filetype = "snacks_input",
+            buftype = "nofile",
+          },
+        }
       },
-      sections = {
-        { section = "header" },
-        { section = "keys", gap = 1, padding = 1 },
-        { icon = " ", title = "Recent Files", section = "recent_files", indent = 2, padding = { 2, 2 } },
-        --[[ { icon = " ", title = "Projects", section = "projects", indent = 2, padding = 2 }, ]]
-        function()
-          local in_git = Snacks.git.get_root() ~= nil
-          local cmds = {
-            {
-              icon = " ",
-              title = "Git Status",
-              cmd = "git --no-pager diff --stat -B -M -C",
-              height = 5,
-            },
-            {
-              title = "Open Issues",
-              cmd = "gh issue list -L 5",
-              key = "i",
-              action = function()
-                vim.fn.jobstart("gh issue list --web", { detach = true })
-              end,
-              icon = " ",
-              height = 3,
-            },
-            {
-              icon = " ",
-              title = "Open PRs",
-              cmd = "gh pr list -L 3",
-              key = "P",
-              action = function()
-                vim.fn.jobstart("gh pr list --web", { detach = true })
-              end,
-              height = 2,
-            },
-          }
-          return vim.tbl_map(function(cmd)
-            return vim.tbl_extend("force", {
-              section = "terminal",
-              enabled = in_git,
-              padding = 1,
-              ttl = 5 * 60,
-              indent = 3,
-            }, cmd)
-          end, cmds)
-        end,
-        { section = "startup" },
-      },
-    },
-    image = { enabled = true },
-    bigfile = { enabled = true },
-    explorer = { enabled = true },
-    indent = { enabled = true },
-    input = { enabled = true },
-    notifier = { enabled = true },
-    picker = { enabled = true },
-    quickfile = { enabled = true },
-    scope = { enabled = true },
-    statuscolumn = { enabled = true },
-    words = { enabled = true },
-    styles = {
-      input = {
-        bo = {
-          filetype = "snacks_input",
-          buftype = "nofile",
-        },
-      }
-    },
-  },
+    }
+  end,
   keys = {
     { "<leader>d",  function() Snacks.dashboard.open() end,                                        desc = "Dashboard" },
     { "<leader>fp", function() Snacks.picker.projects() end,                                       desc = "Projects" },
