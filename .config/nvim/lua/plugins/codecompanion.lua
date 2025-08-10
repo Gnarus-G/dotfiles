@@ -1,22 +1,19 @@
 local env_cascade = require("gnarus.utils").env_var_cascade
 
 local chat_adapter_name = env_cascade({
-  OPENAI_API_KEY = "openai_fast",
-  GEMINI_API_KEY = "gemini",
-  __default = "ollama"
-}, { "OPENAI_API_KEY", "GEMINI_API_KEY" })
+  { vars = { "GNARUS_ALLOW_VENDOR_LLM", "OPENAI_API_KEY" }, value = "openai_fast", },
+  { vars = { "GNARUS_ALLOW_VENDOR_LLM", "GEMINI_API_KEY" }, value = "gemini", }
+}, "ollama")
 
 local inline_adapter_name = env_cascade({
-  OPENAI_API_KEY = "openai_fast_low_thinking",
-  GEMINI_API_KEY = "gemini_fast",
-  __default = "ollama"
-}, { "OPENAI_API_KEY", "GEMINI_API_KEY" })
+  { vars = { "GNARUS_ALLOW_VENDOR_LLM", "OPENAI_API_KEY" }, value = "openai_fast_low_thinking" },
+  { vars = { "GNARUS_ALLOW_VENDOR_LLM", "GEMINI_API_KEY" }, value = "gemini_fast" },
+}, "ollama")
 
 local cmd_adapter_name = env_cascade({
-  OPENAI_API_KEY = "openai_fast_low_thinking",
-  GEMINI_API_KEY = "gemini_fast_low_thinking",
-  __default = "ollama"
-}, { "OPENAI_API_KEY", "GEMINI_API_KEY" })
+  { vars = { "GNARUS_ALLOW_VENDOR_LLM", "OPENAI_API_KEY" }, value = "openai_fast_low_thinking" },
+  { vars = { "GNARUS_ALLOW_VENDOR_LLM", "GEMINI_API_KEY" }, value = "gemini_fast_low_thinking" },
+}, "ollama")
 
 ---@param adapter string
 ---@param model string
