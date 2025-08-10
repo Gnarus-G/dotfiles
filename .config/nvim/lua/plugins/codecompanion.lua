@@ -12,7 +12,7 @@ local inline_adapter_name = env_cascade({
 
 local cmd_adapter_name = env_cascade({
   { vars = { "GNARUS_ALLOW_VENDOR_LLM", "OPENAI_API_KEY" }, value = "openai_fast_low_thinking" },
-  { vars = { "GNARUS_ALLOW_VENDOR_LLM", "GEMINI_API_KEY" }, value = "gemini_fast_low_thinking" },
+  { vars = { "GNARUS_ALLOW_VENDOR_LLM", "GEMINI_API_KEY" }, value = "gemini_fast" },
 }, "ollama")
 
 ---@param adapter string
