@@ -47,13 +47,20 @@ vim.api.nvim_create_autocmd({ "User" }, {
 
 ---@param ft LlmChatType
 ---@return string
-function M.get_formatted_context(ft)
+function M.get_llm_chat_content_from(ft)
   local bufnr = M.nofile_buffers[ft]
   if bufnr == nil or not vim.api.nvim_buf_is_valid(bufnr) then
     return ""
   end
   local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
-  return "<chat_with:" .. ft .. ">" .. table.concat(lines, "\n") .. "</chat_with:" .. ft .. ">"
+  return table.concat(lines, "\n")
+end
+
+---@param ft LlmChatType
+---@return string
+function M.get_formatted_context(ft)
+  local content = M.get_llm_chat_content_from(ft)
+  return "<chat_with:" .. ft .. ">" .. content .. "</chat_with:" .. ft .. ">"
 end
 
 return M

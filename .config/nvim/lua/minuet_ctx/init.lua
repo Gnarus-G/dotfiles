@@ -35,8 +35,9 @@ local function read_file_content(filepath)
   return content or ""
 end
 
-local function get_formatted_files_context(files)
-  ---@type string[]
+---@param files string[] The list of filepaths to read contents for.
+---@return {path: string, content: string, type: string }[]
+local function get_files_context(files)
   local files_contents = vim.iter(files)
       :filter(function(filepath)
         return not is_file_of_current_buffer(filepath)
@@ -49,15 +50,36 @@ local function get_formatted_files_context(files)
       :filter(function(content, _)
         return content ~= ""
       end)
-      :map(function(content, filepath)
+      :map(function(content, path)
+        local filetype = vim.filetype.match({ filename = path })
+        return {
+          path = path,
+          content = content,
+          type = filetype
+        }
+      end)
+      :totable();
+
+  return files_contents;
+end
+
+local function get_formatted_files_context(files)
+  local files_contents = vim.iter(get_files_context(files))
+      :map(function(ctx)
         return "--- Content from file: " ..
-            vim.fn.fnamemodify(filepath, ":t") .. " ---\n" .. content .. "\n--- End of file content ---"
+            vim.fn.fnamemodify(ctx.path, ":t") .. " ---\n" .. ctx.content .. "\n--- End of file content ---"
       end)
       :totable();
 
   return table.concat(files_contents, "\n")
 end
 
+---@return {ft: LlmChatType, content: string}[]
+local function get_chats_context()
+  return { ft = "codecompanion", content = llm_chats.get_llm_chat_content_from("codecompanion") }
+end
+
+---@return string
 local function get_formatted_chats_context()
   local formatted_chats = vim.iter({
         llm_chats.get_formatted_context("codecompanion")
@@ -68,7 +90,7 @@ local function get_formatted_chats_context()
 end
 
 --- Gets all current dynamic context as a formatted string
-local function get_formatted_context()
+local function get_all_context_formatted()
   local files_contents = get_formatted_files_context(all_extra_files())
   local llm_chats_contents = get_formatted_chats_context()
 
@@ -233,5 +255,10 @@ end, 100)
 
 return {
   files = all_extra_files,
-  get_formatted_context = get_formatted_context
+  get_files_context = function()
+    return get_files_context(
+      all_extra_files())
+  end,
+  get_chats_context = get_chats_context,
+  get_formatted_context = get_all_context_formatted
 }
