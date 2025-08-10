@@ -44,7 +44,12 @@ end
 ---@param chat CodeCompanion.Chat
 local function add_file_to_codecompanion_chat(filepath, chat)
   local filetype = vim.filetype.match({ filename = filepath })
-  local content = io.open(filepath, "r"):read("*a")
+  local file, err = io.open(filepath, "r")
+  if not file then
+    return vim.notify("Error opening file: " .. err, vim.log.levels.ERROR)
+  end
+  local content = file:read("*a")
+  file:close()
   local title = "<attachment filepath=\"" .. filepath .. "\">"
   local body = "Here is the content from the file:\n\n" .. "```" .. filetype .. "\n" .. content
   local footer = "```\n</attachment>"
@@ -312,10 +317,15 @@ return {
                       vim.fn.systemlist("fd --type f --max-depth 2 . " .. dir))
 
                     vim.iter(files_in_dir)
-                        :each(function(file)
-                          local content_as_string = io.open(file, "r"):read("*a")
-                          chat:add_context({ role = "user", content = content_as_string }, file,
-                            "<file>" .. file .. "</file>")
+                        :each(function(filepath)
+                          local file, err = io.open(filepath, "r")
+                          if not file then
+                            return vim.notify("Error opening file: " .. err, vim.log.levels.ERROR)
+                          end
+                          local content_as_string = file:read("*a")
+                          file:close()
+                          chat:add_context({ role = "user", content = content_as_string }, filepath,
+                            "<file>" .. filepath .. "</file>")
                         end)
                   end)
               end,
