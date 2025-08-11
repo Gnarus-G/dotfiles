@@ -5,4 +5,6 @@ packer_compiled.lua
 .opencode
 .gitconfig
 .config/gtk-3.0
-.config/leftwm/themes
+.config/leftwm/themes/*
+!.config/leftwm/themes/ignorant/
+!.config/leftwm/themes/ignorant/**

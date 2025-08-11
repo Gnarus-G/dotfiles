@@ -1,0 +1,48 @@
+.todo {
+  font-size: 16px;
+}
+
+.todo > * {
+  margin: 0 3px;
+}
+
+.todo > .message {
+  font-size: 20px;
+  padding: 0 10px;
+}
+
+progressbar > trough {
+  min-width: 50px;
+}
+
+progressbar > trough > progress {
+  border-radius: 2px;
+}
+
+.todo progressbar.priority progress {
+  background: pink;
+}
+
+.todo progressbar.drag progress {
+  background: $secondary;
+}
+
+.todo > .del-btn {
+  opacity: 0.5;
+  border: lighten($color: red, $amount: 10) solid 3px;
+  background-color: darken($color: pink, $amount: 5);
+  border-radius: 50%;
+}
+
+.todo > .del-btn:hover {
+  opacity: 1;
+}
+
+.todo-list {
+  background-color: $background;
+  border-radius: 5px;
+}
+
+.todo-list > .todo {
+  padding: 10px;
+}
