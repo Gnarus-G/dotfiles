@@ -1,0 +1,103 @@
+$light: #b0b4bc;
+$dark: #2e2e2e;
+$primary: #60a5fa;
+$secondary: #a5b4fc;
+$urgent: #f43f5e;
+$background: #0f172a;
+
+* {
+  all: unset; //Unsets everything so you can style everything from scratch
+}
+
+@import "./todo.scss";
+
+//Global Styles
+.bar {
+  background-color: $background;
+  border-radius: 5px;
+  color: $light;
+  padding: 0px 10px;
+}
+
+// Styles on classes (see eww.yuck for more information)
+
+.sidestuff slider {
+  all: unset;
+  color: #ffd5cd;
+}
+.metric scale trough {
+  all: unset;
+  background-color: #4e4e4e;
+  border-radius: 50px;
+  min-height: 3px;
+  min-width: 50px;
+  margin-left: 10px;
+  margin-right: 20px;
+}
+.metric scale trough highlight {
+  all: unset;
+  background-color: $primary;
+  color: #000000;
+  border-radius: 10px;
+}
+.today {
+  color: $secondary;
+}
+
+.workspaces button {
+  margin: 0px 2px;
+  border-radius: 50%;
+}
+
+.workspaces button:hover:not(.ws-button-mine) {
+  color: darken($color: $primary, $amount: 20);
+}
+.ws-button-mine {
+  color: $dark;
+  background-color: $primary;
+}
+.ws-button-visible {
+  color: $light;
+}
+.ws-button-urgent {
+  color: $dark;
+  background-color: #d35d6e;
+}
+.ws-button-busy {
+  color: lighten($color: $dark, $amount: 30);
+}
+
+.calendar {
+  background-color: $background;
+  border-radius: 5px;
+  border: 2px solid $secondary;
+}
+.calendar:selected {
+  color: $dark;
+  background-color: $secondary;
+}
+
+// utilities
+.px {
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.text-bg-light {
+  color: lighten($color: $background, $amount: 25);
+}
+
+.text-primary {
+  color: $light;
+}
+
+.border-x {
+  border-left: 2px solid;
+  border-right: 2px solid;
+  border-color: $dark;
+}
+
+.border-r {
+  border-right: 2px solid;
+  border-color: $dark;
+}
