@@ -130,25 +130,3 @@
   :windowtype "dock"
   :geometry (geometry :x "-1%" :y "3%" :anchor "top right")
    (calendar :class "calendar"))
-
-(defwindow bar
-  :monitor 0
-  :windowtype "dock"
-  :geometry (geometry :x "0%"
-                      :y "10px"
-                      :width "99%"
-                      :height "10px"
-                      :anchor "top center")
-  :reserve (struts :side "top" :distance "35px")
-  (bar :index 0))
-
-(defwindow bar1
-  :monitor 1
-  :windowtype "dock"
-  :geometry (geometry :x "0%"
-                      :y "5px"
-                      :width "99%"
-                      :height "10px"
-                      :anchor "top center")
-  :reserve (struts :side "top" :distance "30px")
-  (bar :index 1))
