@@ -25,6 +25,7 @@ $background: #0f172a;
   all: unset;
   color: #ffd5cd;
 }
+
 .metric scale trough {
   all: unset;
   background-color: #4e4e4e;
@@ -34,12 +35,14 @@ $background: #0f172a;
   margin-left: 10px;
   margin-right: 20px;
 }
+
 .metric scale trough highlight {
   all: unset;
   background-color: $primary;
   color: #000000;
   border-radius: 10px;
 }
+
 .today {
   color: $secondary;
 }
@@ -52,17 +55,21 @@ $background: #0f172a;
 .workspaces button:hover:not(.ws-button-mine) {
   color: darken($color: $primary, $amount: 20);
 }
+
 .ws-button-mine {
   color: $dark;
   background-color: $primary;
 }
+
 .ws-button-visible {
   color: $light;
 }
+
 .ws-button-urgent {
   color: $dark;
   background-color: #d35d6e;
 }
+
 .ws-button-busy {
   color: lighten($color: $dark, $amount: 30);
 }
@@ -72,6 +79,7 @@ $background: #0f172a;
   border-radius: 5px;
   border: 2px solid $secondary;
 }
+
 .calendar:selected {
   color: $dark;
   background-color: $secondary;
@@ -100,4 +108,324 @@ $background: #0f172a;
 .border-r {
   border-right: 2px solid;
   border-color: $dark;
+}
+
+// System Metrics Styling
+.system-metric {
+  font-family: "JetBrains Mono", "Fira Code", monospace;
+  font-weight: bold;
+  transition:
+    background-color 0.3s ease,
+    border-color 0.3s ease;
+}
+
+.metric-label {
+  color: $light;
+  font-size: 12px;
+  margin-right: 5px;
+}
+
+.metric-value {
+  font-size: 13px;
+  font-weight: 900;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  transition: color 0.3s ease;
+}
+
+// Dynamic Alert Level Styling
+.metric-normal {
+  background: linear-gradient(90deg,
+      rgba(34, 197, 94, 0.1),
+      rgba(34, 197, 94, 0.05));
+  border: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+.metric-warning {
+  background: linear-gradient(90deg,
+      rgba(249, 115, 22, 0.15),
+      rgba(249, 115, 22, 0.08));
+  border: 1px solid rgba(249, 115, 22, 0.3);
+  animation: pulse-warning 2s infinite;
+}
+
+.metric-critical {
+  background: linear-gradient(90deg,
+      rgba(239, 68, 68, 0.2),
+      rgba(239, 68, 68, 0.1));
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  animation: pulse-critical 1.5s infinite;
+}
+
+.value-normal {
+  color: #22c55e; // Green
+}
+
+.value-warning {
+  color: #f97316; // Orange
+  font-weight: 900;
+}
+
+.value-critical {
+  color: #ef4444; // Red
+  font-weight: 900;
+  text-shadow: 0 0 8px rgba(239, 68, 68, 0.5);
+}
+
+// Pulse animations for alerts
+@keyframes pulse-warning {
+  0% {
+    box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.4);
+  }
+
+  70% {
+    box-shadow: 0 0 0 3px rgba(249, 115, 22, 0);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(249, 115, 22, 0);
+  }
+}
+
+@keyframes pulse-critical {
+  0% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.6);
+  }
+
+  70% {
+    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+  }
+}
+
+// CPU Styling - Blue theme
+.cpu-metric {
+  background: linear-gradient(90deg,
+      rgba(96, 165, 250, 0.1),
+      rgba(96, 165, 250, 0.05));
+  border-radius: 4px;
+}
+
+.cpu-value {
+  color: $primary;
+}
+
+// RAM Styling - Purple theme
+.ram-metric {
+  background: linear-gradient(90deg,
+      rgba(165, 180, 252, 0.1),
+      rgba(165, 180, 252, 0.05));
+  border-radius: 4px;
+}
+
+.ram-value {
+  color: $secondary;
+}
+
+// Disk Styling - Green theme with usage-based colors
+.disk-metric {
+  background: linear-gradient(90deg,
+      rgba(34, 197, 94, 0.1),
+      rgba(34, 197, 94, 0.05));
+  border-radius: 4px;
+}
+
+.disk-value {
+  color: #22c55e;
+}
+
+// Battery Styling
+.battery-metric {
+  background: linear-gradient(90deg,
+      rgba(168, 85, 247, 0.1),
+      rgba(168, 85, 247, 0.05));
+  border-radius: 4px;
+}
+
+.battery-value {
+  color: #a855f7; // Purple default
+  font-size: 12px;
+}
+
+// Network Styling
+.net-metric {
+  background: linear-gradient(90deg,
+      rgba(249, 115, 22, 0.1),
+      rgba(249, 115, 22, 0.05));
+  border-radius: 4px;
+  font-family: "JetBrains Mono", "Fira Code", monospace;
+}
+
+.net-up {
+  color: #f97316; // Orange for upload
+  font-size: 11px;
+  margin-right: 8px;
+  font-weight: bold;
+}
+
+.net-down {
+  color: #06b6d4; // Cyan for download
+  font-size: 11px;
+  font-weight: bold;
+}
+
+// Volume Control Styling
+.volume-control {
+  background: linear-gradient(90deg,
+      rgba(96, 165, 250, 0.1),
+      rgba(96, 165, 250, 0.05));
+  border-radius: 6px;
+  padding: 4px 8px;
+  border: 1px solid rgba(96, 165, 250, 0.2);
+  transition: all 0.3s ease;
+  font-family: "JetBrains Mono", "Fira Code", monospace;
+
+  &:hover {
+    background: linear-gradient(90deg,
+        rgba(96, 165, 250, 0.15),
+        rgba(96, 165, 250, 0.08));
+    border-color: rgba(96, 165, 250, 0.3);
+  }
+}
+
+// Volume state-based styling
+.volume-high {
+  background: linear-gradient(90deg,
+      rgba(34, 197, 94, 0.1),
+      rgba(34, 197, 94, 0.05));
+  border-color: rgba(34, 197, 94, 0.2);
+
+  &:hover {
+    background: linear-gradient(90deg,
+        rgba(34, 197, 94, 0.15),
+        rgba(34, 197, 94, 0.08));
+    border-color: rgba(34, 197, 94, 0.3);
+  }
+}
+
+.volume-medium {
+  background: linear-gradient(90deg,
+      rgba(249, 115, 22, 0.1),
+      rgba(249, 115, 22, 0.05));
+  border-color: rgba(249, 115, 22, 0.2);
+
+  &:hover {
+    background: linear-gradient(90deg,
+        rgba(249, 115, 22, 0.15),
+        rgba(249, 115, 22, 0.08));
+    border-color: rgba(249, 115, 22, 0.3);
+  }
+}
+
+.volume-low {
+  background: linear-gradient(90deg,
+      rgba(239, 68, 68, 0.1),
+      rgba(239, 68, 68, 0.05));
+  border-color: rgba(239, 68, 68, 0.2);
+
+  &:hover {
+    background: linear-gradient(90deg,
+        rgba(239, 68, 68, 0.15),
+        rgba(239, 68, 68, 0.08));
+    border-color: rgba(239, 68, 68, 0.3);
+  }
+}
+
+.volume-muted {
+  background: linear-gradient(90deg,
+      rgba(107, 114, 128, 0.1),
+      rgba(107, 114, 128, 0.05));
+  border-color: rgba(107, 114, 128, 0.3);
+  animation: pulse-muted 2s infinite;
+
+  &:hover {
+    background: linear-gradient(90deg,
+        rgba(107, 114, 128, 0.15),
+        rgba(107, 114, 128, 0.08));
+  }
+}
+
+// Volume icon button
+.volume-icon-btn {
+  all: unset;
+  font-size: 16px;
+  padding: 2px 4px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  &:active {
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  &.muted {
+    opacity: 0.6;
+    color: #6b7280;
+  }
+}
+
+// Volume text styling
+.volume-text {
+  font-size: 11px;
+  font-weight: bold;
+  margin-left: 6px;
+  min-width: 35px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.text-high {
+  color: #22c55e; // Green
+}
+
+.text-medium {
+  color: #f97316; // Orange
+}
+
+.text-low {
+  color: #ef4444; // Red
+}
+
+.text-muted {
+  color: #6b7280; // Gray
+  opacity: 0.7;
+}
+
+// Volume bar (optional visual indicator)
+.volume-bar-container {
+  min-width: 40px;
+  min-height: 4px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 2px;
+  margin-left: 6px;
+}
+
+.volume-bar {
+  min-height: 4px;
+  background: linear-gradient(90deg, #ef4444, #f97316, #22c55e);
+  border-radius: 2px;
+  transition: all 0.3s ease;
+
+  &.bar-muted {
+    background: #6b7280;
+  }
+}
+
+// Muted pulse animation
+@keyframes pulse-muted {
+  0% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.6;
+  }
+
+  100% {
+    opacity: 1;
+  }
 }
