@@ -13,7 +13,8 @@
     (toggle_audio_icon_button)
     (metric :value volume
             :onchange "pamixer --set-volume {}")
-    (box :class "px border-x" :space-evenly false "CPU:" {round(EWW_CPU.avg,0)} "%")
+    (box :class "px border-x" :space-evenly false "IP: " ip_address)
+    (box :class "px border-x" :space-evenly false "CPU:" {round(EWW_CPU.avg,0)} "%%")
     (box :class "px border-r" :space-evenly false "RAM:" {round(EWW_RAM.used_mem_perc,0)} "%")
    (box :class "border-r px today" 
     (eventbox :onclick "${EWW_CMD} ${cal_is_open ? "close" : "open"} cal; ${EWW_CMD} update cal_is_open=${!cal_is_open}; " today))
@@ -62,6 +63,9 @@
 
 (defpoll volume_muted :interval "100ms"
   "pamixer --get-mute")
+
+(defpoll ip_address :interval "60s"
+  "ip route get 1.1.1.1 | awk '{print $7}'")
 
 (defpoll today :interval "1s"
   "date '+%a, %b %d'")
