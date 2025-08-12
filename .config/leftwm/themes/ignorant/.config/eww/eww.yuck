@@ -123,6 +123,14 @@
 
 (defvar cal_is_open false)
 
+(defwindow cal
+  :monitor 0
+  :stacking "fg"
+  :wm-ignore true
+  :windowtype "dock"
+  :geometry (geometry :x "-1%" :y "3%" :anchor "top right")
+   (calendar :class "calendar"))
+
 (defwindow bar
   :monitor 0
   :windowtype "dock"
@@ -144,22 +152,3 @@
                       :anchor "top center")
   :reserve (struts :side "top" :distance "30px")
   (bar :index 1))
-
-;; (defwindow bar2
-;;   :monitor 2
-;;   :windowtype "dock"
-;;   :geometry (geometry :x "0%"
-;;                       :y "5px"
-;;                       :width "99%"
-;;                       :height "10px"
-;;                       :anchor "top center")
-;;   :reserve (struts :side "top" :distance "30px")
-;;   (bar :index 2))
-
-(defwindow cal
-  :monitor 0
-  :stacking "fg"
-  :wm-ignore true
-  :windowtype "dock"
-  :geometry (geometry :x "-1%" :y "3%" :anchor "top right")
-   (calendar :class "calendar"))

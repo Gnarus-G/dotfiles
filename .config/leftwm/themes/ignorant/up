@@ -33,8 +33,33 @@ fi
 
 start_eww() {
   if [ -x "$(command -v eww)" ]; then
+    echo "🔧 Generating dynamic eww configurations..."
+    
+    # Generate dynamic bar configurations based on detected monitors
+    if ! $SCRIPTPATH/.config/eww/generate_bars.sh; then
+      notify-send "❌ Failed to generate eww bars"
+      return 1
+    fi
+    
+    # Detect monitors and build open command
+    MONITOR_COUNT=$(xrandr --query | grep " connected" | wc -l)
+    BARS="bar"
+    
+    # Add additional bars for extra monitors
+    if [ $MONITOR_COUNT -gt 1 ]; then
+      for i in $(seq 1 $((MONITOR_COUNT - 1))); do
+        BARS="$BARS bar$i"
+      done
+    fi
+    
+    echo "📊 Starting eww with $MONITOR_COUNT monitor(s): $BARS"
+    
+    # Start eww daemon and open bars
     eww -c $SCRIPTPATH/.config/eww daemon &
-    eww -c $SCRIPTPATH/.config/eww open-many bar bar1
+    sleep 1  # Give daemon time to start
+    eww -c $SCRIPTPATH/.config/eww open-many $BARS
+    
+    notify-send -u low "🎯 Eww started with dynamic bars: $BARS"
   else
     notify-send '`eww` not found, please install it (system wide "/usr/bin") and try again.'
     return 1
