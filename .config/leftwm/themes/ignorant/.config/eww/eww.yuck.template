@@ -35,8 +35,8 @@
     ;; Network Metric
     (box :class "px border-x system-metric net-metric" :space-evenly false 
          (label :class "metric-label" :text "NET:")
-         (label :class "net-up" :text "↑${round(EWW_NET.wlan0.NET_UP / 1024, 1)}KB/s")
-         (label :class "net-down" :text "↓${round(EWW_NET.wlan0.NET_DOWN / 1024, 1)}KB/s"))))
+         (label :class "net-up" :text "↑${round(EWW_NET[net_interface].NET_UP / 1024, 1)}KB/s")
+         (label :class "net-down" :text "↓${round(EWW_NET[net_interface].NET_DOWN / 1024, 1)}KB/s"))))
 
 (defwidget sidestuff []
   (box :class "sidestuff" :orientation "h" :space-evenly false :halign "end"
@@ -110,6 +110,8 @@
 
 (defpoll ip_address :interval "60s"
   "ip route get 1.1.1.1 | awk '{print $7}'")
+
+(defpoll net_interface :interval "60s" "ip route get 1.1.1.1 | awk '{printf $5}'")
 
 (defpoll today :interval "1s"
   "date '+%a, %b %d'")
