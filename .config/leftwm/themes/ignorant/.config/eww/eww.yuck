@@ -8,21 +8,65 @@
      ;; (todo :item latest_todo))
     (sidestuff)))
 
+(defwidget system-stats []
+  (box :class "system-stats" :orientation "h" :space-evenly false
+    ;; CPU Metric
+    (box :class "px border-x system-metric cpu-metric ${round(EWW_CPU.avg,0) >= 80 ? 'metric-critical' : round(EWW_CPU.avg,0) >= 50 ? 'metric-warning' : 'metric-normal'}" :space-evenly false 
+         (label :class "metric-label" :text "CPU:")
+         (label :class "metric-value cpu-value ${round(EWW_CPU.avg,0) >= 80 ? 'value-critical' : round(EWW_CPU.avg,0) >= 50 ? 'value-warning' : 'value-normal'}" :text "${round(EWW_CPU.avg,0)}%"))
+    
+    ;; RAM Metric
+    (box :class "px border-x system-metric ram-metric ${round(EWW_RAM.used_mem_perc,0) >= 85 ? 'metric-critical' : round(EWW_RAM.used_mem_perc,0) >= 60 ? 'metric-warning' : 'metric-normal'}" :space-evenly false 
+         (label :class "metric-label" :text "RAM:")
+         (label :class "metric-value ram-value ${round(EWW_RAM.used_mem_perc,0) >= 85 ? 'value-critical' : round(EWW_RAM.used_mem_perc,0) >= 60 ? 'value-warning' : 'value-normal'}" :text "${round(EWW_RAM.used_mem_perc,0)}%"))
+    
+    ;; Disk Metric
+    (box :class "px border-x system-metric disk-metric ${round(EWW_DISK["/"].used_perc,0) >= 90 ? 'metric-critical' : round(EWW_DISK["/"].used_perc,0) >= 70 ? 'metric-warning' : 'metric-normal'}" :space-evenly false 
+         (label :class "metric-label" :text "DISK:")
+         (label :class "metric-value disk-value ${round(EWW_DISK["/"].used_perc,0) >= 90 ? 'value-critical' : round(EWW_DISK["/"].used_perc,0) >= 70 ? 'value-warning' : 'value-normal'}" :text "${round(EWW_DISK["/"].used_perc,0)}%"))
+    
+    ;; Battery - only show if exists
+    (box :class "px border-x system-metric battery-metric" :space-evenly false 
+         :visible has_battery
+         (label :class "metric-label" :text "BAT:")
+         (label :class "metric-value battery-value ${EWW_BATTERY.BAT0.capacity < 20 ? 'value-critical' : EWW_BATTERY.BAT0.capacity < 40 ? 'value-warning' : 'value-normal'}" 
+                :text "${EWW_BATTERY.BAT0.status == 'Charging' ? '🔌' : EWW_BATTERY.BAT0.capacity < 20 ? '🪫' : EWW_BATTERY.BAT0.capacity < 50 ? '🔋' : '🔋'} ${EWW_BATTERY.BAT0.capacity}%"))
+    
+    ;; Network Metric
+    (box :class "px border-x system-metric net-metric" :space-evenly false 
+         (label :class "metric-label" :text "NET:")
+         (label :class "net-up" :text "↑${round(EWW_NET.wlan0.NET_UP / 1024, 1)}KB/s")
+         (label :class "net-down" :text "↓${round(EWW_NET.wlan0.NET_DOWN / 1024, 1)}KB/s"))))
+
 (defwidget sidestuff []
   (box :class "sidestuff" :orientation "h" :space-evenly false :halign "end"
     (toggle_audio_icon_button)
     (metric :value volume
             :onchange "pamixer --set-volume {}")
-    (box :class "px border-x" :space-evenly false "IP: " ip_address)
-    (box :class "px border-x" :space-evenly false "CPU:" {round(EWW_CPU.avg,0)} "%%")
-    (box :class "px border-r" :space-evenly false "RAM:" {round(EWW_RAM.used_mem_perc,0)} "%")
+    (box :class "px border-x" :space-evenly false ip_address)
+    (system-stats)
    (box :class "border-r px today" 
     (eventbox :onclick "${EWW_CMD} ${cal_is_open ? "close" : "open"} cal; ${EWW_CMD} update cal_is_open=${!cal_is_open}; " today))
    (box :style "padding-left: 10px;" time)))
 
+(defpoll has_battery :interval "10s"
+  "test -e /sys/class/power_supply/BAT0 && echo true || echo false")
+
+(defwidget volume-control []
+  (box :class "volume-control ${volume_muted ? 'volume-muted' : volume >= 70 ? 'volume-high' : volume >= 30 ? 'volume-medium' : 'volume-low'}" 
+       :orientation "h" 
+       :space-evenly false
+    ;; Volume icon button
+    (button :class "volume-icon-btn ${volume_muted ? 'muted' : ''}" 
+            :onclick 'pamixer -t'
+            :tooltip "Click to ${volume_muted ? 'unmute' : 'mute'}"
+            {volume_muted ? "🔇" : volume < 30 ? "🔈" : volume < 70 ? "🔉" : "🔊"})
+    ;; Volume percentage display
+    (label :class "volume-text ${volume_muted ? 'text-muted' : volume >= 70 ? 'text-high' : volume >= 30 ? 'text-medium' : 'text-low'}" 
+           :text "${volume_muted ? 'MUTE' : '${volume}%'}")))
+
 (defwidget toggle_audio_icon_button [] 
-  (box :class "label" 
-       (button :onclick 'pamixer -t' {volume_muted ? "🔇" : volume < 30 ? "🔈" : volume < 70 ? "🔉" : "🔊"})))
+  (volume-control))
 
 (defwidget workspaces [index]
     (box :class "workspaces"
