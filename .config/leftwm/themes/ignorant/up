@@ -33,33 +33,41 @@ fi
 
 start_eww() {
   if [ -x "$(command -v eww)" ]; then
-    echo "🔧 Generating dynamic eww configurations..."
-    
-    # Generate dynamic bar configurations based on detected monitors
-    if ! $SCRIPTPATH/.config/eww/generate_bars.sh; then
-      notify-send "❌ Failed to generate eww bars"
-      return 1
-    fi
-    
-    # Detect monitors and build open command
-    MONITOR_COUNT=$(xrandr --query | grep " connected" | wc -l)
-    BARS="bar"
-    
-    # Add additional bars for extra monitors
-    if [ $MONITOR_COUNT -gt 1 ]; then
-      for i in $(seq 1 $((MONITOR_COUNT - 1))); do
-        BARS="$BARS bar$i"
-      done
-    fi
-    
-    echo "📊 Starting eww with $MONITOR_COUNT monitor(s): $BARS"
-    
-    # Start eww daemon and open bars
+    # Start eww daemon
     eww -c $SCRIPTPATH/.config/eww daemon &
     sleep 1  # Give daemon time to start
-    eww -c $SCRIPTPATH/.config/eww open-many $BARS
     
-    notify-send -u low "🎯 Eww started with dynamic bars: $BARS"
+    # Detect monitors and open bars  
+    MONITOR_COUNT=$(xrandr --query | grep " connected" | wc -l)
+    echo "📊 Starting eww with $MONITOR_COUNT monitor(s)"
+    
+    # Open bar on each monitor with proper positioning using window arguments
+    for i in $(seq 0 $((MONITOR_COUNT - 1))); do
+      # Configure positioning based on monitor index
+      if [ $i -eq 0 ]; then
+        # Primary monitor: more margin and reserve space
+        Y_OFFSET="10px"
+        RESERVE_DIST="35px"
+        echo "  Primary monitor: y=${Y_OFFSET}, reserve=${RESERVE_DIST}"
+      else
+        # Secondary monitors: less margin and reserve space
+        Y_OFFSET="5px"
+        RESERVE_DIST="30px"
+        echo "  Secondary monitor: y=${Y_OFFSET}, reserve=${RESERVE_DIST}"
+      fi
+      
+      # Open bar with unique ID and window arguments
+      eww -c $SCRIPTPATH/.config/eww open bar \
+        --id "bar$i" \
+        --screen $i \
+        --arg monitor_id=$i \
+        --arg y_offset="$Y_OFFSET" \
+        --arg reserve_distance="$RESERVE_DIST"
+      
+      echo "  ✅ Opened bar$i on monitor $i"
+    done
+    
+    notify-send -u low "🎯 Eww started on $MONITOR_COUNT monitor(s)"
   else
     notify-send '`eww` not found, please install it (system wide "/usr/bin") and try again.'
     return 1
