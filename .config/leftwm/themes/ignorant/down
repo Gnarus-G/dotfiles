@@ -7,10 +7,19 @@ export SCRIPTPATH="$(
 
 leftwm-command "UnloadTheme"
 
+# Kill eww
 eww -c $SCRIPTPATH/.config/eww kill
+
+# Clean up dynamically generated configurations
+echo "🧹 Cleaning up dynamic eww configurations..."
+if [ -f "$SCRIPTPATH/.config/eww/cleanup_bars.sh" ]; then
+  $SCRIPTPATH/.config/eww/cleanup_bars.sh
+fi
 
 pkill stalonetray
 
 pkill picom
 
 pkill dunst
+
+echo "✅ Theme shutdown complete"
