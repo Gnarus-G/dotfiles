@@ -429,3 +429,31 @@ $background: #0f172a;
     opacity: 1;
   }
 }
+
+// Network Info Styling
+.network-info {
+  background: linear-gradient(90deg,
+      rgba(168, 85, 247, 0.1),
+      rgba(168, 85, 247, 0.05));
+  border-radius: 4px;
+  font-family: "JetBrains Mono", "Fira Code", monospace;
+  font-weight: 600;
+  color: #a855f7;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(168, 85, 247, 0.2);
+}
+
+.network-info:hover {
+  background: linear-gradient(90deg,
+      rgba(168, 85, 247, 0.15),
+      rgba(168, 85, 247, 0.08));
+  border-color: rgba(168, 85, 247, 0.3);
+  color: #c084fc;
+  text-shadow: 0 0 4px rgba(168, 85, 247, 0.4);
+}
+
+.network-info:active {
+  background: linear-gradient(90deg,
+      rgba(168, 85, 247, 0.2),
+      rgba(168, 85, 247, 0.1));
+}

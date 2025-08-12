@@ -43,7 +43,9 @@
     (toggle_audio_icon_button)
     (metric :value volume
             :onchange "pamixer --set-volume {}")
-    (box :class "px border-x" :space-evenly false "${net_interface} ${ip_address}")
+    (eventbox :onclick "${EWW_CMD} poll net_interface; ${EWW_CMD} poll ip_address"
+              :tooltip "Click to refresh network info"
+      (box :class "px border-x network-info" :space-evenly false "${net_interface} ${ip_address}"))
     (system-stats)
    (box :class "border-r px today" 
     (eventbox :onclick "${EWW_CMD} ${cal_is_open ? "close" : "open"} cal; ${EWW_CMD} update cal_is_open=${!cal_is_open}; " today))
@@ -142,5 +144,5 @@
                       :width "99%"
                       :height "10px"
                       :anchor "top center")
-  :reserve (struts :side "top" :distance { reserve_distance ?: "35px" })
+  :reserve (struts :side "top" :distance { reserve_distance ?: "35px"})
   (bar :index monitor_id))
