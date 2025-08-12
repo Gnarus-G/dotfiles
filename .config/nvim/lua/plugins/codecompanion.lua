@@ -454,7 +454,7 @@ return {
         claude_haiku = adapter_and_default_model("anthropic", "claude-3-5-haiku-20241022"),
         claude_sonnet = adapter_and_default_model("anthropic", "claude-sonnet-4-20250514"),
         claude_opus = adapter_and_default_model("anthropic", "claude-opus-4-20250514"),
-        ollama = adapter_and_default_model("ollama", "gpt-oss", {
+        ollama = adapter_and_default_model("ollama", "qwen3", {
           env = {
             url = os.getenv("OLLAMA_API_BASE") or "http://localhost:11434"
           },
