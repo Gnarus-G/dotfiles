@@ -14,7 +14,7 @@ type stalonetray &> /dev/null && stalonetray &
 
 #boot picom compositor if it exists
 if [ -x "$(command -v picom)" ]; then
-  picom --no-vsync --config=$SCRIPTPATH/.config/picom/picom.conf &>/dev/null &
+  picom --no-vsync --config=$SCRIPTPATH/.config/picom/picom.conf &>/tmp/picom_error.log &
 fi
 
 # Set the theme.ron config
