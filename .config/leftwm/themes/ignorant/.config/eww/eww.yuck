@@ -1,8 +1,9 @@
 ;; (include "./todos.yuck")
 
 (defwidget bar [index]
-  (box :orientation "h" :class "bar"
+  (box :orientation "h" :class "bar" :space-evenly false
     (workspaces :index index)
+    (box :hexpand true)
     ;; (box :orientation "h" :visible {!todos_empty} :space-evenly false :halign "center"
     ;;  (button :onclick 'leftwm command "ToggleScratchPad todos"' "📜")
      ;; (todo :item latest_todo))
