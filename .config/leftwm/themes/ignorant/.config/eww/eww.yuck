@@ -96,9 +96,7 @@
                     tag.urgent ? "ws-button-urgent" :
                     tag.busy ? "ws-button-busy" : ""}
             :onclick "leftwm-command \"SendWorkspaceToTag ${index} ${tag.index}\""
-            {!tag.mine && !tag.busy && !tag.visible && !tag.urgent ?  "·" : "${tag.name}"})))
-     (label :style "font-weight: bold" :text {wmstate.workspaces[index].output})))
-      
+            {!tag.mine && !tag.busy && !tag.visible && !tag.urgent ?  "·" : "${tag.name}"})))))
 
 (defwidget metric [value onchange]
   (box :orientation "h"
