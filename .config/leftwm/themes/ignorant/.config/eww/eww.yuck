@@ -1,12 +1,13 @@
-;; (include "./todos.yuck")
+(include "./todos.yuck")
 
 (defwidget bar [index]
   (box :orientation "h" :class "bar" :space-evenly false
     (workspaces :index index)
     (box :hexpand true)
-    ;; (box :orientation "h" :visible {!todos_empty} :space-evenly false :halign "center"
-    ;;  (button :onclick 'leftwm command "ToggleScratchPad todos"' "📜")
-     ;; (todo :item latest_todo))
+    (box :orientation "h" :visible {!todos_empty} :space-evenly false :halign "center"
+     (button :onclick 'leftwm command "ToggleScratchPad todos"' "📜")
+     (todo :item latest_todo))
+    (box :hexpand true)
     (sidestuff)
     (systray :class "border-l" :style "margin-left: 10px; padding-left: 10px" :spacing 10 :icon-size 20)))
     
