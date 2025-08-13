@@ -7,10 +7,12 @@ export SCRIPTPATH="$(
 
 leftwm-command "UnloadTheme"
 
-eww -c $SCRIPTPATH/.config/eww kill
-sleep 1
+if [ -x "$(command -v eww)" ]; then
+  eww -c $SCRIPTPATH/.config/eww kill &> /dev/null
+  sleep 1
+  Kill eww
+fi
 
-Kill eww
 pkill stalonetray
 pkill picom
 pkill dunst
