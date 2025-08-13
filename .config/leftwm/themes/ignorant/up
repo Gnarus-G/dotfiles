@@ -34,19 +34,18 @@ start_eww() {
     eww -c $SCRIPTPATH/.config/eww daemon &
     sleep 1  # Give daemon time to start
     
-    # Detect monitors and open bars  
-    MONITOR_COUNT=$(xrandr --query | grep " connected" | wc -l)
-    echo "📊 Starting eww with $MONITOR_COUNT monitor(s)"
-    
     # Open bar on each monitor with proper positioning using window arguments
-    for i in $(seq 0 $((MONITOR_COUNT - 1))); do
+    MONITOR_NAMES=$(xrandr --query | grep " connected" | cut -d" " -f1)
+    echo "$MONITOR_NAMES" | cat -n | while read i name; do
+      # Adjust i to be 0-based
+      i=$((i - 1))
       # Open bar with unique ID and window arguments
       eww -c $SCRIPTPATH/.config/eww open bar \
-        --id "bar$i" \
-        --screen $i \
-        --arg monitor_id=$i
-      
-      echo "  ✅ Opened bar$i on monitor $i"
+        --id "$name-bar" \
+        --arg monitor="$name" \
+        --arg monitor_id="$i"
+
+      echo "  ✅ Opened bar$i on monitor $name"
     done
     
     notify-send -u low "🎯 Eww started on $MONITOR_COUNT monitor(s)"
