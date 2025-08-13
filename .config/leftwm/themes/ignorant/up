@@ -40,26 +40,11 @@ start_eww() {
     
     # Open bar on each monitor with proper positioning using window arguments
     for i in $(seq 0 $((MONITOR_COUNT - 1))); do
-      # Configure positioning based on monitor index
-      if [ $i -eq 0 ]; then
-        # Primary monitor: more margin and reserve space
-        Y_OFFSET="10px"
-        RESERVE_DIST="35px"
-        echo "  Primary monitor: y=${Y_OFFSET}, reserve=${RESERVE_DIST}"
-      else
-        # Secondary monitors: less margin and reserve space
-        Y_OFFSET="5px"
-        RESERVE_DIST="30px"
-        echo "  Secondary monitor: y=${Y_OFFSET}, reserve=${RESERVE_DIST}"
-      fi
-      
       # Open bar with unique ID and window arguments
       eww -c $SCRIPTPATH/.config/eww open bar \
         --id "bar$i" \
         --screen $i \
-        --arg monitor_id=$i \
-        --arg y_offset="$Y_OFFSET" \
-        --arg reserve_distance="$RESERVE_DIST"
+        --arg monitor_id=$i
       
       echo "  ✅ Opened bar$i on monitor $i"
     done
