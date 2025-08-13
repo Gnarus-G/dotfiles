@@ -144,8 +144,8 @@
   :geometry (geometry :x "-1%" :y "3%" :anchor "top right")
    (calendar :class "calendar"))
 
-(defwindow bar [monitor_id]
-  :monitor monitor_id
+(defwindow bar [monitor monitor_id]
+  :monitor monitor
   :windowtype "dock"
   :geometry (geometry :x "0%"
                       :y "0.5%"
