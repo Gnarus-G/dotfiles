@@ -91,10 +91,6 @@ $background: #0f172a;
   padding-right: 10px;
 }
 
-.text-bg-light {
-  color: lighten($color: $background, $amount: 25);
-}
-
 .text-primary {
   color: $light;
 }
