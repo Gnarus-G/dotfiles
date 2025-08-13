@@ -14,7 +14,6 @@ cleanup() {
     pkill eww
   fi
 
-  pkill stalonetray
   pkill picom
   pkill dunst
 }
