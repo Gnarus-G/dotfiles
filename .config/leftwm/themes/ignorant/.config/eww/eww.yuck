@@ -27,17 +27,24 @@
          (label :class "metric-value disk-value ${round(EWW_DISK["/"].used_perc,0) >= 90 ? 'value-critical' : round(EWW_DISK["/"].used_perc,0) >= 70 ? 'value-warning' : 'value-normal'}" :text "${round(EWW_DISK["/"].used_perc,0)}%"))
     
     ;; Battery - only show if exists
-    (box :class "px border-x system-metric battery-metric" :space-evenly false 
-         :visible has_battery
-         (label :class "metric-label" :text "BAT:")
-         (label :class "metric-value battery-value ${EWW_BATTERY.BAT0.capacity < 20 ? 'value-critical' : EWW_BATTERY.BAT0.capacity < 40 ? 'value-warning' : 'value-normal'}" 
-                :text "${EWW_BATTERY.BAT0.status == 'Charging' ? '🔌' : EWW_BATTERY.BAT0.capacity < 20 ? '🪫' : EWW_BATTERY.BAT0.capacity < 50 ? '🔋' : '🔋'} ${EWW_BATTERY.BAT0.capacity}%"))
+    (box :visible {EWW_BATTERY != ""}
+         (battery-widget))
     
     ;; Network Metric
-    (box :class "px border-x system-metric net-metric" :space-evenly false 
-         (label :class "metric-label" :text "NET:")
-         (label :class "net-up" :text "↑${round(EWW_NET[net_interface].NET_UP / 1024, 1)}KB/s")
-         (label :class "net-down" :text "↓${round(EWW_NET[net_interface].NET_DOWN / 1024, 1)}KB/s"))))
+    (box :visible {net_interface != "N/A"}
+         (net-widget))))
+
+(defwidget net-widget []
+  (box :class "px border-x system-metric net-metric" :space-evenly false
+       (label :class "metric-label" :text "NET:")
+       (label :class "net-up" :text "↑${round(EWW_NET[net_interface].NET_UP / 1024, 1)}KB/s")
+       (label :class "net-down" :text "↓${round(EWW_NET[net_interface].NET_DOWN / 1024, 1)}KB/s")))
+
+(defwidget battery-widget []
+  (box :class "px border-x system-metric battery-metric" :space-evenly false
+       (label :class "metric-label" :text "BAT:")
+       (label :class "metric-value battery-value ${EWW_BATTERY.BAT0.capacity < 20 ? 'value-critical' : EWW_BATTERY.BAT0.capacity < 40 ? 'value-warning' : 'value-normal'}" 
+              :text "${EWW_BATTERY.BAT0.status == 'Charging' ? '🔌' : EWW_BATTERY.BAT0.capacity < 20 ? '🪫' : EWW_BATTERY.BAT0.capacity < 50 ? '🔋' : '🔋'} ${EWW_BATTERY.BAT0.capacity}%")))
 
 (defwidget sidestuff []
   (box :class "sidestuff" :orientation "h" :space-evenly false :halign "end"
@@ -51,9 +58,6 @@
    (box :class "border-r px today" 
     (eventbox :onclick "${EWW_CMD} ${cal_is_open ? "close" : "open"} cal; ${EWW_CMD} update cal_is_open=${!cal_is_open}; " today))
    (box :style "padding-left: 10px;" time)))
-
-(defpoll has_battery :interval "10s"
-  "test -e /sys/class/power_supply/BAT0 && echo true || echo false")
 
 (defwidget volume-control []
   (box :class "volume-control ${volume_muted ? 'volume-muted' : volume >= 70 ? 'volume-high' : volume >= 30 ? 'volume-medium' : 'volume-low'}" 
@@ -90,7 +94,7 @@
                     tag.busy ? "ws-button-busy" : ""}
             :onclick "leftwm-command \"SendWorkspaceToTag ${index} ${tag.index}\""
             {!tag.mine && !tag.busy && !tag.visible && !tag.urgent ?  "·" : "${tag.name}"})))
-     (label :class "text-bg-light" :text "Layout: ${wmstate.workspaces[index].layout}")))
+     (label :class "text-bg-light" :visible false :text "Layout: ${wmstate.workspaces[index].layout}")))
       
 
 (defwidget metric [value onchange]
@@ -105,10 +109,10 @@
 
 
 
-(defpoll volume :interval "200ms"
+(defpoll volume :interval "200ms" :initial 0
   "pamixer --get-volume")
 
-(defpoll volume_muted :interval "100ms"
+(defpoll volume_muted :interval "100ms" :initial false
   "pamixer --get-mute")
 
 (defpoll ip_address :interval "60s"
