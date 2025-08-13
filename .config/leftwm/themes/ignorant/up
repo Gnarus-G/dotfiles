@@ -21,7 +21,7 @@ fi
 leftwm-command "LoadTheme $SCRIPTPATH/theme.ron"
 
 if [ -x "$(command -v feh)" ]; then
-  feh --randomize --bg-fill "$SCRIPTPATH"/wallpaper/*.png
+  feh --randomize --bg-fill "$SCRIPTPATH"/wallpaper/*.png "$SCRIPTPATH"/wallpaper/**/*.png
 fi
 
 # Start dunst.
