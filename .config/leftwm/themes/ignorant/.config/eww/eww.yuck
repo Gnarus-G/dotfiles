@@ -7,7 +7,9 @@
     ;; (box :orientation "h" :visible {!todos_empty} :space-evenly false :halign "center"
     ;;  (button :onclick 'leftwm command "ToggleScratchPad todos"' "📜")
      ;; (todo :item latest_todo))
-    (sidestuff)))
+    (sidestuff)
+    (systray :class "border-l" :style "margin-left: 10px; padding-left: 10px" :spacing 10 :icon-size 20)))
+    
 
 (defwidget system-stats []
   (box :class "system-stats" :orientation "h" :space-evenly false
@@ -57,7 +59,7 @@
     (system-stats)
    (box :class "border-r px today" 
     (eventbox :onclick "${EWW_CMD} ${cal_is_open ? "close" : "open"} cal; ${EWW_CMD} update cal_is_open=${!cal_is_open}; " today))
-   (box :style "padding-left: 10px;" time)))
+   (box :style "padding-left: 10px; font-weight: 900" time)))
 
 (defwidget volume-control []
   (box :class "volume-control ${volume_muted ? 'volume-muted' : volume >= 70 ? 'volume-high' : volume >= 30 ? 'volume-medium' : 'volume-low'}" 
