@@ -144,13 +144,13 @@
   :geometry (geometry :x "-1%" :y "3%" :anchor "top right")
    (calendar :class "calendar"))
 
-(defwindow bar [monitor_id ?y_offset ?reserve_distance]
+(defwindow bar [monitor_id]
   :monitor monitor_id
   :windowtype "dock"
   :geometry (geometry :x "0%"
-                      :y { y_offset ?: "10px"}
+                      :y "0.5%"
                       :width "99%"
                       :height "10px"
                       :anchor "top center")
-  :reserve (struts :side "top" :distance { reserve_distance ?: "35px"})
+  :reserve (struts :side "top" :distance "3%")
   (bar :index monitor_id))
