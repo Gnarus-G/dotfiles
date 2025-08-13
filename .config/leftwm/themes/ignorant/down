@@ -7,14 +7,18 @@ export SCRIPTPATH="$(
 
 leftwm-command "UnloadTheme"
 
-if [ -x "$(command -v eww)" ]; then
-  eww -c $SCRIPTPATH/.config/eww kill &> /dev/null
-  sleep 1
-  Kill eww
-fi
+cleanup() {
+  if [ -x "$(command -v eww)" ]; then
+    eww -c $SCRIPTPATH/.config/eww kill &> /dev/null
+    sleep 1
+    pkill eww
+  fi
 
-pkill stalonetray
-pkill picom
-pkill dunst
+  pkill stalonetray
+  pkill picom
+  pkill dunst
+}
+
+cleanup &> /tmp/ignorant_down_errors.log
 
 echo "✅ Theme shutdown complete"
