@@ -47,12 +47,14 @@ local function add_file_to_codecompanion_chat(filepath, chat)
   end
   local content = file:read("*a")
   file:close()
-  local title = "<attachment filepath=\"" .. filepath .. "\">"
-  local body = "Here is the content from the file:\n\n" .. "```" .. filetype .. "\n" .. content
-  local footer = "```\n</attachment>"
+  filetype       = filetype or vim.filetype.match({ contents = vim.split(content, "\n") })
+  local title    = "<attachment filepath=\"" .. filepath .. "\">"
+  local body     = "Here is the content from the file:\n\n" .. "```" .. filetype .. "\n" .. content
+  local footer   = "```\n</attachment>"
 
+  local filename = vim.fn.fnamemodify(filepath, ":~:.")
   chat:add_context({ role = "user", content = title .. body .. footer }, filepath,
-    "<file>" .. vim.fn.fnamemodify(filepath, ":~:.") .. "</file>")
+    "<file>" .. filename .. "</file>")
 end
 
 ---@param codecompanion CodeCompanion
