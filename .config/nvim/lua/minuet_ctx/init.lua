@@ -9,19 +9,24 @@ local function is_file_of_current_buffer(filepath)
   return full_filepath == full_current_buf_filepath
 end
 
----@return table<string>
+---@return string[]
 local function all_extra_files()
   -- Lazy-load harpoon context to avoid circular dependency
   if not harpoon_ctx then
     harpoon_ctx = require("minuet_ctx.harpoon")
   end
-  local files = vim.tbl_extend("force", extra_files.files(), harpoon_ctx.files());
+  local files = vim.list_extend(extra_files.files(), harpoon_ctx.files());
   local git_files, err = require("gnarus.utils").git_modified_or_added_files();
-  if err then
+  if not git_files then
     vim.notify("Git status error: " .. err, vim.log.levels.ERROR)
     return files
   end
-  return vim.tbl_extend("force", files, git_files)
+
+  local all_files = {}
+  for _, file in ipairs(vim.list_extend(files, git_files)) do
+    all_files[file] = 1337
+  end
+  return vim.tbl_keys(all_files)
 end
 
 local function read_file_content(filepath)

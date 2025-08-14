@@ -35,7 +35,7 @@ return {
     return table.concat(vim.api.nvim_buf_get_lines(buf, 0, -1, false), "\n")
   end,
 
-  ---@return table<string>?
+  ---@return string[]?
   ---@return string?
   git_modified_or_added_files = function()
     local ok, output = pcall(vim.fn.system, "git status --porcelain")
