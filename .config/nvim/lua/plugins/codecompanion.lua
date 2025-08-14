@@ -266,21 +266,23 @@ return {
           },
           tools = {
             groups = {
-              ["read_only"] = {
-                description = "A custom agent combining tools",
-                system_prompt = "Read files from the filesystem to acquire any missing context.",
+              ["smart"] = {
+                system_prompt =
+                "You're a meticulous software engineer who is proactive about filling knowledge gaps before making assumptions.",
                 tools = {
                   "neovim__list_directory",
                   "neovim__find_files",
                   "neovim__read_file",
                   "neovim__read_multiple_files",
+                  "context7_mcp__resolve_library_id",
+                  "context7_mcp__get_library_docs",
+                  "ez_web_search_mcp__search"
                 },
                 opts = {
                   collapse_tools = false, -- When true, show as a single group reference instead of individual tools
                 },
               },
               ["smart_dev"] = {
-                description = "A custom agent combining tools",
                 system_prompt =
                 "You're a meticulous software engineer who always looks things up before making decisions.",
                 tools = {
