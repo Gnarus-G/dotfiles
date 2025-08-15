@@ -31,6 +31,7 @@ vim.filetype.add({
     ["Modelfile"] = 'modelfile',
     todo = 'todolang',
     td = 'todolang',
+    tf = "opentofu" -- instead of terraform
   },
   filename = {
     ["Modelfile"] = 'modelfile',
