@@ -1,7 +1,13 @@
 {
   "mcpServers": {
     "context7-mcp": {
-      "args": ["-y", "@upstash/context7-mcp"],
+      "args": [
+        "-y",
+        "@upstash/context7-mcp"
+      ],
+      "autoApprove": [
+        "resolve-library-id"
+      ],
       "command": "npx",
       "custom_instructions": {
         "text": "- When asked for information on libraries, APIs, tools, systems, or technology, **always** use this tool."
@@ -19,15 +25,34 @@
       "disabled": false
     },
     "fetch-mcp": {
-      "args": ["-c", "node ${HOME}/.mcphub/servers/fetch-mcp/dist/index.js"],
+      "args": [
+        "-c",
+        "node ${HOME}/.mcphub/servers/fetch-mcp/dist/index.js"
+      ],
+      "autoApprove": [
+        "fetch_html",
+        "fetch_markdown",
+        "fetch_txt",
+        "fetch_json"
+      ],
       "command": "sh"
     },
     "sequentialthinking": {
-      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"],
-      "autoApprove": ["sequentialthinking"],
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-sequential-thinking"
+      ],
+      "autoApprove": [
+        "sequentialthinking"
+      ],
       "command": "npx"
     },
     "tts": {
+      "autoApprove": [
+        "list_voices",
+        "speak",
+        "stop_speaking"
+      ],
       "command": "tts-mcp",
       "custom_instructions": {
         "text": "When asked to read or speak, use this server and the `speak` tool."
@@ -52,19 +77,16 @@
       }
     },
     "mcphub": {
-      "autoApprove": ["get_current_servers"]
+      "autoApprove": [
+        "get_current_servers"
+      ]
     },
     "neovim": {
       "autoApprove": [
-        "execute_lua",
-        "execute_command",
         "read_file",
-        "delete_item",
-        "move_item",
+        "read_multiple_files",
         "find_files",
         "list_directory",
-        "write_file",
-        "replace_in_file",
         "edit_file"
       ],
       "custom_instructions": {
