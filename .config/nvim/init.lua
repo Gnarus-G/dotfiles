@@ -35,5 +35,6 @@ vim.filetype.add({
   },
   filename = {
     ["Modelfile"] = 'modelfile',
+    ["Caddyfile"] = 'caddy',
   }
 })
