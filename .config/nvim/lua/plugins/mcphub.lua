@@ -245,6 +245,23 @@ local function add_prompts_and_resources(mcphub)
   })
 
   mcphub.add_prompt("gnarus", {
+    name = "include-chatgpt-chat",
+    description = "Include a conversation with ChatGPT in the prompt",
+    arguments = {
+      {
+        name = "chat",
+        description = "A conversation with ChatGPT from earlier",
+        type = "string",
+        required = true,
+      },
+    },
+    handler = function(req, res)
+      return res:system()
+          :text("Consider this conversation that the user had with ChatGPT earlier.\n```\n" .. req.params.chat .. "\n```")
+    end
+  })
+
+  mcphub.add_prompt("gnarus", {
     name = "enhance-prompt",
     description = "Enhance a prompt of the user to make it more effective",
     arguments = {

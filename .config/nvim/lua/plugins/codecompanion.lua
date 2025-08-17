@@ -276,7 +276,9 @@ return {
                   "neovim__read_multiple_files",
                   "context7_mcp__resolve_library_id",
                   "context7_mcp__get_library_docs",
-                  "ez_web_search_mcp__search"
+                  "ez_web_search_mcp__search",
+                  "fetch_mcp__fetch_html",
+                  "fetch_mcp__fetch_markdown"
                 },
                 opts = {
                   collapse_tools = false, -- When true, show as a single group reference instead of individual tools
@@ -290,11 +292,13 @@ return {
                   "neovim__find_files",
                   "neovim__read_file",
                   "neovim__read_multiple_files",
-                  "neovim__write_file",
-                  "neovim__edit_file",
                   "context7_mcp__resolve_library_id",
                   "context7_mcp__get_library_docs",
-                  "ez_web_search_mcp__search"
+                  "ez_web_search_mcp__search",
+                  "fetch_mcp__fetch_html",
+                  "fetch_mcp__fetch_markdown",
+                  "neovim__write_file",
+                  "neovim__edit_file",
                 },
                 opts = {
                   collapse_tools = false, -- When true, show as a single group reference instead of individual tools
