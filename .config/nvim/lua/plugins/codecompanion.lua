@@ -161,7 +161,7 @@ local function setup_extra_keymaps(codecompanion, adapters)
         prompt = "Prompt",
         win = {
           bo = {
-            filetype = "codecompanion_inline"
+            filetype = "codecompanion"
           }
         }
       }, function(value)
@@ -205,45 +205,6 @@ local function extend_cmp_completions()
         },
       })
     },
-  })
-
-  vim.api.nvim_create_autocmd("FileType", {
-    pattern = "codecompanion_inline",
-    callback = function()
-      local completion = "codecompanion.providers.completion.cmp"
-      local slash = require(completion .. ".slash_commands")
-      local tools = require(completion .. ".tools")
-      local variables = require(completion .. ".variables")
-
-      local function is_codecompanion_filetype()
-        return vim.tbl_contains({ "codecompanion", "codecompanion_inline" }, vim.bo.filetype)
-      end
-      slash.is_available = is_codecompanion_filetype
-      tools.is_available = is_codecompanion_filetype
-      variables.is_available = is_codecompanion_filetype
-
-      cmp.setup.filetype("codecompanion_inline", {
-        sources = cmp.config.sources({
-          { name = "codecompanion_slash_commands" },
-          { name = "codecompanion_tools" },
-          { name = "codecompanion_variables" },
-          { name = "buffer" },
-          { name = "path" },
-        }),
-        formatting = {
-          format = require("lspkind").cmp_format({
-            menu = {
-              codecompanion_tools = "[tool]",
-              codecompanion_variables = "[var]",
-              codecompanion_slash_commands = "[cmd]",
-            },
-          })
-        },
-      })
-      -- returning true will remove this autocmd
-      -- now that the completion sources are registered
-      return true
-    end,
   })
 end
 
