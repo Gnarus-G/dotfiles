@@ -278,7 +278,8 @@ return {
                   "context7_mcp__get_library_docs",
                   "ez_web_search_mcp__search",
                   "fetch_mcp__fetch_html",
-                  "fetch_mcp__fetch_markdown"
+                  "fetch_mcp__fetch_markdown",
+                  "sequentialthinking__sequentialthinking"
                 },
                 opts = {
                   collapse_tools = false, -- When true, show as a single group reference instead of individual tools
@@ -297,6 +298,7 @@ return {
                   "ez_web_search_mcp__search",
                   "fetch_mcp__fetch_html",
                   "fetch_mcp__fetch_markdown",
+                  "sequentialthinking__sequentialthinking",
                   "neovim__write_file",
                   "neovim__edit_file",
                 },
