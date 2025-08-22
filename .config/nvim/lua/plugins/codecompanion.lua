@@ -231,6 +231,7 @@ return {
                 system_prompt =
                 "You're a meticulous software engineer who is proactive about filling knowledge gaps before making assumptions.",
                 tools = {
+                  "access_mcp_resource",
                   "neovim__list_directory",
                   "neovim__find_files",
                   "neovim__read_file",
@@ -250,6 +251,7 @@ return {
                 system_prompt =
                 "You're a meticulous software engineer who always looks things up before making decisions.",
                 tools = {
+                  "access_mcp_resource",
                   "neovim__list_directory",
                   "neovim__find_files",
                   "neovim__read_file",
