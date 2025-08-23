@@ -6,12 +6,12 @@ local chat_adapter_name = env_cascade({
 }, "ollama")
 
 local inline_adapter_name = env_cascade({
+  { vars = { "GNARUS_ALLOW_VENDOR_LLM", "OPENAI_API_KEY" }, value = "openai_ultrafast" },
   { vars = { "GNARUS_ALLOW_VENDOR_LLM", "GEMINI_API_KEY" }, value = "gemini_fast" },
-  { vars = { "GNARUS_ALLOW_VENDOR_LLM", "OPENAI_API_KEY" }, value = "openai_fast_low_thinking" },
 }, "ollama")
 
 local cmd_adapter_name = env_cascade({
-  { vars = { "GNARUS_ALLOW_VENDOR_LLM", "OPENAI_API_KEY" }, value = "openai_fast_low_thinking" },
+  { vars = { "GNARUS_ALLOW_VENDOR_LLM", "OPENAI_API_KEY" }, value = "openai_ultrafast" },
   { vars = { "GNARUS_ALLOW_VENDOR_LLM", "GEMINI_API_KEY" }, value = "gemini_fast" },
 }, "ollama")
 
@@ -400,20 +400,16 @@ return {
       -- gpt-4.1-mini
       -- gemini-2.5-flash
       adapters = {
-        openai = adapter_and_default_model("openai", "gpt-4.1"),
-        openai_fast = adapter_and_default_model("openai", "gpt-4.1-mini"),
-        openai_fast_low_thinking = adapter_and_default_model("openai", "gpt-4.1-mini", {
+        openai           = adapter_and_default_model("openai", "gpt-4.1"),
+        openai_fast      = adapter_and_default_model("openai", "gpt-4.1-mini"),
+        openai_ultrafast = adapter_and_default_model("openai", "gpt-4.1-mini", {
           schema = {
-            temperature = {
-              default = 0
-            },
-            reasoning_effort = {
-              default = "low"
-            }
-          }
+            temperature      = { default = 0 },
+            reasoning_effort = { default = "low" },
+          },
         }),
-        gemini = adapter_and_default_model("gemini", "gemini-2.5-flash"),
-        gemini_fast = adapter_and_default_model("gemini", "gemini-2.5-flash", {
+        gemini           = adapter_and_default_model("gemini", "gemini-2.5-flash"),
+        gemini_fast      = adapter_and_default_model("gemini", "gemini-2.5-flash", {
           schema = {
             temperature = {
               default = 0
@@ -423,11 +419,11 @@ return {
             }
           }
         }),
-        gemini_pro = adapter_and_default_model("gemini", "gemini-2.5-pro"),
-        claude_haiku = adapter_and_default_model("anthropic", "claude-3-5-haiku-20241022"),
-        claude_sonnet = adapter_and_default_model("anthropic", "claude-sonnet-4-20250514"),
-        claude_opus = adapter_and_default_model("anthropic", "claude-opus-4-20250514"),
-        ollama = adapter_and_default_model("ollama", "qwen3", {
+        gemini_pro       = adapter_and_default_model("gemini", "gemini-2.5-pro"),
+        claude_haiku     = adapter_and_default_model("anthropic", "claude-3-5-haiku-20241022"),
+        claude_sonnet    = adapter_and_default_model("anthropic", "claude-sonnet-4-20250514"),
+        claude_opus      = adapter_and_default_model("anthropic", "claude-opus-4-20250514"),
+        ollama           = adapter_and_default_model("ollama", "qwen3", {
           env = {
             url = os.getenv("OLLAMA_API_BASE") or "http://localhost:11434"
           },
