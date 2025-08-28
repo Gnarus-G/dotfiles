@@ -400,45 +400,47 @@ return {
       -- gpt-4.1-mini
       -- gemini-2.5-flash
       adapters = {
-        openai           = adapter_and_default_model("openai", "gpt-4.1"),
-        openai_fast      = adapter_and_default_model("openai", "gpt-4.1-mini"),
-        openai_ultrafast = adapter_and_default_model("openai", "gpt-4.1-mini", {
-          schema = {
-            temperature      = { default = 0 },
-            reasoning_effort = { default = "low" },
-          },
-        }),
-        gemini           = adapter_and_default_model("gemini", "gemini-2.5-flash"),
-        gemini_fast      = adapter_and_default_model("gemini", "gemini-2.5-flash", {
-          schema = {
-            temperature = {
-              default = 0
+        http = {
+          openai           = adapter_and_default_model("openai", "gpt-4.1"),
+          openai_fast      = adapter_and_default_model("openai", "gpt-4.1-mini"),
+          openai_ultrafast = adapter_and_default_model("openai", "gpt-4.1-mini", {
+            schema = {
+              temperature      = { default = 0 },
+              reasoning_effort = { default = "low" },
             },
-            reasoning_effort = {
-              default = "none"
+          }),
+          gemini           = adapter_and_default_model("gemini", "gemini-2.5-flash"),
+          gemini_fast      = adapter_and_default_model("gemini", "gemini-2.5-flash", {
+            schema = {
+              temperature = {
+                default = 0
+              },
+              reasoning_effort = {
+                default = "none"
+              }
             }
-          }
-        }),
-        gemini_pro       = adapter_and_default_model("gemini", "gemini-2.5-pro"),
-        claude_haiku     = adapter_and_default_model("anthropic", "claude-3-5-haiku-20241022"),
-        claude_sonnet    = adapter_and_default_model("anthropic", "claude-sonnet-4-20250514"),
-        claude_opus      = adapter_and_default_model("anthropic", "claude-opus-4-20250514"),
-        ollama           = adapter_and_default_model("ollama", "qwen3", {
-          env = {
-            url = os.getenv("OLLAMA_API_BASE") or "http://localhost:11434"
-          },
-          schema = {
-            temperature = {
-              default = 0
+          }),
+          gemini_pro       = adapter_and_default_model("gemini", "gemini-2.5-pro"),
+          claude_haiku     = adapter_and_default_model("anthropic", "claude-3-5-haiku-20241022"),
+          claude_sonnet    = adapter_and_default_model("anthropic", "claude-sonnet-4-20250514"),
+          claude_opus      = adapter_and_default_model("anthropic", "claude-opus-4-20250514"),
+          ollama           = adapter_and_default_model("ollama", "qwen3", {
+            env = {
+              url = os.getenv("OLLAMA_API_BASE") or "http://localhost:11434"
             },
-            keep_alive = {
-              default = '30m',
+            schema = {
+              temperature = {
+                default = 0
+              },
+              keep_alive = {
+                default = '30m',
+              }
+            },
+            parameters = {
+              sync = true
             }
-          },
-          parameters = {
-            sync = true
-          }
-        }),
+          }),
+        }
       },
       extensions = {
         mcphub = {
@@ -549,7 +551,7 @@ return {
 
     vim.g.codecompanion_auto_tool_mode = true
 
-    setup_extra_keymaps(codecompanion, opts.adapters)
+    setup_extra_keymaps(codecompanion, opts.adapters.http)
     extend_cmp_completions()
   end,
 }
