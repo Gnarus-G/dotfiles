@@ -435,7 +435,6 @@ return {
           }),
           openai_fast      = adapter_and_default_model("openai", "gpt-5-mini", {
             schema = {
-              temperature      = { default = 0.7 },
               reasoning_effort = { default = "low" },
             },
           }),
