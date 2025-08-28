@@ -433,7 +433,7 @@ return {
               reasoning_effort = { default = "low" },
             },
           }),
-          openai_fast      = adapter_and_default_model("openai", "gpt-5-mini", {
+          openai_fast      = adapter_and_default_model("openai", "gpt-5-nano", {
             schema = {
               reasoning_effort = { default = "low" },
             },
