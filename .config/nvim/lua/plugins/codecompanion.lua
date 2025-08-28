@@ -31,23 +31,49 @@ local function adapter_and_default_model(adapter, model, extra_opts)
   return require("codecompanion.adapters").extend(adapter, opts)
 end
 
----@param adapter CodeCompanion.Adapter
+---@param adapter CodeCompanion.HTTPAdapter
 ---@return string
 local function llm_role_title(adapter)
   return "CodeCompanion (" .. adapter.name .. ")"
 end
 
+--- Detect filetype from a filepath and optional content
+---@param filepath string
+---@param content string?
+---@return string
+local function detect_filetype(filepath, content)
+  -- 1) filename-based detection
+  local ft = vim.filetype.match({ filename = filepath })
+  if ft and ft ~= "" then return ft end
+
+  -- 2) content-based detection
+  if content and content ~= "" then
+    local lines = vim.split(content, "\n", { plain = true })
+    ft = vim.filetype.match({ contents = lines })
+    if ft and ft ~= "" then return ft end
+  end
+
+  -- 3) fallback to cleaned basename (strip leading dots), else "text"
+  local basename = vim.fs.basename(filepath or "")
+  local fallback = basename and basename:gsub("^%.+", "") or nil
+  if fallback and fallback ~= "" then
+    return fallback
+  end
+
+  return "text"
+end
+
 ---@param filepath string should be relative
 ---@param chat CodeCompanion.Chat
 local function add_file_to_codecompanion_chat(filepath, chat)
-  local filetype = vim.filetype.match({ filename = filepath })
   local file, err = io.open(filepath, "r")
   if not file then
     return vim.notify("Error opening file: " .. err, vim.log.levels.ERROR)
   end
   local content = file:read("*a")
   file:close()
-  filetype       = filetype or vim.filetype.match({ contents = vim.split(content, "\n") })
+
+  local filetype = detect_filetype(filepath, content)
   local title    = "<attachment filepath=\"" .. filepath .. "\">"
   local body     = "Here is the content from the file:\n\n" .. "```" .. filetype .. "\n" .. content
   local footer   = "```\n</attachment>"
@@ -222,7 +248,7 @@ return {
           adapter = chat_adapter_name,
           roles = {
             ---The header name for the LLM's messages
-            ---@type string|fun(adapter: CodeCompanion.Adapter): string
+            ---@type string|fun(adapter: CodeCompanion.HTTPAdapter): string
             llm = llm_role_title,
           },
           tools = {
