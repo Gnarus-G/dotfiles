@@ -7,12 +7,15 @@ return {
       "nvim-telescope/telescope.nvim",
       "nvim-telescope/telescope-dap.nvim",
       "nvim-neotest/nvim-nio",
+
+      'mfussenegger/nvim-dap-python' -- for python
     },
     config = function()
       local dap = require('dap')
       local dapui = require('dapui')
       local dap_utils = require('dap.utils')
 
+      require("dap-python").setup("uv")
       require("telescope").load_extension("dap")
 
       local function string_split(inputstr, sep)
@@ -296,4 +299,3 @@ return {
     end,
   },
 }
-
