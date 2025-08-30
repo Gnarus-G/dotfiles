@@ -59,7 +59,7 @@ return {
             extra_context = extra_context.get_formatted_context
           },
           optional = {
-            max_tokens = 256,
+            max_completion_tokens = 256,
           },
         },
         openai_fim_compatible = {
@@ -73,20 +73,6 @@ return {
             stop = { '\n\n' },
           },
         },
-      },
-      presets = {
-        faster = {
-          provider_options = {
-            gemini = {
-              model = 'gemini-2.0-flash',
-              chat_input = {
-                template = "{{{extra_context}}}\n" ..
-                    minuet_config.default_chat_input_prefix_first.template,
-                extra_context = extra_context.get_formatted_context
-              },
-            },
-          }
-        }
       }
     }
 
