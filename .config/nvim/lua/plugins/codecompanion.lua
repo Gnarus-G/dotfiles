@@ -314,14 +314,7 @@ return {
 
                     vim.iter(files_in_dir)
                         :each(function(filepath)
-                          local file, err = io.open(filepath, "r")
-                          if not file then
-                            return vim.notify("Error opening file: " .. err, vim.log.levels.ERROR)
-                          end
-                          local content_as_string = file:read("*a")
-                          file:close()
-                          chat:add_context({ role = "user", content = content_as_string }, filepath,
-                            "<file>" .. filepath .. "</file>")
+                          add_file_to_codecompanion_chat(filepath, chat)
                         end)
                   end)
               end,
@@ -368,7 +361,7 @@ return {
                 end
               end,
               opts = {
-                contains_code = false,
+                contains_code = true,
               },
             },
             ["git_modified_or_added_files"] = {
@@ -385,9 +378,16 @@ return {
                 end
               end,
               opts = {
-                contains_code = false,
+                contains_code = true,
               },
             }
+          },
+          variables = {
+            ["buffer"] = {
+              opts = {
+                default_params = 'pin', -- or 'watch'
+              },
+            },
           },
         },
         inline = {
