@@ -41,7 +41,7 @@ return {
         sections = {
           { section = "header" },
           { section = "keys", gap = 1, padding = 1 },
-          { icon = " ", title = "Recent Files", section = "recent_files", indent = 2, padding = { 2, 2 } },
+          { icon = " ", title = "Recent Files", section = "recent_files", indent = 2, padding = { 2, 2 }, cwd = true },
           --[[ { icon = " ", title = "Projects", section = "projects", indent = 2, padding = 2 }, ]]
           function()
             local in_git = Snacks.git.get_root() ~= nil
