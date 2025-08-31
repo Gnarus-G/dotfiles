@@ -1,17 +1,17 @@
 local env_cascade = require("gnarus.utils").env_var_cascade
 
 local chat_adapter_name = env_cascade({
-  { vars = { "GNARUS_ALLOW_VENDOR_LLM", "OPENAI_API_KEY" }, value = "openai_fast", },
+  { vars = { "GNARUS_ALLOW_VENDOR_LLM", "OPENAI_API_KEY" }, value = "openai", },
   { vars = { "GNARUS_ALLOW_VENDOR_LLM", "GEMINI_API_KEY" }, value = "gemini", },
 }, "ollama")
 
 local inline_adapter_name = env_cascade({
-  { vars = { "GNARUS_ALLOW_VENDOR_LLM", "OPENAI_API_KEY" }, value = "openai_ultrafast" },
+  { vars = { "GNARUS_ALLOW_VENDOR_LLM", "OPENAI_API_KEY" }, value = "openai_fast" },
   { vars = { "GNARUS_ALLOW_VENDOR_LLM", "GEMINI_API_KEY" }, value = "gemini_fast" },
 }, "ollama")
 
 local cmd_adapter_name = env_cascade({
-  { vars = { "GNARUS_ALLOW_VENDOR_LLM", "OPENAI_API_KEY" }, value = "openai_ultrafast" },
+  { vars = { "GNARUS_ALLOW_VENDOR_LLM", "OPENAI_API_KEY" }, value = "openai_fast" },
   { vars = { "GNARUS_ALLOW_VENDOR_LLM", "GEMINI_API_KEY" }, value = "gemini_fast" },
 }, "ollama")
 
@@ -122,63 +122,6 @@ local function setup_extra_keymaps(codecompanion, adapters)
       )
     end
   })
-
-  vim.keymap.set("n", "<leader>cc", function()
-    local models = vim.iter(pairs(adapters))
-        :filter(
-        ---@param key string
-          function(key)
-            return not key:find("claude")
-          end)
-        :map(
-          function(key, value)
-            return {
-              name = key,
-              args = value
-            }
-          end)
-        :totable()
-
-    vim.ui.select(models, {
-      prompt = "Select an adapter:",
-      format_item = function(item) return item.name .. " (" .. item.args.schema.model.default .. ")" end,
-    }, function(item)
-      if not item then
-        return vim.notify("No adapter selected", vim.log.levels.WARN)
-      end
-      local chat = codecompanion.last_chat()
-      if not chat then
-        codecompanion.chat({ fargs = { item.name } });
-        return
-      end
-
-      local adapter = chat.adapter.new(item.args)
-      if adapter == nil then
-        return vim.notify("Failed to get adapter from string: " .. item.name, vim.log.levels.ERROR)
-      end
-      chat.adapter = adapter
-
-      local settings = chat.adapter:make_from_schema()
-      if not settings then
-        return vim.notify("Failed to make settings from schema for adapter: " .. item.name, vim.log.levels.ERROR)
-      end
-
-      chat:apply_settings(settings) -- this call only works if `show_settings` is false
-      vim.notify("Changed adapter settings: " .. vim.inspect(settings), vim.log.levels.DEBUG)
-
-      chat.ui = require("codecompanion.strategies.chat.ui").new({
-        adapter = chat.adapter,
-        chat_id = chat.id,
-        chat_bufnr = chat.bufnr,
-        roles = { user = "Me", llm = llm_role_title },
-        settings = chat.settings,
-        winnr = chat.ui.winnr,
-        tokens = chat.ui.tokens
-      })
-
-      chat.ui:open()
-    end)
-  end, { desc = "CodeCompanion, Pick a model and Chat" })
 
   ---@param cb fun(prompt: string)
   local function inline_prompt_input_with_cmd(cb)
@@ -427,25 +370,18 @@ return {
       -- gemini-2.5-flash
       adapters = {
         http = {
-          openai           = adapter_and_default_model("openai", "gpt-5", {
-            schema = {
-              temperature      = { default = 1 },
-              reasoning_effort = { default = "low" },
-            },
-          }),
-          openai_gpt5_mini = adapter_and_default_model("openai", "gpt-5-mini"),
-          openai_fast      = adapter_and_default_model("openai", "gpt-5-mini", {
+          openai      = adapter_and_default_model("openai", "gpt-5-mini", {
             schema = {
               reasoning_effort = { default = "low" },
             },
           }),
-          openai_ultrafast = adapter_and_default_model("openai", "gpt-4.1-mini", {
+          openai_fast = adapter_and_default_model("openai", "gpt-4.1-mini", {
             schema = {
               temperature      = { default = 0 },
               reasoning_effort = { default = "low" },
             },
           }),
-          gemini           = adapter_and_default_model("gemini", "gemini-2.5-pro", {
+          gemini      = adapter_and_default_model("gemini", "gemini-2.5-pro", {
             schema = {
               temperature = {
                 default = 0.3
@@ -455,7 +391,7 @@ return {
               }
             }
           }),
-          gemini_fast      = adapter_and_default_model("gemini", "gemini-2.5-flash", {
+          gemini_fast = adapter_and_default_model("gemini", "gemini-2.5-flash", {
             schema = {
               temperature = {
                 default = 0
@@ -465,11 +401,8 @@ return {
               }
             }
           }),
-          gemini_pro       = adapter_and_default_model("gemini", "gemini-2.5-pro"),
-          claude_haiku     = adapter_and_default_model("anthropic", "claude-3-5-haiku-20241022"),
-          claude_sonnet    = adapter_and_default_model("anthropic", "claude-sonnet-4-20250514"),
-          claude_opus      = adapter_and_default_model("anthropic", "claude-opus-4-20250514"),
-          ollama           = adapter_and_default_model("ollama", "qwen3", {
+          claude      = adapter_and_default_model("anthropic", "claude-sonnet-4-20250514"),
+          ollama      = adapter_and_default_model("ollama", "qwen3", {
             env = {
               url = os.getenv("OLLAMA_API_BASE") or "http://localhost:11434"
             },
