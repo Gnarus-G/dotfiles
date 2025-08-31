@@ -6,7 +6,8 @@
         "@upstash/context7-mcp"
       ],
       "autoApprove": [
-        "resolve-library-id"
+        "resolve-library-id",
+        "get-library-docs"
       ],
       "command": "npx",
       "custom_instructions": {
@@ -17,6 +18,9 @@
       "args": [
         "-c",
         "node ${HOME}/.mcphub/servers/ez-web-search-mcp/build/index.js"
+      ],
+      "autoApprove": [
+        "search"
       ],
       "command": "sh",
       "custom_instructions": {
