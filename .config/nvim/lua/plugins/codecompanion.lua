@@ -84,8 +84,7 @@ local function add_file_to_codecompanion_chat(filepath, chat)
 end
 
 ---@param codecompanion CodeCompanion
----@param adapters table<string, CodeCompanion.AdapterArgs>
-local function setup_extra_keymaps(codecompanion, adapters)
+local function setup_extra_keymaps(codecompanion)
   vim.api.nvim_create_autocmd("FileType", {
     pattern = "NvimTree",
     callback = function()
@@ -197,8 +196,8 @@ return {
           tools = {
             groups = {
               ["smart"] = {
-                system_prompt =
-                "You're a meticulous software engineer who is proactive about filling knowledge gaps before making assumptions.",
+                prompt =
+                "You're a meticulous software engineer who is proactive about filling knowledge gaps before making assumptions, using tools like ${tools}",
                 tools = {
                   "access_mcp_resource",
                   "neovim__list_directory",
@@ -210,15 +209,17 @@ return {
                   "ez_web_search_mcp__search",
                   "fetch_mcp__fetch_html",
                   "fetch_mcp__fetch_markdown",
-                  "sequentialthinking__sequentialthinking"
+                  "fetch_mcp__fetch_markdown",
+                  "fetch_mcp__fetch_txt",
+                  "sequentialthinking__sequentialthinking",
                 },
                 opts = {
-                  collapse_tools = false, -- When true, show as a single group reference instead of individual tools
+                  collapse_tools = true, -- When true, show as a single group reference instead of individual tools
                 },
               },
               ["smart_dev"] = {
-                system_prompt =
-                "You're a meticulous software engineer who always looks things up before making decisions.",
+                prompt =
+                "You're a meticulous software engineer who always looks things up before making decisions, using tools like ${tools}",
                 tools = {
                   "access_mcp_resource",
                   "neovim__list_directory",
@@ -230,14 +231,30 @@ return {
                   "ez_web_search_mcp__search",
                   "fetch_mcp__fetch_html",
                   "fetch_mcp__fetch_markdown",
+                  "fetch_mcp__fetch_markdown",
+                  "fetch_mcp__fetch_txt",
                   "sequentialthinking__sequentialthinking",
+
+                  "get_changed_files",
+                  "grep_search",
+                  "list_code_usages",
+
+                  -- "neovim__edit_file",
                   "neovim__write_file",
-                  "neovim__edit_file",
+                  "insert_edit_into_file",
                 },
                 opts = {
-                  collapse_tools = false, -- When true, show as a single group reference instead of individual tools
+                  collapse_tools = true, -- When true, show as a single group reference instead of individual tools
                 },
               },
+            },
+            opts = {
+              default_tools = {
+                "context7_mcp",
+                "ez_web_search_mcp",
+                "fetch_mcp",
+                "sequentialthinking"
+              }
             }
           },
           slash_commands = {
@@ -529,7 +546,7 @@ return {
 
     vim.g.codecompanion_auto_tool_mode = true
 
-    setup_extra_keymaps(codecompanion, opts.adapters.http)
+    setup_extra_keymaps(codecompanion)
     extend_cmp_completions()
   end,
 }
