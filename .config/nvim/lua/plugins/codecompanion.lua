@@ -199,7 +199,6 @@ return {
                 prompt =
                 "You're a meticulous software engineer who is proactive about filling knowledge gaps before making assumptions, using tools like ${tools}",
                 tools = {
-                  "access_mcp_resource",
                   "neovim__list_directory",
                   "neovim__find_files",
                   "neovim__read_file",
@@ -221,7 +220,6 @@ return {
                 prompt =
                 "You're a meticulous software engineer who always looks things up before making decisions, using tools like ${tools}",
                 tools = {
-                  "access_mcp_resource",
                   "neovim__list_directory",
                   "neovim__find_files",
                   "neovim__read_file",
@@ -235,6 +233,7 @@ return {
                   "fetch_mcp__fetch_txt",
                   "sequentialthinking__sequentialthinking",
 
+                  "neovim__execute_command",
                   "get_changed_files",
                   "grep_search",
                   "list_code_usages",
