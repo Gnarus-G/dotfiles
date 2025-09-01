@@ -103,10 +103,6 @@ local function add_prompts_and_resources(mcphub)
             uri = "neovim://buffer",
             mimeType = "text/plain"
           })
-          :resource({
-            uri = "git://unstaged",
-            mimeType = "application/json"
-          })
           :user()
           :text("Explain why this error is happening in great detail: \n```txt\n" .. req.params.error .. "\n```")
           :send()
