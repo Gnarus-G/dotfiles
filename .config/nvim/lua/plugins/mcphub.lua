@@ -109,38 +109,6 @@ local function add_prompts_and_resources(mcphub)
     end
   })
 
-  mcphub.add_prompt("gnarus", {
-    name = "refactor",
-    description = "Refactor by translating one pattern/library to another",
-    arguments = { {
-      name = "prompt",
-      description = "Details about the desired refactor",
-      type = "string",
-      required = true,
-    } },
-    handler = function(req, res)
-      res
-          :system()
-          :resource({
-            uri = "neovim://buffer",
-            mimeType = "text/plain"
-          })
-          :system()
-          :text("You are an expert software engineer specializing in refactoring and code transformation.")
-          :text(
-            "Your goal is to assist the user in refactoring the provided code by translating patterns or libraries as requested.")
-          :text(
-            "You have access to a variety of tools and resources provided by connected MCP servers. You should leverage these tools, especially for searching documentation (e.g., via 'github.com/upstash/context7-mcp' for library documentation) or performing web searches (e.g., via 'ez-web-search-mcp'), to gather necessary information before making changes.")
-          :text(
-            "Always ensure your refactored code is complete and directly usable as a replacement. Avoid adding redundant comments or explanations that do not contribute new information to the code.")
-          :user()
-          :text("Refactor code according to following details: \n---\n" ..
-            req.params.prompt .. "\n---")
-
-      return res:send()
-    end
-  })
-
   mcphub.add_resource("gnarus", {
     name        = "branch-diff",
     description = "Git diff between current branch and origin/main",
@@ -317,7 +285,7 @@ local function add_prompts_and_resources(mcphub)
   })
 
   mcphub.add_prompt("gnarus", {
-    name = "enhance-prompt",
+    name = "prompt-enhance",
     description = "Enhance a prompt of the user to make it more effective",
     arguments = {
       {
@@ -329,15 +297,72 @@ local function add_prompts_and_resources(mcphub)
     },
     handler = function(req, res)
       return res:system()
-          :text("You are an expert prompt engineer who understands context and communication strategies.")
-          :text("Improve the given prompt by making it more specific, clear, and actionable.")
+          :text(
+            "You are an expert prompt engineer who understands context and communication strategies. Improve the given prompt by making it more specific, clear, and actionable.")
           :user()
           :text("Enhance this prompt:\n" .. req.params.prompt .. "\n")
     end
   })
 
+  mcphub.add_tool("gnarus", {
+    name = "prompt-enhance",
+    description =
+    "Enhance a prompt of the user to make it more effective. Use this tool to get a prompt that is more amenable to an LLM.",
+    inputSchema = {
+      type = "object",
+      properties = {
+        prompt = {
+          type = "string",
+          description = "Prompt to be improved",
+        },
+      },
+      required = { "prompt" },
+    },
+    handler = function(req, res)
+      local params = req.params or {}
+      local prompt = params.prompt or ""
+
+      if type(prompt) ~= "string" or vim.trim(prompt) == "" then
+        return res:error("`prompt` is required and must be a non-empty string"):send()
+      end
+
+      -- Wrap the user prompt with the prompt-enhance persona/system context
+      local system_instruction =
+          "You are an expert prompt engineer who understands context and communication strategies. Improve the given prompt by making it more specific, clear, and actionable."
+          .. " Only respond with the enhanced prompt! No extra commentary!"
+      local full_prompt = system_instruction .. "\n\nEnhance this prompt:\n" .. prompt
+
+      -- Shell-escape the full prompt for safe inclusion on the command line
+      local escaped_prompt = vim.fn.shellescape(full_prompt)
+
+      -- Hard-coded model as requested
+      local model_flag = "--model"
+      local model_value = "google/gemini-2.5-flash"
+      local cmd = "opencode run " .. escaped_prompt .. " " .. model_flag .. " " .. vim.fn.shellescape(model_value)
+
+      -- Execute the command, capture output. Use pcall to avoid Lua errors.
+      local ok, output = pcall(vim.fn.system, cmd)
+
+      if not ok then
+        return res:error("Failed to invoke `opencode` CLI", { error = output, cmd = cmd }):send()
+      end
+
+      local exit_code = tonumber(vim.v.shell_error) or 0
+      if exit_code ~= 0 then
+        return res:error("`opencode` CLI returned non-zero exit code", {
+          exit_code = exit_code,
+          output = output,
+          cmd = cmd,
+        }):send()
+      end
+
+      -- Success: return CLI output as plain text
+      return res:text(output):send()
+    end,
+  })
+
   mcphub.add_prompt("gnarus", {
-    name = "prompt_sum",
+    name = "prompt-summarize",
     description =
     "Generate an effective prompt that captures the user's desires expressed throughout the current chat.",
     handler = function(_, res)
