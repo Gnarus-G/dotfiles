@@ -150,6 +150,9 @@ local function setup_extra_keymaps(codecompanion)
     end),
     { desc = "CodeCompanion Inline", noremap = true, silent = true })
 
+  vim.keymap.set({ "n", "v" }, "<leader>cc", "<cmd>CodeCompanionChat<cr>",
+    { desc = "CodeCompanion Chat", noremap = true, silent = true })
+
   vim.keymap.set({ "n", "v" }, "<leader>ct", "<cmd>CodeCompanionChat Toggle<cr>",
     { desc = "CodeCompanion Toggle", noremap = true, silent = true })
 
