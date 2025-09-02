@@ -188,10 +188,10 @@ local function add_prompts_and_resources(mcphub)
   })
 
   -- Tool: git-commit
-  -- Wraps `git commit -F <file> -a` to allow multi-line commit messages composed of subject, body and footer.
+  -- Wraps `git commit -F <file>` to allow multi-line commit messages composed of subject, body and footer.
   mcphub.add_tool("gnarus", {
     name = "git-commit",
-    description = "Create a git commit using provided subject, body and footer. Runs `git commit -F <tmpfile> -a`.",
+    description = "Create a git commit using provided subject, body and footer. Runs `git commit -F <tmpfile>`.",
     inputSchema = {
       type = "object",
       properties = {
@@ -227,8 +227,8 @@ local function add_prompts_and_resources(mcphub)
       end
       local message = table.concat(parts, "\n")
 
-      -- Pass commit message via stdin to `git commit -F - -a` (no temp file)
-      local cmd = "git commit -F - -a"
+      -- Pass commit message via stdin to `git commit -F -` (no temp file)
+      local cmd = "git commit -F -"
       -- vim.fn.system can accept input as second argument
       local ok, output = pcall(vim.fn.system, cmd, message)
 
