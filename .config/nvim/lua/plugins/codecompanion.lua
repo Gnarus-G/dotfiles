@@ -252,6 +252,7 @@ return {
             },
             opts = {
               default_tools = {
+                "gnarus",
                 "context7_mcp",
                 "ez_web_search_mcp",
                 "fetch_mcp",
