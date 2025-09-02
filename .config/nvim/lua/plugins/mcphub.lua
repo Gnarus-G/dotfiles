@@ -214,9 +214,68 @@ local function add_prompts_and_resources(mcphub)
             "The subject line of a commit should be 50 characters max, and should start with an imperative verb. (e.g. 'Add frontend unit tests'). The subject line must not be prefixed with a type like 'feat:', 'fix:', or 'refactor:'.\n\nBody: The body of a commit should explain the 'what' and 'why' of the commit, not the 'how'. It should be wrapped at 72 characters." ..
             "\n\nFooter: The footer of a commit should contain any information that is not part of the subject or body. (e.g. 'Fixes #123', 'Closes #456', 'BREAKING CHANGE: ...')")
           :user()
-          :text("Git diff:\n```diff\n" .. diff_output .. "\n```\n")
+          :text("@{gnarus__git_commit} Git diff:\n```diff\n" .. diff_output .. "\n```\n")
           :send()
     end
+  })
+
+  -- Tool: git-commit
+  -- Wraps `git commit -F <file> -a` to allow multi-line commit messages composed of subject, body and footer.
+  mcphub.add_tool("gnarus", {
+    name = "git-commit",
+    description = "Create a git commit using provided subject, body and footer. Runs `git commit -F <tmpfile> -a`.",
+    inputSchema = {
+      type = "object",
+      properties = {
+        subject = {
+          type = "string",
+          description =
+          "Commit subject: single-line (max 50 chars), start with an imperative verb, no type prefixes like 'feat:' or 'fix:'",
+        },
+        body = {
+          type = "string",
+          description = "Commit body (optional, can be multi-line)",
+        },
+        footer = {
+          type = "string",
+          description = "Commit footer (optional)",
+        },
+      },
+      required = { "subject" }
+    },
+    handler = function(req, res)
+      local subject = req.params.subject or ""
+      local body = req.params.body or ""
+      local footer = req.params.footer or ""
+
+      -- Build commit message
+      local parts = {}
+      table.insert(parts, subject)
+      if body ~= "" then
+        table.insert(parts, "\n" .. body)
+      end
+      if footer ~= "" then
+        table.insert(parts, "\n" .. footer)
+      end
+      local message = table.concat(parts, "\n")
+
+      -- Pass commit message via stdin to `git commit -F - -a` (no temp file)
+      local cmd = "git commit -F - -a"
+      -- vim.fn.system can accept input as second argument
+      local ok, output = pcall(vim.fn.system, cmd, message)
+
+      if not ok then
+        return res:error("git commit failed", { error = output })
+      end
+
+      -- Check git exit status: use vim.v.shell_error which git sets
+      local shell_err = tonumber(vim.v.shell_error) or 0
+      if shell_err ~= 0 then
+        return res:error("git commit failed", { output = output, code = shell_err })
+      end
+
+      return res:text(output):send()
+    end,
   })
 
   mcphub.add_prompt("gnarus", {
