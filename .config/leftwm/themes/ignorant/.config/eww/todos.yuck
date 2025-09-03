@@ -5,5 +5,6 @@
 
 (defpoll todos :interval "2s" :initial "[]" "~/.local/bin/todo dump -t")
 (defpoll latest_todo :interval "1s" :initial "null" "~/.local/bin/todo dump -t | jq last")
+(defpoll earliest_todo :interval "1s" :initial "null" "~/.local/bin/todo dump -t | jq first")
 (defpoll todos_empty :interval "1s" :initial true "~/.local/bin/todo dump -t | jq 'isempty(.[])'")
     
