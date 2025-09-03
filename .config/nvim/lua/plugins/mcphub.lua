@@ -246,6 +246,78 @@ local function add_prompts_and_resources(mcphub)
     end,
   })
 
+  mcphub.add_tool("gnarus",
+    {
+      name = "todolist_add",
+      description = "Add an item to the user's personal todolist",
+      inputSchema = {
+        type = "object",
+        properties = {
+          item = {
+            type = "string",
+            description = "description of the item todo"
+          }
+        },
+        required = { "item" }
+      },
+      handler = function(req, res)
+        local item = req.params.item
+        local output = vim.fn.system("todo " .. item)
+
+        local shell_err = tonumber(vim.v.shell_error) or 0
+        if shell_err ~= 0 then
+          return res:error("todo commit failed", { output = output, code = shell_err })
+        end
+
+        return res:text("Done!"):send()
+      end
+    })
+
+  mcphub.add_tool("gnarus",
+    {
+      name = "todolist_mark-done",
+      description = "Mark an item the user's personal todolist as completed.",
+      inputSchema = {
+        type = "object",
+        properties = {
+          id = {
+            type = "string",
+            description = "ID (hash) of the item to mark as completed."
+          }
+        },
+        required = { "id" }
+      },
+      handler = function(req, res)
+        local id = req.params.id
+        local job = vim.system({ "todo", "done", id }, { text = true }):wait()
+        local stdout = table.concat({ job.stdout }, "\n")
+        local stderr = table.concat({ job.stderr }, "\n")
+
+        if job.code ~= 0 then
+          return res:error("todo command failed", { stdout = stdout, stderr = stderr, code = job.code })
+        end
+
+        return res:text("Done!"):send()
+      end
+    })
+
+
+  mcphub.add_tool("gnarus",
+    {
+      name = "todolist_view",
+      description = "View items in the user's personal todolist",
+      handler = function(_, res)
+        local output = vim.fn.system({ "todo", "dump" })
+
+        local shell_err = tonumber(vim.v.shell_error) or 0
+        if shell_err ~= 0 then
+          return res:error("todo ls command failed", { output = output, code = shell_err })
+        end
+
+        return res:text(output):send()
+      end
+    })
+
   mcphub.add_prompt("gnarus", {
     name = "curlify",
     description = "Parse and convert text to a `curl` command.",
