@@ -151,22 +151,11 @@ local function add_prompts_and_resources(mcphub)
   mcphub.add_prompt("gnarus", {
     name = "git-commit-summary",
     description = "Genearate a commit message based on the changes against the provided git branch.",
-    arguments = function()
-      -- Get git branches
-      local branches = vim.fn.systemlist("git branch --all --format='%(refname:short)'")
+    handler = function(_, res)
       local current_branch = vim.fn.system("git rev-parse --abbrev-ref HEAD")
       current_branch = vim.trim(current_branch)
-      return {
-        {
-          name = "branch",
-          description = "Target branch (defaults to the current one)",
-          default = current_branch,
-          enum = branches
-        }
-      }
-    end,
-    handler = function(req, res)
-      local ok, diff_output = pcall(vim.fn.system, "git fetch --prune --all && git diff --staged " .. req.params.branch);
+
+      local ok, diff_output = pcall(vim.fn.system, "git fetch --prune --all && git diff --staged " .. current_branch);
       if not ok then
         return res:error("Failed to get git diff", { error = diff_output })
       end
