@@ -241,9 +241,8 @@ return {
                   "grep_search",
                   "list_code_usages",
 
-                  -- "neovim__edit_file",
                   "neovim__write_file",
-                  "insert_edit_into_file",
+                  "neovim__edit_file",
                 },
                 opts = {
                   collapse_tools = true, -- When true, show as a single group reference instead of individual tools
