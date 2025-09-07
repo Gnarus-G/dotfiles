@@ -63,7 +63,7 @@
   "nativeMCPServers": {
     "gnarus": {
       "custom_instructions": {
-        "text": "Consider these two points:\n- When provided a plugin's source code location, always attempt to search and read through it before answering anything.\n- Search inside the nvim://plugin/.. paths to find the source code (lua) files for any of our neovim plugins."
+        "text": "Consider these two points:\n- When provided a plugin's source code location, always attempt to search and read through it before answering anything.\n- Search inside the nvim://plugin/.. paths to find the source code (lua) files for any of our neovim plugins.\n- Enhance the user's prompt before answering it."
       }
     },
     "mcphub": {
