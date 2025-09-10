@@ -243,6 +243,7 @@ return {
 
                   "neovim__write_file",
                   "neovim__edit_file",
+                  "insert_edit_into_file",
                 },
                 opts = {
                   collapse_tools = true, -- When true, show as a single group reference instead of individual tools
