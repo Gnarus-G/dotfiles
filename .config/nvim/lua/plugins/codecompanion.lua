@@ -390,9 +390,9 @@ return {
       -- gemini-2.5-flash
       adapters = {
         http = {
-          openai      = adapter_and_default_model("openai", "gpt-5-mini", {
+          openai      = adapter_and_default_model("openai", "o4-mini-2025-04-16", {
             schema = {
-              reasoning_effort = { default = "low" },
+              -- reasoning_effort = { default = "low" },
             },
           }),
           openai_fast = adapter_and_default_model("openai", "gpt-4.1-mini", {
