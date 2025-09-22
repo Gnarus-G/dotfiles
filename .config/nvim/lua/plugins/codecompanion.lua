@@ -197,6 +197,11 @@ return {
             llm = llm_role_title,
           },
           tools = {
+            ["insert_edit_into_file"] = {
+              opts = {
+                requires_approval = false,
+              },
+            },
             groups = {
               ["smart"] = {
                 prompt =
@@ -242,7 +247,7 @@ return {
                   "list_code_usages",
 
                   "neovim__write_file",
-                  "neovim__edit_file",
+                  -- "neovim__edit_file",
                   -- "insert_edit_into_file",
                 },
                 opts = {
@@ -257,7 +262,9 @@ return {
                 "ez_web_search_mcp",
                 "fetch_mcp",
                 "sequentialthinking"
-              }
+              },
+              auto_submit_errors = true,  -- Send any errors to the LLM automatically?
+              auto_submit_success = true, -- Send any successful output to the LLM automatically?
             }
           },
           slash_commands = {
@@ -373,10 +380,10 @@ return {
       display = {
         diff = {
           enabled = true,
-          close_chat_at = 80,     -- Close an open chat buffer if the total columns of your display are less than...
-          layout = "vertical",    -- vertical|horizontal split for default provider
+          close_chat_at = 80,  -- Close an open chat buffer if the total columns of your display are less than...
+          layout = "vertical", -- vertical|horizontal split for default provider
           opts = { "internal", "filler", "closeoff", "algorithm:patience", "followwrap", "linematch:120" },
-          provider = "mini_diff", -- default|mini_diff
+          provider = "inline", -- default|mini_diff|inline
         },
         chat = { window = { position = "right" }, show_settings = false }
       },
@@ -384,15 +391,16 @@ return {
         log_level = "ERROR", -- TRACE|DEBUG|ERROR|INFO
       },
       -- tier list:
+      -- gpt-5
       -- gpt-4.1
       -- gemini-2.5-pro - probaly too expensive to be worth it ever while gpt-4.1 is better and slightly cheaper
       -- gpt-4.1-mini
       -- gemini-2.5-flash
       adapters = {
         http = {
-          openai      = adapter_and_default_model("openai", "o4-mini-2025-04-16", {
+          openai      = adapter_and_default_model("openai", "gpt-5", {
             schema = {
-              -- reasoning_effort = { default = "low" },
+              reasoning_effort = { default = "low" },
             },
           }),
           openai_fast = adapter_and_default_model("openai", "gpt-4.1-mini", {
