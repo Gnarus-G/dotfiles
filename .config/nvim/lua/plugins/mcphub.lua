@@ -307,6 +307,81 @@ local function add_prompts_and_resources(mcphub)
       end
     })
 
+    -- Tool: calculator
+    -- Safely evaluate arithmetic expressions with support for Lua math functions (e.g., math.sin, math.cos) and constants.
+    mcphub.add_tool("gnarus", {
+      name = "calculator",
+      description = "Evaluate arithmetic expressions. Supports +, -, *, /, %, ^, parentheses, decimals, and math.<fn> like math.sin(x). Also supports constants: pi, e, tau.",
+      inputSchema = {
+        type = "object",
+        properties = {
+          expression = { type = "string", description = "Expression to evaluate (e.g., '3*(2+5) - math.sin(math.pi/2)')" },
+          precision = { type = "number", description = "Optional decimal places to format the result" },
+        },
+        required = { "expression" },
+      },
+      handler = function(req, res)
+        local expr = (req.params and req.params.expression) or ""
+        local precision = req.params and req.params.precision
+
+        if type(expr) ~= "string" or vim.trim(expr) == "" then
+          return res:error("`expression` must be a non-empty string"):send()
+        end
+
+        -- Basic safety checks: disallow quotes/backticks/assignments and unexpected letters
+        if expr:find("[\"'`=]") then
+          return res:error("Expression contains disallowed characters"):send()
+        end
+
+        -- Remove spaces for simpler inspection
+        local compact = expr:gsub("%s+", "")
+        -- Start by removing allowed identifiers while the dot is intact
+        local remainder = compact
+        -- Allow math.<identifier> (e.g., math.sin, math.pi, math.log)
+        remainder = remainder:gsub("math%.[%a_][%w_]*", "")
+        -- Allow constants pi, e, tau as bare identifiers (use frontiers to avoid matching inside numbers like 1e-3)
+        remainder = remainder:gsub("(%f[%a])pi(%f[%A])", "")
+        remainder = remainder:gsub("(%f[%a])tau(%f[%A])", "")
+        remainder = remainder:gsub("(%f[%a])e(%f[%A])", "")
+        -- Allow scientific notation (e.g., 1e-3, 2.5E10, .5e2) by removing the exponent marker when attached to a number
+        remainder = remainder:gsub("([%d%.])[eE][%+%-]?%d+", "%1")
+        -- Now strip allowed numeric and operator characters
+        remainder = remainder:gsub("[%d%.%+%-%*/%%%^%(%),]", "")
+
+        if remainder:find("[%a_]") then
+          return res:error("Expression contains unknown identifiers"):send()
+        end
+
+        -- Restricted evaluation environment
+        local env = {
+          math = math,
+          pi = math.pi,
+          e = math.exp(1),
+          tau = 2 * math.pi,
+        }
+
+        local chunk, load_err = load("return " .. expr, "calculator", "t", env)
+        if not chunk then
+          return res:error("Failed to parse expression", { error = load_err }):send()
+        end
+
+        local ok, result = pcall(chunk)
+        if not ok then
+          return res:error("Failed to evaluate expression", { error = result }):send()
+        end
+
+        if type(result) ~= "number" then
+          return res:error("Expression did not evaluate to a number"):send()
+        end
+
+        if type(precision) == "number" and precision >= 0 and precision <= 12 then
+          return res:text(string.format("%0." .. tostring(math.floor(precision)) .. "f", result)):send()
+        else
+          return res:text(tostring(result)):send()
+        end
+      end,
+    })
+
   mcphub.add_prompt("gnarus", {
     name = "curlify",
     description = "Parse and convert text to a `curl` command.",
