@@ -248,7 +248,7 @@ return {
 
                   "neovim__write_file",
                   -- "neovim__edit_file",
-                  -- "insert_edit_into_file",
+                  "insert_edit_into_file",
                 },
                 opts = {
                   collapse_tools = false, -- When true, show as a single group reference instead of individual tools
@@ -355,7 +355,7 @@ return {
           variables = {
             ["buffer"] = {
               opts = {
-                default_params = 'pin', -- or 'watch'
+                default_params = 'watch', -- or 'watch'
               },
             },
           },
