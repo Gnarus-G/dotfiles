@@ -387,6 +387,13 @@ return {
         },
         chat = { window = { position = "right" }, show_settings = false }
       },
+      prompt_library = {
+        ["Generate a Commit Message"] = {
+          opts = {
+            is_slash_cmd = false,
+          },
+        },
+      },
       opts = {
         log_level = "ERROR", -- TRACE|DEBUG|ERROR|INFO
       },
