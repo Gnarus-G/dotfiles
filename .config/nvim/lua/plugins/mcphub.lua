@@ -149,7 +149,7 @@ local function add_prompts_and_resources(mcphub)
   })
 
   mcphub.add_prompt("gnarus", {
-    name = "git-commit-summary",
+    name = "commit",
     description = "Genearate a commit message based on the changes against the provided git branch.",
     handler = function(_, res)
       local current_branch = vim.fn.system("git rev-parse --abbrev-ref HEAD")
@@ -307,80 +307,81 @@ local function add_prompts_and_resources(mcphub)
       end
     })
 
-    -- Tool: calculator
-    -- Safely evaluate arithmetic expressions with support for Lua math functions (e.g., math.sin, math.cos) and constants.
-    mcphub.add_tool("gnarus", {
-      name = "calculator",
-      description = "Evaluate arithmetic expressions. Supports +, -, *, /, %, ^, parentheses, decimals, and math.<fn> like math.sin(x). Also supports constants: pi, e, tau.",
-      inputSchema = {
-        type = "object",
-        properties = {
-          expression = { type = "string", description = "Expression to evaluate (e.g., '3*(2+5) - math.sin(math.pi/2)')" },
-          precision = { type = "number", description = "Optional decimal places to format the result" },
-        },
-        required = { "expression" },
+  -- Tool: calculator
+  -- Safely evaluate arithmetic expressions with support for Lua math functions (e.g., math.sin, math.cos) and constants.
+  mcphub.add_tool("gnarus", {
+    name = "calculator",
+    description =
+    "Evaluate arithmetic expressions. Supports +, -, *, /, %, ^, parentheses, decimals, and math.<fn> like math.sin(x). Also supports constants: pi, e, tau.",
+    inputSchema = {
+      type = "object",
+      properties = {
+        expression = { type = "string", description = "Expression to evaluate (e.g., '3*(2+5) - math.sin(math.pi/2)')" },
+        precision = { type = "number", description = "Optional decimal places to format the result" },
       },
-      handler = function(req, res)
-        local expr = (req.params and req.params.expression) or ""
-        local precision = req.params and req.params.precision
+      required = { "expression" },
+    },
+    handler = function(req, res)
+      local expr = (req.params and req.params.expression) or ""
+      local precision = req.params and req.params.precision
 
-        if type(expr) ~= "string" or vim.trim(expr) == "" then
-          return res:error("`expression` must be a non-empty string"):send()
-        end
+      if type(expr) ~= "string" or vim.trim(expr) == "" then
+        return res:error("`expression` must be a non-empty string"):send()
+      end
 
-        -- Basic safety checks: disallow quotes/backticks/assignments and unexpected letters
-        if expr:find("[\"'`=]") then
-          return res:error("Expression contains disallowed characters"):send()
-        end
+      -- Basic safety checks: disallow quotes/backticks/assignments and unexpected letters
+      if expr:find("[\"'`=]") then
+        return res:error("Expression contains disallowed characters"):send()
+      end
 
-        -- Remove spaces for simpler inspection
-        local compact = expr:gsub("%s+", "")
-        -- Start by removing allowed identifiers while the dot is intact
-        local remainder = compact
-        -- Allow math.<identifier> (e.g., math.sin, math.pi, math.log)
-        remainder = remainder:gsub("math%.[%a_][%w_]*", "")
-        -- Allow constants pi, e, tau as bare identifiers (use frontiers to avoid matching inside numbers like 1e-3)
-        remainder = remainder:gsub("(%f[%a])pi(%f[%A])", "")
-        remainder = remainder:gsub("(%f[%a])tau(%f[%A])", "")
-        remainder = remainder:gsub("(%f[%a])e(%f[%A])", "")
-        -- Allow scientific notation (e.g., 1e-3, 2.5E10, .5e2) by removing the exponent marker when attached to a number
-        remainder = remainder:gsub("([%d%.])[eE][%+%-]?%d+", "%1")
-        -- Now strip allowed numeric and operator characters
-        remainder = remainder:gsub("[%d%.%+%-%*/%%%^%(%),]", "")
+      -- Remove spaces for simpler inspection
+      local compact = expr:gsub("%s+", "")
+      -- Start by removing allowed identifiers while the dot is intact
+      local remainder = compact
+      -- Allow math.<identifier> (e.g., math.sin, math.pi, math.log)
+      remainder = remainder:gsub("math%.[%a_][%w_]*", "")
+      -- Allow constants pi, e, tau as bare identifiers (use frontiers to avoid matching inside numbers like 1e-3)
+      remainder = remainder:gsub("(%f[%a])pi(%f[%A])", "")
+      remainder = remainder:gsub("(%f[%a])tau(%f[%A])", "")
+      remainder = remainder:gsub("(%f[%a])e(%f[%A])", "")
+      -- Allow scientific notation (e.g., 1e-3, 2.5E10, .5e2) by removing the exponent marker when attached to a number
+      remainder = remainder:gsub("([%d%.])[eE][%+%-]?%d+", "%1")
+      -- Now strip allowed numeric and operator characters
+      remainder = remainder:gsub("[%d%.%+%-%*/%%%^%(%),]", "")
 
-        if remainder:find("[%a_]") then
-          return res:error("Expression contains unknown identifiers"):send()
-        end
+      if remainder:find("[%a_]") then
+        return res:error("Expression contains unknown identifiers"):send()
+      end
 
-        -- Restricted evaluation environment
-        local env = {
-          math = math,
-          pi = math.pi,
-          e = math.exp(1),
-          tau = 2 * math.pi,
-        }
+      -- Restricted evaluation environment
+      local env = {
+        math = math,
+        pi = math.pi,
+        e = math.exp(1),
+        tau = 2 * math.pi,
+      }
 
-        local chunk, load_err = load("return " .. expr, "calculator", "t", env)
-        if not chunk then
-          return res:error("Failed to parse expression", { error = load_err }):send()
-        end
+      local chunk, load_err = load("return " .. expr, "calculator", "t", env)
+      if not chunk then
+        return res:error("Failed to parse expression", { error = load_err }):send()
+      end
 
-        local ok, result = pcall(chunk)
-        if not ok then
-          return res:error("Failed to evaluate expression", { error = result }):send()
-        end
+      local ok, result = pcall(chunk)
+      if not ok then
+        return res:error("Failed to evaluate expression", { error = result }):send()
+      end
 
-        if type(result) ~= "number" then
-          return res:error("Expression did not evaluate to a number"):send()
-        end
+      if type(result) ~= "number" then
+        return res:error("Expression did not evaluate to a number"):send()
+      end
 
-        if type(precision) == "number" and precision >= 0 and precision <= 12 then
-          return res:text(string.format("%0." .. tostring(math.floor(precision)) .. "f", result)):send()
-        else
-          return res:text(tostring(result)):send()
-        end
-      end,
-    })
+      if type(precision) == "number" and precision >= 0 and precision <= 12 then
+        return res:text(string.format("%0." .. tostring(math.floor(precision)) .. "f", result)):send()
+      else
+        return res:text(tostring(result)):send()
+      end
+    end,
+  })
 
   mcphub.add_prompt("gnarus", {
     name = "curlify",
@@ -441,59 +442,23 @@ local function add_prompts_and_resources(mcphub)
   })
 
   mcphub.add_tool("gnarus", {
-    name = "prompt-enhance",
+    name = "add-enhanced-prompt",
     description =
-    "Enhance a prompt of the user to make it more effective. Use this tool to get a prompt that is more amenable to an LLM.",
+    "Add an enhanced version of the prompt of the user to make it more effective. Use this tool to add a prompt that is more amenable to an LLM.",
     inputSchema = {
       type = "object",
       properties = {
-        prompt = {
+        enhanced_prompt = {
           type = "string",
-          description = "Prompt to be improved",
+          description = "Improved prompt",
         },
       },
-      required = { "prompt" },
+      required = { "enhanced_prompt" },
     },
     handler = function(req, res)
       local params = req.params or {}
-      local prompt = params.prompt or ""
-
-      if type(prompt) ~= "string" or vim.trim(prompt) == "" then
-        return res:error("`prompt` is required and must be a non-empty string"):send()
-      end
-
-      -- Wrap the user prompt with the prompt-enhance persona/system context
-      local system_instruction =
-          "You are an expert prompt engineer who understands context and communication strategies. Improve the given prompt by making it more specific, clear, and actionable."
-          .. " Only respond with the enhanced prompt! No extra commentary!"
-      local full_prompt = system_instruction .. "\n\nEnhance this prompt:\n" .. prompt
-
-      -- Shell-escape the full prompt for safe inclusion on the command line
-      local escaped_prompt = vim.fn.shellescape(full_prompt)
-
-      -- Hard-coded model as requested
-      local model_flag = "--model"
-      local model_value = "google/gemini-2.5-flash"
-      local cmd = "opencode run " .. escaped_prompt .. " " .. model_flag .. " " .. vim.fn.shellescape(model_value)
-
-      -- Execute the command, capture output. Use pcall to avoid Lua errors.
-      local ok, output = pcall(vim.fn.system, cmd)
-
-      if not ok then
-        return res:error("Failed to invoke `opencode` CLI", { error = output, cmd = cmd }):send()
-      end
-
-      local exit_code = tonumber(vim.v.shell_error) or 0
-      if exit_code ~= 0 then
-        return res:error("`opencode` CLI returned non-zero exit code", {
-          exit_code = exit_code,
-          output = output,
-          cmd = cmd,
-        }):send()
-      end
-
-      -- Success: return CLI output as plain text
-      return res:text(output):send()
+      local prompt = params.enhanced_prompt
+      return res:text(prompt):send()
     end,
   })
 
