@@ -22,4 +22,6 @@ require("lazy").setup({
   },
   install = { colorscheme = { "tokyonight" } },
   checker = { enabled = true },
+  -- Disable LuaRocks to avoid hererocks/luarocks bootstrap failures during startup
+  rocks = { enabled = false },
 })
