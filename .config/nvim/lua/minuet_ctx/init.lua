@@ -105,7 +105,7 @@ local function get_all_context_formatted()
     :totable(), "\n")
 
   if combined_content ~= '' then
-    combined_content = '<extra_context>\n' .. combined_content .. '\n</extra_contex>'
+    combined_content = '<extra_context>\n' .. combined_content .. '\n</extra_context>'
   end
   return combined_content
 end
@@ -169,6 +169,14 @@ vim.api.nvim_create_user_command('MinuetShowContext', function()
     add_empty_line()
 
     add_markdown_header("Chat Context Buffers")
+    if #data.llm_chats_buffers == 0 then
+      -- Fallback: try to register any existing CodeCompanion chat buffers
+      local llm_chats = require("minuet_ctx.llm_chats")
+      llm_chats.is_empty() -- triggers lazy registration if possible
+      for ft, b in pairs(llm_chats.nofile_buffers) do
+        table.insert(data.llm_chats_buffers, b .. " " .. ft)
+      end
+    end
     if #data.llm_chats_buffers > 0 then
       for _, b_ft in ipairs(data.llm_chats_buffers) do add_list_item(b_ft) end
     else
