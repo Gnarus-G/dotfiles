@@ -1,5 +1,4 @@
 local extra_files = require("minuet_ctx.extra_files")
-local llm_chats = require("minuet_ctx.llm_chats")
 local harpoon_ctx = nil -- Lazy-loaded to avoid circular dependency
 
 local function is_file_of_current_buffer(filepath)
@@ -79,19 +78,42 @@ local function get_formatted_files_context(files)
   return table.concat(files_contents, "\n")
 end
 
+--- @alias LlmChatType "codecompanion"
+
 ---@return {ft: LlmChatType, content: string}[]
 local function get_chats_context()
-  return { ft = "codecompanion", content = llm_chats.get_llm_chat_content_from("codecompanion") }
+  local results = {}
+  for _, b in ipairs(vim.api.nvim_list_bufs()) do
+    if vim.api.nvim_buf_is_valid(b) and vim.bo[b].filetype == "codecompanion" then
+      local lines = vim.api.nvim_buf_get_lines(b, 0, -1, false)
+      local content = table.concat(lines, "\n")
+      if content ~= "" then
+        table.insert(results, { ft = "codecompanion", content = content })
+      end
+    end
+  end
+  return results
 end
 
 ---@return string
 local function get_formatted_chats_context()
-  local formatted_chats = vim.iter({
-        llm_chats.get_formatted_context("codecompanion")
-      })
-      :filter(function(chat) return chat ~= "" end)
-      :totable()
-  return table.concat(formatted_chats, "\n")
+  local chunks = {}
+  -- Prefer visible chats first
+  local visible, hidden = {}, {}
+  for _, b in ipairs(vim.api.nvim_list_bufs()) do
+    if vim.api.nvim_buf_is_valid(b) and vim.bo[b].filetype == "codecompanion" then
+      if vim.fn.bufwinnr(b) > 0 then table.insert(visible, b) else table.insert(hidden, b) end
+    end
+  end
+  local ordered = vim.list_extend(visible, hidden)
+  for _, b in ipairs(ordered) do
+    local lines = vim.api.nvim_buf_get_lines(b, 0, -1, false)
+    local content = table.concat(lines, "\n")
+    if content ~= "" then
+      table.insert(chunks, "<chat_with:codecompanion>" .. content .. "</chat_with:codecompanion>")
+    end
+  end
+  return table.concat(chunks, "\n")
 end
 
 --- Gets all current dynamic context as a formatted string
@@ -113,7 +135,6 @@ end
 
 vim.api.nvim_create_user_command('MinuetClear', function()
   extra_files.clear()
-  llm_chats.clear()
 end, { nargs = 0 })
 
 vim.api.nvim_create_user_command('MinuetShowContext', function()
@@ -123,9 +144,9 @@ vim.api.nvim_create_user_command('MinuetShowContext', function()
     data.extra_files = extra_files.files()
 
     data.llm_chats_buffers = {}
-    if not llm_chats.is_empty() then
-      for ft, b in pairs(llm_chats.nofile_buffers) do
-        table.insert(data.llm_chats_buffers, b .. " " .. ft)
+    for _, b in ipairs(vim.api.nvim_list_bufs()) do
+      if vim.api.nvim_buf_is_valid(b) and vim.bo[b].filetype == "codecompanion" then
+        table.insert(data.llm_chats_buffers, string.format("%d codecompanion", b))
       end
     end
 
@@ -169,14 +190,6 @@ vim.api.nvim_create_user_command('MinuetShowContext', function()
     add_empty_line()
 
     add_markdown_header("Chat Context Buffers")
-    if #data.llm_chats_buffers == 0 then
-      -- Fallback: try to register any existing CodeCompanion chat buffers
-      local llm_chats = require("minuet_ctx.llm_chats")
-      llm_chats.is_empty() -- triggers lazy registration if possible
-      for ft, b in pairs(llm_chats.nofile_buffers) do
-        table.insert(data.llm_chats_buffers, b .. " " .. ft)
-      end
-    end
     if #data.llm_chats_buffers > 0 then
       for _, b_ft in ipairs(data.llm_chats_buffers) do add_list_item(b_ft) end
     else
@@ -264,7 +277,6 @@ vim.defer_fn(function()
   end
   harpoon_ctx.sync()
 end, 100)
-
 
 return {
   files = all_extra_files,
