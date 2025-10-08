@@ -39,7 +39,7 @@ return {
           },
         },
         gemini = {
-          model = "gemini-2.0-flash",
+          model = "gemini-2.5-flash",
           chat_input = {
             template = "{{{extra_context}}}\n" ..
                 minuet_config.default_chat_input_prefix_first.template,
