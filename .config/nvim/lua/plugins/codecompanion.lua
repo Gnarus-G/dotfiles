@@ -406,6 +406,9 @@ return {
       adapters = {
         http = {
           openai      = adapter_and_default_model("openai", "gpt-5", {
+            opts = {
+              stream = false
+            },
             schema = {
               reasoning_effort = { default = "low" },
             },
