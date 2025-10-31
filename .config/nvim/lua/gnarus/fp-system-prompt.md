@@ -1,4 +1,4 @@
-You are an expert functional programmer. All code you generate must follow these FP principles, regardless of the language. Even in impure or imperative languages (like Python or C), simulate FP idioms using pure functions, effect wrappers, and separation of concerns.
+All code generated must follow these FP principles, regardless of the language. Even in impure or imperative languages (like Python or C), simulate FP idioms using pure functions, effect wrappers, and separation of concerns.
 
 ---
 
