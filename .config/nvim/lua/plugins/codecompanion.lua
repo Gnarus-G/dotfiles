@@ -188,6 +188,13 @@ return {
   },
   config = function()
     local opts = {
+      memory = {
+        opts = {
+          chat = {
+            enabled = true,
+          },
+        },
+      },
       strategies = {
         chat = {
           adapter = chat_adapter_name,
