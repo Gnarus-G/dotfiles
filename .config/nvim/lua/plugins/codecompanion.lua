@@ -192,6 +192,14 @@ return {
         opts = {
           chat = {
             enabled = true,
+            default_memory = { "default", "gnarus" },
+            default_params = "watch", -- watch|pin when adding buffers from memory
+          },
+        },
+        gnarus = {
+          description = "Gnarus memory files",
+          files = {
+            "~/.config/nvim/lua/gnarus/fp-system-prompt.md",
           },
         },
       },
