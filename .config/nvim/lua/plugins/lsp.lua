@@ -45,7 +45,7 @@ return {
 
       require('mason').setup({ PATH = "append" })
       require('mason-lspconfig').setup({
-        ensure_installed = { 'rust_analyzer', 'ts_ls', 'dockerls', "cssls", "clangd", "lua_ls", "jsonls" },
+        ensure_installed = { 'rust_analyzer', 'dockerls', "cssls", "clangd", "lua_ls", "jsonls" },
         automatic_enable = true
       })
 
@@ -95,14 +95,9 @@ return {
         }
       })
 
-      vim.lsp.config("ts_ls", {
-        root_markers = { 'package.json', 'tsconfig.json', 'jsconfig.json' },
-      })
-      vim.lsp.enable("ts_ls", false)
-
       vim.lsp.config("denols", {
-        single_file_support = true,
-        root_markers = { 'deno.json', 'deno.jsonc', }
+        single_file_support = false,
+        root_dir = require('lspconfig.util').root_pattern('deno.json', 'deno.jsonc')
       })
 
       vim.diagnostic.config({
@@ -144,7 +139,7 @@ return {
     "williamboman/mason-lspconfig.nvim",
     dependencies = { "williamboman/mason.nvim" },
     opts = {
-      ensure_installed = { 'rust_analyzer', 'ts_ls', 'dockerls', "cssls", "clangd", "lua_ls", "jsonls" },
+      ensure_installed = { 'rust_analyzer', 'dockerls', "cssls", "clangd", "lua_ls", "jsonls" },
       automatic_enable = true
     },
   },
