@@ -4,7 +4,7 @@ return {
   event = { "BufReadPre", "BufNewFile" },
   config = function()
     local null_ls = require("null-ls")
-    
+
     null_ls.setup({
       should_attach = function(bufnr)
         local buf_name = vim.api.nvim_buf_get_name(bufnr)
@@ -16,7 +16,9 @@ return {
           extra_filetypes = { "astro" },
         }),
         null_ls.builtins.code_actions.gitsigns,
+        null_ls.builtins.formatting.black
       },
     })
   end,
 }
+
