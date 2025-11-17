@@ -54,17 +54,16 @@ return {
           },
         },
         openai = {
-          model = "gpt-5-mini",
+          model = "gpt-5.1",
           chat_input = {
             template = "{{{extra_context}}}\n" ..
                 minuet_config.default_chat_input_prefix_first.template,
             extra_context = extra_context.get_formatted_context
           },
-          -- Disable streaming to avoid org verification requirement on GPT-5 series
-          stream = false,
+          stream = true,
           optional = {
-            max_completion_tokens = 128,
-            reasoning_effort = "minimal",
+            -- max_completion_tokens = 128,
+            reasoning_effort = "none",
           },
         },
         openai_fim_compatible = {
@@ -82,8 +81,8 @@ return {
     }
 
     local config                  = env_cascade({
-      { vars = { "GNARUS_ALLOW_VENDOR_LLM", "GEMINI_API_KEY" }, value = { "gemini", 3 } },
       { vars = { "GNARUS_ALLOW_VENDOR_LLM", "OPENAI_API_KEY" }, value = { "openai", 2 } },
+      { vars = { "GNARUS_ALLOW_VENDOR_LLM", "GEMINI_API_KEY" }, value = { "gemini", 3 } },
     }, { "openai_fim_compatible", 1 })
     local provider, n_completions = config[1], config[2]
     vim.notify(string.format("Minuet AI configured with provider: %s, completions: %s", provider, n_completions),
