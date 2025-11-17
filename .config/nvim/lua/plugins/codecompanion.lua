@@ -6,8 +6,8 @@ local chat_adapter_name = env_cascade({
 }, "ollama")
 
 local inline_adapter_name = env_cascade({
-  { vars = { "GNARUS_ALLOW_VENDOR_LLM", "GEMINI_API_KEY" }, value = "gemini_fast" },
   { vars = { "GNARUS_ALLOW_VENDOR_LLM", "OPENAI_API_KEY" }, value = "openai_fast" },
+  { vars = { "GNARUS_ALLOW_VENDOR_LLM", "GEMINI_API_KEY" }, value = "gemini_fast" },
 }, "ollama")
 
 local cmd_adapter_name = env_cascade({
@@ -420,17 +420,16 @@ return {
       -- gemini-2.5-flash
       adapters = {
         http = {
-          openai      = adapter_and_default_model("openai", "gpt-5", {
+          openai      = adapter_and_default_model("openai", "gpt-5.1", {
             opts = {
-              stream = false
+              stream = true
             },
             schema = {
               reasoning_effort = { default = "low" },
             },
           }),
-          openai_fast = adapter_and_default_model("openai", "gpt-4.1-mini", {
+          openai_fast = adapter_and_default_model("openai", "gpt-4.1", {
             schema = {
-              temperature      = { default = 0 },
               reasoning_effort = { default = "low" },
             },
           }),
