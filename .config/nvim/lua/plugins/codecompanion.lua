@@ -545,10 +545,8 @@ return {
 
             -- Summary system
             summary = {
-              -- Keymap to generate summary for current chat (default: "gcs")
-              create_summary_keymap = "gSc",
-              -- Keymap to browse summaries (default: "gbs")
-              browse_summaries_keymap = "gSb",
+              create_summary_keymap = "<leader>gsc",
+              browse_summaries_keymap = "<leader>gsb",
 
               generation_opts = {
                 adapter = nil,               -- defaults to current chat adapter
