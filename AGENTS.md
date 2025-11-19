@@ -1,22 +1,20 @@
-# Agent Guidelines for dotfiles Repository
-
-This repository primarily contains configuration files and scripts for various tools. When making changes, please adhere to the following guidelines:
-
-## 1. Build/Lint/Test Commands
-
-*   **General:** There are no universal build, lint, or test commands for this repository.
-*   **Specific Tools:** For individual configurations (e.g., Neovim, LeftWM, Eww), refer to their respective documentation or configuration files for any specific linting or testing procedures.
-*   **Shell Scripts:** Basic shell script linting can be performed using `shellcheck <script_name.sh>`.
-
-## 2. Code Style Guidelines
-
-*   **Imports/Includes:** Follow the existing patterns for importing or including files within each configuration type (e.g., Lua `require`, SCSS `@import`).
-*   **Formatting:** Maintain consistent indentation (tabs or spaces as per existing files), spacing, and line breaks.
-*   **Naming Conventions:** Adhere to the naming conventions already present in the specific configuration files (e.g., snake_case for Lua variables, kebab-case for CSS classes).
-*   **Error Handling:** For scripts, include basic error handling where appropriate (e.g., checking command success, handling file not found).
-*   **Comments:** Use comments sparingly to explain complex logic or non-obvious configurations.
-*   **File Specificity:** Each configuration file or script should be self-contained and focused on its specific purpose.
-
-## 3. Cursor/Copilot Rules
-
-No specific Cursor or Copilot rules were found in the repository. Agents should follow the general guidelines above.
+# Agent Guidelines for dotfiles
+- Scope: repo contains personal configs for Neovim, LeftWM, Eww, shell.
+- Build/Lint/Test
+  - No repo-wide build or test targets; validate by reloading target app.
+  - Neovim configs: run `nvim --clean -u .config/nvim/init.lua` to sanity check.
+  - Shell scripts: lint with `shellcheck path/to/script.sh`.
+  - Eww / LeftWM: reload via `leftwm-theme apply ignorant` then `eww reload`.
+  - Single-test workflow not applicable; rely on tool-specific reloads.
+- Code Style
+  - Lua: 2-space indent, snake_case locals, keep tables aligned.
+  - SCSS/Yuck: 2-space indent, kebab-case selectors, reuse shared variables.
+  - RON/JSON: preserve existing key order; keep existing trailing commas.
+  - Shell configs: prefer POSIX-compatible syntax unless file is explicitly zsh.
+  - Imports: group by tool domain; avoid unused requires/includes.
+  - Naming: descriptive snake_case in Lua, kebab-case in CSS, uppercase env vars.
+  - Error handling: guard external commands (`command || exit 1`) in scripts.
+  - Comments: only for non-obvious behavior or external dependencies.
+  - File scope: keep configs focused; add new files under matching tool directories.
+- Automation Rules
+  - No Cursor (.cursor, .cursorrules) or Copilot (.github/copilot-instructions.md) policies present.
