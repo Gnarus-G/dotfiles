@@ -1,13 +1,13 @@
 local env_cascade = require("gnarus.utils").env_var_cascade
 
 local chat_adapter_name = env_cascade({
-  { vars = { "GNARUS_ALLOW_VENDOR_LLM", "OPENAI_API_KEY" }, value = "openai", },
   { vars = { "GNARUS_ALLOW_VENDOR_LLM", "GEMINI_API_KEY" }, value = "gemini", },
+  { vars = { "GNARUS_ALLOW_VENDOR_LLM", "OPENAI_API_KEY" }, value = "openai", },
 }, "ollama")
 
 local inline_adapter_name = env_cascade({
-  { vars = { "GNARUS_ALLOW_VENDOR_LLM", "OPENAI_API_KEY" }, value = "openai_fast" },
   { vars = { "GNARUS_ALLOW_VENDOR_LLM", "GEMINI_API_KEY" }, value = "gemini_fast" },
+  { vars = { "GNARUS_ALLOW_VENDOR_LLM", "OPENAI_API_KEY" }, value = "openai_fast" },
 }, "ollama")
 
 local cmd_adapter_name = env_cascade({
@@ -412,12 +412,6 @@ return {
       opts = {
         log_level = "ERROR", -- TRACE|DEBUG|ERROR|INFO
       },
-      -- tier list:
-      -- gpt-5
-      -- gpt-4.1
-      -- gemini-2.5-pro - probaly too expensive to be worth it ever while gpt-4.1 is better and slightly cheaper
-      -- gpt-4.1-mini
-      -- gemini-2.5-flash
       adapters = {
         http = {
           openai      = adapter_and_default_model("openai", "gpt-5.1", {
@@ -428,9 +422,12 @@ return {
               reasoning_effort = { default = "low" },
             },
           }),
-          openai_fast = adapter_and_default_model("openai", "gpt-4.1", {
+          openai_fast = adapter_and_default_model("openai", "gpt-5.1", {
+            opts = {
+              stream = true
+            },
             schema = {
-              reasoning_effort = { default = "low" },
+              reasoning_effort = { default = "none" },
             },
           }),
           openai_high = adapter_and_default_model("openai", "gpt-5", {
@@ -441,17 +438,17 @@ return {
               reasoning_effort = { default = "high" },
             },
           }),
-          gemini      = adapter_and_default_model("gemini", "gemini-2.5-pro", {
+          gemini      = adapter_and_default_model("gemini", "gemini-3-pro-preview", {
             schema = {
               temperature = {
                 default = 0.3
               },
               reasoning_effort = {
-                default = "low"
+                default = "medium"
               }
             }
           }),
-          gemini_fast = adapter_and_default_model("gemini", "gemini-2.5-flash", {
+          gemini_fast = adapter_and_default_model("gemini", "gemini-3-pro-preview", {
             schema = {
               temperature = {
                 default = 0
