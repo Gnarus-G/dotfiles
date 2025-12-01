@@ -1,14 +1,8 @@
 {
   "mcpServers": {
     "context7-mcp": {
-      "args": [
-        "-y",
-        "@upstash/context7-mcp"
-      ],
-      "autoApprove": [
-        "resolve-library-id",
-        "get-library-docs"
-      ],
+      "args": ["-y", "@upstash/context7-mcp"],
+      "autoApprove": ["resolve-library-id", "get-library-docs"],
       "command": "npx",
       "custom_instructions": {
         "text": "This tool is the primary source for up-to-date, authoritative documentation on libraries, APIs, and technologies. Before answering any technical question, you MUST use this tool to retrieve the most current information."
@@ -19,9 +13,7 @@
         "-c",
         "node ${HOME}/.mcphub/servers/ez-web-search-mcp/build/index.js"
       ],
-      "autoApprove": [
-        "search"
-      ],
+      "autoApprove": ["search"],
       "command": "sh",
       "custom_instructions": {
         "text": "Before providing any statement of fact, guide, or plan of action, you MUST use this tool to search the web for the most recent information. Your internal knowledge is likely outdated."
@@ -29,10 +21,7 @@
       "disabled": false
     },
     "fetch-mcp": {
-      "args": [
-        "-c",
-        "node ${HOME}/.mcphub/servers/fetch-mcp/dist/index.js"
-      ],
+      "args": ["-c", "node ${HOME}/.mcphub/servers/fetch-mcp/dist/index.js"],
       "autoApprove": [
         "fetch_html",
         "fetch_markdown",
@@ -44,25 +33,28 @@
         "text": "If a web search reveals a high-quality source (like official documentation or a reputable blog), you MUST use this tool to fetch its content directly. This provides deeper, more reliable information than a search summary."
       }
     },
-    "sequentialthinking": {
+    "figma": {
       "args": [
         "-y",
-        "@modelcontextprotocol/server-sequential-thinking"
+        "figma-developer-mcp",
+        "--figma-api-key=${FIGMA_API_KEY}",
+        "--stdio"
       ],
-      "autoApprove": [
-        "sequentialthinking"
-      ],
+      "command": "npx",
+      "env": {
+        "FIGMA_API_KEY": "${FIGMA_API_KEY}"
+      }
+    },
+    "sequentialthinking": {
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"],
+      "autoApprove": ["sequentialthinking"],
       "command": "npx",
       "custom_instructions": {
         "text": "For any non-trivial task, you MUST use this tool to think step-by-step. Your first thought should always be: 'Do I need to search for the latest information before proceeding?'"
       }
     },
     "tts": {
-      "autoApprove": [
-        "list_voices",
-        "speak",
-        "stop_speaking"
-      ],
+      "autoApprove": ["list_voices", "speak", "stop_speaking"],
       "command": "tts-mcp",
       "custom_instructions": {
         "text": "When asked to read or speak, use this server and the `speak` tool."
@@ -94,14 +86,10 @@
         "text": "Consider these two points:\n- When provided a plugin's source code location, always attempt to search and read through it before answering anything.\n- Search inside the nvim://plugin/.. paths to find the source code (lua) files for any of our neovim plugins.\n- Enhance the user's prompt before answering it."
       },
       "disabled_prompts": [],
-      "disabled_tools": [
-        "add-enhanced-prompt"
-      ]
+      "disabled_tools": ["add-enhanced-prompt"]
     },
     "mcphub": {
-      "autoApprove": [
-        "get_current_servers"
-      ]
+      "autoApprove": ["get_current_servers"]
     },
     "neovim": {
       "autoApprove": [
