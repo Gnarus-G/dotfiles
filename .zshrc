@@ -78,9 +78,6 @@ source $ZSH/oh-my-zsh.sh
 
 # User configuration
 
-# Vim rempap jk to <Esc>
-bindkey -M viins 'jk' vi-cmd-mode
-
 # Show different cursors per mode
 VI_MODE_SET_CURSOR=true
 
@@ -143,3 +140,6 @@ eval $(opam env --switch=5.2.0)
 # END opam configuration
 
 [ ! -f "$HOME/.x-cmd.root/X" ] || . "$HOME/.x-cmd.root/X" # boot up x-cmd.
+
+# opencode
+export PATH=/home/ghislain/.opencode/bin:$PATH
