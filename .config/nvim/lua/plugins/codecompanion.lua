@@ -11,11 +11,6 @@ local inline_adapter_name = env_cascade({
   { vars = { "GNARUS_ALLOW_VENDOR_LLM", "OPENAI_API_KEY" }, value = "openai_fast" },
 }, "ollama")
 
-local cmd_adapter_name = env_cascade({
-  { vars = { "GNARUS_ALLOW_VENDOR_LLM", "GEMINI_API_KEY" }, value = "gemini_fast" },
-  { vars = { "GNARUS_ALLOW_VENDOR_LLM", "OPENAI_API_KEY" }, value = "openai_fast" },
-}, "ollama")
-
 ---@param adapter string
 ---@param model string
 ---@param extra_opts table?
@@ -389,9 +384,6 @@ return {
             },
           },
         },
-        cmd = {
-          adapter = cmd_adapter_name
-        }
       },
       display = {
         diff = {

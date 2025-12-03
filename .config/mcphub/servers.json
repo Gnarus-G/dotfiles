@@ -66,10 +66,6 @@
         "RUST_LOG": "debug",
         "XDG_RUNTIME_DIR": "/run/user/1000"
       }
-    },
-    "vectorcode-mcp-server": {
-      "args": [],
-      "command": "vectorcode-mcp-server"
     }
   },
   "nativeMCPServers": {
