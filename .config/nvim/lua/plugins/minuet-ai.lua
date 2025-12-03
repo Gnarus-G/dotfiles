@@ -15,7 +15,7 @@ return {
         enable_auto_complete = true,
       },
       virtualtext = {
-        auto_trigger_ft = { "python" },
+        auto_trigger_ft = { "python", "rust" },
         show_on_completion_menu = true,
         keymap = {
           accept = '<Tab>',
@@ -82,8 +82,8 @@ return {
     }
 
     local config                  = env_cascade({
-      { vars = { "GNARUS_ALLOW_VENDOR_LLM", "GEMINI_API_KEY" }, value = { "gemini", 3 } },
       { vars = { "GNARUS_ALLOW_VENDOR_LLM", "OPENAI_API_KEY" }, value = { "openai", 2 } },
+      { vars = { "GNARUS_ALLOW_VENDOR_LLM", "GEMINI_API_KEY" }, value = { "gemini", 3 } },
     }, { "openai_fim_compatible", 1 })
     local provider, n_completions = config[1], config[2]
     vim.notify(string.format("Minuet AI configured with provider: %s, completions: %s", provider, n_completions),
