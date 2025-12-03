@@ -51,26 +51,6 @@ local function add_prompts_and_resources(mcphub)
     end
   })
 
-  mcphub.add_prompt("gnarus", {
-    name = "use_functional_programming",
-    description = "This prompt provides a system-level instruction to enforce functional programming principles.",
-    handler = function(_, res)
-      local r, err = require("gnarus.utils").read_fp_guide_system_prompt_file()
-      if not r then
-        return res:error("Failed to read FP guide system prompt file", { error = err }):send()
-      end
-      local prompt, fp_guide_content = r[1], r[2]
-      res:system()
-          :text(prompt ..
-            "\nAll your responses must adhere strictly to the functional programming principles provided above. " ..
-            "Prioritize pure functions, immutability, and declarative transformations. Avoid side effects. " ..
-            "Ensure that any code examples provided are idiomatic Rust and demonstrate these principles clearly. " ..
-            "If I ask for something that contradicts FP principles, gently guide me back to the correct approach.")
-          :text("<guide>" .. fp_guide_content .. "</guide>")
-          :send()
-    end
-  })
-
   mcphub.add_resource("gnarus", {
     name = "working-files",
     description = "list of files not yet committed in current git repository, excluding untracked files.",
@@ -419,47 +399,6 @@ local function add_prompts_and_resources(mcphub)
       return res:system()
           :text("Consider this conversation that the user had with ChatGPT earlier.\n```\n" .. req.params.chat .. "\n```")
     end
-  })
-
-  mcphub.add_prompt("gnarus", {
-    name = "prompt-enhance",
-    description = "Enhance a prompt of the user to make it more effective",
-    arguments = {
-      {
-        name = "prompt",
-        description = "Prompt to be improved",
-        type = "string",
-        required = true,
-      },
-    },
-    handler = function(req, res)
-      return res:system()
-          :text(
-            "You are an expert prompt engineer who understands context and communication strategies. Improve the given prompt by making it more specific, clear, and actionable.")
-          :user()
-          :text("Enhance this prompt:\n" .. req.params.prompt .. "\n")
-    end
-  })
-
-  mcphub.add_tool("gnarus", {
-    name = "add-enhanced-prompt",
-    description =
-    "Add an enhanced version of the prompt of the user to make it more effective. Use this tool to add a prompt that is more amenable to an LLM.",
-    inputSchema = {
-      type = "object",
-      properties = {
-        enhanced_prompt = {
-          type = "string",
-          description = "Improved prompt",
-        },
-      },
-      required = { "enhanced_prompt" },
-    },
-    handler = function(req, res)
-      local params = req.params or {}
-      local prompt = params.enhanced_prompt
-      return res:text(prompt):send()
-    end,
   })
 
   mcphub.add_prompt("gnarus", {
