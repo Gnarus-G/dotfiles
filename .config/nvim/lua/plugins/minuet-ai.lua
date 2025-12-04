@@ -15,7 +15,7 @@ return {
         enable_auto_complete = true,
       },
       virtualtext = {
-        auto_trigger_ft = { "python", "rust" },
+        auto_trigger_ft = { "python" },
         show_on_completion_menu = true,
         keymap = {
           accept = '<Tab>',
