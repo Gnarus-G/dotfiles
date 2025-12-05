@@ -78,7 +78,10 @@ return {
         capabilities = lsp_capabilities,
         settings = {
           ['rust-analyzer'] = {
-            checkOnSave = true,
+            checkOnSave = {
+              command = "clippy",
+              extraArgs = { "--", "-D", "warnings" },
+            },
             rustfmt = {
               overrideCommand = { "rustfmt", "+nightly", "--edition", "2021" },
             }
@@ -101,7 +104,13 @@ return {
       })
 
       vim.diagnostic.config({
-        virtual_text = true,
+        virtual_text = {
+          severity = { min = vim.diagnostic.severity.WARN },
+        },
+        signs = true,
+        underline = true,
+        update_in_insert = false,
+        severity_sort = true,
       })
 
       vim.lsp.config("rstdls", {
