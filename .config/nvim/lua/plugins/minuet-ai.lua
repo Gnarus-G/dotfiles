@@ -69,11 +69,16 @@ return {
         },
         openai_fim_compatible = {
           name = "ollama",
-          model = 'qwen2.5-coder:3b',
+          model = 'qwen2.5-coder:3b', -- qwen3-coder:480b-cloud
+          chat_input = {
+            template = "{{{extra_context}}}\n" ..
+                minuet_config.default_chat_input_prefix_first.template,
+            extra_context = extra_context.get_formatted_context
+          },
           api_key = "TERM",
           end_point = ollama_api_base .. '/v1/completions',
           optional = {
-            max_tokens = 256,
+            -- max_tokens = 256,
             top_p = 0.9,
             stop = { '\n\n' },
           },
