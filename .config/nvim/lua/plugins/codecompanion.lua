@@ -452,7 +452,7 @@ return {
             }
           }),
           claude      = adapter_and_default_model("anthropic", "claude-sonnet-4-20250514"),
-          ollama      = adapter_and_default_model("ollama", "qwen3", {
+          ollama      = adapter_and_default_model("ollama", "gpt-oss:latest", {
             env = {
               url = os.getenv("OLLAMA_API_BASE") or "http://localhost:11434"
             },
