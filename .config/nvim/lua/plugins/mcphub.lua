@@ -215,6 +215,79 @@ local function add_prompts_and_resources(mcphub)
     end,
   })
 
+  mcphub.add_tool("gnarus", {
+    name = "shotgun",
+    description = "Take a screenshot of the current monitor screen or specific area/window.",
+    inputSchema = {
+      type = "object",
+      properties = {
+        output_file = {
+          type = "string",
+          description = "Output file path for the screenshot"
+        },
+        single_screen = {
+          type = "boolean",
+          description = "Capture only the screen determined by the cursor location"
+        },
+        geometry = {
+          type = "string",
+          description = "Area to capture in WxH+X+Y format (e.g., 800x600+100+100)"
+        },
+        window_id = {
+          type = "string",
+          description = "Window ID to capture"
+        },
+        format = {
+          type = "string",
+          enum = { "png", "pam" },
+          description = "Output format (default: png)"
+        }
+      },
+      required = { "output_file" }
+    },
+    handler = function(req, res)
+      local params = req.params or {}
+      local output_file = params.output_file
+      local single_screen = params.single_screen
+      local geometry = params.geometry
+      local window_id = params.window_id
+      local format = params.format
+
+      -- Build command with options
+      local cmd_parts = { "shotgun" }
+
+      if single_screen then
+        table.insert(cmd_parts, "-s")
+      end
+
+      if geometry then
+        table.insert(cmd_parts, "-g")
+        table.insert(cmd_parts, geometry)
+      end
+
+      if window_id then
+        table.insert(cmd_parts, "-i")
+        table.insert(cmd_parts, window_id)
+      end
+
+      if format then
+        table.insert(cmd_parts, "-f")
+        table.insert(cmd_parts, format)
+      end
+
+      table.insert(cmd_parts, output_file)
+
+      local cmd = table.concat(cmd_parts, " ")
+      local ok, output = pcall(vim.fn.system, cmd)
+
+      if not ok or vim.v.shell_error ~= 0 then
+        return res:error("Failed to take screenshot", { error = output, code = vim.v.shell_error })
+      end
+
+      res:text("Screenshot saved to " .. output_file):send()
+    end
+  })
+
   mcphub.add_tool("gnarus",
     {
       name = "todolist_add",

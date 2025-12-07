@@ -142,4 +142,4 @@ eval $(opam env --switch=5.2.0)
 [ ! -f "$HOME/.x-cmd.root/X" ] || . "$HOME/.x-cmd.root/X" # boot up x-cmd.
 
 # opencode
-export PATH=/home/ghislain/.opencode/bin:$PATH
+export PATH=$HOME/.opencode/bin:$PATH
