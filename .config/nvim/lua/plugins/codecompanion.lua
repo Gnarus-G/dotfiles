@@ -188,8 +188,8 @@ return {
         opts = {
           chat = {
             enabled = true,
-            default_memory = { "default", "gnarus" },
-            default_params = "watch", -- watch|pin when adding buffers from memory
+            default_rules = { "default", "gnarus" },
+            default_params = "all", -- all|diff when adding buffers from memory
           },
         },
         gnarus = {
@@ -363,13 +363,7 @@ return {
               },
             }
           },
-          variables = {
-            ["buffer"] = {
-              opts = {
-                default_params = 'watch', -- or 'watch'
-              },
-            },
-          },
+          variables = {},
         },
         inline = {
           adapter = inline_adapter_name,
