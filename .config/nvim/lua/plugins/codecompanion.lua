@@ -184,7 +184,7 @@ return {
   },
   config = function()
     local opts = {
-      memory = {
+      rules = {
         opts = {
           chat = {
             enabled = true,
@@ -199,7 +199,7 @@ return {
           },
         },
       },
-      strategies = {
+      interactions = {
         chat = {
           adapter = chat_adapter_name,
           roles = {
@@ -210,7 +210,7 @@ return {
           tools = {
             ["insert_edit_into_file"] = {
               opts = {
-                requires_approval = false,
+                require_approval_before = false,
               },
             },
             groups = {
