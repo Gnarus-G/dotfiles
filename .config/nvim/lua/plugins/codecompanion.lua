@@ -386,7 +386,12 @@ return {
           opts = { "internal", "filler", "closeoff", "algorithm:patience", "followwrap", "linematch:120" },
           provider = "inline", -- default|mini_diff|inline
         },
-        chat = { window = { position = "right" }, show_settings = false }
+        chat = { window = { position = "right" }, show_settings = false },
+        action_palette = {
+          opts = {
+            show_preset_prompts = false,
+          },
+        },
       },
       prompt_library = {
         ["Generate a Commit Message"] = {
