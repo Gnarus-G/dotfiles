@@ -1,7 +1,7 @@
 local env_cascade = require("gnarus.utils").env_var_cascade
 
 local chat_adapter_name = env_cascade({
-  { vars = { "GNARUS_ALLOW_VENDOR_LLM", "GEMINI_API_KEY" }, value = "gemini_fast", },
+  { vars = { "GNARUS_ALLOW_VENDOR_LLM", "GEMINI_API_KEY" }, value = "gemini", },
   { vars = { "GNARUS_ALLOW_VENDOR_LLM", "OPENAI_API_KEY" }, value = "openai", },
 }, "ollama")
 
@@ -429,7 +429,7 @@ return {
               reasoning_effort = { default = "high" },
             },
           }),
-          gemini      = adapter_and_default_model("gemini", "gemini-3-pro-preview", {
+          gemini      = adapter_and_default_model("gemini", "gemini-3-flash-preview", {
             schema = {
               temperature = {
                 default = 0.3
@@ -445,7 +445,7 @@ return {
                 default = 0
               },
               reasoning_effort = {
-                default = "low"
+                default = "minimal"
               }
             }
           }),
