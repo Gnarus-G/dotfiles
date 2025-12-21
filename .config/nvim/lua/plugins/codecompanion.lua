@@ -445,7 +445,7 @@ return {
                 default = 0
               },
               reasoning_effort = {
-                default = "minimal"
+                default = "none"
               }
             }
           }),
