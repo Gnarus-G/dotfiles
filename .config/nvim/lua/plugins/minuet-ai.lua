@@ -69,7 +69,7 @@ return {
         },
         openai_fim_compatible = {
           name = "ollama",
-          model = 'qwen2.5-coder:3b', -- qwen3-coder:480b-cloud
+          model = 'qwen2.5-coder:32b-base-q2_K', -- qwen3-coder:480b-cloud
           chat_input = {
             template = "{{{extra_context}}}\n" ..
                 minuet_config.default_chat_input_prefix_first.template,
