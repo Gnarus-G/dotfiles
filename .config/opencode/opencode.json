@@ -12,8 +12,7 @@
       "models": {
         "qwen3:latest": {},
         "gpt-oss:latest": {},
-        "nemotron-3-nano": {},
-        "functiongemma": {}
+        "nemotron-3-nano": {}
       }
     }
   },
