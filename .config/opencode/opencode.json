@@ -10,7 +10,11 @@
         "baseURL": "http://localhost:11434/v1"
       },
       "models": {
-        "qwen3": {}
+        "qwen3:latest": {},
+        "qwen2.5:14b": {},
+        "qwen3:14b": {},
+        "himither:latest": {},
+        "llama3.2-vision:latest": {}
       }
     }
   },

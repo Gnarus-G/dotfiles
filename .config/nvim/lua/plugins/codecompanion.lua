@@ -509,9 +509,9 @@ return {
             auto_generate_title = true,
             title_generation_opts = {
               ---Adapter for generating titles (defaults to current chat adapter)
-              adapter = "gemini",          -- "copilot"
+              adapter = "ollama",          -- "copilot"
               ---Model for generating titles (defaults to current chat model)
-              model = "gemini-2.5-flash",  -- "gpt-4o"
+              model = "gpt-oss:latest",    -- "gpt-4o"
               ---Number of user prompts after which to refresh the title (0 to disable)
               refresh_every_n_prompts = 1, -- e.g., 3 to refresh after every 3rd user prompt
               ---Maximum number of times to refresh the title (default: 3)
