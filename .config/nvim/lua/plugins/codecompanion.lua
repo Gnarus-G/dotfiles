@@ -187,8 +187,7 @@ return {
         opts = {
           chat = {
             enabled = true,
-            default_rules = { "default", "gnarus" },
-            default_params = "all", -- all|diff when adding buffers from memory
+            autoload = { "default", "gnarus" }
           },
         },
         gnarus = {
@@ -509,9 +508,9 @@ return {
             auto_generate_title = true,
             title_generation_opts = {
               ---Adapter for generating titles (defaults to current chat adapter)
-              adapter = "ollama",
+              adapter = inline_adapter_name,
               ---Model for generating titles (defaults to current chat model)
-              model = "qwen3:1.7b",
+              -- model = "qwen3",
               ---Number of user prompts after which to refresh the title (0 to disable)
               refresh_every_n_prompts = 1, -- e.g., 3 to refresh after every 3rd user prompt
               ---Maximum number of times to refresh the title (default: 3)
