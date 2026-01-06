@@ -434,7 +434,7 @@ return {
                 default = 0.3
               },
               reasoning_effort = {
-                default = "medium"
+                default = "low"
               }
             }
           }),
