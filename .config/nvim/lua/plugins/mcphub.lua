@@ -348,6 +348,10 @@ local function add_prompts_and_resources(mcphub)
     {
       name = "todolist_view",
       description = "View items in the user's personal todolist",
+      inputSchema = {
+        type = "object",
+        properties = {},
+      },
       handler = function(_, res)
         local output = vim.fn.system({ "todo", "dump" })
 
