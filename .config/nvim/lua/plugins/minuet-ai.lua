@@ -27,11 +27,10 @@ return {
         },
       },
       -- Increase timeout slightly since non-streamed responses arrive in one chunk
-      request_timeout = 5,
+      request_timeout = 10,
       provider_options = {
         claude = {
-          max_tokens = 512,
-          model = 'claude-3-5-haiku-20241022',
+          model = 'claude-haiku-4-5',
           chat_input = {
             template = "{{{extra_context}}}\n" ..
                 minuet_config.default_chat_input_prefix_first.template,
