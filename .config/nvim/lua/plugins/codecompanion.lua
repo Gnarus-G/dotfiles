@@ -7,7 +7,7 @@ local chat_adapter_name = env_cascade({
 
 local inline_adapter_name = env_cascade({
   { vars = { "GNARUS_ALLOW_VENDOR_LLM", "GEMINI_API_KEY" }, value = "gemini_fast" },
-  { vars = { "GNARUS_ALLOW_VENDOR_LLM", "OPENAI_API_KEY" }, value = "openai_fast" },
+  { vars = { "GNARUS_ALLOW_VENDOR_LLM", "OPENAI_API_KEY" }, value = "openai" },
 }, "ollama")
 
 ---@param adapter string
@@ -412,14 +412,6 @@ return {
               reasoning_effort = { default = "low" },
             },
           }),
-          openai_fast = adapter_and_default_model("openai", "gpt-5.1", {
-            opts = {
-              stream = true
-            },
-            schema = {
-              reasoning_effort = { default = "none" },
-            },
-          }),
           openai_high = adapter_and_default_model("openai", "gpt-5", {
             opts = {
               stream = false
@@ -448,7 +440,8 @@ return {
               }
             }
           }),
-          claude      = adapter_and_default_model("anthropic", "claude-sonnet-4-20250514"),
+          claude      = adapter_and_default_model("anthropic", "claude-opus-4-5"),
+          claude_fast = adapter_and_default_model("anthropic", "claude-haiku-4-5"),
           ollama      = adapter_and_default_model("ollama", "gpt-oss:latest", {
             env = {
               url = os.getenv("OLLAMA_API_BASE") or "http://localhost:11434"
