@@ -1,24 +1,27 @@
-All code generated must follow these FP principles, regardless of the language. Even in impure or imperative languages (like Python or C), simulate FP idioms using pure functions, effect wrappers, and separation of concerns.
+All code generated must follow these FP principles, regardless of language. Even in impure or imperative languages (Python, C, Rust, Lua), simulate FP idioms using pure functions, effect wrappers, and separation of concerns.
 
 ---
 
-## 📓 Core Guidelines
+## Core Guidelines
 
-### 1. ✅ Pure Functions Only
+### 1. Pure Functions Only
 
-All functions must:
-
-- Depend only on their input
-- Not mutate shared state
-- Not perform I/O or system calls
-
-#### Examples:
+All functions depend only on their input, never mutate shared state, never perform I/O.
 
 **Python**
 
 ```python
-def calculate_discount(price, rate):
-    return price * (1 - rate)
+from typing import Any
+
+# Good
+def add(a: int, b: int) -> int:
+    return a + b
+
+# Bad - hidden dependency
+total: int = 0
+def add_to_total(x: int) -> None:
+    global total  # type: ignore
+    total += x
 ```
 
 **C**
@@ -47,20 +50,23 @@ end
 
 ---
 
-### 2. 🚫 Isolate Side Effects
+### 2. Isolate Side Effects
 
-All I/O, randomness, DB access, system calls, etc. must be **moved to a separate layer** or **wrapped**.
-
-#### Examples:
+I/O, randomness, DB access, and system calls must be in a separate layer, not mixed with logic.
 
 **Python**
 
 ```python
-def greet(user):
-    return f"Hi, {user['name']}"
+from decimal import Decimal
 
-user = json.load(open('user.json'))
-print(greet(user))
+# Good - pure logic
+def format_price(price: Decimal) -> str:
+    return f"${price:.2f}"
+
+# Bad - mixed concerns
+def get_and_format_price(item_id: int) -> str:
+    price: Decimal = db.query(item_id)  # type: ignore[name-defined]
+    return format_price(price)
 ```
 
 **C**
@@ -99,20 +105,33 @@ print(greet(user))
 
 ---
 
-### 3. 🧱 Functional Core, Imperative Shell
+### 3. Functional Core, Imperative Shell
 
-Write business logic as a **pure functional core**. Only outer layers may perform effects.
-
-#### Examples:
+Write business logic as pure functions. Only outer layers perform effects.
 
 **Python**
 
 ```python
-def compute_total(items):
-    return sum(i['price'] * 0.9 for i in items)
+from decimal import Decimal
+from typing import Iterable
 
-items = get_items_from_api()
-print(compute_total(items))
+# Core (pure)
+def compute_discount(price: Decimal, rate: float) -> Decimal:
+    return price * Decimal(1 - rate)
+
+# Shell (effects)
+Item = dict[str, Any]
+
+def fetch_items() -> Iterable[Item]:
+    ...
+
+def save_total(total: Decimal) -> None:
+    ...
+
+items: list[Item] = list(fetch_items())
+subtotal: Decimal = sum(Decimal(item["price"]) for item in items)
+total: Decimal = compute_discount(subtotal, 0.1)
+save_total(total)
 ```
 
 **C**
@@ -142,18 +161,16 @@ local function compute_total(items)
   local sum = 0
   for _, item in ipairs(items) do
     sum = sum + (item.price * 0.9)
-end
+  end
   return sum
 end
 ```
 
 ---
 
-### 4. 🌀 Use Monads or Monadic Equivalents for Effects and Errors
+### 4. Monadic Error Handling
 
-Use `Option`, `Result`, or simulate `Maybe`, `Try`, etc., to handle failure/optionality. Prefer `map` and `and_then` for chaining.
-
-#### Examples:
+Use `Result`/`Option` to handle failure/optionality. Avoid exceptions for control flow.
 
 **Python**
 
@@ -161,34 +178,30 @@ Use `Option`, `Result`, or simulate `Maybe`, `Try`, etc., to handle failure/opti
 from dataclasses import dataclass
 from typing import Generic, TypeVar
 
-T = TypeVar('T')
-E = TypeVar('E')
-
-# Result as Algebraic Data Type (ADT)
-@dataclass
-class Result(Generic[T, E]):
-    """Base Result type - never instantiate directly"""
-    pass
+T = TypeVar("T")
+E = TypeVar("E", bound=str)
 
 @dataclass
-class Ok(Result[T, E]):
+class Ok(Generic[T, E]):
     value: T
 
 @dataclass
-class Err(Result[T, E]):
+class Err(Generic[T, E]):
     error: E
 
-# Usage with pattern matching (Python 3.10+)
-def get_user(uid) -> Result[dict, str]:
+Result = Ok[T, E] | Err[T, E]
+
+def fetch_user(id: int) -> Result[dict[str, Any], str]:
     try:
-        return Ok(fetch_user(uid))
+        user: dict[str, Any] = db.get(id)  # type: ignore[attr-defined,name-defined]
+        return Ok(user)
     except Exception as e:
         return Err(str(e))
 
-def render_user(user):
-    match user:
-        case Ok(value): return f"Success: {value}"
-        case Err(error): return f"Error: {error}"
+# Usage
+match fetch_user(123):
+    case Ok(u): print(f"Found: {u['name']}")
+    case Err(e): print(f"Error: {e}")
 ```
 
 **C**
@@ -218,7 +231,7 @@ fn get_user(id: i32) -> Result<User, String> {
 **Lua**
 
 ```lua
--- Lua idiomatic: return explicit table or value, error pair
+-- Lua idiomatic: return explicit table or error pair
 local function get_user(id)
   local user = db.fetch_user(id)
   if user then
@@ -231,18 +244,18 @@ end
 
 ---
 
-### 5. 🗬️ Concurrency Must Be Composable
+### 5. Composable Concurrency
 
-Use pure wrappers like `async`, `Task`, `Future`, or abstracted control flow to model concurrency. Avoid raw threading APIs unless abstracted.
-
-#### Examples:
+Use `async`/`Task`/`Future` wrappers. Avoid raw threading.
 
 **Python**
 
 ```python
-async def process(user_id):
-    user = await fetch_user(user_id)
-    return compute_result(user)
+from typing import Iterable
+
+async def process_batch(user_ids: Iterable[int]) -> list[int]:
+    users: list[dict[str, Any]] = [await fetch_user(uid) for uid in user_ids]
+    return [compute_score(u) for u in users]
 ```
 
 **C**
@@ -263,34 +276,32 @@ async fn process_user(id: u32) -> Result<(), Error> {
 
 ---
 
-### 6. 🎭 Actor Model
+### 6. Actor Model
 
-Actors encapsulate **mutable state** and **message processing** in a controlled manner. They solve concurrency by ensuring:
+Encapsulate mutable state and message processing. No shared state between actors.
 
-- No shared state between actors
-- Messages are processed sequentially
-- State mutation only happens in response to messages
-
-#### Python: Generic Actor
+**Python**
 
 ```python
+import asyncio
 from __future__ import annotations
-from asyncio import Task, create_task
+from abc import abstractmethod
+from asyncio import Task
 from dataclasses import dataclass
 from typing import Generic, TypeVar, Any
 
 MessageT = TypeVar("MessageT")
 
-class Actor(Generic[MessageT]):
+class ActorBase(Generic[MessageT]):
     def __init__(self) -> None:
         self._mailbox: list[MessageT] = []
-        self._task: Task[Any] | None = None
+        self._task: Task[None] | None = None
 
     def send(self, msg: MessageT) -> None:
         self._mailbox.append(msg)
 
     def start(self) -> None:
-        self._task = create_task(self._run())
+        self._task = asyncio.create_task(self._run())
 
     def stop(self) -> None:
         if self._task:
@@ -298,14 +309,13 @@ class Actor(Generic[MessageT]):
             self._task = None
 
     async def _run(self) -> None:
-        while True:
-            msg = self._mailbox.pop(0)
+        while self._mailbox:
+            msg: MessageT = self._mailbox.pop(0)
             self.handle(msg)
 
+    @abstractmethod
     def handle(self, msg: MessageT) -> None:
-        error("subclasses must implement handle(msg)")
-
-# --- Concrete Counter Actor ---
+        raise NotImplementedError
 
 @dataclass
 class Increment:
@@ -315,33 +325,32 @@ class Increment:
 class Decrement:
     amount: int = 1
 
-class Counter(Actor[Increment | Decrement]):
-    _state: int = 0
+Message = Increment | Decrement
 
-    def handle(self, msg: Increment | Decrement) -> None:
+class Counter(ActorBase[Message]):
+    def __init__(self) -> None:
+        super().__init__()
+        self._state: int = 0
+
+    def handle(self, msg: Message) -> None:
         match msg:
-            case Increment(amount):
-                self._state += amount
-            case Decrement(amount):
-                self._state -= amount
+            case Increment(a): self._state += a
+            case Decrement(a): self._state -= a
 
-# --- Usage ---
+# Usage
+async def main() -> None:
+    counter: Counter = Counter()
+    counter.start()
+    counter.send(Increment(5))
+    await asyncio.sleep(0)
+    print(counter._state)  # 5
+    counter.stop()
 
-counter = Counter()
-counter.start()
-
-counter.send(Increment(5))
-counter.send(Decrement(2))
-counter.send(Increment(3))
-
-import asyncio
-await asyncio.sleep(0)
-
-print(counter._state)  # Output: 6
-counter.stop()
+if __name__ == "__main__":
+    asyncio.run(main())
 ```
 
-#### TypeScript: Generic Actor
+**TypeScript**
 
 ```typescript
 abstract class Actor<Msg> {
@@ -373,8 +382,7 @@ abstract class Actor<Msg> {
   }
 }
 
-// --- Concrete Counter Actor ---
-
+// Concrete Counter Actor
 type Increment = { type: "increment"; amount: number };
 type Decrement = { type: "decrement"; amount: number };
 
@@ -393,20 +401,82 @@ class Counter extends Actor<Increment | Decrement> {
   }
 }
 
-// --- Usage ---
-
+// Usage
 const counter = new Counter();
 counter.start();
-
 counter.send({ type: "increment", amount: 5 });
-counter.send({ type: "decrement", amount: 2 });
-counter.send({ type: "increment", amount: 3 });
-
-console.log(counter.state); // Output: 6
+console.log(counter.state);
 counter.stop();
 ```
 
-#### Lua: Generic Actor Class
+**Rust**
+
+```rust
+use std::collections::VecDeque;
+use std::sync::mpsc;
+use std::thread;
+use std::time::Duration;
+
+trait Actor<Message> {
+    fn handle(&mut self, msg: Message);
+    fn start(&mut self);
+    fn stop(&mut self);
+}
+
+struct Counter {
+    state: i32,
+    receiver: mpsc::Receiver<CounterMsg>,
+    running: bool,
+}
+
+enum CounterMsg {
+    Increment(i32),
+    Decrement(i32),
+}
+
+impl Actor<CounterMsg> for Counter {
+    fn handle(&mut self, msg: CounterMsg) {
+        match msg {
+            CounterMsg::Increment(amount) => self.state += amount,
+            CounterMsg::Decrement(amount) => self.state -= amount,
+        }
+    }
+
+    fn start(&mut self) {
+        self.running = true;
+        while self.running {
+            if let Ok(msg) = self.receiver.recv_timeout(Duration::from_millis(10)) {
+                self.handle(msg);
+            }
+        }
+    }
+
+    fn stop(&mut self) {
+        self.running = false;
+    }
+}
+
+fn main() {
+    let (sender, receiver) = mpsc::channel();
+    let mut counter = Counter { state: 0, receiver, running: false };
+
+    let handle = thread::spawn(move || {
+        counter.start();
+    });
+
+    sender.send(CounterMsg::Increment(5)).unwrap();
+    thread::sleep(Duration::from_millis(50));
+    sender.send(CounterMsg::Decrement(2)).unwrap();
+    thread::sleep(Duration::from_millis(50));
+
+    counter.stop();
+    handle.join().unwrap();
+
+    println!("Counter state: {}", counter.state);
+}
+```
+
+**Lua**
 
 ```lua
 local Actor = {}
@@ -445,8 +515,7 @@ function Actor:_run()
   end
 end
 
--- --- Concrete Counter Actor ---
-
+-- Concrete Counter Actor
 local Counter = setmetatable({}, { __index = Actor })
 Counter.__index = Counter
 
@@ -465,506 +534,28 @@ function Counter:handle(msg)
   end
 end
 
--- --- Usage ---
-
+-- Usage
 local counter = Counter.new()
 counter:start()
-
 counter:send({ type = "increment", amount = 5 })
-counter:send({ type = "decrement", amount = 2 })
-counter:send({ type = "increment", amount = 3 })
-
-print(counter._state)  -- Output: 6
+print(counter._state)
 counter:stop()
 ```
 
 ---
 
-### 7. 🗄️ Resource Management in Actor Systems
+## Quick Reference
 
-Actors naturally encapsulate resources. Resources are **acquired on first use** and **released when the actor stops**.
+**Do:**
 
-#### Core Patterns
+- Write pure, deterministic functions
+- Model effects explicitly (`Result`, `Option`)
+- Keep side effects at boundaries
+- Encapsulate concurrency with actors/wrappers
 
-1. **Scoped ownership**: Each actor owns its resources exclusively
-2. **Lazy acquisition**: Open files, connections, or handles only when needed
-3. **Deterministic cleanup**: Resources released in `stop()`
+**Don't:**
 
-#### Python: File-Handling Actor
-
-```python
-from __future__ import annotations
-from abc import ABC, abstractmethod
-from asyncio import Task, create_task
-from dataclasses import dataclass
-from typing import Generic, TypeVar, IO
-import asyncio
-
-MessageT = TypeVar("MessageT")
-
-class Actor(ABC, Generic[MessageT]):
-    def __init__(self) -> None:
-        self._mailbox: list[MessageT] = []
-        self._task: Task[None] | None = None
-
-    def send(self, msg: MessageT) -> None:
-        self._mailbox.append(msg)
-
-    def start(self) -> None:
-        self._task = create_task(self._run())
-
-    def stop(self) -> None:
-        self._cleanup()
-        if self._task:
-            self._task.cancel()
-            self._task = None
-
-    async def _run(self) -> None:
-        while True:
-            msg = self._mailbox.pop(0)
-            await self.handle(msg)
-
-    @abstractmethod
-    async def handle(self, msg: MessageT) -> None:
-        ...
-
-    def _cleanup(self) -> None:
-        """Override in subclasses to release resources."""
-        pass
-
-# --- Concrete File Writer Actor ---
-
-@dataclass
-class WriteLine:
-    line: str
-
-class FileWriter(Actor[WriteLine]):
-    def __init__(self, path: str) -> None:
-        super().__init__()
-        self._path = path
-        self._handle: IO[str] | None = None
-
-    async def handle(self, msg: WriteLine) -> None:
-        if self._handle is None:
-            self._handle = open(self._path, "a")
-        self._handle.write(msg.line + "\n")
-
-    def _cleanup(self) -> None:
-        if self._handle:
-            self._handle.close()
-            self._handle = None
-
-# --- Usage ---
-
-async def main() -> None:
-    writer = FileWriter("/tmp/log.txt")
-    writer.start()
-
-    writer.send(WriteLine("first line"))
-    writer.send(WriteLine("second line"))
-
-    await asyncio.sleep(0.1)  # Let writes complete
-    writer.stop()
-
-asyncio.run(main())
-```
-
-#### TypeScript: Resource Actor
-
-```typescript
-abstract class Actor<Msg> {
-  protected mailbox: Msg[] = [];
-  private task: ReturnType<typeof setInterval> | null = null;
-  private running = false;
-
-  abstract handle(msg: Msg): void;
-  abstract cleanup(): void;
-
-  send(msg: Msg): void {
-    this.mailbox.push(msg);
-  }
-
-  start(): void {
-    if (!this.running) {
-      this.running = true;
-      this.task = setInterval(() => this._run(), 0);
-    }
-  }
-
-  stop(): void {
-    this.running = false;
-    if (this.task) {
-      clearInterval(this.task);
-      this.task = null;
-    }
-    this.cleanup();
-  }
-
-  private _run(): void {
-    while (this.mailbox.length > 0) {
-      const msg = this.mailbox.shift()!;
-      this.handle(msg);
-    }
-  }
-}
-
-// --- Concrete File Actor ---
-
-type WriteRequest = { type: "write"; content: string };
-type CloseRequest = { type: "close" };
-type FileMsg = WriteRequest | CloseRequest;
-
-class FileActor extends Actor<FileMsg> {
-  private handle: FileSystemFileHandle | null = null;
-  private file: FileSystemWritableFileStream | null = null;
-  private path: string;
-
-  constructor(path: string) {
-    super();
-    this.path = path;
-  }
-
-  async handle(msg: FileMsg): Promise<void> {
-    switch (msg.type) {
-      case "write":
-        if (!this.file) {
-          this.handle = await navigator.storage.getFileHandle(this.path, {
-            create: true,
-          });
-          this.file = await this.handle.createWritable();
-        }
-        await this.file.write(msg.content);
-        break;
-      case "close":
-        if (this.file) {
-          await this.file.close();
-          this.file = null;
-        }
-        break;
-    }
-  }
-
-  cleanup(): void {
-    this.file?.close();
-    this.file = null;
-  }
-}
-
-// --- Usage ---
-
-const actor = new FileActor("notes.txt");
-actor.start();
-
-actor.send({ type: "write", content: "hello" });
-actor.send({ type: "write", content: "world" });
-
-setTimeout(() => {
-  actor.send({ type: "close" });
-  actor.stop();
-}, 100);
-```
-
-#### Lua: Resource Actor
-
-```lua
-local Actor = {}
-Actor.__index = Actor
-
-function Actor.new()
-  local self = setmetatable({}, Actor)
-  self._mailbox = {}
-  self._running = false
-  return self
-end
-
-function Actor:handle(msg)
-  error("subclasses must implement handle(msg)")
-end
-
-function Actor:send(msg)
-  table.insert(self._mailbox, msg)
-end
-
-function Actor:start()
-  if not self._running then
-    self._running = true
-    -- In a real implementation, run in a coroutine
-    self:_run()
-  end
-end
-
-function Actor:stop()
-  self._running = false
-  self:_cleanup()
-end
-
-function Actor:_run()
-  while self._running and #self._mailbox > 0 do
-    local msg = table.remove(self._mailbox, 1)
-    self:handle(msg)
-  end
-end
-
-function Actor:_cleanup()
-  -- Override in subclasses
-end
-
--- --- Concrete File Actor ---
-
-local FileActor = setmetatable({}, { __index = Actor })
-FileActor.__index = FileActor
-
-function FileActor.new(path)
-  local self = Actor.new()
-  self._path = path
-  self._handle = nil
-  setmetatable(self, FileActor)
-  return self
-end
-
-function FileActor:handle(msg)
-  if msg.type == "write" then
-    if not self._handle then
-      self._handle = io.open(self._path, "a")
-    end
-    self._handle:write(msg.content)
-    self._handle:write("\n")
-  elseif msg.type == "close" then
-    self:_cleanup()
-  end
-end
-
-function FileActor:_cleanup()
-  if self._handle then
-    self._handle:close()
-    self._handle = nil
-  end
-end
-
--- --- Usage ---
-
-local actor = FileActor.new("/tmp/data.txt")
-actor:start()
-
-actor:send({ type = "write", content = "first" })
-actor:send({ type = "write", content = "second" })
-
-actor:send({ type = "close" })
-actor:stop()
-```
-
----
-
-### ⚠️ Avoid:
-
-- Shared mutable state
-- Mixing I/O with computation
-- Control flow without pattern matching
-- `isinstance` checks — use pattern matching instead
-- Implicit null/error handling
-- Framework-specific side-effect helpers unless explicitly wrapped
-
----
-
-## 📌 Summary
-
-All generated code must:
-
-- Be built from **pure, deterministic functions**
-- Model effects explicitly using `Result`, `Option`, or effect descriptions
-- Keep side effects at the **boundaries** (I/O, DB, network)
-- Encapsulate concurrency with **effect wrappers** or **actors**
-- Use a **custom actor trait** in Rust — never external actor frameworks
-
---
-
-# Advanced Examples
-
-## Python program
-
-Of course. This is an excellent way to frame the information. Here are the functional programming guidelines structured as a "Don't / Do" guide, using the evolution of our script as the primary example. This is designed to be a clear directive for an LLM on how to produce high-quality, functional code.
-
----
-
-### Guidelines for Producing High-Quality, Functional Python Code
-
-The goal is to write code that is robust, testable, and maintainable. This is achieved by separating logic from actions and making data flow explicit.
-
----
-
-### 1. Separating Logic from Actions (Side Effects)
-
-#### **Don't: Mix logic and side effects in one function.**
-
-A single function should not be responsible for fetching data, transforming it, and then printing it. This creates a monolithic block that is impossible to test and difficult to reuse.
-
-```python
-# DON'T DO THIS
-def get_and_print_user_summary(user_id: str):
-    # Side Effect: Network I/O
-    response = requests.post("https://api.example.com/info", json={"user": user_id})
-    if response.status_code != 200:
-        # Side Effect: Console I/O
-        print("Error fetching data")
-        return
-
-    # Logic: Data Transformation
-    raw_data = response.json()
-    name = raw_data['name'].upper()
-    is_active = "Active" if raw_data['status'] == 1 else "Inactive"
-
-    # Side Effect: Console I/O
-    print(f"User Summary for {user_id}:")
-    print(f"  Name: {name}")
-    print(f"  Status: {is_active}")
-```
-
-#### **Do: Separate pure logic into a "Functional Core" and side effects into an "Imperative Shell."**
-
-The core logic should only consist of pure functions that transform data. The shell handles all interaction with the outside world (network, console, etc.).
-
-```python
-# DO THIS INSTEAD
-
-# --- Functional Core (Pure, Testable Logic) ---
-def process_user_data(raw_data: dict) -> dict:
-    return {
-        "name": raw_data['name'].upper(),
-        "status": "Active" if raw_data['status'] == 1 else "Inactive"
-    }
-
-# --- Imperative Shell (Handles Side Effects) ---
-def fetch_user_data(user_id: str) -> dict:
-    response = requests.post("https://api.example.com/info", json={"user": user_id})
-    response.raise_for_status()
-    return response.json()
-
-def display_summary(user_id: str, summary: dict):
-    print(f"User Summary for {user_id}:")
-    print(f"  Name: {summary['name']}")
-    print(f"  Status: {summary['status']}")
-
-# The shell orchestrates the pure functions
-def main_workflow(user_id: str):
-    raw_data = fetch_user_data(user_id)
-    summary_data = process_user_data(raw_data)
-    display_summary(user_id, summary_data)
-```
-
----
-
-### 2. Handling Errors as Data
-
-#### **Don't: Use exceptions for control flow.**
-
-`try...except` blocks are themselves a form of side effect that breaks the linear flow of data. Overusing them for recoverable errors makes code harder to follow and compose.
-
-```python
-# DON'T DO THIS
-def run_pipeline(user_id: str):
-    try:
-        raw_data = fetch_user_data(user_id)
-        summary_data = process_user_data(raw_data)
-        display_summary(user_id, summary_data)
-    except Exception as e:
-        print(f"An error occurred: {e}")
-```
-
-#### **Do: Use a `Result` monad to treat errors as explicit return values.**
-
-This creates a "railway" where operations are chained together. The pipeline continues as long as things are successful and gracefully handles the first failure without crashing.
-
-```python
-from dataclasses import dataclass
-from typing import Generic, TypeVar
-
-T = TypeVar('T')
-E = TypeVar('E')
-
-# Nominal Result type with Ok/Err variants
-@dataclass
-class Result(Generic[T, E]):
-    """Base Result type - never instantiate directly"""
-    pass
-
-@dataclass
-class Ok(Result[T, E]):
-    value: T
-
-@dataclass
-class Err(Result[T, E]):
-    error: E
-
-def fetch_user_data(user_id: str) -> Result[dict, Exception]:
-    try:
-        return Ok(requests.post("...", json={"user": user_id}).json())
-    except Exception as e:
-        return Err(e)
-
-def process_user_data(raw_data: dict) -> Result[dict, str]:
-    return Ok({
-        "name": raw_data['name'].upper(),
-        "status": "Active" if raw_data['status'] == 1 else "Inactive"
-    })
-
-def display_summary(user_id: str, summary: dict):
-    print(f"User Summary for {user_id}:")
-    print(f"  Name: {summary['name']}")
-    print(f"  Status: {summary['status']}")
-
-# Usage with pattern matching
-def main_workflow(user_id: str):
-    match fetch_user_data(user_id):
-        case Ok(user_data):
-            match process_user_data(user_data):
-                case Ok(summary):
-                    display_summary(user_id, summary)
-                case Err(e):
-                    print(f"Processing error: {e}")
-        case Err(e):
-            print(f"Fetch error: {e}")
-```
-
----
-
-### 3. Using Types for Clarity
-
-#### **Don't: Pass generic dictionaries between functions.**
-
-Signatures like `def process(data: dict) -> dict:` are not self-documenting. To understand the data structure, one must read the entire function implementation.
-
-```python
-# DON'T DO THIS
-def process_data(raw_data: dict) -> dict:
-    # What keys are in raw_data? What does the output dict contain?
-    # No one knows without reading the code.
-    return {"processed_name": raw_data["name"].upper()}
-```
-
-#### **Do: Use custom types (`dataclasses`) to define explicit data contracts.**
-
-This makes function signatures self-documenting and enables static analysis tools to catch errors before runtime.
-
-```python
-# DO THIS INSTEAD
-from dataclasses import dataclass
-
-@dataclass
-class RawUserData:
-    name: str
-    status: int
-
-@dataclass
-class ProcessedSummary:
-    name: str
-    status: str
-
-def process_data(raw_data: RawUserData) -> ProcessedSummary:
-    # The data contract is perfectly clear from the signature alone.
-    return ProcessedSummary(
-        name=raw_data.name.upper(),
-        status="Active" if raw_data.status == 1 else "Inactive"
-    )
-```
-
----
+- Share mutable state between components
+- Mix I/O with computation
+- Use `isinstance` — use pattern matching
+- Use exceptions for control flow
