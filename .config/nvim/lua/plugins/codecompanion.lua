@@ -462,8 +462,7 @@ return {
               sync = true
             }
           }),
-          ollama_cloud = adapter_and_default_model("ollama", "gemini-3-flash-preview:latest", {
-            -- ollama      = adapter_and_default_model("ollama", "minimax-m2.1:cloud", {
+          ollama_cloud = adapter_and_default_model("ollama", "minimax-m2.1:cloud", {
             parameters = {
               sync = true
             }
