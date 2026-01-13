@@ -182,14 +182,14 @@ T = TypeVar("T")
 E = TypeVar("E", bound=str)
 
 @dataclass
-class Ok(Generic[T, E]):
+class Ok(Generic[T]):
     value: T
 
 @dataclass
-class Err(Generic[T, E]):
+class Err(Generic[E]):
     error: E
 
-Result = Ok[T, E] | Err[T, E]
+Result = Ok[T] | Err[E]
 
 def fetch_user(id: int) -> Result[dict[str, Any], str]:
     try:
@@ -272,6 +272,49 @@ async fn process_user(id: u32) -> Result<(), Error> {
     let score = compute_score(&user);
     save_score(score).await
 }
+```
+
+**Lua**
+
+```lua
+-- Lua uses coroutines for cooperative concurrency
+local function fetch_user(id)
+    -- Simulated async I/O
+    local co = coroutine.create(function()
+        -- In real code, this would be non-blocking I/O
+        coroutine.yield()
+    end)
+    return function()
+        local ok, user = coroutine.resume(co)
+        if ok then
+            return { id = id, name = "User" .. tostring(id) }
+        end
+        return nil
+    end
+end
+
+local function compute_score(user)
+    return user.id * 10
+end
+
+-- Process batch using coroutines
+local function process_batch(user_ids)
+    local results = {}
+    for _, id in ipairs(user_ids) do
+        local fetch = fetch_user(id)
+        local user = fetch()
+        if user then
+            table.insert(results, compute_score(user))
+        end
+    end
+    return results
+end
+
+-- Usage
+local scores = process_batch({1, 2, 3, 4, 5})
+for _, score in ipairs(scores) do
+    print("Score:", score)
+end
 ```
 
 ---
