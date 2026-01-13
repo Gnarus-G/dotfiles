@@ -37,6 +37,14 @@ fn multiply(a: i32, b: i32) -> i32 {
 }
 ```
 
+**Lua**
+
+```lua
+local function multiply(a, b)
+  return a * b
+end
+```
+
 ---
 
 ### 2. 🚫 Isolate Side Effects
@@ -58,10 +66,9 @@ print(greet(user))
 **C**
 
 ```c
-char* greet(const char* name) {
-    static char buffer[100];
-    snprintf(buffer, 100, "Hello, %s", name);
-    return buffer;
+// Caller manages memory - no internal static state
+void greet(const char* name, char* buffer, size_t size) {
+    snprintf(buffer, size, "Hello, %s", name);
 }
 ```
 
@@ -76,6 +83,18 @@ fn main() {
     let name = std::env::args().nth(1).unwrap();
     println!("{}", greet(&name));
 }
+```
+
+**Lua**
+
+```lua
+local function greet(user)
+  return "Hi, " .. user.name
+end
+
+-- I/O happens at the boundary
+local user = { name = "Alice" }
+print(greet(user))
 ```
 
 ---
@@ -116,6 +135,18 @@ fn compute_total(prices: &[f64]) -> f64 {
 }
 ```
 
+**Lua**
+
+```lua
+local function compute_total(items)
+  local sum = 0
+  for _, item in ipairs(items) do
+    sum = sum + (item.price * 0.9)
+end
+  return sum
+end
+```
+
 ---
 
 ### 4. 🌀 Use Monads or Monadic Equivalents for Effects and Errors
@@ -127,26 +158,53 @@ Use `Option`, `Result`, or simulate `Maybe`, `Try`, etc., to handle failure/opti
 **Python**
 
 ```python
-from returns.result import Result, Success, Failure
+from dataclasses import dataclass
+from typing import Generic, TypeVar
 
+T = TypeVar('T')
+E = TypeVar('E')
+
+# Result as Algebraic Data Type (ADT)
+@dataclass
+class Result(Generic[T, E]):
+    """Base Result type - never instantiate directly"""
+    pass
+
+@dataclass
+class Ok(Result[T, E]):
+    value: T
+
+@dataclass
+class Err(Result[T, E]):
+    error: E
+
+# Usage with pattern matching (Python 3.10+)
 def get_user(uid) -> Result[dict, str]:
     try:
-        return Success(fetch_user(uid))
+        return Ok(fetch_user(uid))
     except Exception as e:
-        return Failure(str(e))
+        return Err(str(e))
+
+def render_user(user):
+    match user:
+        case Ok(value): return f"Success: {value}"
+        case Err(error): return f"Error: {error}"
 ```
 
 **C**
 
 ```c
-// Simulate Result
+// Simulate Result with Tagged Union
 typedef struct {
-    int ok;
+    bool is_ok;
     union {
         int value;
         const char* error;
     };
 } ResultInt;
+
+ResultInt ok(int v) { return (ResultInt){ .is_ok = true, .value = v }; }
+ResultInt err(const char* e) { return (ResultInt){ .is_ok = false, .error = e }; }
 ```
 
 **Rust**
@@ -155,6 +213,20 @@ typedef struct {
 fn get_user(id: i32) -> Result<User, String> {
     db::fetch_user(id).ok_or("User not found".to_string())
 }
+```
+
+**Lua**
+
+```lua
+-- Lua idiomatic: return explicit table or value, error pair
+local function get_user(id)
+  local user = db.fetch_user(id)
+  if user then
+    return { ok = user }
+  else
+    return { err = "User not found" }
+  end
+end
 ```
 
 ---
@@ -364,27 +436,54 @@ def run_pipeline(user_id: str):
 This creates a "railway" where operations are chained together. The pipeline continues as long as things are successful and gracefully handles the first failure without crashing.
 
 ```python
-# DO THIS INSTEAD
-from returns.result import Success, safe
+from dataclasses import dataclass
+from typing import Generic, TypeVar
 
-# Functions now return a Result[Success, Failure]
-@safe
+T = TypeVar('T')
+E = TypeVar('E')
+
+# Nominal Result type with Ok/Err variants
+@dataclass
+class Result(Generic[T, E]):
+    """Base Result type - never instantiate directly"""
+    pass
+
+@dataclass
+class Ok(Result[T, E]):
+    value: T
+
+@dataclass
+class Err(Result[T, E]):
+    error: E
+
 def fetch_user_data(user_id: str) -> Result[dict, Exception]:
-    # ... returns response.json() on success, or Failure(exception) on error
+    try:
+        return Ok(requests.post("...", json={"user": user_id}).json())
+    except Exception as e:
+        return Err(e)
 
-@safe
-def process_user_data(raw_data: dict) -> Result[dict, Exception]:
-    # ... returns summary dict on success, or Failure(exception) on error
+def process_user_data(raw_data: dict) -> Result[dict, str]:
+    return Ok({
+        "name": raw_data['name'].upper(),
+        "status": "Active" if raw_data['status'] == 1 else "Inactive"
+    })
 
-# The main logic is a clean, readable pipeline
+def display_summary(user_id: str, summary: dict):
+    print(f"User Summary for {user_id}:")
+    print(f"  Name: {summary['name']}")
+    print(f"  Status: {summary['status']}")
+
+# Usage with pattern matching
 def main_workflow(user_id: str):
-    (
-        Success(user_id)
-        .bind(fetch_user_data)
-        .bind(process_user_data)
-        .map(lambda summary: display_summary(user_id, summary))
-        .alt(lambda error: print(f"An error occurred: {error}")) # Handles any failure
-    )
+    match fetch_user_data(user_id):
+        case Ok(user_data):
+            match process_user_data(user_data):
+                case Ok(summary):
+                    display_summary(user_id, summary)
+                case Err(e):
+                    print(f"Processing error: {e}")
+        case Err(e):
+            print(f"Fetch error: {e}")
 ```
 
 ---
