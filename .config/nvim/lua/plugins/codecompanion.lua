@@ -1,12 +1,14 @@
 local env_cascade = require("gnarus.utils").env_var_cascade
 
 local chat_adapter_name = env_cascade({
-  { vars = { "GNARUS_ALLOW_VENDOR_LLM", "ANTHROPIC_API_KEY" }, value = "claude", },
+  { vars = { "GNARUS_ALLOW_VENDOR_LLM", "ANTHROPIC_API_KEY" }, value = "ollama_cloud", },
+  { vars = { "GNARUS_ALLOW_VENDOR_LLM", "ANTHROPIC_API_KEY" }, value = "claude_fast", },
   { vars = { "GNARUS_ALLOW_VENDOR_LLM", "GEMINI_API_KEY" },    value = "gemini", },
   { vars = { "GNARUS_ALLOW_VENDOR_LLM", "OPENAI_API_KEY" },    value = "openai", },
 }, "ollama")
 
 local inline_adapter_name = env_cascade({
+  { vars = { "GNARUS_ALLOW_VENDOR_LLM", "ANTHROPIC_API_KEY" }, value = "ollama_cloud", },
   { vars = { "GNARUS_ALLOW_VENDOR_LLM", "ANTHROPIC_API_KEY" }, value = "claude_fast" },
   { vars = { "GNARUS_ALLOW_VENDOR_LLM", "GEMINI_API_KEY" },    value = "gemini_fast" },
   { vars = { "GNARUS_ALLOW_VENDOR_LLM", "OPENAI_API_KEY" },    value = "openai" },
@@ -406,7 +408,7 @@ return {
       },
       adapters = {
         http = {
-          openai      = adapter_and_default_model("openai", "gpt-5", {
+          openai       = adapter_and_default_model("openai", "gpt-5", {
             opts = {
               stream = true
             },
@@ -414,7 +416,7 @@ return {
               reasoning_effort = { default = "low" },
             },
           }),
-          openai_high = adapter_and_default_model("openai", "gpt-5", {
+          openai_high  = adapter_and_default_model("openai", "gpt-5", {
             opts = {
               stream = false
             },
@@ -422,7 +424,7 @@ return {
               reasoning_effort = { default = "high" },
             },
           }),
-          gemini      = adapter_and_default_model("gemini", "gemini-3-flash-preview", {
+          gemini       = adapter_and_default_model("gemini", "gemini-3-flash-preview", {
             schema = {
               temperature = {
                 default = 0.3
@@ -432,7 +434,7 @@ return {
               }
             }
           }),
-          gemini_fast = adapter_and_default_model("gemini", "gemini-3-flash-preview", {
+          gemini_fast  = adapter_and_default_model("gemini", "gemini-3-flash-preview", {
             schema = {
               temperature = {
                 default = 0
@@ -442,9 +444,9 @@ return {
               }
             }
           }),
-          claude      = adapter_and_default_model("anthropic", "claude-opus-4-5"),
-          claude_fast = adapter_and_default_model("anthropic", "claude-haiku-4-5"),
-          ollama      = adapter_and_default_model("ollama", "gpt-oss:latest", {
+          claude       = adapter_and_default_model("anthropic", "claude-opus-4-5"),
+          claude_fast  = adapter_and_default_model("anthropic", "claude-haiku-4-5"),
+          ollama       = adapter_and_default_model("ollama", "gpt-oss:latest", {
             env = {
               url = os.getenv("OLLAMA_API_BASE") or "http://localhost:11434"
             },
@@ -456,6 +458,12 @@ return {
                 default = '30m',
               }
             },
+            parameters = {
+              sync = true
+            }
+          }),
+          ollama_cloud = adapter_and_default_model("ollama", "gemini-3-flash-preview:latest", {
+            -- ollama      = adapter_and_default_model("ollama", "minimax-m2.1:cloud", {
             parameters = {
               sync = true
             }

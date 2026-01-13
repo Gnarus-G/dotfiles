@@ -12,7 +12,8 @@
       "models": {
         "qwen3:latest": {},
         "gpt-oss:latest": {},
-        "nemotron-3-nano": {}
+        "nemotron-3-nano": {},
+        "minimax-m2.1:cloud": {}
       }
     }
   },
