@@ -263,56 +263,494 @@ async fn process_user(id: u32) -> Result<(), Error> {
 
 ---
 
-### 6. 🎭 Actor Model (Python & Rust Only)
+### 6. 🎭 Actor Model
 
-Use **actors** for local state, message handling, and concurrency when mutable or long-lived context is required.
+Actors encapsulate **mutable state** and **message processing** in a controlled manner. They solve concurrency by ensuring:
 
-- In Python, use async classes with a queue
-- In Rust, implement your own `Actor` trait — **do not use `actix`**
+- No shared state between actors
+- Messages are processed sequentially
+- State mutation only happens in response to messages
 
-#### Python
+#### Python: Generic Actor
 
 ```python
-class Counter:
-    def __init__(self):
-        self.count = 0
-        self.mailbox = asyncio.Queue()
+from __future__ import annotations
+from asyncio import Task, create_task
+from dataclasses import dataclass
+from typing import Generic, TypeVar, Any
 
-    async def run(self):
+MessageT = TypeVar("MessageT")
+
+class Actor(Generic[MessageT]):
+    def __init__(self) -> None:
+        self._mailbox: list[MessageT] = []
+        self._task: Task[Any] | None = None
+
+    def send(self, msg: MessageT) -> None:
+        self._mailbox.append(msg)
+
+    def start(self) -> None:
+        self._task = create_task(self._run())
+
+    def stop(self) -> None:
+        if self._task:
+            self._task.cancel()
+            self._task = None
+
+    async def _run(self) -> None:
         while True:
-            msg = await self.mailbox.get()
-            if msg == "inc":
-                self.count += 1
-            elif msg == "get":
-                print(self.count)
+            msg = self._mailbox.pop(0)
+            self.handle(msg)
+
+    def handle(self, msg: MessageT) -> None:
+        error("subclasses must implement handle(msg)")
+
+# --- Concrete Counter Actor ---
+
+@dataclass
+class Increment:
+    amount: int = 1
+
+@dataclass
+class Decrement:
+    amount: int = 1
+
+class Counter(Actor[Increment | Decrement]):
+    _state: int = 0
+
+    def handle(self, msg: Increment | Decrement) -> None:
+        match msg:
+            case Increment(amount):
+                self._state += amount
+            case Decrement(amount):
+                self._state -= amount
+
+# --- Usage ---
+
+counter = Counter()
+counter.start()
+
+counter.send(Increment(5))
+counter.send(Decrement(2))
+counter.send(Increment(3))
+
+import asyncio
+await asyncio.sleep(0)
+
+print(counter._state)  # Output: 6
+counter.stop()
 ```
 
-#### Rust
+#### TypeScript: Generic Actor
 
-```rust
-use async_trait::async_trait;
+```typescript
+abstract class Actor<Msg> {
+  protected mailbox: Msg[] = [];
+  private running = false;
 
-pub trait Message: Send {}
-pub struct Increment;
-impl Message for Increment {}
+  abstract handle(msg: Msg): void;
 
-#[async_trait]
-pub trait Actor {
-    async fn handle(&mut self, msg: Box<dyn Message + Send>);
-}
+  send(msg: Msg): void {
+    this.mailbox.push(msg);
+  }
 
-pub struct Counter {
-    pub count: usize,
-}
-
-#[async_trait]
-impl Actor for Counter {
-    async fn handle(&mut self, msg: Box<dyn Message + Send>) {
-        if msg.downcast_ref::<Increment>().is_some() {
-            self.count += 1;
-        }
+  start(): void {
+    if (!this.running) {
+      this.running = true;
+      this._run();
     }
+  }
+
+  stop(): void {
+    this.running = false;
+  }
+
+  private _run(): void {
+    while (this.running && this.mailbox.length > 0) {
+      const msg = this.mailbox.shift()!;
+      this.handle(msg);
+    }
+  }
 }
+
+// --- Concrete Counter Actor ---
+
+type Increment = { type: "increment"; amount: number };
+type Decrement = { type: "decrement"; amount: number };
+
+class Counter extends Actor<Increment | Decrement> {
+  private state: number = 0;
+
+  handle(msg: Increment | Decrement): void {
+    switch (msg.type) {
+      case "increment":
+        this.state += msg.amount;
+        break;
+      case "decrement":
+        this.state -= msg.amount;
+        break;
+    }
+  }
+}
+
+// --- Usage ---
+
+const counter = new Counter();
+counter.start();
+
+counter.send({ type: "increment", amount: 5 });
+counter.send({ type: "decrement", amount: 2 });
+counter.send({ type: "increment", amount: 3 });
+
+console.log(counter.state); // Output: 6
+counter.stop();
+```
+
+#### Lua: Generic Actor Class
+
+```lua
+local Actor = {}
+Actor.__index = Actor
+
+function Actor.new()
+  local self = setmetatable({}, Actor)
+  self._mailbox = {}
+  self._running = false
+  return self
+end
+
+function Actor:handle(msg)
+  error("subclasses must implement handle(msg)")
+end
+
+function Actor:send(msg)
+  table.insert(self._mailbox, msg)
+end
+
+function Actor:start()
+  if not self._running then
+    self._running = true
+    self:_run()
+  end
+end
+
+function Actor:stop()
+  self._running = false
+end
+
+function Actor:_run()
+  while self._running and #self._mailbox > 0 do
+    local msg = table.remove(self._mailbox, 1)
+    self:handle(msg)
+  end
+end
+
+-- --- Concrete Counter Actor ---
+
+local Counter = setmetatable({}, { __index = Actor })
+Counter.__index = Counter
+
+function Counter.new()
+  local self = Actor.new()
+  self._state = 0
+  setmetatable(self, Counter)
+  return self
+end
+
+function Counter:handle(msg)
+  if msg.type == "increment" then
+    self._state = self._state + (msg.amount or 1)
+  elseif msg.type == "decrement" then
+    self._state = self._state - (msg.amount or 1)
+  end
+end
+
+-- --- Usage ---
+
+local counter = Counter.new()
+counter:start()
+
+counter:send({ type = "increment", amount = 5 })
+counter:send({ type = "decrement", amount = 2 })
+counter:send({ type = "increment", amount = 3 })
+
+print(counter._state)  -- Output: 6
+counter:stop()
+```
+
+---
+
+### 7. 🗄️ Resource Management in Actor Systems
+
+Actors naturally encapsulate resources. Resources are **acquired on first use** and **released when the actor stops**.
+
+#### Core Patterns
+
+1. **Scoped ownership**: Each actor owns its resources exclusively
+2. **Lazy acquisition**: Open files, connections, or handles only when needed
+3. **Deterministic cleanup**: Resources released in `stop()`
+
+#### Python: File-Handling Actor
+
+```python
+from __future__ import annotations
+from abc import ABC, abstractmethod
+from asyncio import Task, create_task
+from dataclasses import dataclass
+from typing import Generic, TypeVar, IO
+import asyncio
+
+MessageT = TypeVar("MessageT")
+
+class Actor(ABC, Generic[MessageT]):
+    def __init__(self) -> None:
+        self._mailbox: list[MessageT] = []
+        self._task: Task[None] | None = None
+
+    def send(self, msg: MessageT) -> None:
+        self._mailbox.append(msg)
+
+    def start(self) -> None:
+        self._task = create_task(self._run())
+
+    def stop(self) -> None:
+        self._cleanup()
+        if self._task:
+            self._task.cancel()
+            self._task = None
+
+    async def _run(self) -> None:
+        while True:
+            msg = self._mailbox.pop(0)
+            await self.handle(msg)
+
+    @abstractmethod
+    async def handle(self, msg: MessageT) -> None:
+        ...
+
+    def _cleanup(self) -> None:
+        """Override in subclasses to release resources."""
+        pass
+
+# --- Concrete File Writer Actor ---
+
+@dataclass
+class WriteLine:
+    line: str
+
+class FileWriter(Actor[WriteLine]):
+    def __init__(self, path: str) -> None:
+        super().__init__()
+        self._path = path
+        self._handle: IO[str] | None = None
+
+    async def handle(self, msg: WriteLine) -> None:
+        if self._handle is None:
+            self._handle = open(self._path, "a")
+        self._handle.write(msg.line + "\n")
+
+    def _cleanup(self) -> None:
+        if self._handle:
+            self._handle.close()
+            self._handle = None
+
+# --- Usage ---
+
+async def main() -> None:
+    writer = FileWriter("/tmp/log.txt")
+    writer.start()
+
+    writer.send(WriteLine("first line"))
+    writer.send(WriteLine("second line"))
+
+    await asyncio.sleep(0.1)  # Let writes complete
+    writer.stop()
+
+asyncio.run(main())
+```
+
+#### TypeScript: Resource Actor
+
+```typescript
+abstract class Actor<Msg> {
+  protected mailbox: Msg[] = [];
+  private task: ReturnType<typeof setInterval> | null = null;
+  private running = false;
+
+  abstract handle(msg: Msg): void;
+  abstract cleanup(): void;
+
+  send(msg: Msg): void {
+    this.mailbox.push(msg);
+  }
+
+  start(): void {
+    if (!this.running) {
+      this.running = true;
+      this.task = setInterval(() => this._run(), 0);
+    }
+  }
+
+  stop(): void {
+    this.running = false;
+    if (this.task) {
+      clearInterval(this.task);
+      this.task = null;
+    }
+    this.cleanup();
+  }
+
+  private _run(): void {
+    while (this.mailbox.length > 0) {
+      const msg = this.mailbox.shift()!;
+      this.handle(msg);
+    }
+  }
+}
+
+// --- Concrete File Actor ---
+
+type WriteRequest = { type: "write"; content: string };
+type CloseRequest = { type: "close" };
+type FileMsg = WriteRequest | CloseRequest;
+
+class FileActor extends Actor<FileMsg> {
+  private handle: FileSystemFileHandle | null = null;
+  private file: FileSystemWritableFileStream | null = null;
+  private path: string;
+
+  constructor(path: string) {
+    super();
+    this.path = path;
+  }
+
+  async handle(msg: FileMsg): Promise<void> {
+    switch (msg.type) {
+      case "write":
+        if (!this.file) {
+          this.handle = await navigator.storage.getFileHandle(this.path, {
+            create: true,
+          });
+          this.file = await this.handle.createWritable();
+        }
+        await this.file.write(msg.content);
+        break;
+      case "close":
+        if (this.file) {
+          await this.file.close();
+          this.file = null;
+        }
+        break;
+    }
+  }
+
+  cleanup(): void {
+    this.file?.close();
+    this.file = null;
+  }
+}
+
+// --- Usage ---
+
+const actor = new FileActor("notes.txt");
+actor.start();
+
+actor.send({ type: "write", content: "hello" });
+actor.send({ type: "write", content: "world" });
+
+setTimeout(() => {
+  actor.send({ type: "close" });
+  actor.stop();
+}, 100);
+```
+
+#### Lua: Resource Actor
+
+```lua
+local Actor = {}
+Actor.__index = Actor
+
+function Actor.new()
+  local self = setmetatable({}, Actor)
+  self._mailbox = {}
+  self._running = false
+  return self
+end
+
+function Actor:handle(msg)
+  error("subclasses must implement handle(msg)")
+end
+
+function Actor:send(msg)
+  table.insert(self._mailbox, msg)
+end
+
+function Actor:start()
+  if not self._running then
+    self._running = true
+    -- In a real implementation, run in a coroutine
+    self:_run()
+  end
+end
+
+function Actor:stop()
+  self._running = false
+  self:_cleanup()
+end
+
+function Actor:_run()
+  while self._running and #self._mailbox > 0 do
+    local msg = table.remove(self._mailbox, 1)
+    self:handle(msg)
+  end
+end
+
+function Actor:_cleanup()
+  -- Override in subclasses
+end
+
+-- --- Concrete File Actor ---
+
+local FileActor = setmetatable({}, { __index = Actor })
+FileActor.__index = FileActor
+
+function FileActor.new(path)
+  local self = Actor.new()
+  self._path = path
+  self._handle = nil
+  setmetatable(self, FileActor)
+  return self
+end
+
+function FileActor:handle(msg)
+  if msg.type == "write" then
+    if not self._handle then
+      self._handle = io.open(self._path, "a")
+    end
+    self._handle:write(msg.content)
+    self._handle:write("\n")
+  elseif msg.type == "close" then
+    self:_cleanup()
+  end
+end
+
+function FileActor:_cleanup()
+  if self._handle then
+    self._handle:close()
+    self._handle = nil
+  end
+end
+
+-- --- Usage ---
+
+local actor = FileActor.new("/tmp/data.txt")
+actor:start()
+
+actor:send({ type = "write", content = "first" })
+actor:send({ type = "write", content = "second" })
+
+actor:send({ type = "close" })
+actor:stop()
 ```
 
 ---
@@ -321,7 +759,8 @@ impl Actor for Counter {
 
 - Shared mutable state
 - Mixing I/O with computation
-- Control flow without abstraction (`while`/`if` inside business logic)
+- Control flow without pattern matching
+- `isinstance` checks — use pattern matching instead
 - Implicit null/error handling
 - Framework-specific side-effect helpers unless explicitly wrapped
 
@@ -502,28 +941,30 @@ def process_data(raw_data: dict) -> dict:
     return {"processed_name": raw_data["name"].upper()}
 ```
 
-#### **Do: Use custom types (`TypedDict`) to define explicit data contracts.**
+#### **Do: Use custom types (`dataclasses`) to define explicit data contracts.**
 
 This makes function signatures self-documenting and enables static analysis tools to catch errors before runtime.
 
 ```python
 # DO THIS INSTEAD
-from typing import TypedDict
+from dataclasses import dataclass
 
-class RawUserData(TypedDict):
+@dataclass
+class RawUserData:
     name: str
     status: int
 
-class ProcessedSummary(TypedDict):
+@dataclass
+class ProcessedSummary:
     name: str
     status: str
 
 def process_data(raw_data: RawUserData) -> ProcessedSummary:
     # The data contract is perfectly clear from the signature alone.
-    return {
-        "name": raw_data['name'].upper(),
-        "status": "Active" if raw_data['status'] == 1 else "Inactive"
-    }
+    return ProcessedSummary(
+        name=raw_data.name.upper(),
+        status="Active" if raw_data.status == 1 else "Inactive"
+    )
 ```
 
 ---
