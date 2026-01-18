@@ -4,6 +4,67 @@ All code generated must follow these FP principles, regardless of language. Even
 
 ## Core Guidelines
 
+### 0. No Global State
+
+Never use global variables or mutable shared state. Pass dependencies explicitly through parameters or injection. Use actors, message passing, or dependency injection patterns to manage state.
+
+**Python**
+```python
+# Good - dependency injected
+class UserService:
+    def __init__(self, database: Database):
+        self.database = database
+
+# Bad - global state
+DATABASE: Database | None = None
+def get_user(id: int) -> User:
+    return DATABASE.query(id)
+```
+
+**Rust**
+```rust
+// Good - passed as parameter
+fn process(settings: &AppSettings) {
+    // use settings
+}
+
+// Bad - global static
+static SETTINGS: OnceLock<AppSettings> = OnceLock::new();
+fn process() {
+    let settings = SETTINGS.get().unwrap();
+}
+```
+
+**TypeScript**
+```typescript
+// Good - dependency injected
+class SettingsStore {
+    constructor(private deps: { getSettings: () => Settings }) {}
+}
+
+// Bad - global variable
+const GLOBAL_SETTINGS = new Map();
+function getSetting(key: string) {
+    return GLOBAL_SETTINGS.get(key);
+}
+```
+
+**Actor Pattern (preferred for stateful components):**
+```rust
+// Good - actor holds state, receives messages
+struct SettingsActor {
+    settings: AppSettings,
+}
+
+impl SettingsActor {
+    fn handle(&mut self, msg: SettingsCommand) {
+        // update state based on message
+    }
+}
+```
+
+---
+
 ### 1. Pure Functions Only
 
 All functions depend only on their input, never mutate shared state, never perform I/O.
