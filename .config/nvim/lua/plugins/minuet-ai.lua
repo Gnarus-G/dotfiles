@@ -70,7 +70,7 @@ return {
           name = "ollama",
           api_key = "TERM",
           end_point = ollama_api_base .. '/v1/chat/completions',
-          model = 'devstral-2:123b-cloud',
+          model = 'devstral-small-2:24b-cloud',
 
           chat_input = {
             template = "{{{extra_context}}}\n" ..
