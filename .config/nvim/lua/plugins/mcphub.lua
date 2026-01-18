@@ -151,7 +151,7 @@ local function add_prompts_and_resources(mcphub)
             "The subject line of a commit should be 50 characters max, and should start with an imperative verb. (e.g. 'Add frontend unit tests'). The subject line must not be prefixed with a type like 'feat:', 'fix:', or 'refactor:'.\n\nBody: The body of a commit should explain the 'what' and 'why' of the commit, not the 'how'. It should be wrapped at 72 characters." ..
             "\n\nFooter: The footer of a commit should contain any information that is not part of the subject or body. (e.g. 'Fixes #123', 'Closes #456', 'BREAKING CHANGE: ...')")
           :user()
-          :text("@{gnarus__git_commit} Git diff:\n```diff\n" .. diff_output .. "\n```\n")
+          :text("@{gnarus__git_commit} Write a commit for this Git diff:\n```diff\n" .. diff_output .. "\n```\n")
           :send()
     end
   })
