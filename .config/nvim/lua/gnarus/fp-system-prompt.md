@@ -1,5 +1,8 @@
 All code generated must follow these FP principles, regardless of language. Even in impure or imperative languages (Python, C, Rust, Lua), simulate FP idioms using pure functions, effect wrappers, and separation of concerns.
 
+> **Note**: This is a comprehensive multi-language FP guide (~1,000 lines).
+> Focus on sections relevant to your target language(s).
+
 ---
 
 ## Core Guidelines
@@ -648,7 +651,289 @@ counter:stop()
 
 ---
 
-## Quick Reference
+### 7. Request-Reply Actor Pattern
+
+Basic actors use fire-and-forget messaging. For request-response semantics, embed a reply channel in the request envelope. This enables:
+
+- **Type-safe request/response pairing**: Compiler enforces correct response types
+- **Automatic correlation**: Responses include the original request
+- **Exactly-once semantics**: Reply channel ownership prevents double-send
+- **No protocol registry**: Types encode the contract
+
+Domain messages stay pure. Only the envelope carries actor infrastructure.
+
+**Rust**
+
+```rust
+// Request envelope with embedded reply channel
+#[derive(Debug)]
+pub struct Request<Req, Res> {
+  pub payload: Req,
+  pub reply_to: Sender<Response<Req, Res>>,  // Use your runtime's oneshot channel
+}
+
+// Correlated response
+#[derive(Debug)]
+pub struct Response<Req, Res> {
+  pub request: Req,
+  pub result: Res,
+}
+
+impl<Req, Res> Response<Req, Res> {
+  pub fn new(request: Req, result: Res) -> Self {
+    Self { request, result }
+  }
+}
+
+// Domain messages (pure)
+#[derive(Debug, Clone)]
+pub struct Add {
+  pub a: i32,
+  pub b: i32,
+}
+
+#[derive(Debug)]
+pub struct AddResult {
+  pub value: i32,
+}
+
+// Actor consumes Request<Add, AddResult>
+pub struct Adder;
+
+impl Actor for Adder {
+  type Message = Request<Add, AddResult>;
+
+  fn handle_message(&mut self, msg: Self::Message) {
+    let Add { a, b } = msg.payload.clone();
+    let result = AddResult { value: a + b };
+    let response = Response::new(msg.payload, result);
+    let _ = msg.reply_to.send(response);
+  }
+}
+
+// ask() helper for sync-style interaction
+pub fn ask<Req, Res>(
+  target: &ActorRef<Request<Req, Res>>,
+  req: Req,
+) -> Receiver<Response<Req, Res>>
+where
+  Req: Send + Clone + 'static,
+  Res: Send + 'static,
+{
+  let (tx, rx) = oneshot_channel();  // Use tokio::sync::oneshot, mpsc, etc.
+  let msg = Request { payload: req, reply_to: tx };
+  target.send(msg);
+  rx
+}
+
+// Usage
+fn main() {
+  let adder = spawn_actor(|_self_ref| Adder);
+  let rx = ask(&adder, Add { a: 10, b: 32 });
+  let response = rx.recv().unwrap();
+  println!("Request: {:?}", response.request);
+  println!("Result: {:?}", response.result);  // AddResult { value: 42 }
+}
+```
+
+**Python**
+
+```python
+from __future__ import annotations
+from dataclasses import dataclass
+from typing import Generic, TypeVar, Protocol
+
+# Use asyncio.Queue, threading.Queue, or custom oneshot channel
+Req = TypeVar("Req")
+Res = TypeVar("Res")
+
+class ReplySender(Protocol, Generic[Res]):
+    def send(self, value: Res) -> None: ...
+
+class ReplyReceiver(Protocol, Generic[Res]):
+    def recv(self) -> Res: ...
+
+@dataclass
+class Request(Generic[Req, Res]):
+    payload: Req
+    reply_to: ReplySender[Response[Req, Res]]
+
+@dataclass
+class Response(Generic[Req, Res]):
+    request: Req
+    result: Res
+
+# Domain messages
+@dataclass
+class Add:
+    a: int
+    b: int
+
+@dataclass
+class AddResult:
+    value: int
+
+# Actor implementation
+class Adder(ActorBase[Request[Add, AddResult]]):
+    def handle(self, msg: Request[Add, AddResult]) -> None:
+        result = AddResult(value=msg.payload.a + msg.payload.b)
+        response = Response(request=msg.payload, result=result)
+        msg.reply_to.send(response)
+
+# ask() helper
+def ask(
+    target: ActorRef[Request[Req, Res]],
+    req: Req,
+) -> ReplyReceiver[Response[Req, Res]]:
+    tx, rx = oneshot_channel()  # Abstract: use your runtime's channel
+    target.send(Request(payload=req, reply_to=tx))
+    return rx
+
+# Usage
+adder: ActorRef[Request[Add, AddResult]] = spawn_actor(Adder)
+rx: ReplyReceiver[Response[Add, AddResult]] = ask(adder, Add(a=10, b=32))
+response: Response[Add, AddResult] = rx.recv()
+print(f"Request: {response.request}")
+print(f"Result: {response.result}")  # AddResult(value=42)
+```
+
+**TypeScript**
+
+```typescript
+// Abstract: use Promise, custom channel, or actor runtime's mechanism
+type ReplySender<T> = (value: T) => void;
+type ReplyReceiver<T> = Promise<T>;
+
+interface Request<Req, Res> {
+  payload: Req;
+  replyTo: ReplySender<Response<Req, Res>>;
+}
+
+interface Response<Req, Res> {
+  request: Req;
+  result: Res;
+}
+
+// Domain messages
+interface Add {
+  a: number;
+  b: number;
+}
+
+interface AddResult {
+  value: number;
+}
+
+// Actor implementation
+class Adder extends Actor<Request<Add, AddResult>> {
+  handle(msg: Request<Add, AddResult>): void {
+    const result: AddResult = {
+      value: msg.payload.a + msg.payload.b,
+    };
+    const response: Response<Add, AddResult> = {
+      request: msg.payload,
+      result: result,
+    };
+    msg.replyTo(response);
+  }
+}
+
+// ask() helper
+function ask<Req, Res>(
+  target: ActorRef<Request<Req, Res>>,
+  req: Req
+): ReplyReceiver<Response<Req, Res>> {
+  return new Promise((resolve) => {
+    target.send({ payload: req, replyTo: resolve });
+  });
+}
+
+// Usage
+const adder = spawnActor(() => new Adder());
+const response = await ask(adder, { a: 10, b: 32 });
+console.log("Request:", response.request);
+console.log("Result:", response.result);  // { value: 42 }
+```
+
+**Lua**
+
+```lua
+-- Abstract: use coroutines, callbacks, or actor runtime's mechanism
+
+-- Request envelope
+local function make_request(payload, reply_to)
+  return { payload = payload, reply_to = reply_to }
+end
+
+-- Correlated response
+local function make_response(request, result)
+  return { request = request, result = result }
+end
+
+-- Domain messages
+local function make_add(a, b)
+  return { a = a, b = b }
+end
+
+local function make_add_result(value)
+  return { value = value }
+end
+
+-- Actor implementation
+local Adder = setmetatable({}, { __index = Actor })
+Adder.__index = Adder
+
+function Adder.new()
+  local self = Actor.new()
+  setmetatable(self, Adder)
+  return self
+end
+
+function Adder:handle(msg)
+  local result = make_add_result(msg.payload.a + msg.payload.b)
+  local response = make_response(msg.payload, result)
+  msg.reply_to(response)
+end
+
+-- ask() helper (callback-based)
+local function ask(target, req, callback)
+  local request = make_request(req, callback)
+  target:send(request)
+end
+
+-- Usage
+local adder = spawn_actor(function() return Adder.new() end)
+ask(adder, make_add(10, 32), function(response)
+  print("Request: a=" .. response.request.a .. " b=" .. response.request.b)
+  print("Result: " .. tostring(response.result.value))  -- 42
+end)
+```
+
+**Key Properties**:
+
+This pattern provides production-grade guarantees:
+
+- **Type Safety**: Compiler enforces correct request→response pairing
+- **Exactly-Once Reply**: Channel ownership prevents double-send
+- **Automatic Correlation**: Response includes original request for traceability
+- **No Protocol Registry**: Types encode the contract, no runtime lookup
+- **Domain Isolation**: Business logic stays pure, no actor plumbing leaks
+- **Thread-Safe**: Channel semantics handle concurrency correctly
+- **Debuggable**: Correlated responses make request tracing trivial
+
+**Future Extensions**:
+
+This foundation supports advanced patterns:
+
+- Reducer-style state actors (state + message → new state)
+- Supervision and crash recovery (monitor actors, restart on failure)
+- Timeout and cancellation as messages (explicit control flow)
+- AsyncActor variants (full async/await integration)
+- Streaming responses (reply with iterator/stream instead of single value)
+
+---
+
+## 8. Quick Reference
 
 **Do:**
 
