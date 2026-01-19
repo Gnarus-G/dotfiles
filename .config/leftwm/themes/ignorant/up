@@ -9,6 +9,9 @@ if [ -f "/tmp/leftwm-theme-down" ]; then
 fi
 ln -s $SCRIPTPATH/down /tmp/leftwm-theme-down
 
+# Wait for X11/GLX to fully initialize
+sleep 2
+
 #boot picom compositor if it exists
 if [ -x "$(command -v picom)" ]; then
   picom --no-vsync --config=$SCRIPTPATH/.config/picom/picom.conf &>/tmp/picom_error.log &
