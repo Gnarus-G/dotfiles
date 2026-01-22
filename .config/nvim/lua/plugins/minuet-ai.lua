@@ -70,15 +70,16 @@ return {
           name = "ollama",
           api_key = "TERM",
           end_point = ollama_api_base .. '/v1/chat/completions',
-          model = 'devstral-small-2:24b-cloud',
-
+          model = 'minimax-m2.1:cloud', -- 'qwen3-coder:480b-cloud',
           chat_input = {
             template = "{{{extra_context}}}\n" ..
                 minuet_config.default_chat_input_prefix_first.template,
             extra_context = extra_context.get_formatted_context
           },
-
-          stream = true,
+          optional = {
+            max_completion_tokens = 1024,
+            reasoning_effort = "none",
+          },
         },
         openai_fim_compatible = {
           name = "ollama-fim",
@@ -100,9 +101,9 @@ return {
     }
 
     local config                  = env_cascade({
+      { vars = { "GNARUS_ALLOW_VENDOR_LLM" },                   value = { "openai_compatible", 2 } },
       { vars = { "GNARUS_ALLOW_VENDOR_LLM", "GEMINI_API_KEY" }, value = { "gemini", 3 } },
       { vars = { "GNARUS_ALLOW_VENDOR_LLM", "OPENAI_API_KEY" }, value = { "openai", 2 } },
-      { vars = { "GNARUS_ALLOW_VENDOR_LLM" },                   value = { "openai_compatible", 2 } },
     }, { "openai_fim_compatible", 1 })
     local provider, n_completions = config[1], config[2]
     vim.notify(string.format("Minuet AI configured with provider: %s, completions: %s", provider, n_completions),
