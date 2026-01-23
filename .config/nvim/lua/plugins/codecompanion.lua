@@ -1,34 +1,18 @@
 local env_cascade = require("gnarus.utils").env_var_cascade
 
-local chat_adapter_name = env_cascade({
-  { vars = { "GNARUS_ALLOW_VENDOR_LLM", "ANTHROPIC_API_KEY" }, value = "ollama_cloud", },
-  { vars = { "GNARUS_ALLOW_VENDOR_LLM", "ANTHROPIC_API_KEY" }, value = "claude_fast", },
-  { vars = { "GNARUS_ALLOW_VENDOR_LLM", "GEMINI_API_KEY" },    value = "gemini", },
-  { vars = { "GNARUS_ALLOW_VENDOR_LLM", "OPENAI_API_KEY" },    value = "openai", },
-}, "ollama")
+local chat_adapter = env_cascade({
+  { vars = { "GNARUS_ALLOW_VENDOR_LLM", "GEMINI_API_KEY" },    value = { name = "gemini" } },
+  { vars = { "GNARUS_ALLOW_VENDOR_LLM" },                      value = { name = "ollama_cloud" } },
+  { vars = { "GNARUS_ALLOW_VENDOR_LLM", "OPENAI_API_KEY" },    value = { name = "openai" } },
+  { vars = { "GNARUS_ALLOW_VENDOR_LLM", "ANTHROPIC_API_KEY" }, value = { name = "anthropic", model = "claude-opus-4-5" } },
+}, { name = "ollama" })
 
-local inline_adapter_name = env_cascade({
-  { vars = { "GNARUS_ALLOW_VENDOR_LLM", "ANTHROPIC_API_KEY" }, value = "ollama_cloud", },
-  { vars = { "GNARUS_ALLOW_VENDOR_LLM", "ANTHROPIC_API_KEY" }, value = "claude_fast" },
-  { vars = { "GNARUS_ALLOW_VENDOR_LLM", "GEMINI_API_KEY" },    value = "gemini_fast" },
-  { vars = { "GNARUS_ALLOW_VENDOR_LLM", "OPENAI_API_KEY" },    value = "openai" },
-}, "ollama")
-
----@param adapter string
----@param model string
----@param extra_opts table?
-local function adapter_and_default_model(adapter, model, extra_opts)
-  local opts = vim.tbl_deep_extend("force", extra_opts or {},
-    {
-      schema = {
-        model = {
-          default = model
-        }
-      },
-    }
-  );
-  return require("codecompanion.adapters").extend(adapter, opts)
-end
+local inline_adapter = env_cascade({
+  { vars = { "GNARUS_ALLOW_VENDOR_LLM" },                      value = { name = "ollama_cloud", model = "devstral-2:123b-cloud" } },
+  { vars = { "GNARUS_ALLOW_VENDOR_LLM", "GEMINI_API_KEY" },    value = { name = "gemini_fast" } },
+  { vars = { "GNARUS_ALLOW_VENDOR_LLM", "OPENAI_API_KEY" },    value = { name = "openai_fast" } },
+  { vars = { "GNARUS_ALLOW_VENDOR_LLM", "ANTHROPIC_API_KEY" }, value = { name = "anthropic" } },
+}, { name = "ollama" })
 
 ---@param adapter CodeCompanion.HTTPAdapter
 ---@return string
@@ -203,7 +187,7 @@ return {
       },
       interactions = {
         chat = {
-          adapter = chat_adapter_name,
+          adapter = chat_adapter,
           roles = {
             ---The header name for the LLM's messages
             ---@type string|fun(adapter: CodeCompanion.HTTPAdapter): string
@@ -368,7 +352,7 @@ return {
           variables = {},
         },
         inline = {
-          adapter = inline_adapter_name,
+          adapter = inline_adapter,
           keymaps = {
             accept_change = {
               modes = { n = "ga" },
@@ -408,66 +392,91 @@ return {
       },
       adapters = {
         http = {
-          openai       = adapter_and_default_model("openai", "gpt-5", {
-            opts = {
-              stream = true
-            },
-            schema = {
-              reasoning_effort = { default = "low" },
-            },
-          }),
-          openai_high  = adapter_and_default_model("openai", "gpt-5", {
-            opts = {
-              stream = false
-            },
-            schema = {
-              reasoning_effort = { default = "high" },
-            },
-          }),
-          gemini       = adapter_and_default_model("gemini", "gemini-3-flash-preview", {
-            schema = {
-              temperature = {
-                default = 0.3
+          ollama = function()
+            return require("codecompanion.adapters").extend("ollama", {
+              env = { url = os.getenv("OLLAMA_API_BASE") or "http://localhost:11434" },
+              schema = {
+                model = { default = "gpt-oss:latest" },
+                temperature = { default = 0 },
+                keep_alive = { default = "30m" },
               },
-              reasoning_effort = {
-                default = "low"
-              }
-            }
-          }),
-          gemini_fast  = adapter_and_default_model("gemini", "gemini-3-flash-preview", {
-            schema = {
-              temperature = {
-                default = 0
+              parameters = { sync = true },
+            })
+          end,
+
+          ollama_cloud = function()
+            return require("codecompanion.adapters").extend("ollama", {
+              env = { url = os.getenv("OLLAMA_API_BASE") or "http://localhost:11434" },
+              schema = { model = { default = "minimax-m2.1:cloud" } },
+              parameters = { sync = true },
+            })
+          end,
+
+          gemini = function()
+            return require("codecompanion.adapters").extend("gemini", {
+              schema = {
+                model = { default = "gemini-3-flash-preview" },
+                reasoning_effort = { default = "low" },
               },
-              reasoning_effort = {
-                default = "none"
-              }
-            }
-          }),
-          claude       = adapter_and_default_model("anthropic", "claude-opus-4-5"),
-          claude_fast  = adapter_and_default_model("anthropic", "claude-haiku-4-5"),
-          ollama       = adapter_and_default_model("ollama", "gpt-oss:latest", {
-            env = {
-              url = os.getenv("OLLAMA_API_BASE") or "http://localhost:11434"
-            },
-            schema = {
-              temperature = {
-                default = 0
+            })
+          end,
+
+          gemini_fast = function()
+            return require("codecompanion.adapters").extend("gemini", {
+              schema = {
+                model = { default = "gemini-3-flash-preview" },
+                reasoning_effort = { default = "none" },
               },
-              keep_alive = {
-                default = '30m',
-              }
-            },
-            parameters = {
-              sync = true
-            }
-          }),
-          ollama_cloud = adapter_and_default_model("ollama", "minimax-m2.1:cloud", {
-            parameters = {
-              sync = true
-            }
-          }),
-        }
+            })
+          end,
+
+          openai = function()
+            return require("codecompanion.adapters").extend("openai", {
+              opts = { stream = true },
+              schema = {
+                model = {
+                  default = "gpt-5.2",
+                  choices = {
+                    ["gpt-5.2"] = { formatted_name = "GPT 5.2", opts = { has_vision = true, can_reason = true } },
+                    ["gpt-5.1"] = { formatted_name = "GPT 5.1", opts = { has_vision = true, can_reason = true } },
+                    ["gpt-5"] = { formatted_name = "GPT 5", opts = { has_vision = true, can_reason = true } },
+                    ["gpt-5-mini"] = { formatted_name = "GPT 5 Mini", opts = { has_vision = true, can_reason = true } },
+                    ["gpt-5-nano"] = { formatted_name = "GPT 5 Nano", opts = { has_vision = true, can_reason = true } },
+                    ["o4-mini-2025-04-16"] = { formatted_name = "o4 Mini", opts = { has_vision = true, can_reason = true } },
+                    ["o3-mini-2025-01-31"] = { formatted_name = "o3 Mini", opts = { can_reason = true } },
+                    ["o3-2025-04-16"] = { formatted_name = "o3", opts = { has_vision = true, can_reason = true } },
+                    ["o1-2024-12-17"] = { formatted_name = "o1", opts = { has_vision = true, can_reason = true } },
+                    ["gpt-4.1"] = { formatted_name = "GPT 4.1", opts = { has_vision = true } },
+                    ["gpt-4o"] = { formatted_name = "GPT-4o", opts = { has_vision = true } },
+                    ["gpt-4o-mini"] = { formatted_name = "GPT-4o Mini", opts = { has_vision = true } },
+                    ["gpt-4-turbo-preview"] = { formatted_name = "GPT-4 Turbo Preview", opts = { has_vision = true } },
+                    "gpt-4",
+                    "gpt-3.5-turbo",
+                  },
+                },
+                reasoning_effort = { default = "low" },
+              },
+            })
+          end,
+
+          openai_fast = function()
+            return require("codecompanion.adapters").extend("openai", {
+              opts = { stream = true },
+              schema = {
+                model = {
+                  default = "gpt-5-mini",
+                },
+                reasoning_effort = { default = "low" },
+              },
+            })
+          end,
+
+          anthropic = function()
+            return require("codecompanion.adapters").extend("anthropic", {
+              schema = { model = { default = "claude-haiku-4-5" } },
+            })
+          end,
+        },
       },
       extensions = {
         mcphub = {
@@ -509,19 +518,9 @@ return {
             ---Automatically generate titles for new chats
             auto_generate_title = true,
             title_generation_opts = {
-              ---Adapter for generating titles (defaults to current chat adapter)
-              adapter = inline_adapter_name,
-              ---Model for generating titles (defaults to current chat model)
-              -- model = "qwen3",
-              ---Number of user prompts after which to refresh the title (0 to disable)
-              refresh_every_n_prompts = 1, -- e.g., 3 to refresh after every 3rd user prompt
-              ---Maximum number of times to refresh the title (default: 3)
+              adapter = inline_adapter,
+              refresh_every_n_prompts = 1,
               max_refreshes = 3,
-              format_title = function(original_title)
-                -- this can be a custom function that applies some custom
-                -- formatting to the title.
-                return original_title
-              end
             },
             ---On exiting and entering neovim, loads the last chat on opening chat
             continue_last_chat = false,
