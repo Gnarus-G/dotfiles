@@ -11,11 +11,8 @@
         "baseURL": "http://localhost:11434/v1"
       },
       "models": {
-        "qwen3:latest": {},
         "gpt-oss:latest": {},
-        "nemotron-3-nano": {},
-        "minimax-m2.1:cloud": {},
-        "glm-4.7:cloud": {}
+        "minimax-m2.1:cloud": {}
       }
     }
   },

@@ -70,7 +70,7 @@ return {
           name = "ollama",
           api_key = "TERM",
           end_point = ollama_api_base .. '/v1/chat/completions',
-          model = 'minimax-m2.1:cloud', -- 'qwen3-coder:480b-cloud',
+          model = 'devstral-2:123b-cloud', -- 'minimax-m2.1:cloud',
           chat_input = {
             template = "{{{extra_context}}}\n" ..
                 minuet_config.default_chat_input_prefix_first.template,
