@@ -41,6 +41,7 @@
         "--stdio"
       ],
       "command": "npx",
+      "disabled": true,
       "env": {
         "FIGMA_API_KEY": "${FIGMA_API_KEY}"
       }
@@ -51,7 +52,8 @@
       "command": "npx",
       "custom_instructions": {
         "text": "For any non-trivial task, you MUST use this tool to think step-by-step. Your first thought should always be: 'Do I need to search for the latest information before proceeding?'"
-      }
+      },
+      "disabled": true
     },
     "tts": {
       "autoApprove": ["list_voices", "speak", "stop_speaking"],
@@ -59,7 +61,7 @@
       "custom_instructions": {
         "text": "When asked to read or speak, use this server and the `speak` tool."
       },
-      "disabled": false,
+      "disabled": true,
       "env": {
         "DBUS_SESSION_BUS_ADDRESS": "unix:path=/run/user/1000/bus",
         "HIMITHER_TTS_LOG_FILE": "/tmp/tts-mcp-server.log",
