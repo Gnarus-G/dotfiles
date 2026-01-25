@@ -94,10 +94,15 @@ local function setup_extra_keymaps(codecompanion)
             local all_files = vim.tbl_filter(function(f) return vim.fn.filereadable(f) == 1 end,
               vim.fn.systemlist("fd --type f --max-depth 2 . " .. node.absolute_path))
 
-            vim.iter(all_files)
-                :each(function(file)
-                  add_file_to_codecompanion_chat(file, chat)
-                end)
+            if all_files and #all_files > 0 then
+              vim.iter(all_files)
+                  :each(function(file)
+                    add_file_to_codecompanion_chat(file, chat)
+                  end)
+            else
+              vim.notify("No files found in directory: " .. node.absolute_path, vim.log.levels.INFO,
+                { title = "CodeCompanion" })
+            end
           end
         end,
         { desc = "Select file in NvimTree and add to codecompanion chat", buffer = true }
@@ -279,10 +284,14 @@ return {
                     local files_in_dir = vim.tbl_filter(function(f) return vim.fn.filereadable(f) == 1 end,
                       vim.fn.systemlist("fd --type f --max-depth 2 . " .. dir))
 
-                    vim.iter(files_in_dir)
-                        :each(function(filepath)
-                          add_file_to_codecompanion_chat(filepath, chat)
-                        end)
+                    if files_in_dir and #files_in_dir > 0 then
+                      vim.iter(files_in_dir)
+                          :each(function(filepath)
+                            add_file_to_codecompanion_chat(filepath, chat)
+                          end)
+                    else
+                      vim.notify("No files found in directory: " .. dir, vim.log.levels.INFO, { title = "CodeCompanion" })
+                    end
                   end)
               end,
               opts = {
