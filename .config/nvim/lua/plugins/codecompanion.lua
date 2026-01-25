@@ -1,18 +1,18 @@
 local env_cascade = require("gnarus.utils").env_var_cascade
 
 local chat_adapter = env_cascade({
-  { vars = { "GNARUS_ALLOW_VENDOR_LLM", "GEMINI_API_KEY" },    value = { name = "gemini" } },
+  { vars = { "GNARUS_ALLOW_VENDOR_LLM", "GEMINI_API_KEY" },    value = { name = "gemini", model = "gemini-3-flash-preview" } },
   { vars = { "GNARUS_ALLOW_VENDOR_LLM" },                      value = { name = "ollama", model = "minimax-m2.1:cloud" } },
-  { vars = { "GNARUS_ALLOW_VENDOR_LLM", "OPENAI_API_KEY" },    value = { name = "openai" } },
+  { vars = { "GNARUS_ALLOW_VENDOR_LLM", "OPENAI_API_KEY" },    value = { name = "openai", model = "gpt-5.2" } },
   { vars = { "GNARUS_ALLOW_VENDOR_LLM", "ANTHROPIC_API_KEY" }, value = { name = "anthropic", model = "claude-opus-4-5" } },
-}, { name = "ollama" })
+}, { name = "ollama", model = "qwen3-vl" })
 
 local inline_adapter = env_cascade({
   { vars = { "GNARUS_ALLOW_VENDOR_LLM" },                      value = { name = "ollama", model = "devstral-2:123b-cloud" } },
-  { vars = { "GNARUS_ALLOW_VENDOR_LLM", "GEMINI_API_KEY" },    value = { name = "gemini_fast" } },
-  { vars = { "GNARUS_ALLOW_VENDOR_LLM", "OPENAI_API_KEY" },    value = { name = "openai_fast" } },
+  { vars = { "GNARUS_ALLOW_VENDOR_LLM", "GEMINI_API_KEY" },    value = { name = "gemini_fast", model = "gemini-3-flash-preview" } },
+  { vars = { "GNARUS_ALLOW_VENDOR_LLM", "OPENAI_API_KEY" },    value = { name = "openai_fast", model = "gpt-5-mini" } },
   { vars = { "GNARUS_ALLOW_VENDOR_LLM", "ANTHROPIC_API_KEY" }, value = { name = "anthropic", model = "claude-haiku-4-5" } },
-}, { name = "ollama" })
+}, { name = "ollama", model = "qwen3:4b" })
 
 ---@param adapter CodeCompanion.HTTPAdapter
 ---@return string
@@ -405,7 +405,6 @@ return {
             return require("codecompanion.adapters").extend("ollama", {
               env = { url = os.getenv("OLLAMA_API_BASE") or "http://localhost:11434" },
               schema = {
-                model = { default = "gpt-oss:latest" },
                 temperature = { default = 0 },
                 keep_alive = { default = "30m" },
               },
@@ -416,7 +415,6 @@ return {
           gemini = function()
             return require("codecompanion.adapters").extend("gemini", {
               schema = {
-                model = { default = "gemini-3-flash-preview" },
                 reasoning_effort = { default = "medium" },
               },
             })
@@ -425,7 +423,6 @@ return {
           gemini_fast = function()
             return require("codecompanion.adapters").extend("gemini", {
               schema = {
-                model = { default = "gemini-3-flash-preview" },
                 reasoning_effort = { default = "none" },
               },
             })
@@ -436,7 +433,6 @@ return {
               opts = { stream = true },
               schema = {
                 model = {
-                  default = "gpt-5.2",
                   choices = {
                     ["gpt-5.2"] = { formatted_name = "GPT 5.2", opts = { has_vision = true, can_reason = true } },
                     ["gpt-5.1"] = { formatted_name = "GPT 5.1", opts = { has_vision = true, can_reason = true } },
@@ -464,9 +460,6 @@ return {
             return require("codecompanion.adapters").extend("openai", {
               opts = { stream = true },
               schema = {
-                model = {
-                  default = "gpt-5-mini",
-                },
                 reasoning_effort = { default = "low" },
               },
             })
