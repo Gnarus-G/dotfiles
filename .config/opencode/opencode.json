@@ -36,24 +36,6 @@
         "-c",
         "node ${HOME}/.mcphub/servers/fetch-mcp/dist/index.js"
       ]
-    },
-    "sequentialthinking": {
-      "type": "local",
-      "command": [
-        "npx",
-        "-y",
-        "@modelcontextprotocol/server-sequential-thinking"
-      ]
-    },
-    "tts": {
-      "type": "local",
-      "command": ["tts-mcp"],
-      "environment": {
-        "DBUS_SESSION_BUS_ADDRESS": "unix:path=/run/user/1000/bus",
-        "HIMITHER_TTS_LOG_FILE": "/tmp/tts-mcp-server.log",
-        "RUST_LOG": "debug",
-        "XDG_RUNTIME_DIR": "/run/user/1000"
-      }
     }
   }
 }
