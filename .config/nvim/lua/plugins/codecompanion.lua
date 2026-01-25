@@ -2,16 +2,16 @@ local env_cascade = require("gnarus.utils").env_var_cascade
 
 local chat_adapter = env_cascade({
   { vars = { "GNARUS_ALLOW_VENDOR_LLM", "GEMINI_API_KEY" },    value = { name = "gemini" } },
-  { vars = { "GNARUS_ALLOW_VENDOR_LLM" },                      value = { name = "ollama_cloud" } },
+  { vars = { "GNARUS_ALLOW_VENDOR_LLM" },                      value = { name = "ollama", model = "minimax-m2.1:cloud" } },
   { vars = { "GNARUS_ALLOW_VENDOR_LLM", "OPENAI_API_KEY" },    value = { name = "openai" } },
   { vars = { "GNARUS_ALLOW_VENDOR_LLM", "ANTHROPIC_API_KEY" }, value = { name = "anthropic", model = "claude-opus-4-5" } },
 }, { name = "ollama" })
 
 local inline_adapter = env_cascade({
-  { vars = { "GNARUS_ALLOW_VENDOR_LLM" },                      value = { name = "ollama_cloud", model = "devstral-2:123b-cloud" } },
+  { vars = { "GNARUS_ALLOW_VENDOR_LLM" },                      value = { name = "ollama", model = "devstral-2:123b-cloud" } },
   { vars = { "GNARUS_ALLOW_VENDOR_LLM", "GEMINI_API_KEY" },    value = { name = "gemini_fast" } },
   { vars = { "GNARUS_ALLOW_VENDOR_LLM", "OPENAI_API_KEY" },    value = { name = "openai_fast" } },
-  { vars = { "GNARUS_ALLOW_VENDOR_LLM", "ANTHROPIC_API_KEY" }, value = { name = "anthropic" } },
+  { vars = { "GNARUS_ALLOW_VENDOR_LLM", "ANTHROPIC_API_KEY" }, value = { name = "anthropic", model = "claude-haiku-4-5" } },
 }, { name = "ollama" })
 
 ---@param adapter CodeCompanion.HTTPAdapter
@@ -413,19 +413,11 @@ return {
             })
           end,
 
-          ollama_cloud = function()
-            return require("codecompanion.adapters").extend("ollama", {
-              env = { url = os.getenv("OLLAMA_API_BASE") or "http://localhost:11434" },
-              schema = { model = { default = "minimax-m2.1:cloud" } },
-              parameters = { sync = true },
-            })
-          end,
-
           gemini = function()
             return require("codecompanion.adapters").extend("gemini", {
               schema = {
                 model = { default = "gemini-3-flash-preview" },
-                reasoning_effort = { default = "low" },
+                reasoning_effort = { default = "medium" },
               },
             })
           end,
@@ -463,7 +455,7 @@ return {
                     "gpt-3.5-turbo",
                   },
                 },
-                reasoning_effort = { default = "low" },
+                reasoning_effort = { default = "medium" },
               },
             })
           end,
@@ -477,12 +469,6 @@ return {
                 },
                 reasoning_effort = { default = "low" },
               },
-            })
-          end,
-
-          anthropic = function()
-            return require("codecompanion.adapters").extend("anthropic", {
-              schema = { model = { default = "claude-haiku-4-5" } },
             })
           end,
         },
