@@ -1,0 +1,33 @@
+[project]
+name = "stts"
+version = "0.1.0"
+description = "Speech-to-Text and Text-to-Speech library with RunPod integration"
+requires-python = ">=3.10"
+dependencies = [
+    "runpod>=1.7.0",
+    "mcp>=1.0.0",
+    "click>=8.0.0",
+    "pydantic>=2.0.0",
+]
+
+[project.scripts]
+stts-server = "server:main"
+stt = "cli.stt_cli:main"
+tts = "cli.tts_cli:main"
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["cli*", "stt*", "tts*"]
+
+[tool.setuptools]
+py-modules = ["server", "__init__"]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0.0",
+    "ruff>=0.1.0",
+]
