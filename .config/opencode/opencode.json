@@ -39,14 +39,10 @@
     "screenshot-mcp": {
       "type": "local",
       "command": [
-        "sh",
+        "bash",
         "-c",
-        "uv run --project ${HOME}/.config/mcphub/servers/screenshot-mcp python ${HOME}/.config/mcphub/servers/screenshot-mcp/server.py"
-      ],
-      "environment": {
-        "DISPLAY": ":0",
-        "XAUTHORITY": "/tmp/xauth_oeUISK"
-      }
+        "${HOME}/.config/mcphub/servers/screenshot-mcp/run-server.sh"
+      ]
     }
   }
 }
