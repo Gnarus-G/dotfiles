@@ -164,7 +164,7 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
 
 async def main():
     from mcp.server.stdio import stdio_server
-    
+
     async with stdio_server() as streams:
         await app.run(
             streams[0],
