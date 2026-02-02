@@ -46,6 +46,15 @@
         "FIGMA_API_KEY": "${FIGMA_API_KEY}"
       }
     },
+    "screenshot-mcp": {
+      "args": ["${HOME}/.config/mcphub/servers/screenshot-mcp/run-server.sh"],
+      "autoApprove": ["take_screenshot", "list_screenshots"],
+      "command": "sh",
+      "custom_instructions": {
+        "text": "Use this tool to capture screenshots. Modes: fullscreen (entire desktop), current (current monitor), active (active window), window (under cursor). Supports delay parameter for countdown."
+      },
+      "disabled": true
+    },
     "sequentialthinking": {
       "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"],
       "autoApprove": ["sequentialthinking"],
@@ -54,15 +63,6 @@
         "text": "For any non-trivial task, you MUST use this tool to think step-by-step. Your first thought should always be: 'Do I need to search for the latest information before proceeding?'"
       },
       "disabled": true
-    },
-    "screenshot-mcp": {
-      "args": ["${HOME}/.config/mcphub/servers/screenshot-mcp/run-server.sh"],
-      "autoApprove": ["take_screenshot", "list_screenshots"],
-      "command": "sh",
-      "custom_instructions": {
-        "text": "Use this tool to capture screenshots. Modes: fullscreen (entire desktop), current (current monitor), active (active window), window (under cursor). Supports delay parameter for countdown."
-      },
-      "disabled": false
     },
     "tts": {
       "autoApprove": ["list_voices", "speak", "stop_speaking"],
