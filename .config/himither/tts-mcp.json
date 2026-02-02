@@ -1,5 +1,5 @@
 {
-  "tts_backend": "piper",
-  "tts_voice_kokoro": "af_sky",
-  "tts_voice_piper": "0"
+  "tts_backend": "kokoro",
+  "tts_voice_kokoro": "af_nova",
+  "tts_voice_piper": "150"
 }
