@@ -55,6 +55,25 @@
       },
       "disabled": true
     },
+    "screenshot-mcp": {
+      "args": [
+        "run",
+        "--project",
+        "${HOME}/.config/mcphub/servers/screenshot-mcp",
+        "python",
+        "${HOME}/.config/mcphub/servers/screenshot-mcp/server.py"
+      ],
+      "autoApprove": ["take_screenshot", "list_screenshots"],
+      "command": "uv",
+      "custom_instructions": {
+        "text": "Use this tool to capture screenshots. Modes: fullscreen (entire desktop), current (current monitor), active (active window), window (under cursor). Supports delay parameter for countdown."
+      },
+      "disabled": false,
+      "env": {
+        "DISPLAY": ":0",
+        "XAUTHORITY": "/tmp/xauth_oeUISK"
+      }
+    },
     "tts": {
       "autoApprove": ["list_voices", "speak", "stop_speaking"],
       "command": "tts-mcp",

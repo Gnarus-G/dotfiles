@@ -35,6 +35,21 @@
         "-c",
         "node ${HOME}/.mcphub/servers/fetch-mcp/dist/index.js"
       ]
+    },
+    "screenshot-mcp": {
+      "type": "local",
+      "command": [
+        "uv",
+        "run",
+        "--project",
+        "${HOME}/.mcphub/servers/screenshot-mcp",
+        "python",
+        "${HOME}/.mcphub/servers/screenshot-mcp/server.py"
+      ],
+      "environment": {
+        "DISPLAY": ":0",
+        "XAUTHORITY": "/tmp/xauth_oeUISK"
+      }
     }
   }
 }
