@@ -3,6 +3,8 @@
 import sys
 import os
 import time
+import tty
+import termios
 import queue
 import select
 import threading
@@ -494,7 +496,11 @@ class LoopRecorder:
         print(f"   Directory: {self.output_dir.absolute()}")
         print(f"   Controls: [Enter] = next segment | [q + Enter] = quit")
         print(f"   Press Enter to start first recording...")
-        input()
+        
+        # Wait for initial Enter using select (more robust than input after recording)
+        while not select.select([sys.stdin], [], [], 0.1)[0]:
+            pass
+        sys.stdin.read(1)  # Consume the newline
         
         try:
             while True:
@@ -522,9 +528,19 @@ class LoopRecorder:
                     except Exception as e:
                         print(f"✗ Failed: {e}")
                 
-                # Prompt for next action
+                # Prompt for next action using select (more robust)
                 print(f"\n[Enter] = record segment {segment + 1} | [q + Enter] = quit")
-                response = input().strip().lower()
+                
+                # Read line with timeout to avoid blocking forever
+                response = ""
+                while True:
+                    if select.select([sys.stdin], [], [], 0.1)[0]:
+                        char = sys.stdin.read(1)
+                        if char == '\n':
+                            break
+                        response += char
+                
+                response = response.strip().lower()
                 
                 if response == "q":
                     print(f"\n✓ Loop mode complete. {len(self.sessions)} segments recorded.")

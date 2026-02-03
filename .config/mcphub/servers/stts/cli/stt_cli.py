@@ -180,9 +180,6 @@ def record_command(
             if not output_dir:
                 output_dir = Path.cwd()
             
-            click.echo(f"🎤 Starting loop recording mode...")
-            click.echo(f"   Output directory: {output_dir.absolute()}")
-            
             # Setup transcription callback if needed
             def transcribe_func(audio_path: Path) -> str:
                 stt = RunPodSTT(api_key=api_key, endpoint_id=endpoint_id)
