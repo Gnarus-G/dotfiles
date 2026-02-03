@@ -17,7 +17,9 @@ configPaths=(
   .config/picom.conf
   .zshrc
   .gitconfig
-  .local/bin
+
+  .local/bin/clip
+  .local/bin/getfonts.sh
 )
 
 for p in ${configPaths[*]}; do
