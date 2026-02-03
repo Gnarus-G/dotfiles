@@ -92,14 +92,35 @@ class RunPodSTT(SpeechToText):
             # Run transcription
             result = self.endpoint.run_sync({"input": input_data})
             
+            # Handle None or empty response
+            if not result:
+                raise RuntimeError(
+                    "Transcription failed: No response from RunPod endpoint. "
+                    "The endpoint may be cold-starting or the audio file may be too large. "
+                    f"Endpoint ID: {self.endpoint_id}"
+                )
+            
+            # Handle explicit error in response
             if "error" in result:
-                raise RuntimeError(f"Transcription failed: {result['error']}")
+                error_msg = result["error"]
+                raise RuntimeError(
+                    f"Transcription failed: {error_msg}. "
+                    f"Check endpoint logs for details. Endpoint ID: {self.endpoint_id}"
+                )
             
             # Extract transcription from result
             # RunPod faster-whisper endpoint returns specific format
             transcription = result.get("transcription", "")
             detected_language = result.get("detected_language")
             segments = result.get("segments", [])
+            
+            # Handle empty transcription
+            if not transcription and not segments:
+                raise RuntimeError(
+                    "Transcription failed: Empty response from endpoint. "
+                    "The audio may be silent or the endpoint format may have changed. "
+                    f"Response keys: {list(result.keys())}"
+                )
             
             return TranscriptionResult(
                 text=transcription,
