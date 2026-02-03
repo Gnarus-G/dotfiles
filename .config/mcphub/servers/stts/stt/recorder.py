@@ -154,6 +154,7 @@ class RecorderActor(Actor):
         self._output_path: Optional[Path] = None
         self._start_time: Optional[float] = None
         self._result_queue: queue.Queue[Result] = queue.Queue()
+        self._recording_complete: threading.Event = threading.Event()
         
     def handle(self, msg: Message) -> None:
         """Process messages sequentially - no race conditions."""
@@ -257,6 +258,7 @@ class RecorderActor(Actor):
                 audio_path=self._output_path,
                 duration=duration
             ))
+            self._recording_complete.set()
             self._output_path = None
             self._start_time = None
     
@@ -308,6 +310,9 @@ class RecorderActor(Actor):
         
         This is the imperative shell that interfaces with the pure actor core.
         """
+        # Reset completion event
+        self._recording_complete.clear()
+        
         # Start recording
         self.send(StartRecording(output_path=output_path, duration=duration))
         
@@ -317,8 +322,14 @@ class RecorderActor(Actor):
             self.send(StopRecording())
         # else: input detection is handled by Actor's _run loop
         
-        # Wait for result
-        result = self._result_queue.get(timeout=10)
+        # Wait for recording to complete (no timeout - waits for user input or duration)
+        self._recording_complete.wait()
+        
+        # Get result (should be ready immediately after completion)
+        try:
+            result = self._result_queue.get(timeout=5)
+        except queue.Empty:
+            raise RuntimeError("Recording completed but no result received from actor")
         
         if isinstance(result, Err):
             raise RuntimeError(result.error)
@@ -440,6 +451,17 @@ def record_audio(
     try:
         session = actor.record(output_path, duration)
         return session
+    except Exception as e:
+        # Add context to any recording errors
+        import traceback
+        error_msg = str(e) if str(e) else f"{type(e).__name__}: {repr(e)}"
+        raise RuntimeError(
+            f"Recording failed: {error_msg}\n"
+            f"Type: {type(e).__name__}\n"
+            f"Output: {output_path}\n"
+            f"Duration: {duration}\n"
+            f"Traceback:\n{traceback.format_exc()}"
+        ) from e
     finally:
         actor.stop()
 

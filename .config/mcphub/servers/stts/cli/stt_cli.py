@@ -239,7 +239,12 @@ def record_command(
         click.echo(f"Error: {e}", err=True)
         return 1
     except Exception as e:
-        click.echo(f"Unexpected error: {e}", err=True)
+        import traceback
+        error_msg = str(e) if str(e) else f"{type(e).__name__}: {repr(e)}"
+        click.echo(f"\nUnexpected error: {error_msg}", err=True)
+        click.echo(f"Error type: {type(e).__name__}", err=True)
+        click.echo("Traceback:", err=True)
+        click.echo(traceback.format_exc(), err=True)
         return 1
 
 
