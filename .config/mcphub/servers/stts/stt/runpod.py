@@ -88,45 +88,68 @@ class RunPodSTT(SpeechToText):
         # Add any additional parameters
         input_data.update(kwargs)
         
-        try:
-            # Run transcription
-            result = self.endpoint.run_sync({"input": input_data})
-            
-            # Handle None or empty response
-            if not result:
-                raise RuntimeError(
-                    "Transcription failed: No response from RunPod endpoint. "
-                    "The endpoint may be cold-starting or the audio file may be too large. "
-                    f"Endpoint ID: {self.endpoint_id}"
+        # Retry logic for cold-starting serverless endpoints
+        max_retries = 3
+        retry_delay = 10  # seconds
+        
+        for attempt in range(max_retries):
+            try:
+                # Run transcription
+                result = self.endpoint.run_sync({"input": input_data})
+                
+                # Handle None or empty response (cold start scenario)
+                if not result:
+                    if attempt < max_retries - 1:
+                        import time
+                        print(f"  Endpoint cold-starting, waiting {retry_delay}s... (attempt {attempt + 1}/{max_retries})")
+                        time.sleep(retry_delay)
+                        retry_delay *= 2  # Exponential backoff
+                        continue
+                    raise RuntimeError(
+                        "Transcription failed: No response from RunPod endpoint after retries. "
+                        "The endpoint may be offline or the audio file may be too large. "
+                        f"Endpoint ID: {self.endpoint_id}"
+                    )
+                
+                # Handle explicit error in response
+                if "error" in result:
+                    error_msg = result["error"]
+                    raise RuntimeError(
+                        f"Transcription failed: {error_msg}. "
+                        f"Check endpoint logs for details. Endpoint ID: {self.endpoint_id}"
+                    )
+                
+                # Extract transcription from result
+                # RunPod faster-whisper endpoint returns specific format
+                transcription = result.get("transcription", "")
+                detected_language = result.get("detected_language")
+                segments = result.get("segments", [])
+                
+                # Handle empty transcription
+                if not transcription and not segments:
+                    raise RuntimeError(
+                        "Transcription failed: Empty response from endpoint. "
+                        "The audio may be silent or the endpoint format may have changed. "
+                        f"Response keys: {list(result.keys())}"
+                    )
+                
+                return TranscriptionResult(
+                    text=transcription,
+                    language=detected_language or language,
+                    segments=segments
                 )
-            
-            # Handle explicit error in response
-            if "error" in result:
-                error_msg = result["error"]
-                raise RuntimeError(
-                    f"Transcription failed: {error_msg}. "
-                    f"Check endpoint logs for details. Endpoint ID: {self.endpoint_id}"
-                )
-            
-            # Extract transcription from result
-            # RunPod faster-whisper endpoint returns specific format
-            transcription = result.get("transcription", "")
-            detected_language = result.get("detected_language")
-            segments = result.get("segments", [])
-            
-            # Handle empty transcription
-            if not transcription and not segments:
-                raise RuntimeError(
-                    "Transcription failed: Empty response from endpoint. "
-                    "The audio may be silent or the endpoint format may have changed. "
-                    f"Response keys: {list(result.keys())}"
-                )
-            
-            return TranscriptionResult(
-                text=transcription,
-                language=detected_language or language,
-                segments=segments
-            )
-            
-        except Exception as e:
-            raise RuntimeError(f"Transcription failed: {str(e)}") from e
+                
+            except RuntimeError:
+                # Re-raise runtime errors immediately (don't retry actual failures)
+                raise
+            except Exception as e:
+                if attempt < max_retries - 1:
+                    import time
+                    print(f"  Transcription error, retrying in {retry_delay}s... (attempt {attempt + 1}/{max_retries})")
+                    time.sleep(retry_delay)
+                    retry_delay *= 2
+                    continue
+                raise RuntimeError(f"Transcription failed after {max_retries} attempts: {str(e)}") from e
+        
+        # Should never reach here
+        raise RuntimeError("Transcription failed: Exceeded maximum retry attempts")
