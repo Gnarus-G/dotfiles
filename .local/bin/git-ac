@@ -1,0 +1,114 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# git-ac: Automated commit message generation using Claude CLI
+# Usage: git ac [options]
+
+MODEL="haiku"
+NO_EDIT=false
+DRY_RUN=false
+
+usage() {
+  cat <<EOF
+Usage: git ac [options]
+
+Generate a commit message using Claude CLI for staged changes.
+
+Options:
+  -y, --no-edit       Skip editor, commit directly with generated message
+  -n, --dry-run       Print generated message to stdout, don't commit
+  -m, --model MODEL   Override model (default: haiku)
+  -h, --help          Show this help message
+
+Examples:
+  git add -p && git ac       Stage changes interactively, then generate and edit message
+  git ac -y                  Quick commit without editing
+  git ac --dry-run           Preview the generated message
+  git ac --model sonnet      Use a different model
+EOF
+}
+
+# Parse arguments
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -y|--no-edit)
+      NO_EDIT=true
+      shift
+      ;;
+    -n|--dry-run)
+      DRY_RUN=true
+      shift
+      ;;
+    -m|--model)
+      MODEL="$2"
+      shift 2
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      echo "Unknown option: $1" >&2
+      usage >&2
+      exit 1
+      ;;
+  esac
+done
+
+# Check for staged changes
+if git diff --staged --quiet; then
+  echo "Error: No staged changes" >&2
+  exit 1
+fi
+
+# Get staged diff
+DIFF=$(git diff --staged)
+
+# System prompt for Claude
+SYSTEM_PROMPT="You are a knowledgeable software developer generating a Git commit message.
+
+Rules:
+- Subject line: max 50 characters, imperative verb (e.g., \"Add frontend unit tests\")
+- NO type prefixes like \"feat:\", \"fix:\", \"refactor:\"
+- Body: explain \"what\" and \"why\", not \"how\", wrapped at 72 characters
+- Footer: references like \"Fixes #123\", \"Closes #456\", or \"BREAKING CHANGE: ...\"
+
+Output ONLY the commit message, no markdown fences, no explanation.
+Format:
+<subject>
+
+<body>
+
+<footer (if applicable)>"
+
+# Generate commit message via Claude CLI
+MESSAGE=$(claude --print --model "$MODEL" --system-prompt "$SYSTEM_PROMPT" \
+  "Write a commit message for this Git diff:
+
+$DIFF")
+
+# Handle --dry-run
+if $DRY_RUN; then
+  echo "$MESSAGE"
+  exit 0
+fi
+
+# Write to temp file with name nvim recognizes as gitcommit
+TMPDIR=$(mktemp -d)
+TMPFILE="$TMPDIR/COMMIT_EDITMSG"
+trap 'rm -rf "$TMPDIR"' EXIT
+echo "$MESSAGE" > "$TMPFILE"
+
+# Open editor unless --no-edit
+if ! $NO_EDIT; then
+  ${GIT_EDITOR:-${EDITOR:-vi}} "$TMPFILE"
+fi
+
+# Check if message is empty
+if [[ ! -s "$TMPFILE" ]]; then
+  echo "Aborting: empty commit message" >&2
+  exit 1
+fi
+
+# Commit with the message
+git commit -F "$TMPFILE"
