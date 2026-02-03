@@ -1,7 +1,6 @@
 packer_compiled.lua
 .luarc.json
 .aider*
-.local
 .opencode
 .gitconfig
 .config/gtk-3.0
