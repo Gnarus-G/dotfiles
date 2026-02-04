@@ -3,8 +3,6 @@
 import sys
 import os
 import time
-import tty
-import termios
 import queue
 import select
 import threading
@@ -492,15 +490,13 @@ class LoopRecorder:
         self.output_dir.mkdir(parents=True, exist_ok=True)
         segment = 1
         
-        print(f"\n🎤 Loop Recording Mode")
-        print(f"   Directory: {self.output_dir.absolute()}")
-        print(f"   Controls: [Enter] = next segment | [q + Enter] = quit")
-        print(f"   Press Enter to start first recording...")
+        print(f"\n🎤 Loop Recording Mode", flush=True)
+        print(f"   Directory: {self.output_dir.absolute()}", flush=True)
+        print(f"   Controls: Press any key to record segment, 'q' then Enter to quit", flush=True)
+        print(f"   Press Enter to start first recording...", flush=True)
         
-        # Wait for initial Enter using select (more robust than input after recording)
-        while not select.select([sys.stdin], [], [], 0.1)[0]:
-            pass
-        sys.stdin.read(1)  # Consume the newline
+        # Simple blocking input for first Enter
+        sys.stdin.readline()
         
         try:
             while True:
@@ -528,19 +524,9 @@ class LoopRecorder:
                     except Exception as e:
                         print(f"✗ Failed: {e}")
                 
-                # Prompt for next action using select (more robust)
-                print(f"\n[Enter] = record segment {segment + 1} | [q + Enter] = quit")
-                
-                # Read line with timeout to avoid blocking forever
-                response = ""
-                while True:
-                    if select.select([sys.stdin], [], [], 0.1)[0]:
-                        char = sys.stdin.read(1)
-                        if char == '\n':
-                            break
-                        response += char
-                
-                response = response.strip().lower()
+                # Simple prompt for next action
+                print(f"\nPress Enter to record segment {segment + 1}, or 'q' then Enter to quit")
+                response = sys.stdin.readline().strip().lower()
                 
                 if response == "q":
                     print(f"\n✓ Loop mode complete. {len(self.sessions)} segments recorded.")
