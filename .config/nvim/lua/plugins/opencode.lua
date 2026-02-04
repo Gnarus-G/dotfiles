@@ -1,78 +1,77 @@
 return {
   "sudo-tee/opencode.nvim",
   config = function()
-    -- Default configuration with all available options
     require('opencode').setup({
-      preferred_picker = nil,       -- 'telescope', 'fzf', 'mini.pick', 'snacks', 'select', if nil, it will use the best available picker. Note mini.pick does not support multiple selections
-      preferred_completion = nil,   -- 'blink', 'nvim-cmp','vim_complete' if nil, it will use the best available completion
-      default_global_keymaps = true, -- If false, disables all default global keymaps
-      default_mode = 'build',       -- 'build' or 'plan' or any custom configured. @see [OpenCode Agents](https://opencode.ai/docs/modes/)
-      default_system_prompt = nil,  -- Custom system prompt to use for all sessions. If nil, uses the default built-in system prompt
-      keymap_prefix = '<leader>o',  -- Default keymap prefix for global keymaps change to your preferred prefix and it will be applied to all keymaps starting with <leader>o
+      preferred_picker = nil,           -- 'telescope', 'fzf', 'mini.pick', 'snacks', 'select', if nil, it will use the best available picker. Note mini.pick does not support multiple selections
+      preferred_completion = nil,       -- 'blink', 'nvim-cmp','vim_complete' if nil, it will use the best available completion
+      default_global_keymaps = true,    -- If false, disables all default global keymaps
+      default_mode = 'build',           -- 'build' or 'plan' or any custom configured. @see [OpenCode Agents](https://opencode.ai/docs/modes/)
+      default_system_prompt = nil,      -- Custom system prompt to use for all sessions. If nil, uses the default built-in system prompt
+      keymap_prefix = '<leader>o',      -- Default keymap prefix for global keymaps change to your preferred prefix and it will be applied to all keymaps starting with <leader>o
       opencode_executable = 'opencode', -- Name of your opencode binary
       keymap = {
         editor = {
-          ['<leader>og'] = { 'toggle' },                      -- Open opencode. Close if opened
-          ['<leader>oi'] = { 'open_input' },                  -- Opens and focuses on input window on insert mode
-          ['<leader>oI'] = { 'open_input_new_session' },      -- Opens and focuses on input window on insert mode. Creates a new session
-          ['<leader>oo'] = { 'open_output' },                 -- Opens and focuses on output window
-          ['<leader>ot'] = { 'toggle_focus' },                -- Toggle focus between opencode and last window
-          ['<leader>oT'] = { 'timeline' },                    -- Display timeline picker to navigate/undo/redo/fork messages
-          ['<leader>oq'] = { 'close' },                       -- Close UI windows
-          ['<leader>os'] = { 'select_session' },              -- Select and load a opencode session
-          ['<leader>oR'] = { 'rename_session' },              -- Rename current session
-          ['<leader>op'] = { 'configure_provider' },          -- Quick provider and model switch from predefined list
-          ['<leader>oV'] = { 'configure_variant' },           -- Switch model variant for the current model
-          ['<leader>oz'] = { 'toggle_zoom' },                 -- Zoom in/out on the Opencode windows
-          ['<leader>ov'] = { 'paste_image' },                 -- Paste image from clipboard into current session
-          ['<leader>od'] = { 'diff_open' },                   -- Opens a diff tab of a modified file since the last opencode prompt
-          ['<leader>o]'] = { 'diff_next' },                   -- Navigate to next file diff
-          ['<leader>o['] = { 'diff_prev' },                   -- Navigate to previous file diff
-          ['<leader>oc'] = { 'diff_close' },                  -- Close diff view tab and return to normal editing
-          ['<leader>ora'] = { 'diff_revert_all_last_prompt' }, -- Revert all file changes since the last opencode prompt
-          ['<leader>ort'] = { 'diff_revert_this_last_prompt' }, -- Revert current file changes since the last opencode prompt
-          ['<leader>orA'] = { 'diff_revert_all' },            -- Revert all file changes since the last opencode session
-          ['<leader>orT'] = { 'diff_revert_this' },           -- Revert current file changes since the last opencode session
-          ['<leader>orr'] = { 'diff_restore_snapshot_file' }, -- Restore a file to a restore point
-          ['<leader>orR'] = { 'diff_restore_snapshot_all' },  -- Restore all files to a restore point
-          ['<leader>ox'] = { 'swap_position' },               -- Swap Opencode pane left/right
-          ['<leader>ott'] = { 'toggle_tool_output' },         -- Toggle tools output (diffs, cmd output, etc.)
-          ['<leader>otr'] = { 'toggle_reasoning_output' },    -- Toggle reasoning output (thinking steps)
+          ['<leader>og'] = { 'toggle' },                          -- Open opencode. Close if opened
+          ['<leader>oi'] = { 'open_input' },                      -- Opens and focuses on input window on insert mode
+          ['<leader>oI'] = { 'open_input_new_session' },          -- Opens and focuses on input window on insert mode. Creates a new session
+          ['<leader>oo'] = { 'open_output' },                     -- Opens and focuses on output window
+          ['<leader>ot'] = { 'toggle_focus' },                    -- Toggle focus between opencode and last window
+          ['<leader>oT'] = { 'timeline' },                        -- Display timeline picker to navigate/undo/redo/fork messages
+          ['<leader>oq'] = { 'close' },                           -- Close UI windows
+          ['<leader>os'] = { 'select_session' },                  -- Select and load a opencode session
+          ['<leader>oR'] = { 'rename_session' },                  -- Rename current session
+          ['<leader>op'] = { 'configure_provider' },              -- Quick provider and model switch from predefined list
+          ['<leader>oV'] = { 'configure_variant' },               -- Switch model variant for the current model
+          ['<leader>oz'] = { 'toggle_zoom' },                     -- Zoom in/out on the Opencode windows
+          ['<leader>ov'] = { 'paste_image' },                     -- Paste image from clipboard into current session
+          ['<leader>od'] = { 'diff_open' },                       -- Opens a diff tab of a modified file since the last opencode prompt
+          ['<leader>o]'] = { 'diff_next' },                       -- Navigate to next file diff
+          ['<leader>o['] = { 'diff_prev' },                       -- Navigate to previous file diff
+          ['<leader>oc'] = { 'diff_close' },                      -- Close diff view tab and return to normal editing
+          ['<leader>ora'] = { 'diff_revert_all_last_prompt' },    -- Revert all file changes since the last opencode prompt
+          ['<leader>ort'] = { 'diff_revert_this_last_prompt' },   -- Revert current file changes since the last opencode prompt
+          ['<leader>orA'] = { 'diff_revert_all' },                -- Revert all file changes since the last opencode session
+          ['<leader>orT'] = { 'diff_revert_this' },               -- Revert current file changes since the last opencode session
+          ['<leader>orr'] = { 'diff_restore_snapshot_file' },     -- Restore a file to a restore point
+          ['<leader>orR'] = { 'diff_restore_snapshot_all' },      -- Restore all files to a restore point
+          ['<leader>ox'] = { 'swap_position' },                   -- Swap Opencode pane left/right
+          ['<leader>ott'] = { 'toggle_tool_output' },             -- Toggle tools output (diffs, cmd output, etc.)
+          ['<leader>otr'] = { 'toggle_reasoning_output' },        -- Toggle reasoning output (thinking steps)
           ['<leader>o/'] = { 'quick_chat', mode = { 'n', 'x' } }, -- Open quick chat input with selection context in visual mode or current line context in normal mode
         },
         input_window = {
           ['<S-cr>'] = { 'submit_input_prompt', mode = { 'n', 'i' } }, -- Submit prompt (normal mode and insert mode)
-          ['<esc>'] = { 'close' },                                 -- Close UI windows
-          ['<C-c>'] = { 'cancel' },                                -- Cancel opencode request while it is running
-          ['~'] = { 'mention_file', mode = 'i' },                  -- Pick a file and add to context. See File Mentions section
-          ['@'] = { 'mention', mode = 'i' },                       -- Insert mention (file/agent)
-          ['/'] = { 'slash_commands', mode = 'i' },                -- Pick a command to run in the input window
-          ['#'] = { 'context_items', mode = 'i' },                 -- Manage context items (current file, selection, diagnostics, mentioned files)
-          ['<M-v>'] = { 'paste_image', mode = 'i' },               -- Paste image from clipboard as attachment
-          ['<C-i>'] = { 'focus_input', mode = { 'n', 'i' } },      -- Focus on input window and enter insert mode at the end of the input from the output window
-          ['<tab>'] = { 'toggle_pane', mode = { 'n', 'i' } },      -- Toggle between input and output panes
-          ['<up>'] = { 'prev_prompt_history', mode = { 'n', 'i' } }, -- Navigate to previous prompt in history
+          ['<esc>'] = { 'close' },                                     -- Close UI windows
+          ['<C-c>'] = { 'cancel' },                                    -- Cancel opencode request while it is running
+          ['~'] = { 'mention_file', mode = 'i' },                      -- Pick a file and add to context. See File Mentions section
+          ['@'] = { 'mention', mode = 'i' },                           -- Insert mention (file/agent)
+          ['/'] = { 'slash_commands', mode = 'i' },                    -- Pick a command to run in the input window
+          ['#'] = { 'context_items', mode = 'i' },                     -- Manage context items (current file, selection, diagnostics, mentioned files)
+          ['<M-v>'] = { 'paste_image', mode = 'i' },                   -- Paste image from clipboard as attachment
+          ['<C-i>'] = { 'focus_input', mode = { 'n', 'i' } },          -- Focus on input window and enter insert mode at the end of the input from the output window
+          ['<tab>'] = { 'toggle_pane', mode = { 'n', 'i' } },          -- Toggle between input and output panes
+          ['<up>'] = { 'prev_prompt_history', mode = { 'n', 'i' } },   -- Navigate to previous prompt in history
           ['<down>'] = { 'next_prompt_history', mode = { 'n', 'i' } }, -- Navigate to next prompt in history
-          ['<M-m>'] = { 'switch_mode' },                           -- Switch between modes (build/plan)
-          ['<M-r>'] = { 'cycle_variant', mode = { 'n', 'i' } },    -- Cycle through available model variants
+          ['<M-m>'] = { 'switch_mode' },                               -- Switch between modes (build/plan)
+          ['<M-r>'] = { 'cycle_variant', mode = { 'n', 'i' } },        -- Cycle through available model variants
         },
         output_window = {
-          ['<esc>'] = { 'close' },                        -- Close UI windows
-          ['<C-c>'] = { 'cancel' },                       -- Cancel opencode request while it is running
-          [']]'] = { 'next_message' },                    -- Navigate to next message in the conversation
-          ['[['] = { 'prev_message' },                    -- Navigate to previous message in the conversation
+          ['<esc>'] = { 'close' },                            -- Close UI windows
+          ['<C-c>'] = { 'cancel' },                           -- Cancel opencode request while it is running
+          [']]'] = { 'next_message' },                        -- Navigate to next message in the conversation
+          ['[['] = { 'prev_message' },                        -- Navigate to previous message in the conversation
           ['<tab>'] = { 'toggle_pane', mode = { 'n', 'i' } }, -- Toggle between input and output panes
-          ['i'] = { 'focus_input', 'n' },                 -- Focus on input window and enter insert mode at the end of the input from the output window
-          ['<M-r>'] = { 'cycle_variant', mode = { 'n' } }, -- Cycle through available model variants
-          ['<leader>oS'] = { 'select_child_session' },    -- Select and load a child session
-          ['<leader>oD'] = { 'debug_message' },           -- Open raw message in new buffer for debugging
-          ['<leader>oO'] = { 'debug_output' },            -- Open raw output in new buffer for debugging
-          ['<leader>ods'] = { 'debug_session' },          -- Open raw session in new buffer for debugging
+          ['i'] = { 'focus_input', 'n' },                     -- Focus on input window and enter insert mode at the end of the input from the output window
+          ['<M-r>'] = { 'cycle_variant', mode = { 'n' } },    -- Cycle through available model variants
+          ['<leader>oS'] = { 'select_child_session' },        -- Select and load a child session
+          ['<leader>oD'] = { 'debug_message' },               -- Open raw message in new buffer for debugging
+          ['<leader>oO'] = { 'debug_output' },                -- Open raw output in new buffer for debugging
+          ['<leader>ods'] = { 'debug_session' },              -- Open raw session in new buffer for debugging
         },
         session_picker = {
           rename_session = { '<C-r>' }, -- Rename selected session in the session picker
           delete_session = { '<C-d>' }, -- Delete selected session in the session picker
-          new_session = { '<C-s>' }, -- Create and switch to a new session in the session picker
+          new_session = { '<C-s>' },    -- Create and switch to a new session in the session picker
         },
         timeline_picker = {
           undo = { '<C-u>', mode = { 'i', 'n' } }, -- Undo to selected message in timeline picker
@@ -80,7 +79,7 @@ return {
         },
         history_picker = {
           delete_entry = { '<C-d>', mode = { 'i', 'n' } }, -- Delete selected entry in the history picker
-          clear_all = { '<C-X>', mode = { 'i', 'n' } }, -- Clear all entries in the history picker
+          clear_all = { '<C-X>', mode = { 'i', 'n' } },    -- Clear all entries in the history picker
         },
         model_picker = {
           toggle_favorite = { '<C-f>', mode = { 'i', 'n' } },
@@ -90,33 +89,33 @@ return {
         },
       },
       ui = {
-        position = 'right',                                                    -- 'right' (default), 'left' or 'current'. Position of the UI split. 'current' uses the current window for the output.
-        input_position = 'bottom',                                             -- 'bottom' (default) or 'top'. Position of the input window
-        window_width = 0.40,                                                   -- Width as percentage of editor width
-        zoom_width = 0.8,                                                      -- Zoom width as percentage of editor width
-        display_model = true,                                                  -- Display model name on top winbar
-        display_context_size = true,                                           -- Display context size in the footer
-        display_cost = true,                                                   -- Display cost in the footer
+        position = 'right',                                                        -- 'right' (default), 'left' or 'current'. Position of the UI split. 'current' uses the current window for the output.
+        input_position = 'bottom',                                                 -- 'bottom' (default) or 'top'. Position of the input window
+        window_width = 0.40,                                                       -- Width as percentage of editor width
+        zoom_width = 0.8,                                                          -- Zoom width as percentage of editor width
+        display_model = true,                                                      -- Display model name on top winbar
+        display_context_size = true,                                               -- Display context size in the footer
+        display_cost = true,                                                       -- Display cost in the footer
         window_highlight = 'Normal:OpencodeBackground,FloatBorder:OpencodeBorder', -- Highlight group for the opencode window
         icons = {
-          preset = 'nerdfonts',                                                -- 'nerdfonts' | 'text'. Choose UI icon style (default: 'nerdfonts')
-          overrides = {},                                                      -- Optional per-key overrides, see section below
+          preset = 'nerdfonts',                                                    -- 'nerdfonts' | 'text'. Choose UI icon style (default: 'nerdfonts')
+          overrides = {},                                                          -- Optional per-key overrides, see section below
         },
         output = {
           tools = {
-            show_output = true,       -- Show tools output [diffs, cmd output, etc.] (default: true)
+            show_output = true,           -- Show tools output [diffs, cmd output, etc.] (default: true)
             show_reasoning_output = true, -- Show reasoning/thinking steps output (default: true)
           },
           rendering = {
             markdown_debounce_ms = 250, -- Debounce time for markdown rendering on new data (default: 250ms)
-            on_data_rendered = nil, -- Called when new data is rendered; set to false to disable default RenderMarkdown/Markview behavior
+            on_data_rendered = nil,     -- Called when new data is rendered; set to false to disable default RenderMarkdown/Markview behavior
           },
         },
         input = {
           min_height = 0.10, -- min height of prompt input as percentage of window height
           max_height = 0.25, -- max height of prompt input as percentage of window height
           text = {
-            wrap = false, -- Wraps text inside input window
+            wrap = false,    -- Wraps text inside input window
           },
           -- Auto-hide input window when prompt is submitted or focus switches to output window
           auto_hide = false,
@@ -160,15 +159,15 @@ return {
         },
       },
       context = {
-        enabled = true,  -- Enable automatic context capturing
+        enabled = true,      -- Enable automatic context capturing
         cursor_data = {
-          enabled = false, -- Include cursor position and line content in the context
+          enabled = false,   -- Include cursor position and line content in the context
           context_lines = 5, -- Number of lines before and after cursor to include in context
         },
         diagnostics = {
-          info = false,     -- Include diagnostics info in the context (default to false
-          warn = true,      -- Include diagnostics warnings in the context
-          error = true,     -- Include diagnostics errors in the context
+          info = false,         -- Include diagnostics info in the context (default to false
+          warn = true,          -- Include diagnostics warnings in the context
+          error = true,         -- Include diagnostics errors in the context
           only_closest = false, -- If true, only diagnostics for cursor/selection
         },
         current_file = {
@@ -209,16 +208,16 @@ return {
           vim.notify("📅 Session loaded: " .. session_name, vim.log.levels.INFO)
         end,
         on_done_thinking = function()
-          vim.notify("✅ Processing complete!", vim.log.levels.INFO)
+          vim.notify("✅ Thinking complete!", vim.log.levels.INFO)
         end,
         on_permission_requested = function(permission)
           vim.notify("⚠️  Permission requested: " .. permission, vim.log.levels.WARN)
         end,
       },
       quick_chat = {
-        default_model = nil, -- works better with a fast model like gpt-4.1
+        default_model = nil,    -- works better with a fast model like gpt-4.1
         default_agent = 'plan', -- plan ensure no file modifications by default
-        instructions = nil, -- Use built-in instructions if nil
+        instructions = nil,     -- Use built-in instructions if nil
       },
     })
   end,
@@ -230,7 +229,7 @@ return {
         anti_conceal = { enabled = false },
         file_types = { 'markdown', 'opencode_output' },
       },
-      ft = { 'markdown', 'Avante', 'copilot-chat', 'opencode_output' },
+      ft = { 'markdown', 'opencode_output' },
     },
     'hrsh7th/nvim-cmp',
     'folke/snacks.nvim',
