@@ -3,8 +3,8 @@ local harpoon_ctx = nil -- Lazy-loaded to avoid circular dependency
 
 local function is_file_of_current_buffer(filepath)
   local current_buf_filepath = vim.api.nvim_buf_get_name(0)
-  local full_filepath = vim.fn.fnamemodify(filepath, ":p")
-  local full_current_buf_filepath = vim.fn.fnamemodify(current_buf_filepath, ":p")
+  local full_filepath = vim.fn.expand(filepath)
+  local full_current_buf_filepath = vim.fn.expand(current_buf_filepath)
   return full_filepath == full_current_buf_filepath
 end
 
@@ -78,61 +78,6 @@ local function get_formatted_files_context(files)
   return table.concat(files_contents, "\n")
 end
 
---- @alias LlmChatType "codecompanion"
-
----@return {ft: LlmChatType, content: string}[]
-local function get_chats_context()
-  local results = {}
-  for _, b in ipairs(vim.api.nvim_list_bufs()) do
-    if vim.api.nvim_buf_is_valid(b) and vim.bo[b].filetype == "codecompanion" then
-      local lines = vim.api.nvim_buf_get_lines(b, 0, -1, false)
-      local content = table.concat(lines, "\n")
-      if content ~= "" then
-        table.insert(results, { ft = "codecompanion", content = content })
-      end
-    end
-  end
-  return results
-end
-
----@return string
-local function get_formatted_chats_context()
-  local chunks = {}
-  -- Prefer visible chats first
-  local visible, hidden = {}, {}
-  for _, b in ipairs(vim.api.nvim_list_bufs()) do
-    if vim.api.nvim_buf_is_valid(b) and vim.bo[b].filetype == "codecompanion" then
-      if vim.fn.bufwinnr(b) > 0 then table.insert(visible, b) else table.insert(hidden, b) end
-    end
-  end
-  local ordered = vim.list_extend(visible, hidden)
-  for _, b in ipairs(ordered) do
-    local lines = vim.api.nvim_buf_get_lines(b, 0, -1, false)
-    local content = table.concat(lines, "\n")
-    if content ~= "" then
-      table.insert(chunks, "<chat_with:codecompanion>" .. content .. "</chat_with:codecompanion>")
-    end
-  end
-  return table.concat(chunks, "\n")
-end
-
---- Gets all current dynamic context as a formatted string
-local function get_all_context_formatted()
-  local files_contents = get_formatted_files_context(all_extra_files())
-  local llm_chats_contents = get_formatted_chats_context()
-
-  local combined_content = table.concat(
-    vim.iter({ files_contents, llm_chats_contents })
-    :filter(function(content) return content ~= "" end)
-    :totable(), "\n")
-
-  if combined_content ~= '' then
-    combined_content = '<extra_context>\n' .. combined_content .. '\n</extra_context>'
-  end
-  return combined_content
-end
-
-
 vim.api.nvim_create_user_command('MinuetClear', function()
   extra_files.clear()
 end, { nargs = 0 })
@@ -143,14 +88,9 @@ vim.api.nvim_create_user_command('MinuetShowContext', function()
 
     data.extra_files = extra_files.files()
 
-    data.llm_chats_buffers = {}
-    for _, b in ipairs(vim.api.nvim_list_bufs()) do
-      if vim.api.nvim_buf_is_valid(b) and vim.bo[b].filetype == "codecompanion" then
-        table.insert(data.llm_chats_buffers, string.format("%d codecompanion", b))
-      end
-    end
+    local llm_chats_buffers = {}
+    data.llm_chats_buffers = llm_chats_buffers
 
-    -- Lazy-load harpoon context to avoid circular dependency
     if not harpoon_ctx then
       harpoon_ctx = require("minuet_ctx.harpoon")
     end
@@ -190,11 +130,7 @@ vim.api.nvim_create_user_command('MinuetShowContext', function()
     add_empty_line()
 
     add_markdown_header("Chat Context Buffers")
-    if #data.llm_chats_buffers > 0 then
-      for _, b_ft in ipairs(data.llm_chats_buffers) do add_list_item(b_ft) end
-    else
-      add_list_item("(none)")
-    end
+    add_list_item("(none)")
     add_empty_line()
 
     add_markdown_header("Harpoon Files")
@@ -284,6 +220,12 @@ return {
     return get_files_context(
       all_extra_files())
   end,
-  get_chats_context = get_chats_context,
-  get_formatted_context = get_all_context_formatted
+  get_chats_context = function() return {} end,
+  get_formatted_context = function()
+    local files_contents = get_formatted_files_context(all_extra_files())
+    if files_contents ~= '' then
+      return '<extra_context>\n' .. files_contents .. '\n</extra_context>'
+    end
+    return ''
+  end
 }
