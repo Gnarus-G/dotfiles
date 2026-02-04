@@ -20,6 +20,7 @@ configPaths=(
 
   .local/bin/clip
   .local/bin/getfonts.sh
+  .local/bin/git-ac
 )
 
 for p in ${configPaths[*]}; do
