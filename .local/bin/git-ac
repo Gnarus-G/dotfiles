@@ -4,7 +4,7 @@ set -euo pipefail
 # git-ac: Automated commit message generation using OpenCode CLI
 # Usage: git ac [options]
 
-MODEL="google/gemini-2.0-flash"
+MODEL="google/gemini-3-flash-preview"
 NO_EDIT=false
 DRY_RUN=false
 
@@ -17,7 +17,7 @@ Generate a commit message using OpenCode CLI for staged changes.
 Options:
   -y, --no-edit       Skip editor, commit directly with generated message
   -n, --dry-run       Print generated message to stdout, don't commit
-  -m, --model MODEL   Override model (default: google/gemini-2.0-flash)
+  -m, --model MODEL   Override model (default: $MODEL)
   -h, --help          Show this help message
 
 Examples:
