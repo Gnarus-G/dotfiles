@@ -26,14 +26,7 @@ return {
         lualine_a = { 'mode' },
         lualine_b = { 'branch', 'diff', 'diagnostics' },
         lualine_c = { { 'filename', path = 1, file_status = true } },
-        lualine_w = {
-          {
-            function()
-              return vim.g.mcphub_status or ""
-            end,
-            color = { fg = '#98c379' }
-          },
-        },
+        lualine_w = {},
         lualine_x = {
           {
             require 'minuet.lualine',
@@ -41,16 +34,7 @@ return {
             provider_model_separator = ' :: ',
             display_on_idle = true,
           },
-          {
-            require "gnarus.codecompanion-lualine-ext"
-          },
           'encoding', 'fileformat', 'filetype',
-          {
-            function()
-              return vim.g.mcphub_servers_status or ""
-            end,
-            color = { fg = '#61afef' }
-          },
         },
         lualine_y = { 'progress' },
         lualine_z = { 'location' }
