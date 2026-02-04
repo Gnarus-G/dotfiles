@@ -2,6 +2,7 @@
 
 import os
 import base64
+import time
 from pathlib import Path
 from typing import Optional
 
@@ -100,7 +101,6 @@ class RunPodSTT(SpeechToText):
                 # Handle None or empty response (cold start scenario)
                 if not result:
                     if attempt < max_retries - 1:
-                        import time
                         print(f"  Endpoint cold-starting, waiting {retry_delay}s... (attempt {attempt + 1}/{max_retries})")
                         time.sleep(retry_delay)
                         retry_delay *= 2  # Exponential backoff
@@ -125,7 +125,7 @@ class RunPodSTT(SpeechToText):
                 detected_language = result.get("detected_language")
                 segments = result.get("segments", [])
                 
-                # Handle empty transcription
+                # Handle empty transcription - if segments exist, it may just be silence
                 if not transcription and not segments:
                     raise RuntimeError(
                         "Transcription failed: Empty response from endpoint. "
@@ -144,7 +144,6 @@ class RunPodSTT(SpeechToText):
                 raise
             except Exception as e:
                 if attempt < max_retries - 1:
-                    import time
                     print(f"  Transcription error, retrying in {retry_delay}s... (attempt {attempt + 1}/{max_retries})")
                     time.sleep(retry_delay)
                     retry_delay *= 2
