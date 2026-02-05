@@ -18,6 +18,15 @@
       "skillFolderHash": "c2f31172b6f256272305a5e6e7228b258446899f",
       "installedAt": "2026-02-05T15:54:04.569Z",
       "updatedAt": "2026-02-05T15:54:04.569Z"
+    },
+    "refactoring-expert": {
+      "source": "samhvw8/dot-claude",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/samhvw8/dot-claude.git",
+      "skillPath": "skills/refactoring-expert/SKILL.md",
+      "skillFolderHash": "f08f50e6b6c748c05d7fa11620671340a962cf06",
+      "installedAt": "2026-02-05T16:04:24.199Z",
+      "updatedAt": "2026-02-05T16:04:24.199Z"
     }
   },
   "dismissed": {
@@ -29,7 +38,6 @@
     "gemini-cli",
     "github-copilot",
     "kimi-cli",
-    "opencode",
-    "replit"
+    "opencode"
   ]
 }
