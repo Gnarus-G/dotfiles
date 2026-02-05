@@ -45,6 +45,15 @@
       "skillFolderHash": "2010a5f93f41dbeda97c246d4991470383ccc6f3",
       "installedAt": "2026-02-05T16:16:23.682Z",
       "updatedAt": "2026-02-05T16:16:23.682Z"
+    },
+    "frontend-design": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/anthropics/skills.git",
+      "skillPath": "skills/frontend-design/SKILL.md",
+      "skillFolderHash": "928950704df8a8b885c03de5da626331e6f29cf8",
+      "installedAt": "2026-02-05T16:17:15.887Z",
+      "updatedAt": "2026-02-05T16:17:15.887Z"
     }
   },
   "dismissed": {
