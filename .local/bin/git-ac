@@ -82,7 +82,7 @@ Format:
 <footer (if applicable)>"
 
 # Generate commit message via OpenCode CLI
-MESSAGE=$(opencode run --model "$MODEL" \
+MESSAGE=$(opencode run --model "$MODEL" --variant none \
   "$SYSTEM_PROMPT
 
 Write a commit message for this Git diff:
