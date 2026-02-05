@@ -20,22 +20,6 @@
       "type": "local",
       "command": ["npx", "-y", "@upstash/context7-mcp"]
     },
-    "ez-web-search-mcp": {
-      "type": "local",
-      "command": [
-        "sh",
-        "-c",
-        "node ${HOME}/.mcphub/servers/ez-web-search-mcp/build/index.js"
-      ]
-    },
-    "fetch-mcp": {
-      "type": "local",
-      "command": [
-        "sh",
-        "-c",
-        "node ${HOME}/.mcphub/servers/fetch-mcp/dist/index.js"
-      ]
-    },
     "tts": {
       "type": "local",
       "command": ["tts-mcp"],
