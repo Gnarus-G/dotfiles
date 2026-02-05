@@ -3,6 +3,8 @@
 pwd=$(pwd)
 
 configPaths=(
+  .agents
+
   .config/nvim
   .config/mcphub
   .config/opencode
