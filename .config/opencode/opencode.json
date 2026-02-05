@@ -29,14 +29,6 @@
         "RUST_LOG": "debug",
         "XDG_RUNTIME_DIR": "/run/user/1000"
       }
-    },
-    "screenshot-mcp": {
-      "type": "local",
-      "command": [
-        "bash",
-        "-c",
-        "${HOME}/.config/mcphub/servers/screenshot-mcp/run-server.sh"
-      ]
     }
   }
 }
