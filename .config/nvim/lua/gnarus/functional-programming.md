@@ -12,6 +12,7 @@ All code generated must follow these FP principles, regardless of language. Even
 Never use global variables or mutable shared state. Pass dependencies explicitly through parameters or injection. Use actors, message passing, or dependency injection patterns to manage state.
 
 **Python**
+
 ```python
 # Good - dependency injected
 class UserService:
@@ -25,6 +26,7 @@ def get_user(id: int) -> User:
 ```
 
 **Rust**
+
 ```rust
 // Good - passed as parameter
 fn process(settings: &AppSettings) {
@@ -39,20 +41,22 @@ fn process() {
 ```
 
 **TypeScript**
+
 ```typescript
 // Good - dependency injected
 class SettingsStore {
-    constructor(private deps: { getSettings: () => Settings }) {}
+  constructor(private deps: { getSettings: () => Settings }) {}
 }
 
 // Bad - global variable
 const GLOBAL_SETTINGS = new Map();
 function getSetting(key: string) {
-    return GLOBAL_SETTINGS.get(key);
+  return GLOBAL_SETTINGS.get(key);
 }
 ```
 
 **Actor Pattern (preferred for stateful components):**
+
 ```rust
 // Good - actor holds state, receives messages
 struct SettingsActor {
@@ -841,7 +845,7 @@ class Adder extends Actor<Request<Add, AddResult>> {
 // ask() helper
 function ask<Req, Res>(
   target: ActorRef<Request<Req, Res>>,
-  req: Req
+  req: Req,
 ): ReplyReceiver<Response<Req, Res>> {
   return new Promise((resolve) => {
     target.send({ payload: req, replyTo: resolve });
@@ -852,7 +856,7 @@ function ask<Req, Res>(
 const adder = spawnActor(() => new Adder());
 const response = await ask(adder, { a: 10, b: 32 });
 console.log("Request:", response.request);
-console.log("Result:", response.result);  // { value: 42 }
+console.log("Result:", response.result); // { value: 42 }
 ```
 
 **Lua**
