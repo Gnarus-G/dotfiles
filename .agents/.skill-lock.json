@@ -54,6 +54,15 @@
       "skillFolderHash": "928950704df8a8b885c03de5da626331e6f29cf8",
       "installedAt": "2026-02-05T16:17:15.887Z",
       "updatedAt": "2026-02-05T16:17:15.887Z"
+    },
+    "create-pr": {
+      "source": "marcelorodrigo/agent-skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/marcelorodrigo/agent-skills.git",
+      "skillPath": "skills/create-pr/SKILL.md",
+      "skillFolderHash": "690e88ef1110b4e54428f647becfc5a7dd48464a",
+      "installedAt": "2026-02-05T16:32:06.595Z",
+      "updatedAt": "2026-02-05T16:32:06.595Z"
     }
   },
   "dismissed": {
