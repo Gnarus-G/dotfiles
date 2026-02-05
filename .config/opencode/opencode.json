@@ -10,8 +10,8 @@
         "baseURL": "http://localhost:11434/v1"
       },
       "models": {
-        "gpt-oss:latest": {},
-        "minimax-m2.1:cloud": {}
+        "minimax-m2.1:cloud": {},
+        "gpt-oss:latest": {}
       }
     }
   },
