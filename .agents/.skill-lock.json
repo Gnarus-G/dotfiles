@@ -1,0 +1,35 @@
+{
+  "version": 3,
+  "skills": {
+    "svelte5-best-practices": {
+      "source": "ejirocodes/agent-skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/ejirocodes/agent-skills.git",
+      "skillPath": "svelte/skills/svelte5-best-practices/SKILL.md",
+      "skillFolderHash": "69304f192cd45efd037309a513058d9bf94f0d1f",
+      "installedAt": "2026-02-05T15:53:43.502Z",
+      "updatedAt": "2026-02-05T15:53:43.502Z"
+    },
+    "find-skills": {
+      "source": "vercel-labs/skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/vercel-labs/skills.git",
+      "skillPath": "skills/find-skills/SKILL.md",
+      "skillFolderHash": "c2f31172b6f256272305a5e6e7228b258446899f",
+      "installedAt": "2026-02-05T15:54:04.569Z",
+      "updatedAt": "2026-02-05T15:54:04.569Z"
+    }
+  },
+  "dismissed": {
+    "findSkillsPrompt": true
+  },
+  "lastSelectedAgents": [
+    "amp",
+    "codex",
+    "gemini-cli",
+    "github-copilot",
+    "kimi-cli",
+    "opencode",
+    "replit"
+  ]
+}
