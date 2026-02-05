@@ -53,7 +53,7 @@ return {
     return unstaged_files, nil
   end,
   read_fp_guide_system_prompt_file = function()
-    local filepath = vim.fn.stdpath("config") .. "/lua/gnarus/fp-system-prompt.md"
+    local filepath = vim.fn.stdpath("config") .. "/lua/gnarus/functional-programming.md"
     local file, err = io.open(filepath, "r")
     if not file then
       return nil, "Error opening file: " .. err
