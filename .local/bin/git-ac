@@ -82,12 +82,11 @@ Format:
 <footer (if applicable)>"
 
 # Generate commit message via OpenCode CLI
-MESSAGE=$(opencode run --model "$MODEL" --variant none \
-  "$SYSTEM_PROMPT
+MESSAGE=$(echo "$SYSTEM_PROMPT
 
 Write a commit message for this Git diff:
 
-$DIFF")
+$DIFF" | opencode run --model "$MODEL" --variant none -)
 
 # Handle --dry-run
 if $DRY_RUN; then
