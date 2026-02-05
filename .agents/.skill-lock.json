@@ -36,6 +36,15 @@
       "skillFolderHash": "11645489cae041694d97d64036e2ed58cb9b519f",
       "installedAt": "2026-02-05T16:07:49.284Z",
       "updatedAt": "2026-02-05T16:07:49.284Z"
+    },
+    "coolify-deploy": {
+      "source": "v1truv1us/ai-eng-system",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/v1truv1us/ai-eng-system.git",
+      "skillPath": "skills/coolify-deploy/SKILL.md",
+      "skillFolderHash": "2010a5f93f41dbeda97c246d4991470383ccc6f3",
+      "installedAt": "2026-02-05T16:16:23.682Z",
+      "updatedAt": "2026-02-05T16:16:23.682Z"
     }
   },
   "dismissed": {
