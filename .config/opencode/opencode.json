@@ -2,7 +2,9 @@
   "$schema": "https://opencode.ai/config.json",
   "theme": "tokyonight",
   "autoupdate": true,
-  "instructions": ["~/d/dotfiles/.config/nvim/lua/gnarus/fp-system-prompt.md"],
+  "instructions": [
+    "~/d/dotfiles/.config/nvim/lua/gnarus/functional-programming.md"
+  ],
   "provider": {
     "ollama": {
       "npm": "@ai-sdk/openai-compatible",
