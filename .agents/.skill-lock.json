@@ -27,6 +27,15 @@
       "skillFolderHash": "f08f50e6b6c748c05d7fa11620671340a962cf06",
       "installedAt": "2026-02-05T16:04:24.199Z",
       "updatedAt": "2026-02-05T16:04:24.199Z"
+    },
+    "tmux-processes": {
+      "source": "0xbigboss/claude-code",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/0xbigboss/claude-code.git",
+      "skillPath": ".claude/skills/tmux-processes/SKILL.md",
+      "skillFolderHash": "11645489cae041694d97d64036e2ed58cb9b519f",
+      "installedAt": "2026-02-05T16:07:49.284Z",
+      "updatedAt": "2026-02-05T16:07:49.284Z"
     }
   },
   "dismissed": {
