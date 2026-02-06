@@ -38,7 +38,7 @@ return {
           },
         },
         gemini = {
-          model = "gemini-3-flash-preview",
+          model = "gemini-2.5-flash",
           chat_input = {
             template = "{{{extra_context}}}\n" ..
                 minuet_config.default_chat_input_prefix_first.template,
@@ -66,21 +66,6 @@ return {
             reasoning_effort = "none",
           },
         },
-        openai_compatible = {
-          name = "ollama",
-          api_key = "TERM",
-          end_point = ollama_api_base .. '/v1/chat/completions',
-          model = 'devstral-2:123b-cloud', -- 'minimax-m2.1:cloud',
-          chat_input = {
-            template = "{{{extra_context}}}\n" ..
-                minuet_config.default_chat_input_prefix_first.template,
-            extra_context = extra_context.get_formatted_context
-          },
-          optional = {
-            max_completion_tokens = 1024,
-            reasoning_effort = "none",
-          },
-        },
         openai_fim_compatible = {
           name = "ollama-fim",
           model = 'qwen2.5-coder:32b-base-q2_K', -- qwen3-coder:480b-cloud
@@ -101,9 +86,8 @@ return {
     }
 
     local config                  = env_cascade({
-      { vars = { "GNARUS_ALLOW_VENDOR_LLM" },                   value = { "openai_compatible", 2 } },
-      { vars = { "GNARUS_ALLOW_VENDOR_LLM", "GEMINI_API_KEY" }, value = { "gemini", 3 } },
-      { vars = { "GNARUS_ALLOW_VENDOR_LLM", "OPENAI_API_KEY" }, value = { "openai", 2 } },
+      { vars = { "GNARUS_ALLOW_VENDOR_LLM", "GEMINI_API_KEY" }, value = { "gemini", 2 } },
+      { vars = { "GNARUS_ALLOW_VENDOR_LLM", "OPENAI_API_KEY" }, value = { "openai", 1 } },
     }, { "openai_fim_compatible", 1 })
     local provider, n_completions = config[1], config[2]
     vim.notify(string.format("Minuet AI configured with provider: %s, completions: %s", provider, n_completions),
