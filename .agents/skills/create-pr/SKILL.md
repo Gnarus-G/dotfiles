@@ -84,15 +84,22 @@ Use this structure for PR descriptions (ignoring any repository PR templates):
 ### Step 4: Create the PR
 
 ```bash
-gh pr create --draft --title "<type>(<scope>): <description>" --body "
+gh pr create --draft --title "<concise description of the change>" --body "
 <description body here>
 "
 ```
 
-**Title format** follows commit conventions:
-- `feat(scope): Add new feature`
-- `fix(scope): Fix the bug`
-- `refactor(scope): Refactor something`
+**Title format** should be a plain, concise description of the change. Do NOT use conventional commit prefixes like `feat(scope):`, `fix:`, `refactor:`, etc. Just describe what the PR does in natural language.
+
+Good titles:
+- `Source VAST S3 events from Kafka instead of SQLite queue`
+- `Handle null response in user API endpoint`
+- `Extract validation logic to shared module`
+
+Bad titles:
+- `feat(pcap_monitor): Source VAST S3 events from Kafka`
+- `fix: Handle null response`
+- `refactor(validation): Extract to shared module`
 
 ## PR Description Examples
 
