@@ -72,6 +72,24 @@
       "skillFolderHash": "916b782e8fa418c8a7ea5b39d7371ba9de5b8009",
       "installedAt": "2026-02-07T16:28:39.509Z",
       "updatedAt": "2026-02-07T16:28:39.509Z"
+    },
+    "runpod-deployment": {
+      "source": "scientiacapital/skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/scientiacapital/skills.git",
+      "skillPath": "active/runpod-deployment-skill/SKILL.md",
+      "skillFolderHash": "fa520a568db428a02c5d05f25c455ae83c93263b",
+      "installedAt": "2026-02-07T18:08:32.006Z",
+      "updatedAt": "2026-02-07T18:08:32.006Z"
+    },
+    "runpod": {
+      "source": "runpod/skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/runpod/skills.git",
+      "skillPath": "runpod/SKILL.md",
+      "skillFolderHash": "21986a0959a2bad7c8e1f83035d4e1d787292c27",
+      "installedAt": "2026-02-07T18:08:43.763Z",
+      "updatedAt": "2026-02-07T18:08:43.763Z"
     }
   },
   "dismissed": {
