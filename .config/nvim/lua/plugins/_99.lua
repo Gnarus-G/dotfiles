@@ -9,6 +9,7 @@ return {
     local cwd = vim.uv.cwd()
     local basename = vim.fs.basename(cwd)
     _99.setup({
+      model = "ollama/minimax-m2.1:cloud",
       logger = {
         level = _99.DEBUG,
         path = "/tmp/" .. basename .. ".99.debug",
@@ -37,9 +38,7 @@ return {
         --- ... the other rules in that dir ...
         ---
         custom_rules = {
-          "scratch/custom_rules/",
           "~/.agents/skills/",
-          "~/.config/opencode/skills/",
         },
 
         --- What autocomplete do you use.  We currently only
@@ -81,6 +80,10 @@ return {
       _99.stop_all_requests()
     end)
 
+    --- custom prompt on visual selection (e.g., "explain this code")
+    vim.keymap.set("v", "<leader>9e", function()
+      _99.visual_prompt({})
+    end)
     --- Example: Using rules + actions for custom behaviors
     --- Create a rule file like ~/.rules/debug.md that defines custom behavior.
     --- For instance, a "debug" rule could automatically add printf statements
