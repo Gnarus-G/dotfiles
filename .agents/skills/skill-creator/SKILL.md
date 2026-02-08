@@ -23,9 +23,11 @@ Use this when you want to:
 
 1. **Choose a unique skill name** - Must be lowercase alphanumeric with hyphens, 1-64 chars
 2. **Ask the user if it should be global or project local**
-3. **Create the directory structure**
-   - Global: `~/.config/opencode/skills/<name>/`
-   - Project-local: `.opencode/skills/<name>/`
+3. **Create the directory structure** (prefer `~/.agents/skills/`)
+   - Global: `~/.agents/skills/<name>/` (preferred)
+   - Project-local: `.agents/skills/<name>/`
+   - Alternative global: `~/.config/opencode/skills/<name>/`
+   - Alternative project-local: `.opencode/skills/<name>/`
 4. **Write frontmatter** - Include `name`, `description`, and optional fields
 5. **Add skill content** - Use markdown to document the skill's purpose and usage
 6. **Validate the skill** - Ensure proper naming and frontmatter format
@@ -56,12 +58,19 @@ metadata:
 
 Skills are discovered in these locations (in order):
 
-1. `.opencode/skills/<name>/SKILL.md` (project-local)
-2. `~/.config/opencode/skills/<name>/SKILL.md` (global)
-3. `.claude/skills/<name>/SKILL.md` (project Claude)
-4. `~/.claude/skills/<name>/SKILL.md` (global Claude)
-5. `.agents/skills/<name>/SKILL.md` (project agent)
-6. `~/.agents/skills/<name>/SKILL.md` (global agent)
+### Preferred locations (use these)
+
+1. `~/.agents/skills/<name>/SKILL.md` (global - preferred)
+2. `.agents/skills/<name>/SKILL.md` (project-local)
+
+### Alternative locations (supported for compatibility)
+
+3. `~/.config/opencode/skills/<name>/SKILL.md` (global)
+4. `.opencode/skills/<name>/SKILL.md` (project-local)
+5. `~/.claude/skills/<name>/SKILL.md` (global Claude)
+6. `.claude/skills/<name>/SKILL.md` (project Claude)
+
+**Note:** The `~/.agents/` folder is preferred because it's tool-agnostic and works across different AI coding assistants.
 
 ## Permission configuration
 
@@ -86,6 +95,56 @@ Skills can be controlled via `opencode.json` permissions:
 - **Workflow automation** - Skills that automate multi-step processes
 - **Code generation** - Skills that generate boilerplate or templates
 
+## References folder pattern
+
+For skills with extensive content, consider using a `references/` subdirectory to organize documentation. This pattern improves maintainability and discoverability.
+
+### When to use references
+
+Consider using a references folder when your skill has:
+
+- **Multiple distinct topics** (e.g., installation, configuration, deployment)
+- **Long command references** that would clutter the main skill file
+- **API documentation** with many endpoints or examples
+- **Platform-specific guides** (e.g., Linux vs Windows setup)
+
+### Structure
+
+```
+<skill-name>/
+├── SKILL.md                 # Main skill with overview and quick reference table
+└── references/
+    ├── installation.md      # Installation instructions
+    ├── configuration.md     # Configuration guide
+    ├── commands.md          # Command reference
+    └── examples.md          # Usage examples
+```
+
+### Main SKILL.md pattern
+
+Include a Quick Reference table linking to reference files:
+
+```markdown
+## Quick Reference
+
+| Topic | Description | Reference |
+|-------|-------------|-----------|
+| **Installation** | How to install the tool | [installation.md](references/installation.md) |
+| **Configuration** | Setup and configuration | [configuration.md](references/configuration.md) |
+| **Commands** | Command reference | [commands.md](references/commands.md) |
+
+## Essential Commands
+
+Brief overview of most common commands...
+```
+
+### Benefits
+
+- **Skimmable main file** - Users can quickly see what's available
+- **Focused reference files** - Each file covers one topic in depth
+- **Easier maintenance** - Update individual topics without touching everything
+- **Better search** - Reference files can be discovered independently
+
 ## Validation checklist
 
 - [ ] Skill name follows naming rules
@@ -94,7 +153,8 @@ Skills can be controlled via `opencode.json` permissions:
 - [ ] Content is well-organized and actionable
 - [ ] Skill is placed in correct discovery location
 - [ ] Permissions are configured appropriately
+- [ ] Considered using references folder for complex skills
 
 ## Examples
 
-See other skills in the `.opencode/skills/` directory for examples of effective skill creation.
+See other skills in the `~/.agents/skills/` directory for examples of effective skill creation.
