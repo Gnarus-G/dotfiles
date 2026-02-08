@@ -90,6 +90,24 @@
       "skillFolderHash": "21986a0959a2bad7c8e1f83035d4e1d787292c27",
       "installedAt": "2026-02-07T18:08:43.763Z",
       "updatedAt": "2026-02-07T18:08:43.763Z"
+    },
+    "create-auth-skill": {
+      "source": "better-auth/skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/better-auth/skills.git",
+      "skillPath": "better-auth/create-auth/SKILL.md",
+      "skillFolderHash": "b296a4603f09b8afed34e4bcd421ec5514d70015",
+      "installedAt": "2026-02-08T02:46:38.668Z",
+      "updatedAt": "2026-02-08T02:46:38.668Z"
+    },
+    "better-auth-best-practices": {
+      "source": "better-auth/skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/better-auth/skills.git",
+      "skillPath": "better-auth/best-practices/SKILL.md",
+      "skillFolderHash": "83bdaa60f65da278dc513a64127f4e4db759cd20",
+      "installedAt": "2026-02-08T02:46:47.807Z",
+      "updatedAt": "2026-02-08T02:46:47.807Z"
     }
   },
   "dismissed": {
