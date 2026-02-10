@@ -12,6 +12,7 @@ return {
       model = "ollama/minimax-m2.1:cloud",
       logger = {
         level = _99.DEBUG,
+        type = "file",
         path = "/tmp/" .. basename .. ".99.debug",
         print_on_error = true,
       },
@@ -60,17 +61,6 @@ return {
       },
     })
 
-    -- Create your own short cuts for the different types of actions
-    vim.keymap.set("n", "<leader>9f", function()
-      _99.fill_in_function()
-    end)
-    -- take extra note that i have visual selection only in v mode
-    -- technically whatever your last visual selection is, will be used
-    -- so i have this set to visual mode so i dont screw up and use an
-    -- old visual selection
-    --
-    -- likely ill add a mode check and assert on required visual mode
-    -- so just prepare for it now
     vim.keymap.set("v", "<leader>9v", function()
       _99.visual()
     end)
@@ -82,14 +72,7 @@ return {
 
     --- custom prompt on visual selection (e.g., "explain this code")
     vim.keymap.set("v", "<leader>9e", function()
-      _99.visual_prompt({})
-    end)
-    --- Example: Using rules + actions for custom behaviors
-    --- Create a rule file like ~/.rules/debug.md that defines custom behavior.
-    --- For instance, a "debug" rule could automatically add printf statements
-    --- throughout a function to help debug its execution flow.
-    vim.keymap.set("n", "<leader>9fd", function()
-      _99.fill_in_function()
+      _99.visual()
     end)
   end,
 }
