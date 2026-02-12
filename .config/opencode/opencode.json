@@ -10,6 +10,7 @@
         "baseURL": "http://localhost:11434/v1"
       },
       "models": {
+        "glm-5:cloud": {},
         "minimax-m2.1:cloud": {},
         "gpt-oss:latest": {}
       }
