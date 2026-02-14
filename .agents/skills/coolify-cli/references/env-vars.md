@@ -54,4 +54,21 @@ coolify service env sync <service_uuid> --file .env
 1. **Use .env file sync**: Keep env vars in version control-friendly files
 2. **Use build-time flag**: For variables needed during build (API URLs, build flags)
 3. **Use preview flag**: For variables needed in preview deployments
-4. **Sync behavior**: Updates existing variables, creates missing ones. Does NOT delete variables not in the file.
+4. **Sync behavior**: Updates existing variables, creates missing ones. Does NOT delete variables not in the file
+
+## Important Notes
+
+### Sensitive Values
+- Environment variables marked as **sensitive** (like passwords, API keys, secrets) will display as `********` (hidden) by default
+- This is **expected behavior** - the values are stored securely and only shown once during creation
+- To view hidden values, use `--show-sensitive` or `-s` flag: `coolify app env list <app_uuid> -s`
+- Empty/null values for sensitive vars are normal - the actual value is hidden for security
+
+### Listing Environment Variables
+```bash
+# Standard list (sensitive values hidden as ********)
+coolify app env list <app_uuid>
+
+# Show sensitive values (only works if you have permission)
+coolify app env list <app_uuid> -s
+```.
