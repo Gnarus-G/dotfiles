@@ -9,7 +9,7 @@ return {
     local cwd = vim.uv.cwd()
     local basename = vim.fs.basename(cwd)
     _99.setup({
-      model = "ollama/minimax-m2.1:cloud",
+      model = "ollama-cloud/minimax-m2.5",
       logger = {
         level = _99.DEBUG,
         type = "file",
