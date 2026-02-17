@@ -8,8 +8,13 @@ return {
     -- logging mechanisms within 99.  This is for more debugging purposes
     local cwd = vim.uv.cwd()
     local basename = vim.fs.basename(cwd)
+
+    local model = require("gnarus.utils").env_var_cascade({
+      { vars = { "GNARUS_ALLOW_VENDOR_LLM" }, value = "anthropic/claude-opus-4-5" },
+    }, "ollama-cloud/glm-5")
+
     _99.setup({
-      model = "ollama-cloud/minimax-m2.5",
+      model = model,
       logger = {
         level = _99.DEBUG,
         type = "file",
@@ -68,11 +73,6 @@ return {
     --- if you have a request you dont want to make any changes, just cancel it
     vim.keymap.set("v", "<leader>9s", function()
       _99.stop_all_requests()
-    end)
-
-    --- custom prompt on visual selection (e.g., "explain this code")
-    vim.keymap.set("v", "<leader>9e", function()
-      _99.visual()
     end)
   end,
 }
