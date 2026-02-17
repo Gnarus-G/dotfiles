@@ -4,7 +4,7 @@ set -euo pipefail
 # git-ac: Automated commit message generation using OpenCode CLI
 # Usage: git ac [options]
 
-MODEL="ollama-cloud/nemotron-3-nano:30b"
+MODEL="ollama-cloud/glm-5"
 NO_EDIT=false
 DRY_RUN=false
 
