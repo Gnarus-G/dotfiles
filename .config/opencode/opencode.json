@@ -10,9 +10,7 @@
         "baseURL": "http://localhost:11434/v1"
       },
       "models": {
-        "glm-5:cloud": {},
-        "minimax-m2.1:cloud": {},
-        "gpt-oss:latest": {}
+        "glm-5:cloud": {}
       }
     }
   },
@@ -30,6 +28,14 @@
         "RUST_LOG": "debug",
         "XDG_RUNTIME_DIR": "/run/user/1000"
       }
+    },
+    "ez-web-search-mcp": {
+      "type": "local",
+      "command": [
+        "sh",
+        "-c",
+        "node ${HOME}/.mcphub/servers/ez-web-search-mcp/build/index.js"
+      ]
     }
   }
 }
