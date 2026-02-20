@@ -28,6 +28,8 @@ return {
       -- https://opencode.ai/docs/permissions/#external-directories
       -- https://code.claude.com/docs/en/permissions#read-and-edit
       tmp_dir = "./tmp",
+      show_in_flight_requests = true,
+      auto_add_skills = true,
 
       --- Completions: #rules and @files in the prompt buffer
       completion = {
@@ -96,8 +98,69 @@ return {
       _99.stop_all_requests()
     end)
 
+    local last_search_xid = nil
+
     vim.keymap.set("n", "<leader>9s", function()
-      _99.search()
+      last_search_xid = _99.search()
+    end)
+
+    --- open quickfix with results from the last search
+    vim.keymap.set("n", "<leader>9q", function()
+      if last_search_xid then
+        _99.qfix_search_results(last_search_xid)
+      else
+        vim.notify("99: no search results yet", vim.log.levels.WARN)
+      end
+    end)
+
+    --- tutorial: ask AI to generate a tutorial on any topic
+    vim.keymap.set("n", "<leader>9t", function()
+      _99.tutorial({})
+    end)
+
+    --- open the last tutorial (or pick from list if multiple)
+    vim.keymap.set("n", "<leader>9T", function()
+      _99.open_tutorial(nil)
+    end)
+
+    --- add md_files via file picker (markdown only)
+    vim.keymap.set("n", "<leader>9a", function()
+      Snacks.picker.files({
+        ft = "md",
+        confirm = function(picker, _)
+          picker:close()
+          local selected = picker:selected({ fallback = true })
+          for _, item in ipairs(selected) do
+            _99.add_md_file(item.file)
+            vim.notify("99: added md_file " .. item.file)
+          end
+        end,
+      })
+    end)
+
+    --- remove md_files via picker from current list
+    vim.keymap.set("n", "<leader>9d", function()
+      local state = _99.__get_state()
+      local items = {}
+      for _, md in ipairs(state.md_files) do
+        table.insert(items, { text = md, file = md })
+      end
+      if #items == 0 then
+        vim.notify("99: no md_files to remove", vim.log.levels.WARN)
+        return
+      end
+      Snacks.picker({
+        title = "Remove md_file",
+        items = items,
+        confirm = function(picker, _)
+          picker:close()
+          local selected = picker:selected({ fallback = true })
+          for _, item in ipairs(selected) do
+            _99.rm_md_file(item.text)
+            vim.notify("99: removed md_file " .. item.text)
+          end
+        end,
+      })
     end)
   end,
 }
