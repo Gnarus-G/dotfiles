@@ -1,0 +1,20 @@
+{
+  "Name": "sync",
+  "Mode": "Synchronous",
+  "Params": {
+    "OUTPUT_CAP": 0.0,
+    "DECAY_RATE": 0.10000000009313226,
+    "INPUT_DPI": 1600.0,
+    "ANGLE_ROTATION": -4.5,
+    "SYNC_SPEED": 16.0,
+    "GAMMA": 1.0,
+    "OFFSET": 0.0,
+    "ACCEL": 5.0,
+    "LIMIT": 1.5,
+    "SMOOTH": 0.5,
+    "MOTIVITY": 2.0,
+    "SENS_MULT": 0.19999999995343387,
+    "YX_RATIO": 2.0
+  },
+  "CreatedAt": "2026-02-20T21:07:41.759103697Z"
+}
