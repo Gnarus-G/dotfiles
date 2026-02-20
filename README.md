@@ -140,6 +140,38 @@ git branch -u forge/main
 git pull
 ```
 
+## OpenCode
+
+### Plugins
+
+[opencode-agent-memory](https://github.com/joshuadavidthomas/opencode-agent-memory) and
+[opencode-agent-skills](https://github.com/joshuadavidthomas/opencode-agent-skills)
+are configured in `opencode.json` and installed automatically on startup.
+
+### Superpowers (optional)
+
+[Superpowers](https://github.com/obra/superpowers) is included as a git submodule.
+After cloning this repo, initialize it:
+
+```sh
+git submodule update --init
+```
+
+Skills are discoverable via the `opencode-agent-skills` plugin through
+a symlink at `.config/opencode/skill/superpowers`.
+
+To enable the full superpowers workflow (bootstrap prompt on every session):
+
+```sh
+export OPENCODE_AGENT_SKILLS_SUPERPOWERS_MODE=true
+```
+
+Update to latest:
+
+```sh
+git submodule update --remote .config/opencode/superpowers
+```
+
 ## Must-have tools
 
 ### Install [x-cmd](https://www.x-cmd.com/start/get-started)
