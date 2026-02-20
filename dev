@@ -13,6 +13,7 @@ configPaths=(
   .config/eww .config/leftwm
   .config/ghostty/config
   .config/himither
+  .config/maccel
 
   .tmux.conf.local
   .wezterm.lua
