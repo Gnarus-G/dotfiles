@@ -10,21 +10,27 @@ return {
     local basename = vim.fs.basename(cwd)
 
     local model = require("gnarus.utils").env_var_cascade({
-      { vars = { "GNARUS_ALLOW_VENDOR_LLM" }, value = "anthropic/claude-opus-4-5" },
+      { vars = { "GNARUS_ALLOW_VENDOR_LLM" }, value = "anthropic/claude-sonnet-4-5" },
     }, "ollama-cloud/glm-5")
 
     _99.setup({
       model = model,
+      provider = _99.Providers.OpenCodeProvider,
       logger = {
         level = _99.DEBUG,
-        type = "file",
         path = "/tmp/" .. basename .. ".99.debug",
         print_on_error = true,
       },
 
-      --- A new feature that is centered around tags
+      -- When setting this to something that is not inside the CWD tools
+      -- such as claude code or opencode will have permission issues
+      -- and generation will fail refer to tool documentation to resolve
+      -- https://opencode.ai/docs/permissions/#external-directories
+      -- https://code.claude.com/docs/en/permissions#read-and-edit
+      tmp_dir = "./tmp",
+
+      --- Completions: #rules and @files in the prompt buffer
       completion = {
-        --- Defaults to .cursor/rules
         -- I am going to disable these until i understand the
         -- problem better.  Inside of cursor rules there is also
         -- application rules, which means i need to apply these
@@ -47,8 +53,16 @@ return {
           "~/.agents/skills/",
         },
 
+        --- Configure @file completion (all fields optional, sensible defaults)
+        files = {
+          -- enabled = true,
+          -- max_file_size = 102400,     -- bytes, skip files larger than this
+          -- max_files = 5000,            -- cap on total discovered files
+          -- exclude = { ".env", ".env.*", "node_modules", ".git", ... },
+        },
+
         --- What autocomplete do you use.  We currently only
-        --- support cmp right now
+        --- support cmp and blink right now
         source = "cmp",
       },
 
@@ -66,13 +80,24 @@ return {
       },
     })
 
+    -- take extra note that i have visual selection only in v mode
+    -- technically whatever your last visual selection is, will be used
+    -- so i have this set to visual mode so i dont screw up and use an
+    -- old visual selection
+    --
+    -- likely ill add a mode check and assert on required visual mode
+    -- so just prepare for it now
     vim.keymap.set("v", "<leader>9v", function()
       _99.visual()
     end)
 
     --- if you have a request you dont want to make any changes, just cancel it
-    vim.keymap.set("v", "<leader>9s", function()
+    vim.keymap.set("n", "<leader>9x", function()
       _99.stop_all_requests()
+    end)
+
+    vim.keymap.set("n", "<leader>9s", function()
+      _99.search()
     end)
   end,
 }
