@@ -46,7 +46,7 @@ return {
       require('mason').setup({ PATH = "append" })
       require('mason-lspconfig').setup({
         ensure_installed = { 'rust_analyzer', 'dockerls', "cssls", "clangd", "lua_ls", "jsonls" },
-        automatic_enable = true
+        automatic_enable = false
       })
 
       -- LSP server configurations
@@ -117,16 +117,11 @@ return {
         capabilities = lsp_capabilities
       })
 
-      vim.lsp.config("cnls", {
-        cmd = { "cnls" },
-        filetypes = { "javascriptreact", "typescriptreact" },
-        root_markers = { "package.json" },
+      vim.lsp.config("tailwindcss", {
+        cmd = { "sh", "-c", "NODE_OPTIONS='--max-old-space-size=2048' tailwindcss-language-server --stdio" },
+        filetypes = { "javascript", "javascriptreact", "javascript.jsx", "typescript", "typescriptreact", "typescript.tsx", "vue", "html" },
+        root_markers = { "tailwind.config.js", "tailwind.config.ts", "postcss.config.js", "postcss.config.ts", "tailwind.config.mjs", "tailwind.config.mts" },
         capabilities = lsp_capabilities,
-        settings = {
-          cnls = {
-            scopes = { "att:className,class,classes,*ClassName", "fn:createElement,cva", "prop:className" }
-          }
-        }
       })
 
       vim.lsp.config("todols", {
@@ -136,7 +131,7 @@ return {
         capabilities = lsp_capabilities
       })
 
-      vim.lsp.enable { "cnls", "todols" }
+      vim.lsp.enable { "tailwindcss", "todols" }
     end,
   },
   {
@@ -149,7 +144,7 @@ return {
     dependencies = { "williamboman/mason.nvim" },
     opts = {
       ensure_installed = { 'rust_analyzer', 'dockerls', "cssls", "clangd", "lua_ls", "jsonls" },
-      automatic_enable = true
+      automatic_enable = false
     },
   },
   {
