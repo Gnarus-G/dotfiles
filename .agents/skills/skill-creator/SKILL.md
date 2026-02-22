@@ -21,9 +21,12 @@ Use this when you want to:
 
 ## How to create a skill
 
-1. **Choose a unique skill name** - Must be lowercase alphanumeric with hyphens, 1-64 chars
-2. **Ask the user if it should be global or project local**
-3. **Create the directory structure** (prefer `~/.agents/skills/`)
+1. **Research the topic/tool** - Use `ez-web-search-mcp_search` and `context7-mcp` tools to gather information about the topic or tool the skill will cover. This ensures the skill content is accurate and comprehensive.
+   - Use `context7-mcp_resolve-library-id` then `context7-mcp_query-docs` for library/framework documentation
+   - Use `ez-web-search-mcp_search` for general web searches about tools, workflows, or concepts
+2. **Choose a unique skill name** - Must be lowercase alphanumeric with hyphens, 1-64 chars
+3. **Ask the user if it should be global or project local**
+4. **Create the directory structure** (prefer `~/.agents/skills/`)
    - Global: `~/.agents/skills/<name>/` (preferred)
    - Project-local: `.agents/skills/<name>/`
    - Alternative global: `~/.config/opencode/skills/<name>/`
@@ -31,6 +34,38 @@ Use this when you want to:
 4. **Write frontmatter** - Include `name`, `description`, and optional fields
 5. **Add skill content** - Use markdown to document the skill's purpose and usage
 6. **Validate the skill** - Ensure proper naming and frontmatter format
+
+## Researching for skill content
+
+When creating a skill, first gather accurate information about the relevant tool or topic:
+
+### Using context7-mcp for library documentation
+
+For skills about specific libraries or frameworks:
+
+```text
+1. Call context7-mcp_resolve-library-id with the library name
+2. Use the returned library ID with context7-mcp_query-docs to fetch relevant docs
+3. Focus queries on the specific aspects the skill should cover
+```
+
+Example: For a React skill, resolve the library ID first, then query for "hooks patterns" or "component lifecycle".
+
+### Using ez-web-search-mcp for general research
+
+For broader topics, tools without Context7 coverage, or workflows:
+
+```text
+Call ez-web-search-mcp_search with descriptive queries about best practices,
+common patterns, or tool usage.
+```
+
+### Tips for effective research
+
+- Be specific in queries to get relevant results
+- Cross-reference multiple sources for accuracy
+- Include version-specific information when relevant
+- Note any security considerations or gotchas
 
 ## Skill frontmatter requirements
 
@@ -147,6 +182,7 @@ Brief overview of most common commands...
 
 ## Validation checklist
 
+- [ ] Researched topic using web search and/or context7-mcp
 - [ ] Skill name follows naming rules
 - [ ] Frontmatter includes required fields
 - [ ] Description is specific and helpful
