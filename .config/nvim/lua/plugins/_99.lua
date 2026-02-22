@@ -27,7 +27,7 @@ return {
       -- and generation will fail refer to tool documentation to resolve
       -- https://opencode.ai/docs/permissions/#external-directories
       -- https://code.claude.com/docs/en/permissions#read-and-edit
-      tmp_dir = "./tmp",
+      tmp_dir = "/tmp", -- I allowed /tmp/** in opencode
       show_in_flight_requests = true,
       auto_add_skills = true,
 
