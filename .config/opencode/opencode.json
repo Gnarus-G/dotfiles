@@ -8,7 +8,7 @@
   "theme": "tokyonight",
   "autoupdate": true,
   "plugin": ["opencode-agent-memory", "opencode-agent-skills"],
-  "instructions": [],
+  "instructions": ["~/d/dotfiles/.config/opencode/system.md"],
   "provider": {
     "ollama": {
       "npm": "@ai-sdk/openai-compatible",
