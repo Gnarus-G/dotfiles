@@ -43,12 +43,6 @@ return {
 
       local lsp_capabilities = require('cmp_nvim_lsp').default_capabilities()
 
-      require('mason').setup({ PATH = "append" })
-      require('mason-lspconfig').setup({
-        ensure_installed = { 'rust_analyzer', 'dockerls', "cssls", "clangd", "lua_ls", "jsonls" },
-        automatic_enable = false
-      })
-
       -- LSP server configurations
       vim.lsp.config("ocamllsp", {
         capabilities = lsp_capabilities,
@@ -131,7 +125,7 @@ return {
         capabilities = lsp_capabilities
       })
 
-      vim.lsp.enable { "tailwindcss", "todols", "rust_analyzer", "lua_ls", "jsonls", "dockerls", "clangd" }
+      vim.lsp.enable { "todols" }
     end,
   },
   {
@@ -144,7 +138,7 @@ return {
     dependencies = { "williamboman/mason.nvim" },
     opts = {
       ensure_installed = { 'rust_analyzer', 'dockerls', "cssls", "clangd", "lua_ls", "jsonls" },
-      automatic_enable = false
+      automatic_enable = true
     },
   },
   {
