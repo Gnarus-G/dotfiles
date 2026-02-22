@@ -131,7 +131,7 @@ return {
         capabilities = lsp_capabilities
       })
 
-      vim.lsp.enable { "tailwindcss", "todols" }
+      vim.lsp.enable { "tailwindcss", "todols", "rust_analyzer", "lua_ls", "jsonls", "dockerls", "clangd" }
     end,
   },
   {
