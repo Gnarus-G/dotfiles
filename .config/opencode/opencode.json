@@ -7,7 +7,7 @@
   },
   "theme": "tokyonight",
   "autoupdate": true,
-  "plugin": ["opencode-agent-memory", "opencode-agent-skills"],
+  "plugin": ["opencode-agent-memory", "opencode-agent-skills@0.6.4"],
   "instructions": ["~/d/dotfiles/.config/opencode/system.md"],
   "provider": {
     "ollama": {
