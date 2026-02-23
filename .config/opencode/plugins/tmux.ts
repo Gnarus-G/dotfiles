@@ -68,6 +68,7 @@ function formatHelpMessage(): string {
     "Prompt references:",
     "- `@pane` uses selected pane for this OpenCode session",
     "- `@pane:<target>` uses explicit pane target",
+    "- expansion only happens for standalone tokens separated by whitespace",
     "",
     "Valid targets:",
     "- numeric index from `/tmux-panes`",
@@ -93,7 +94,7 @@ async function expandPaneReferencesInText(
   resolvePane: (sessionID: string, selector?: string) => Promise<{ target: string; namedTarget: string; paneID: string } | { error: string }>,
   capturePaneText: (target: string, lines?: number) => Promise<{ output?: string; error?: string }>,
 ): Promise<string> {
-  const regex = /(?<![`\w])@pane(?::([^\s`'",;!?()[\]{}<>]+))?/g
+  const regex = /(?<!\S)@pane(?::([^\s`'",;!?()[\]{}<>]+))?(?!\S)/g
   let result = ""
   let cursor = 0
 
@@ -111,15 +112,15 @@ async function expandPaneReferencesInText(
       expansion = (async () => {
         const resolved = await resolvePane(sessionID, selector)
         if ("error" in resolved) {
-          return `[tmux pane error for ${token}: ${resolved.error}]`
+          throw new Error(`${token} failed: ${resolved.error}`)
         }
 
         const captured = await capturePaneText(resolved.target)
-        if (!captured.output) {
-          return `[tmux pane error for ${token}: ${captured.error}]`
+        if (captured.error) {
+          throw new Error(`${token} failed: ${captured.error}`)
         }
 
-        const body = captured.output.trim() || "(pane output is empty)"
+        const body = (captured.output ?? "").trim() || "(pane output is empty)"
         return [
           "<tmux-pane>",
           `target: ${resolved.target}`,
@@ -358,13 +359,18 @@ export const TmuxPlugin: Plugin = async ({ client, $ }) => {
         if (part.type !== "text") continue
         if (!part.text.includes("@pane")) continue
 
-        part.text = await expandPaneReferencesInText(
-          input.sessionID,
-          part.text,
-          cache,
-          (sessionID, selector) => resolvePane(sessionID, selector),
-          (target, lines) => capturePaneText(target, lines),
-        )
+        try {
+          part.text = await expandPaneReferencesInText(
+            input.sessionID,
+            part.text,
+            cache,
+            (sessionID, selector) => resolvePane(sessionID, selector),
+            (target, lines) => capturePaneText(target, lines),
+          )
+        } catch (error) {
+          const message = error instanceof Error ? error.message : String(error)
+          throw new Error(`tmux pane expansion blocked this message: ${message}`)
+        }
       }
     },
 
