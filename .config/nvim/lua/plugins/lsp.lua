@@ -77,7 +77,7 @@ return {
               extraArgs = { "--", "-D", "warnings" },
             },
             rustfmt = {
-              overrideCommand = { "rustfmt", "+nightly", "--edition", "2021" },
+              overrideCommand = { "rustfmt", "+nightly" },
             }
           }
         }
