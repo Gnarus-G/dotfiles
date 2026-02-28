@@ -1,12 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# git-ac: Automated commit message generation using OpenCode CLI
+# git-ac: Automated commit message generation using Ollama
 # Usage: git ac [options]
 
-MODEL="ollama-cloud/glm-5"
+MODEL="mistral:7b"
 NO_EDIT=false
 DRY_RUN=false
+USE_OPENCODE=false
+VERBOSE=false
 
 usage() {
   cat <<EOF
@@ -18,6 +20,8 @@ Options:
   -y, --no-edit       Skip editor, commit directly with generated message
   -n, --dry-run       Print generated message to stdout, don't commit
   -m, --model MODEL   Override model (default: $MODEL)
+  -o, --opencode      Use OpenCode CLI instead of direct Ollama
+  -v, --verbose       Show timing and quality metrics
   -h, --help          Show this help message
 
 Examples:
@@ -42,6 +46,14 @@ while [[ $# -gt 0 ]]; do
   -m | --model)
     MODEL="$2"
     shift 2
+    ;;
+  -o | --opencode)
+    USE_OPENCODE=true
+    shift
+    ;;
+  -v | --verbose)
+    VERBOSE=true
+    shift
     ;;
   -h | --help)
     usage
@@ -81,16 +93,39 @@ Format:
 
 <footer (if applicable)>"
 
-# Generate commit message via OpenCode CLI
-MESSAGE=$(echo "$SYSTEM_PROMPT
+# Generate commit message
+START_TIME=$(date +%s.%N)
+
+if $USE_OPENCODE; then
+  MESSAGE=$(echo "$SYSTEM_PROMPT
 
 Write a commit message for this Git diff:
 
 $DIFF" | opencode run --model "$MODEL" --variant none -)
+else
+  PROMPT="$SYSTEM_PROMPT
+
+Write a commit message for this Git diff:
+
+$DIFF"
+  MESSAGE=$(curl -s http://localhost:11434/api/generate \
+    -d "{\"model\": \"$MODEL\", \"prompt\": $(echo "$PROMPT" | jq -Rs .), \"stream\": false}" | jq -r '.response')
+fi
+
+END_TIME=$(date +%s.%N)
+DURATION=$(echo "$END_TIME - $START_TIME" | bc)
 
 # Handle --dry-run
 if $DRY_RUN; then
   echo "$MESSAGE"
+  if $VERBOSE; then
+    echo ""
+    echo "---"
+    echo "Model: $MODEL"
+    printf "Generation time: %.2fs\n" "$DURATION"
+    echo "Subject line length: $(echo "$MESSAGE" | head -n1 | wc -c) chars"
+    echo "Body lines: $(echo "$MESSAGE" | tail -n +3 | wc -l)"
+  fi
   exit 0
 fi
 
@@ -113,3 +148,23 @@ fi
 
 # Commit with the message
 git commit -F "$TMPFILE"
+
+# Show quality metrics if verbose
+if $VERBOSE; then
+  echo ""
+  echo "---"
+  echo "Model: $MODEL"
+  printf "Generation time: %.2fs\n" "$DURATION"
+  
+  SUBJECT=$(echo "$MESSAGE" | head -n1)
+  echo "Subject: $SUBJECT"
+  echo "Subject length: $(echo "$SUBJECT" | wc -c) chars (limit: 50)"
+  
+  if [[ ${#SUBJECT} -gt 50 ]]; then
+    echo "⚠️  Warning: Subject exceeds 50 characters"
+  fi
+  
+  if echo "$SUBJECT" | grep -qE "^(feat|fix|chore|refactor|test|docs):"; then
+    echo "⚠️  Warning: Subject has type prefix (should be plain imperative)"
+  fi
+fi
