@@ -4,7 +4,7 @@ set -euo pipefail
 # git-ac: Automated commit message generation using Ollama
 # Usage: git ac [options]
 
-MODEL="qwen3-coder:480b-cloud"
+MODEL="qwen3-coder-next:cloud"
 NO_EDIT=false
 DRY_RUN=false
 USE_OPENCODE=false
@@ -48,7 +48,7 @@ while [[ $# -gt 0 ]]; do
     shift 2
     ;;
   -o | --opencode)
-    USE_OPENCODE=true
+USE_OPENCODE=false
     shift
     ;;
   -v | --verbose)
