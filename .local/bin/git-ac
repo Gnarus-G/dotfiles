@@ -4,7 +4,7 @@ set -euo pipefail
 # git-ac: Automated commit message generation using Ollama
 # Usage: git ac [options]
 
-MODEL="mistral:7b"
+MODEL="qwen3-coder:480b-cloud"
 NO_EDIT=false
 DRY_RUN=false
 USE_OPENCODE=false
@@ -77,21 +77,19 @@ fi
 DIFF=$(git diff --staged)
 
 # System prompt
-SYSTEM_PROMPT="You are a knowledgeable software developer generating a Git commit message.
+SYSTEM_PROMPT="Generate a git commit message for these changes.
 
-Rules:
-- Subject line: max 50 characters, imperative verb (e.g., \"Add frontend unit tests\")
-- NO type prefixes like \"feat:\", \"fix:\", \"refactor:\"
-- Body: explain \"what\" and \"why\", not \"how\", wrapped at 72 characters
-- Footer: references like \"Fixes #123\", \"Closes #456\", or \"BREAKING CHANGE: ...\"
-
-Output ONLY the commit message, no markdown fences, no explanation.
 Format:
-<subject>
+- Line 1: Subject (max 50 chars, imperative, no prefix)
+- Line 2: Blank
+- Line 3+: Body (explain what/why, wrap at 72 chars)
 
-<body>
+Do NOT include:
+- Type prefixes (feat:, fix:, etc.)
+- Markdown code blocks
+- Explanations or commentary
 
-<footer (if applicable)>"
+Output ONLY the commit message."
 
 # Generate commit message
 START_TIME=$(date +%s.%N)
