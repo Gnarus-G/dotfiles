@@ -90,8 +90,17 @@ return {
     --
     -- likely ill add a mode check and assert on required visual mode
     -- so just prepare for it now
+    -- Send visual selection to AI for modification
     vim.keymap.set("v", "<leader>9v", function()
       _99.visual({})
+    end)
+
+    -- Vibe mode: open prompt buffer for free-form AI requests
+    -- Type natural language description of code changes you want
+    -- AI writes changes to temp file, results shown in quickfix list
+    -- Output format: /path/to/file.ext:lnum:cnum,X,NOTES
+    vim.keymap.set("n", "<leader>9V", function()
+      _99.vibe()
     end)
 
     --- if you have a request you dont want to make any changes, just cancel it
