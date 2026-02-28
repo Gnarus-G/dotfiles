@@ -90,7 +90,11 @@
         (command: MoveToTag, value: "7", modifier: ["modkey", "Shift"], key: "7"),
         (command: MoveToTag, value: "8", modifier: ["modkey", "Shift"], key: "8"),
         (command: MoveToTag, value: "9", modifier: ["modkey", "Shift"], key: "9"),
-        (command: RotateTag, modifier: ["modkey"], key: "z")
+        (command: RotateTag, modifier: ["modkey"], key: "z"),
+        (command: Execute,
+         value: "dbus-send --session --dest=tech.bytin.vype --type=method_call /tech/bytin/vype tech.bytin.vype.Recorder.ToggleRecording",
+         modifier: ["modkey"],
+         key: "v")
     ],
     workspaces: [],
 )
