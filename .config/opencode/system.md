@@ -8,9 +8,9 @@
 
 ## Skills
 
-- **Committing**: Always invoke `git-commit` skill when asked to commit changes
 - **Code design**: Use `functional-programming` or `refactoring-expert` skill when planning or designing code changes
 - **Skill creation**: Use `skill-creator` skill when creating new skills
+- **Tmux**: Use `tmux-processes` skill if working in tmux environment to manage panes effectively for workflows involving multiple files/screens/tabs
 
 ## Workflow Quality
 
