@@ -6,6 +6,7 @@ return {
     -- For logging that is to a file if you wish to trace through requests
     -- for reporting bugs, i would not rely on this, but instead the provided
     -- logging mechanisms within 99.  This is for more debugging purposes
+    ---@diagnostic disable: undefined-field
     local cwd = vim.uv.cwd()
     local basename = vim.fs.basename(cwd)
 
@@ -90,7 +91,7 @@ return {
     -- likely ill add a mode check and assert on required visual mode
     -- so just prepare for it now
     vim.keymap.set("v", "<leader>9v", function()
-      _99.visual()
+      _99.visual({})
     end)
 
     --- if you have a request you dont want to make any changes, just cancel it
@@ -98,19 +99,13 @@ return {
       _99.stop_all_requests()
     end)
 
-    local last_search_xid = nil
-
     vim.keymap.set("n", "<leader>9s", function()
-      last_search_xid = _99.search()
+      _99.search({})
     end)
 
-    --- open quickfix with results from the last search
+    --- open previous requests (search, vibe, tutorial) in quickfix list
     vim.keymap.set("n", "<leader>9q", function()
-      if last_search_xid then
-        _99.qfix_search_results(last_search_xid)
-      else
-        vim.notify("99: no search results yet", vim.log.levels.WARN)
-      end
+      _99.open()
     end)
 
     --- tutorial: ask AI to generate a tutorial on any topic
@@ -118,9 +113,9 @@ return {
       _99.tutorial({})
     end)
 
-    --- open the last tutorial (or pick from list if multiple)
-    vim.keymap.set("n", "<leader>9T", function()
-      _99.open_tutorial(nil)
+    --- open previous requests (search, vibe, tutorial) via picker
+    vim.keymap.set("n", "<leader>9o", function()
+      _99.open()
     end)
 
     --- add md_files via file picker (markdown only)
