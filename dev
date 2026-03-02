@@ -4,6 +4,7 @@ pwd=$(pwd)
 
 configPaths=(
   .agents
+  .codex/config.toml
 
   .config/nvim
   .config/mcphub
@@ -28,5 +29,6 @@ configPaths=(
 
 for p in ${configPaths[*]}; do
   rm -rf ~/$p
+  mkdir -p "$(dirname ~/$p)"
   ln -s $pwd/$p ~/$p
 done
