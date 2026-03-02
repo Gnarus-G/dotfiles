@@ -1,6 +1,6 @@
 ---
 name: tmux-processes
-description: Use the tmux plugin workflow for pane selection, @pane references, and long-lived process management.
+description: Use the tmux plugin workflow for pane selection, '@pane' references, and long-lived process management.
 ---
 
 # tmux Process Management (Plugin-First)
