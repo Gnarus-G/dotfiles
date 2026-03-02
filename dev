@@ -1,34 +1,152 @@
-#!/usr/bin/env bash
+#!/usr/bin/env python3
 
-pwd=$(pwd)
+import os
+import shutil
+import subprocess
+from pathlib import Path
 
-configPaths=(
-  .agents
-  .codex/config.toml
+DOTFILES = Path(__file__).resolve().parent
+HOME = Path.home()
 
-  .config/nvim
-  .config/mcphub
-  .config/opencode
-  .config/awesome
-  .config/gtk-3.0
-  .config/eww .config/leftwm
-  .config/ghostty/config
-  .config/himither
-  .config/maccel
+# source dir (relative to dotfiles repo) -> list of symlink targets (relative to ~)
+# Most map 1:1 to the same relative path under ~.
+LINKS: dict[str, list[str]] = {
+    ".agents": [".agents"],
+    ".agents/skills": [".claude/skills"],
+    ".codex/config.toml": [".codex/config.toml"],
+    ".config/nvim": [".config/nvim"],
+    ".config/mcphub": [".config/mcphub"],
+    ".config/opencode": [".config/opencode"],
+    ".config/awesome": [".config/awesome"],
+    ".config/gtk-3.0": [".config/gtk-3.0"],
+    ".config/eww": [".config/eww"],
+    ".config/leftwm": [".config/leftwm"],
+    ".config/ghostty/config": [".config/ghostty/config"],
+    ".config/himither": [".config/himither"],
+    ".config/maccel": [".config/maccel"],
+    ".tmux.conf.local": [".tmux.conf.local"],
+    ".wezterm.lua": [".wezterm.lua"],
+    ".config/picom.conf": [".config/picom.conf"],
+    ".zshrc": [".zshrc"],
+    ".gitconfig": [".gitconfig"],
+    ".local/bin/clip": [".local/bin/clip"],
+    ".local/bin/getfonts.sh": [".local/bin/getfonts.sh"],
+    ".local/bin/git-ac": [".local/bin/git-ac"],
+}
 
-  .tmux.conf.local
-  .wezterm.lua
-  .config/picom.conf
-  .zshrc
-  .gitconfig
 
-  .local/bin/clip
-  .local/bin/getfonts.sh
-  .local/bin/git-ac
-)
+def show_diff(source: Path, target: Path):
+    """Show a diff between the dotfiles source and the conflicting target."""
+    # Resolve symlinks so we diff actual content
+    real_target = target.resolve() if target.is_symlink() else target
+    real_source = source.resolve() if source.is_symlink() else source
 
-for p in ${configPaths[*]}; do
-  rm -rf ~/$p
-  mkdir -p "$(dirname ~/$p)"
-  ln -s $pwd/$p ~/$p
-done
+    if real_source.is_file() and real_target.is_file():
+        subprocess.run(
+            ["diff", "--color=always", "-u", str(real_source), str(real_target)],
+            # diff exits 1 when files differ — that's expected
+        )
+    elif real_source.is_dir() and real_target.is_dir():
+        subprocess.run(
+            ["diff", "--color=always", "-ru", str(real_source), str(real_target)],
+        )
+    else:
+        print(f"    (cannot diff: {real_source} and {real_target} are different types)")
+
+
+def prompt_conflict(source: Path, target: Path) -> str:
+    """Ask the user how to resolve a conflict at target."""
+    print(f"\n  conflict: {target}")
+    if target.is_symlink():
+        print(f"    existing symlink -> {os.readlink(target)}")
+        print(f"    expected         -> {source}")
+    elif target.is_dir():
+        print(f"    existing directory with content")
+    else:
+        print(f"    existing file")
+
+    show_diff(source, target)
+
+    while True:
+        choice = input("  [o]verwrite / [a]bsorb / [s]kip? ").strip().lower()
+        if choice in ("o", "overwrite"):
+            return "overwrite"
+        if choice in ("a", "absorb"):
+            return "absorb"
+        if choice in ("s", "skip"):
+            return "skip"
+
+
+def absorb(source: Path, target: Path):
+    """Move the existing target content into the dotfiles repo, then symlink."""
+    if source.exists() or source.is_symlink():
+        # Merge: for dirs, copy tree contents over; for files, replace.
+        if source.is_dir() and target.is_dir():
+            shutil.copytree(target, source, dirs_exist_ok=True)
+        else:
+            if source.is_symlink():
+                source.unlink()
+            source.parent.mkdir(parents=True, exist_ok=True)
+            shutil.move(str(target), str(source))
+    else:
+        source.parent.mkdir(parents=True, exist_ok=True)
+        shutil.move(str(target), str(source))
+
+
+def remove(target: Path):
+    """Remove a target path (file, symlink, or directory)."""
+    if target.is_symlink() or target.is_file():
+        target.unlink()
+    elif target.is_dir():
+        shutil.rmtree(target)
+
+
+def link(source: Path, target: Path):
+    """Create a symlink: target -> source."""
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.symlink_to(source)
+
+
+def is_correct_link(source: Path, target: Path) -> bool:
+    """Check if target is already a symlink pointing to source."""
+    return target.is_symlink() and target.resolve() == source.resolve()
+
+
+def main():
+    print(f"dotfiles: {DOTFILES}")
+    print(f"home:     {HOME}\n")
+
+    for src_rel, dst_rels in LINKS.items():
+        source = DOTFILES / src_rel
+        for dst_rel in dst_rels:
+            target = HOME / dst_rel
+
+            # Already correct — nothing to do.
+            if is_correct_link(source, target):
+                print(f"  ok  {dst_rel}")
+                continue
+
+            # Nothing at target — just link.
+            if not target.exists() and not target.is_symlink():
+                link(source, target)
+                print(f"  ln  {dst_rel}")
+                continue
+
+            # Conflict: something is there that doesn't match.
+            action = prompt_conflict(source, target)
+
+            if action == "skip":
+                print(f"  --  {dst_rel} (skipped)")
+            elif action == "overwrite":
+                remove(target)
+                link(source, target)
+                print(f"  ln  {dst_rel} (overwritten)")
+            elif action == "absorb":
+                absorb(source, target)
+                remove(target)
+                link(source, target)
+                print(f"  ln  {dst_rel} (absorbed)")
+
+
+if __name__ == "__main__":
+    main()
