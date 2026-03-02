@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import json
 import os
 import shutil
 import subprocess
@@ -13,7 +14,6 @@ HOME = Path.home()
 LINKS: dict[str, list[str]] = {
     ".agents": [".agents"],
     ".agents/skills": [".claude/skills"],
-    ".codex/config.toml": [".codex/config.toml"],
     ".config/nvim": [".config/nvim"],
     ".config/mcphub": [".config/mcphub"],
     ".config/opencode": [".config/opencode"],
@@ -148,5 +148,68 @@ def main():
                 print(f"  ln  {dst_rel} (absorbed)")
 
 
+def sync_mcp():
+    """Sync MCP servers from .mcp.json into Claude Code and Codex."""
+    mcp_path = DOTFILES / ".mcp.json"
+    if not mcp_path.exists():
+        return
+
+    servers = json.loads(mcp_path.read_text()).get("mcpServers", {})
+    if not servers:
+        return
+
+    # Claude Code
+    if shutil.which("claude"):
+        for name, spec in servers.items():
+            subprocess.run(
+                ["claude", "mcp", "add-json", "-s", "user", name, json.dumps(spec)],
+                capture_output=True,
+            )
+            print(f"  mcp claude  {name}")
+    else:
+        print("  --  claude not found, skipping")
+
+    # Codex — merge [mcp_servers.*] into ~/.codex/config.toml
+    codex_target = HOME / ".codex" / "config.toml"
+
+    toml_blocks = []
+    for name, spec in servers.items():
+        lines = [f"[mcp_servers.{name}]"]
+        lines.append(f'command = "{spec["command"]}"')
+        if spec.get("args"):
+            items = ", ".join(f'"{a}"' for a in spec["args"])
+            lines.append(f"args = [{items}]")
+        if spec.get("env"):
+            lines.append(f"\n[mcp_servers.{name}.env]")
+            for k, v in spec["env"].items():
+                lines.append(f'{k} = "{v}"')
+        toml_blocks.append("\n".join(lines))
+
+    mcp_toml = "\n\n".join(toml_blocks)
+
+    # Strip existing mcp_servers sections from target, keep the rest
+    rest = ""
+    if codex_target.exists():
+        in_mcp = False
+        kept = []
+        for line in codex_target.read_text().splitlines():
+            is_header = line.startswith("[")
+            if is_header and "mcp_servers" in line:
+                in_mcp = True
+            elif is_header:
+                in_mcp = False
+            if not in_mcp:
+                kept.append(line)
+        rest = "\n".join(kept).strip()
+
+    codex_target.parent.mkdir(parents=True, exist_ok=True)
+    content = mcp_toml
+    if rest:
+        content += "\n\n" + rest
+    codex_target.write_text(content + "\n")
+    print("  mcp codex  (synced)")
+
+
 if __name__ == "__main__":
     main()
+    sync_mcp()
