@@ -1,158 +1,99 @@
 ---
 name: ollama-amd-gpu-installation
-description: Comprehensive guide for installing Ollama with AMD GPU support using systemd USER services on Ubuntu and Arch Linux
+description: Install Ollama for AMD GPU acceleration only as a simple systemd user service
 license: MIT
 compatibility: opencode
 metadata:
   audience: developers
   workflow: installation
-  platforms:
-    - Ubuntu 24.04+
-    - Arch Linux
+  platforms: [Linux]
 ---
 
 # Ollama AMD GPU Installation Skill
 
-This skill provides comprehensive guidance for installing Ollama with AMD GPU support using systemd USER services on both Ubuntu and Arch Linux.
+Use this skill for a direct, minimal setup of Ollama with AMD GPU acceleration only as a user-level service.
 
-## Overview
+Hard requirements:
 
-Ollama is an open-source platform for running large language models locally. This skill focuses on AMD GPU acceleration and proper systemd USER service configuration for personal use.
+- Install Ollama in user space only.
+- Use a systemd user service only.
+- Do not require `sudo` for Ollama install or service management.
 
-## Prerequisites
+## Behavior
 
-- AMD GPU with ROCm support
-- Ubuntu 24.04+ or Arch Linux
-- User with sudo privileges
-- ~15GB disk space for models
+- Keep responses short and action-oriented.
+- Do not interrogate the user with multiple setup questions.
+- Provide a small command set the user can paste.
+- Never use `curl -fsSL https://ollama.com/install.sh | sh` because it installs system-wide.
+- Never require `sudo` for Ollama commands in this workflow.
 
-## Quick Reference
+## Default Workflow (GPU-Only)
 
-| Topic | Description | Commands |
-|-------|-------------|----------|
-| **Driver Installation** | Install ROCm drivers for AMD GPU | [drivers.md](references/drivers.md) |
-| **Ollama Installation** | Install and configure Ollama | [installation.md](references/installation.md) |
-| **Systemd Service** | Create systemd USER service | [service.md](references/service.md) |
-| **Verification** | Test installation and GPU acceleration | [verification.md](references/verification.md) |
-| **Troubleshooting** | Common issues and solutions | [troubleshooting.md](references/troubleshooting.md) |
+1. Verify ROCm is already working (required)
 
-## Essential Commands
+This skill does not install drivers or ROCm because those steps are system-wide and may need admin rights.
 
 ```bash
-# Install ROCm drivers (Ubuntu)
-sudo apt install -y amdgpu-dkms rocm
-
-# Install ROCm drivers (Arch)
-sudo pacman -S --needed rocm-opencl rocm-libs rocm-opencl-icd amdgpu
-
-# Install Ollama
-curl -fsSL https://ollama.com/install.sh | sh
-
-# Create symlink
-mkdir -p ~/.local/bin && ln -sf ~/.local/opt/ollama/bin/ollama ~/.local/bin/ollama
-
-# Create systemd service
-systemctl --user daemon-reload && systemctl --user enable ollama
-
-# Start service
-systemctl --user start ollama
-
-# Verify installation
-~/.local/opt/ollama/bin/ollama --version
+rocminfo
 ```
 
-## GPU Acceleration
+If `rocminfo` does not detect the GPU, stop and fix ROCm outside this skill before continuing.
 
-Ollama automatically detects AMD GPUs when ROCm drivers are properly installed. GPU acceleration significantly improves model inference speed for larger models.
-
-## Model Storage
-
-Models are stored in `~/.local/opt/ollama/models` by default. This location is user-specific and doesn't require elevated permissions.
-
-## Security Considerations
-
-- Systemd USER services run with your user permissions
-- Models are stored in your home directory
-- No system-wide configuration required
-- Firewall access can be restricted to localhost
-
-## Uninstall
-
-To completely remove Ollama:
+2. Install Ollama and ROCm-enabled runtime (user space only)
 
 ```bash
-# Stop and disable service
-systemctl --user stop ollama
-systemctl --user disable ollama
-
-# Remove service file
-rm ~/.config/systemd/user/ollama.service
-
-# Remove installation
-rm -rf ~/.local/opt/ollama
-
-# Remove symlink
-rm ~/.local/bin/ollama
-
-# Remove ROCm drivers (optional)
-sudo apt remove -y amdgpu-dkms rocm  # Ubuntu
-sudo pacman -R rocm-opencl rocm-libs rocm-opencl-icd amdgpu  # Arch
+mkdir -p ~/.local/opt/ollama ~/.local/bin
+curl -fsSL https://ollama.com/download/ollama-linux-amd64-rocm.tar.zst | tar x -C ~/.local/opt/ollama
+ln -sf ~/.local/opt/ollama/bin/ollama ~/.local/bin/ollama
 ```
 
-## Performance Tuning
+3. Create user service
 
-Add these options to the service file for better performance:
+```bash
+mkdir -p ~/.config/systemd/user
+cat > ~/.config/systemd/user/ollama.service << 'EOF'
+[Unit]
+Description=Ollama (User)
+After=network-online.target
 
-```ini
 [Service]
-LimitNOFILE=65536
-CPUQuota=80%
-MemoryHigh=8G
-MemoryMax=16G
-Environment="OLLAMA_GPU=amd"
-Environment="OLLAMA_GPUS=0"
+Type=simple
+ExecStart=%h/.local/opt/ollama/bin/ollama serve
+Restart=always
+RestartSec=3
+Environment=OLLAMA_HOST=127.0.0.1:11434
+Environment=OLLAMA_GPU=amd
+Environment=OLLAMA_LLM_LIBRARY=rocm
+
+[Install]
+WantedBy=default.target
+EOF
 ```
 
-## Model Management
-
-### Pulling Models
+4. Enable and start
 
 ```bash
-~/.local/opt/ollama/bin/ollama pull llama3.2:3b
-~/.local/opt/ollama/bin/ollama pull codellama:7b
-~/.local/opt/ollama/bin/ollama pull deepseek-coder:6.7b
+systemctl --user daemon-reload
+systemctl --user enable --now ollama
 ```
 
-### Listing Models
+If a system-wide service already occupies `127.0.0.1:11434`, change the user service host to another port (for example `127.0.0.1:11435`) and restart the user service.
+
+5. Verify GPU acceleration
 
 ```bash
-~/.local/opt/ollama/bin/ollama list
-```
-
-## Monitoring
-
-### Log Monitoring
-
-```bash
-journalctl --user -u ollama -f
-```
-
-### Performance Monitoring
-
-```bash
-rocm-smi
 ~/.local/opt/ollama/bin/ollama --version
+rocminfo | head -n 20
+systemctl --user status ollama --no-pager
+journalctl --user -u ollama -n 50 --no-pager
 ```
 
-## Additional Resources
+If `rocminfo` does not detect the GPU, stop and fix ROCm before using Ollama.
 
-- [Ollama Official Documentation](https://docs.ollama.com/)
-- [ROCm Documentation](https://rocm.docs.amd.com/)
-- [AMD GPU Drivers](https://www.amd.com/en/support/linux-drivers)
+## References
 
-## Notes
-
-- This skill uses systemd USER services for personal use without requiring sudo for service management
-- GPU acceleration is automatic when ROCm drivers are properly installed
-- Models are stored in user home directory for easy backup and management
-- Service automatically restarts on crashes and system boot
+- [references/installation.md](references/installation.md)
+- [references/service.md](references/service.md)
+- [references/verification.md](references/verification.md)
+- [references/drivers.md](references/drivers.md)
+- [references/troubleshooting.md](references/troubleshooting.md)
