@@ -32,6 +32,7 @@ LINKS: dict[str, list[str]] = {
     ".local/bin/clip": [".local/bin/clip"],
     ".local/bin/getfonts.sh": [".local/bin/getfonts.sh"],
     ".local/bin/git-ac": [".local/bin/git-ac"],
+    ".local/bin/ollama-websearch-mcp.py": [".local/bin/ollama-websearch-mcp.py"],
 }
 
 
