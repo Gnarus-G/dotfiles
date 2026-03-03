@@ -34,13 +34,9 @@
         "XDG_RUNTIME_DIR": "/run/user/1000"
       }
     },
-    "ez-web-search-mcp": {
+    "websearch": {
       "type": "local",
-      "command": [
-        "sh",
-        "-c",
-        "node ${HOME}/.mcphub/servers/ez-web-search-mcp/build/index.js"
-      ]
+      "command": ["uv", "run", "--python", "3.14", "/home/gnarus/.local/bin/ollama-websearch-mcp.py"]
     }
   }
 }
