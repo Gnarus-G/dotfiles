@@ -16,8 +16,12 @@ Environment:
 from __future__ import annotations
 
 import asyncio
+import logging
 import os
 from typing import Any, Dict
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
+log = logging.getLogger("ollama-websearch-mcp")
 
 from ollama import Client
 
@@ -34,22 +38,31 @@ if not _FASTMCP_AVAILABLE:
 
 
 if "OLLAMA_API_KEY" not in os.environ and "OLLAMA_WEBSEARCH_API_KEY" in os.environ:
+  log.info("Using OLLAMA_WEBSEARCH_API_KEY as OLLAMA_API_KEY")
   os.environ["OLLAMA_API_KEY"] = os.environ["OLLAMA_WEBSEARCH_API_KEY"]
 
 client = Client()
+log.info("Ollama client initialized")
 
 
 def _web_search_impl(query: str, max_results: int = 3) -> Dict[str, Any]:
+  log.info("web_search query=%r max_results=%d", query, max_results)
   res = client.web_search(query=query, max_results=max_results)
-  return res.model_dump()
+  data = res.model_dump()
+  log.debug("web_search result keys=%s", list(data.keys()))
+  return data
 
 
 def _web_fetch_impl(url: str) -> Dict[str, Any]:
+  log.info("web_fetch url=%r", url)
   res = client.web_fetch(url=url)
-  return res.model_dump()
+  data = res.model_dump()
+  log.debug("web_fetch result keys=%s", list(data.keys()))
+  return data
 
 
 if _FASTMCP_AVAILABLE:
+  log.info("Using FastMCP backend")
   app = FastMCP('ollama-search-fetch')
 
   @app.tool()
@@ -85,6 +98,7 @@ if _FASTMCP_AVAILABLE:
     app.run()
 
 else:
+  log.info("Using low-level Server backend (FastMCP unavailable)")
   server = Server('ollama-search-fetch')
 
   @server.tool()
