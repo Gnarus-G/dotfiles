@@ -17,14 +17,6 @@
         "RUST_LOG": "debug",
         "XDG_RUNTIME_DIR": "/run/user/1000"
       }
-    },
-    "ez-web-search-mcp": {
-      "type": "stdio",
-      "command": "sh",
-      "args": [
-        "-c",
-        "node ${HOME}/.mcphub/servers/ez-web-search-mcp/build/index.js"
-      ]
     }
   }
 }
