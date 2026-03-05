@@ -61,7 +61,7 @@ Type=simple
 ExecStart=%h/.local/opt/ollama/bin/ollama serve
 Restart=always
 RestartSec=3
-Environment=OLLAMA_HOST=0.0.0.0:11434
+Environment=OLLAMA_HOST=127.0.0.1:11434
 Environment=OLLAMA_GPU=amd
 Environment=OLLAMA_LLM_LIBRARY=rocm
 
@@ -77,7 +77,7 @@ systemctl --user daemon-reload
 systemctl --user enable --now ollama
 ```
 
-If a system-wide service already occupies port `11434`, change the user service host to another port (for example `0.0.0.0:11435`) and restart the user service.
+If a system-wide service already occupies `127.0.0.1:11434`, change the user service host to another port (for example `127.0.0.1:11435`) and restart the user service.
 
 5. Verify GPU acceleration
 
