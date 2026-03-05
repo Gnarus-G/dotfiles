@@ -2,7 +2,8 @@
   "$schema": "https://opencode.ai/config.json",
   "permission": {
     "external_directory": {
-      "/tmp/**": "allow"
+      "/tmp/**": "allow",
+      "~/d/**": "allow"
     }
   },
   "autoupdate": true,
@@ -36,7 +37,11 @@
     },
     "websearch": {
       "type": "local",
-      "command": ["sh", "-c", "uv run --python 3.14 $HOME/.local/bin/ollama-websearch-mcp.py"]
+      "command": [
+        "sh",
+        "-c",
+        "uv run --python 3.14 $HOME/.local/bin/ollama-websearch-mcp.py"
+      ]
     }
   }
 }
