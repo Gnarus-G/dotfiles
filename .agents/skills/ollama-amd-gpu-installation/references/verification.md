@@ -21,7 +21,7 @@ Expected: `active (running)`.
 ## 3) Ollama API Responds
 
 ```bash
-curl -s http://0.0.0.0:11434/api/tags
+curl -s http://127.0.0.1:11434/api/tags
 ```
 
 Expected: JSON response (even if model list is empty).
