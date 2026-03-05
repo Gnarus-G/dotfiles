@@ -47,13 +47,13 @@ export PATH="$HOME/.local/bin:$PATH"
 which ollama
 ```
 
-If port `11434` is busy (likely from a system service you cannot control), update your user service to another port such as `127.0.0.1:11435`.
+If port `11434` is busy (likely from a system service you cannot control), update your user service to another port such as `0.0.0.0:11435`.
 
-## API not reachable on localhost
+## API not reachable on network
 
 ```bash
 systemctl --user status ollama --no-pager
-curl -v http://127.0.0.1:11434/api/tags
+curl -v http://0.0.0.0:11434/api/tags
 ```
 
 If connection is refused, restart service and recheck logs.
