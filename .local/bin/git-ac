@@ -1,176 +1,224 @@
-#!/usr/bin/env bash
-set -euo pipefail
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.11"
+# dependencies = [
+#   "ollama",
+# ]
+# ///
 
-# git-ac: Automated commit message generation using Ollama
-# Usage: git ac [options]
+import argparse
+import os
+import shutil
+import subprocess
+import sys
+import tempfile
+import time
+from dataclasses import dataclass
+from pathlib import Path
 
-MODEL="qwen3-coder-next:cloud"
-NO_EDIT=false
-DRY_RUN=false
-USE_OPENCODE=false
-VERBOSE=false
+try:
+  from ollama import Client
+except ImportError:
+  Client = None
 
-usage() {
-  cat <<EOF
-Usage: git ac [options]
 
-Generate a commit message using OpenCode CLI for staged changes.
+DEFAULT_OLLAMA_MODEL = "qwen3-coder-next:cloud"
+OLLAMA_URL = "http://localhost:11434"
 
-Options:
-  -y, --no-edit       Skip editor, commit directly with generated message
-  -n, --dry-run       Print generated message to stdout, don't commit
-  -m, --model MODEL   Override model (default: $MODEL)
-  -o, --opencode      Use OpenCode CLI instead of direct Ollama
-  -v, --verbose       Show timing and quality metrics
-  -h, --help          Show this help message
+SYSTEM_PROMPT = """Write a high-quality git commit message for these staged changes.
 
-Examples:
-  git add -p && git ac       Stage changes interactively, then generate and edit message
-  git ac -y                  Quick commit without editing
-  git ac --dry-run           Preview the generated message
-  git ac --model ollama-cloud/kimi-k2.5   Use a different model
-EOF
-}
+Rules:
+- Output only the commit message text.
+- Subject line must be imperative, plain English, no type prefix, max 50 characters.
+- Prefer the smallest accurate subject.
+- Add a body only when it adds useful context.
+- Body should explain intent or impact, not restate the diff.
+- Avoid repeating obvious file names, symbols, or line-by-line edits.
+- If the change is mechanical or self-evident, omit the body.
+- No markdown, bullets, labels, or commentary.
+"""
 
-# Parse arguments
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-  -y | --no-edit)
-    NO_EDIT=true
-    shift
-    ;;
-  -n | --dry-run)
-    DRY_RUN=true
-    shift
-    ;;
-  -m | --model)
-    MODEL="$2"
-    shift 2
-    ;;
-  -o | --opencode)
-USE_OPENCODE=false
-    shift
-    ;;
-  -v | --verbose)
-    VERBOSE=true
-    shift
-    ;;
-  -h | --help)
-    usage
-    exit 0
-    ;;
-  *)
-    echo "Unknown option: $1" >&2
-    usage >&2
-    exit 1
-    ;;
-  esac
-done
 
-# Check for staged changes
-if git diff --staged --quiet; then
-  echo "Error: No staged changes" >&2
-  exit 1
-fi
+@dataclass(frozen=True)
+class BackendConfig:
+  backend: str
+  model: str
 
-# Get staged diff
-DIFF=$(git diff --staged)
 
-# System prompt
-SYSTEM_PROMPT="Generate a git commit message for these changes.
+def parse_args(argv: list[str]) -> argparse.Namespace:
+  parser = argparse.ArgumentParser(
+    prog="git ac",
+    description="Generate a commit message using Ollama for staged changes.",
+  )
+  parser.add_argument("-y", "--no-edit", action="store_true", help="Skip editor, commit directly")
+  parser.add_argument("-n", "--dry-run", action="store_true", help="Print generated message and exit")
+  parser.add_argument(
+    "-b",
+    "--backend",
+    choices=("ollama",),
+    default="ollama",
+    help="Generation backend (default: ollama)",
+  )
+  parser.add_argument("-m", "--model", help="Override Ollama model")
+  parser.add_argument("-v", "--verbose", action="store_true", help="Show timing and quality metrics")
+  return parser.parse_args(argv)
 
-Format:
-- Line 1: Subject (max 50 chars, imperative, no prefix)
-- Line 2: Blank
-- Line 3+: Body (explain what/why, wrap at 72 chars)
 
-Do NOT include:
-- Type prefixes (feat:, fix:, etc.)
-- Markdown code blocks
-- Explanations or commentary
+def resolve_backend_config(args: argparse.Namespace) -> BackendConfig:
+  return BackendConfig(backend="ollama", model=args.model or DEFAULT_OLLAMA_MODEL)
 
-Output ONLY the commit message."
 
-# Check/pull model if using Ollama directly
-if ! $USE_OPENCODE; then
-  if ! curl -s http://localhost:11434/api/tags | jq -e ".models[] | select(.name == \"$MODEL\")" >/dev/null 2>&1; then
-    echo "Model $MODEL not found. Pulling..." >&2
-    ollama pull "$MODEL" >&2
-  fi
-fi
+def run_command(command: list[str], *, input_text: str | None = None) -> subprocess.CompletedProcess[str]:
+  try:
+    return subprocess.run(command, check=True, text=True, input=input_text, capture_output=True)
+  except subprocess.CalledProcessError as exc:
+    detail = (exc.stderr or exc.stdout or "").strip()
+    if detail:
+      raise SystemExit(detail) from exc
+    raise SystemExit(f"Error: command failed: {' '.join(command)}") from exc
 
-# Generate commit message
-START_TIME=$(date +%s.%N)
 
-if $USE_OPENCODE; then
-  MESSAGE=$(echo "$SYSTEM_PROMPT
+def git_output(args: list[str]) -> str:
+  return run_command(["git", *args]).stdout
 
-Write a commit message for this Git diff:
 
-$DIFF" | opencode run --model "$MODEL" --variant none -)
-else
-  PROMPT="$SYSTEM_PROMPT
+def staged_diff_args() -> list[str]:
+  return ["diff", "--cached"]
 
-Write a commit message for this Git diff:
 
-$DIFF"
-  MESSAGE=$(curl -s http://localhost:11434/api/generate \
-    -d "{\"model\": \"$MODEL\", \"prompt\": $(echo "$PROMPT" | jq -Rs .), \"stream\": false}" | jq -r '.response')
-fi
+def ensure_git_worktree() -> Path | None:
+  result = subprocess.run(["git", "rev-parse", "--show-toplevel"], check=False, capture_output=True, text=True)
+  if result.returncode != 0:
+    return None
+  return Path(result.stdout.strip()) if result.stdout.strip() else None
 
-END_TIME=$(date +%s.%N)
-DURATION=$(echo "$END_TIME - $START_TIME" | bc)
 
-# Handle --dry-run
-if $DRY_RUN; then
-  echo "$MESSAGE"
-  if $VERBOSE; then
-    echo ""
-    echo "---"
-    echo "Model: $MODEL"
-    printf "Generation time: %.2fs\n" "$DURATION"
-    echo "Subject line length: $(echo "$MESSAGE" | head -n1 | wc -c) chars"
-    echo "Body lines: $(echo "$MESSAGE" | tail -n +3 | wc -l)"
-  fi
-  exit 0
-fi
+def ensure_staged_changes() -> None:
+  worktree = ensure_git_worktree()
+  if worktree is None:
+    raise SystemExit("Error: Not inside a git worktree")
+  os.chdir(worktree)
+  result = subprocess.run(["git", *staged_diff_args(), "--quiet"], check=False)
+  if result.returncode == 0:
+    raise SystemExit("Error: No staged changes")
+  if result.returncode != 1:
+    raise SystemExit("Error: Unable to inspect staged changes")
 
-# Write to temp file with name nvim recognizes as gitcommit
-TMPDIR=$(mktemp -d)
-TMPFILE="$TMPDIR/COMMIT_EDITMSG"
-trap 'rm -rf "$TMPDIR"' EXIT
-echo "$MESSAGE" >"$TMPFILE"
 
-# Open editor unless --no-edit
-if ! $NO_EDIT; then
-  ${GIT_EDITOR:-${EDITOR:-vi}} "$TMPFILE"
-fi
+def build_prompt(diff: str) -> str:
+  return f"{SYSTEM_PROMPT}\nWrite a commit message for this Git diff:\n\n{diff}"
 
-# Check if message is empty
-if [[ ! -s "$TMPFILE" ]]; then
-  echo "Aborting: empty commit message" >&2
-  exit 1
-fi
 
-# Commit with the message
-git commit -F "$TMPFILE"
+def get_prompt() -> str:
+  return build_prompt(git_output(staged_diff_args()))
 
-# Show quality metrics if verbose
-if $VERBOSE; then
-  echo ""
-  echo "---"
-  echo "Model: $MODEL"
-  printf "Generation time: %.2fs\n" "$DURATION"
-  
-  SUBJECT=$(echo "$MESSAGE" | head -n1)
-  echo "Subject: $SUBJECT"
-  echo "Subject length: $(echo "$SUBJECT" | wc -c) chars (limit: 50)"
-  
-  if [[ ${#SUBJECT} -gt 50 ]]; then
-    echo "⚠️  Warning: Subject exceeds 50 characters"
-  fi
-  
-  if echo "$SUBJECT" | grep -qE "^(feat|fix|chore|refactor|test|docs):"; then
-    echo "⚠️  Warning: Subject has type prefix (should be plain imperative)"
-  fi
-fi
+
+def get_ollama_client() -> Client:
+  if Client is None:
+    raise SystemExit("Error: Python package 'ollama' is not installed. Run this script with uv.")
+  return Client(host=OLLAMA_URL)
+
+
+def ollama_has_model(model: str) -> bool:
+  try:
+    data = get_ollama_client().list().model_dump()
+  except Exception as exc:
+    raise SystemExit(f"Error: Unable to reach Ollama at {OLLAMA_URL}: {exc}") from exc
+  models = data.get("models", [])
+  return any(item.get("model") == model or item.get("name") == model for item in models if isinstance(item, dict))
+
+
+def ensure_ollama_model(model: str) -> None:
+  if ollama_has_model(model):
+    return
+  if shutil.which("ollama") is None:
+    raise SystemExit(f"Error: Model {model} not found and ollama CLI is unavailable")
+  print(f"Model {model} not found. Pulling...", file=sys.stderr)
+  subprocess.run(["ollama", "pull", model], check=True)
+
+
+def generate_with_ollama(model: str, prompt: str) -> str:
+  ensure_ollama_model(model)
+  try:
+    response = get_ollama_client().generate(model=model, prompt=prompt)
+  except Exception as exc:
+    raise SystemExit(f"Error: Ollama generate failed: {exc}") from exc
+  message = getattr(response, "response", None)
+  if not isinstance(message, str):
+    raise SystemExit("Error: Ollama returned an unexpected response")
+  return message.strip()
+
+
+def print_verbose_header(config: BackendConfig, duration: float) -> None:
+  print()
+  print("---")
+  print(f"Backend: {config.backend}")
+  print(f"Model: {config.model}")
+  print(f"Generation time: {duration:.2f}s")
+
+
+def print_dry_run_metrics(message: str) -> None:
+  lines = message.splitlines()
+  subject = lines[0] if lines else ""
+  body_lines = max(len(lines) - 2, 0)
+  print(f"Subject line length: {len(subject)} chars")
+  print(f"Body lines: {body_lines}")
+
+
+def print_commit_metrics(message: str) -> None:
+  subject = message.splitlines()[0] if message.splitlines() else ""
+  print(f"Subject: {subject}")
+  print(f"Subject length: {len(subject)} chars (limit: 50)")
+  if len(subject) > 50:
+    print("Warning: Subject exceeds 50 characters")
+  prefixes = ("feat:", "fix:", "chore:", "refactor:", "test:", "docs:")
+  if subject.startswith(prefixes):
+    print("Warning: Subject has type prefix (should be plain imperative)")
+
+
+def open_editor(path: Path) -> None:
+  editor = os.environ.get("GIT_EDITOR") or os.environ.get("EDITOR") or "vi"
+  if " " in editor:
+    subprocess.run(f"{editor} {path}", shell=True, check=True)
+  else:
+    subprocess.run([editor, str(path)], check=True)
+
+
+def commit_message(message: str, no_edit: bool) -> None:
+  with tempfile.TemporaryDirectory() as tmpdir:
+    message_path = Path(tmpdir) / "COMMIT_EDITMSG"
+    message_path.write_text(message + "\n", encoding="utf-8")
+    if not no_edit:
+      open_editor(message_path)
+    final_message = message_path.read_text(encoding="utf-8")
+    if not final_message.strip():
+      raise SystemExit("Aborting: empty commit message")
+    subprocess.run(["git", "commit", "-F", str(message_path)], check=True)
+
+
+def main(argv: list[str]) -> int:
+  args = parse_args(argv)
+  config = resolve_backend_config(args)
+  ensure_staged_changes()
+  prompt = get_prompt()
+
+  start = time.perf_counter()
+  message = generate_with_ollama(config.model, prompt)
+  duration = time.perf_counter() - start
+
+  if args.dry_run:
+    print(message)
+    if args.verbose:
+      print_verbose_header(config, duration)
+      print_dry_run_metrics(message)
+    return 0
+
+  commit_message(message, args.no_edit)
+  if args.verbose:
+    print_verbose_header(config, duration)
+    print_commit_metrics(message)
+  return 0
+
+
+if __name__ == "__main__":
+  raise SystemExit(main(sys.argv[1:]))
