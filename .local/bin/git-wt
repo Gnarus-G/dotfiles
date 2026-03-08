@@ -1,0 +1,219 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+usage() {
+  cat <<'EOF'
+Usage:
+  git wt [-b <branch>]
+  git wt rm
+
+Commands:
+  -b <branch>   Create a new branch from a selected base branch
+  rm            Remove a selected worktree
+EOF
+}
+
+die() {
+  printf 'git wt: %s\n' "$1" >&2
+  exit 1
+}
+
+require_command() {
+  command -v "$1" >/dev/null 2>&1 || die "missing required command: $1"
+}
+
+repo_root() {
+  git rev-parse --show-toplevel 2>/dev/null || die 'not inside a git repository'
+}
+
+repo_name() {
+  basename "$1"
+}
+
+random_id() {
+  printf '%04x%04x\n' "$RANDOM" "$RANDOM" | cut -c1-6
+}
+
+sanitize_branch_name() {
+  local branch="$1"
+  printf '%s\n' "${branch//\//-}"
+}
+
+generated_worktree_path() {
+  local root="$1"
+  local branch="$2"
+  local name
+  name=$(repo_name "$root")
+  branch=$(sanitize_branch_name "$branch")
+  printf '%s/d/agentic/%s_%s_%s\n' "$HOME" "$branch" "$name" "$(random_id)"
+}
+
+validate_branch_name() {
+  git check-ref-format --branch "$1" >/dev/null 2>&1 || die "invalid branch name: $1"
+}
+
+list_base_branches() {
+  git for-each-ref --sort=-committerdate --format='%(refname:short)' refs/heads refs/remotes |
+    while IFS= read -r ref; do
+      [[ -n "$ref" ]] || continue
+      [[ "$ref" == */HEAD ]] && continue
+
+      local display="$ref"
+      case "$ref" in
+      origin/*)
+        display=${ref#origin/}
+        ;;
+      esac
+
+      printf '%s\t%s\n' "$display" "$ref"
+    done |
+    awk -F '\t' '!seen[$1]++'
+}
+
+pick_base_branch() {
+  local root="$1"
+  export GIT_WT_REPO_ROOT="$root"
+
+  list_base_branches | fzf \
+    --delimiter=$'\t' \
+    --with-nth=1,2 \
+    --prompt='base branch> ' \
+    --preview 'ref=$(printf "%s" {} | cut -f2); git -C "$GIT_WT_REPO_ROOT" log --oneline --decorate -n 12 "$ref"'
+}
+
+create_worktree() {
+  local new_branch="${1:-}"
+
+  require_command fzf
+
+  local root
+  root=$(repo_root)
+
+  local selection
+  selection=$(pick_base_branch "$root") || die 'base branch selection cancelled'
+
+  local base_display=${selection%%$'\t'*}
+  local base_ref=${selection#*$'\t'}
+  local current
+  current=$(git -C "$root" branch --show-current)
+
+  [[ -n "$base_ref" ]] || die 'no base branch selected'
+
+  local worktree_path
+  worktree_path=$(generated_worktree_path "$root" "$base_display")
+  mkdir -p "$(dirname "$worktree_path")"
+
+  if [[ -n "$new_branch" ]]; then
+    validate_branch_name "$new_branch"
+    git -C "$root" worktree add -b "$new_branch" "$worktree_path" "$base_ref"
+    printf 'Created worktree: %s\n' "$worktree_path"
+    printf 'Base branch: %s\n' "$base_display"
+    printf 'New branch: %s\n' "$new_branch"
+    return
+  fi
+
+  if [[ "$base_display" != "$current" ]] && git -C "$root" show-ref --verify --quiet "refs/heads/$base_display"; then
+    git -C "$root" worktree add "$worktree_path" "$base_display"
+    printf 'Created worktree: %s\n' "$worktree_path"
+    printf 'Base branch: %s\n' "$base_display"
+    printf 'Mode: attached\n'
+    return
+  fi
+
+  git -C "$root" worktree add --detach "$worktree_path" "$base_ref"
+  printf 'Created worktree: %s\n' "$worktree_path"
+  printf 'Base branch: %s\n' "$base_display"
+  printf 'Mode: detached\n'
+}
+
+list_removable_worktrees() {
+  local root="$1"
+  local current_path=''
+  local current_branch=''
+
+  print_worktree_record() {
+    if [[ -n "$current_path" && "$current_path" != "$root" ]]; then
+      if [[ -z "$current_branch" ]]; then
+        current_branch='detached'
+      fi
+      printf '%s\t%s\n' "$current_path" "$current_branch"
+    fi
+  }
+
+  git -C "$root" worktree list --porcelain |
+    while IFS= read -r line || [[ -n "$line" ]]; do
+      if [[ -z "$line" ]]; then
+        print_worktree_record
+        current_path=''
+        current_branch=''
+        continue
+      fi
+
+      case "$line" in
+      worktree\ *)
+        current_path=${line#worktree }
+        ;;
+      branch\ refs/heads/*)
+        current_branch=${line#branch refs/heads/}
+        ;;
+      detached)
+        current_branch='detached'
+        ;;
+      esac
+    done
+
+  print_worktree_record
+}
+
+remove_worktree() {
+  require_command fzf
+
+  local root
+  root=$(repo_root)
+
+  local selections
+  selections=$(list_removable_worktrees "$root" | fzf \
+    --multi \
+    --delimiter=$'\t' \
+    --with-nth=1,2 \
+    --prompt='remove worktree> ' \
+    --preview 'path=$(printf "%s" {} | cut -f1); git -C "$path" status --short --branch') ||
+    die 'worktree selection cancelled'
+
+  [[ -n "$selections" ]] || die 'no worktree selected'
+
+  while IFS= read -r selection; do
+    [[ -n "$selection" ]] || continue
+
+    local worktree_path=${selection%%$'\t'*}
+    [[ -n "$worktree_path" ]] || die 'no worktree selected'
+
+    git -C "$root" worktree remove "$worktree_path"
+    printf 'Removed worktree: %s\n' "$worktree_path"
+  done <<<"$selections"
+}
+
+main() {
+  case "${1:-}" in
+  '')
+    create_worktree
+    ;;
+  -b)
+    [[ $# -eq 2 ]] || die 'expected a branch name after -b'
+    create_worktree "$2"
+    ;;
+  rm)
+    [[ $# -eq 1 ]] || die 'rm does not take extra arguments'
+    remove_worktree
+    ;;
+  -h|--help|help)
+    usage
+    ;;
+  *)
+    usage >&2
+    die "unknown argument: $1"
+    ;;
+  esac
+}
+
+main "$@"
