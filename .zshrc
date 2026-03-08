@@ -161,12 +161,12 @@ cdd() {
           branch=${commit:+detached@$commit}
           branch=${branch:-unknown}
         fi
-        printf '[%s]\t%s\n' "$branch" "$repo"
+        printf '%s\t[%s]\n' "$repo" "$branch"
       done |
       fzf --delimiter=$'\t' --with-nth=1,2
   ) || return
 
-  repo=${selection#*$'\t'}
+  repo=${selection%%$'\t'*}
   [[ -n "$repo" ]] && cd "$HOME/d/$repo"
 }
 alias jq2env='jq -r "to_entries | .[] | [.key, .value] | join(\"=\")"'
