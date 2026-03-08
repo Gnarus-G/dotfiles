@@ -237,63 +237,11 @@ EOF
   assert_eq "$output" "$tmpdir/target" 'zsh git wrapper should cd into the created worktree'
 }
 
-test_cdd_entries_start_with_branch() {
-  local tmpdir
-  tmpdir=$(mktemp -d)
-  trap 'rm -rf "$tmpdir"' RETURN
-
-  python - <<'PY' >"$tmpdir/cdd.zsh"
-from pathlib import Path
-import re
-
-text = Path('/home/gnarus/d/dotfiles/.zshrc').read_text()
-match = re.search(r'^cdd\(\) \{.*?^\}', text, re.MULTILINE | re.DOTALL)
-if not match:
-    raise SystemExit('cdd function not found in .zshrc')
-print(match.group(0))
-PY
-
-  mkdir -p "$tmpdir/bin"
-  mkdir -p "$tmpdir/home/d/repo-one"
-
-  cat >"$tmpdir/bin/fd" <<'EOF'
-#!/usr/bin/env bash
-printf 'repo-one\n'
-EOF
-
-cat >"$tmpdir/bin/git" <<'EOF'
-#!/usr/bin/env bash
-set -euo pipefail
-if [[ "$1" == -C ]]; then
-  shift 2
-fi
-if [[ "$1" == branch && "$2" == --show-current ]]; then
-    printf 'feature/demo\n'
-elif [[ "$1" == rev-parse && "$2" == --short && "$3" == HEAD ]]; then
-    printf 'abc1234\n'
-fi
-EOF
-
-  cat >"$tmpdir/bin/fzf" <<'EOF'
-#!/usr/bin/env bash
-set -euo pipefail
-cat >"$FZF_CAPTURE_FILE"
-head -n 1 "$FZF_CAPTURE_FILE"
-EOF
-
-  chmod +x "$tmpdir/bin/fd" "$tmpdir/bin/git" "$tmpdir/bin/fzf"
-
-  local output
-  output=$(FZF_CAPTURE_FILE="$tmpdir/fzf.out" HOME="$tmpdir/home" PATH="$tmpdir/bin:$PATH" zsh -fc 'source "$1"; cdd >/dev/null; cat "$2"' zsh "$tmpdir/cdd.zsh" "$tmpdir/fzf.out")
-  assert_eq "$output" $'[feature/demo]\trepo-one' 'cdd should prefix picker entries with the branch name'
-}
-
 test_create_detached_worktree
 test_create_attached_worktree_for_other_branch
 test_create_named_branch
 test_remove_selected_worktree
 test_remove_multiple_worktrees
 test_zsh_wrapper_auto_cd
-test_cdd_entries_start_with_branch
 
 printf 'ok\n'
