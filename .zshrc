@@ -129,7 +129,46 @@ export NVM_DIR="$HOME/.nvm"
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 alias vim=nvim
-alias cdd='cd $(fd -HIg "**/.git" --base-directory ~/d --strip-cwd-prefix -x echo {//} | fzf | xargs -I % echo ~/d/%)'
+git() {
+  if [[ "$1" != "wt" ]]; then
+    command git "$@"
+    return $?
+  fi
+
+  local output exit_code worktree_path
+  output=$(command git "$@" 2>&1)
+  exit_code=$?
+
+  [[ -n "$output" ]] && print -r -- "$output"
+
+  if [[ $exit_code -eq 0 && "${2:-}" != "rm" && "${2:-}" != "-h" && "${2:-}" != "--help" && "${2:-}" != "help" ]]; then
+    worktree_path=$(printf '%s\n' "$output" | sed -n '/^Created worktree: /{s/^Created worktree: //;p;q;}')
+    [[ -n "$worktree_path" ]] && builtin cd "$worktree_path"
+  fi
+
+  return $exit_code
+}
+
+cdd() {
+  local selection repo branch commit
+
+  selection=$(
+    fd -HIg "**/.git" --base-directory ~/d --strip-cwd-prefix -x echo {//} |
+      while IFS= read -r repo; do
+        branch=$(git -C "$HOME/d/$repo" branch --show-current 2>/dev/null || true)
+        if [[ -z "$branch" ]]; then
+          commit=$(git -C "$HOME/d/$repo" rev-parse --short HEAD 2>/dev/null || true)
+          branch=${commit:+detached@$commit}
+          branch=${branch:-unknown}
+        fi
+        printf '%s\t[%s]\n' "$repo" "$branch"
+      done |
+      fzf --delimiter=$'\t' --with-nth=1,2
+  ) || return
+
+  repo=${selection%%$'\t'*}
+  [[ -n "$repo" ]] && cd "$HOME/d/$repo"
+}
 alias jq2env='jq -r "to_entries | .[] | [.key, .value] | join(\"=\")"'
 alias cp2='rsync -aPWh'
 alias sshx='ssh -YC felix@192.168.1.24 -p 456 x2x -east -to :0'
