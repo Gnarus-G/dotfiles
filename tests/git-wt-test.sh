@@ -202,6 +202,28 @@ test_remove_multiple_worktrees() {
   assert_dir_missing "$tmpdir/removable-two" 'second selected worktree should be removed'
 }
 
+test_force_remove_dirty_worktree() {
+  local tmpdir
+  tmpdir=$(mktemp -d)
+  trap 'rm -rf "$tmpdir"' RETURN
+
+  local fake_bin="$tmpdir/bin"
+  make_fake_fzf "$fake_bin"
+
+  local repo_dir
+  repo_dir=$(setup_repo "$tmpdir")
+  git -C "$repo_dir" worktree add "$tmpdir/dirty-tree" feature/base >/dev/null
+  printf 'dirty\n' >>"$tmpdir/dirty-tree/file.txt"
+
+  (
+    cd "$repo_dir" &&
+      HOME="$tmpdir/home" PATH="$fake_bin:$PATH" \
+      FZF_CHOICE="$tmpdir/dirty-tree" "$SCRIPT" rm -f >/dev/null 2>&1
+  )
+
+  assert_dir_missing "$tmpdir/dirty-tree" 'force remove should delete dirty worktree'
+}
+
 test_zsh_wrapper_auto_cd() {
   local tmpdir
   tmpdir=$(mktemp -d)
@@ -242,6 +264,7 @@ test_create_attached_worktree_for_other_branch
 test_create_named_branch
 test_remove_selected_worktree
 test_remove_multiple_worktrees
+test_force_remove_dirty_worktree
 test_zsh_wrapper_auto_cd
 
 printf 'ok\n'
