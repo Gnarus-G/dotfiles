@@ -5,11 +5,12 @@ usage() {
   cat <<'EOF'
 Usage:
   git wt [-b <branch>]
-  git wt rm
+  git wt rm [-f]
 
 Commands:
   -b <branch>   Create a new branch from a selected base branch
-  rm            Remove a selected worktree
+  rm            Remove selected worktrees
+  rm -f         Force remove selected worktrees
 EOF
 }
 
@@ -166,6 +167,8 @@ list_removable_worktrees() {
 }
 
 remove_worktree() {
+  local force_remove="${1:-false}"
+
   require_command fzf
 
   local root
@@ -188,7 +191,11 @@ remove_worktree() {
     local worktree_path=${selection%%$'\t'*}
     [[ -n "$worktree_path" ]] || die 'no worktree selected'
 
-    git -C "$root" worktree remove "$worktree_path"
+    if [[ "$force_remove" == true ]]; then
+      git -C "$root" worktree remove --force "$worktree_path"
+    else
+      git -C "$root" worktree remove "$worktree_path"
+    fi
     printf 'Removed worktree: %s\n' "$worktree_path"
   done <<<"$selections"
 }
@@ -203,8 +210,19 @@ main() {
     create_worktree "$2"
     ;;
   rm)
-    [[ $# -eq 1 ]] || die 'rm does not take extra arguments'
-    remove_worktree
+    case "${2:-}" in
+    '')
+      [[ $# -eq 1 ]] || die 'rm does not take extra arguments'
+      remove_worktree
+      ;;
+    -f)
+      [[ $# -eq 2 ]] || die 'rm -f does not take extra arguments'
+      remove_worktree true
+      ;;
+    *)
+      die "unknown rm argument: $2"
+      ;;
+    esac
     ;;
   -h|--help|help)
     usage
