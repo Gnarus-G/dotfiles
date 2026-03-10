@@ -136,7 +136,7 @@ git() {
   fi
 
   local output exit_code worktree_path
-  output=$(command git "$@" 2>&1)
+  output=$(command git "$@")
   exit_code=$?
 
   [[ -n "$output" ]] && print -r -- "$output"
