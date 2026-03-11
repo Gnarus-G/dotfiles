@@ -219,5 +219,26 @@ return {
         end,
       })
     end)
+
+
+    -- Setup cmp sources for 99prompt filetype using buffer event listener
+    -- Deferred so it runs after the 99 plugin's own cmp.setup.buffer() call
+    vim.api.nvim_create_autocmd("FileType", {
+      pattern = "99prompt",
+      callback = function()
+        vim.schedule(function()
+          local cmp = require('cmp')
+          cmp.setup.buffer({
+            sources = cmp.config.sources({
+              { name = '99' },
+              {
+                name = 'buffer',
+                option = { get_bufnrs = require "gnarus.utils".get_loaded_buffers }
+              }
+            })
+          })
+        end)
+      end,
+    })
   end,
 }
