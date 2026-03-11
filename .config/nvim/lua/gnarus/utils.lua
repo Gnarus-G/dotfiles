@@ -70,7 +70,7 @@ return {
   end,
   --- Determine values based on environment variables in priority order
   ---@generic T
-  ---@param map {vars: string[], value: T }[] list of environment variable names to their corresponding values.
+  ---@param map {vars: string[], _if: boolean|function?, value: T }[] list of environment variable names to their corresponding values.
   ---@param fallback T
   ---@return T
   env_var_cascade = function(map, fallback)
@@ -83,7 +83,18 @@ return {
         return var_is_present(var)
       end)
       assert(arg.value, string.format("cascade value for env var names {%s} is required", table.concat(arg.vars, ",")))
-      if all_vars_are_present then
+
+      -- Check if _if condition is met (if provided)
+      local if_condition_met = true
+      if arg._if ~= nil then
+        if type(arg._if) == "function" then
+          if_condition_met = arg._if()
+        else
+          if_condition_met = arg._if
+        end
+      end
+
+      if all_vars_are_present and if_condition_met then
         return arg.value
       end
     end
