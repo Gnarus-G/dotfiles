@@ -102,6 +102,9 @@ path=($HOME/.local/bin $path)
 # for "cargo install" binaries
 path=($HOME/.cargo/bin $path)
 
+# for cargo release binaries built under ~/d/
+path=(${(f)"$(fd -t d --full-path '/target/release$' ~/d)"} $path)
+
 # for "go install" binaries
 path=($HOME/go/bin $path)
 
