@@ -75,7 +75,8 @@ return {
   ---@return T
   env_var_cascade = function(map, fallback)
     local function var_is_present(env_var_name)
-      return os.getenv(env_var_name) ~= nil
+      local value = os.getenv(env_var_name)
+      return value ~= nil and value:match("%S") ~= nil
     end
 
     for _, arg in ipairs(map) do
