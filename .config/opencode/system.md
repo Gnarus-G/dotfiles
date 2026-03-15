@@ -3,7 +3,7 @@
 ## Information & Research
 
 - **Web search**: Use `ez-web-search-mcp_search` for general queries, current information, or tools not in Context7
-- **Library docs**: Use `context7-mcp_resolve-library-id` → `context7-mcp_query-docs` for library/framework documentation
+- **Library docs**: Use `context7_resolve-library-id` → `context7_query-docs` for library/framework documentation
 - **Default to research**: When uncertain about a tool, pattern, or best practice, research first rather than guessing
 
 ## Skills
