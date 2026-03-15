@@ -212,6 +212,43 @@ def sync_mcp():
     print("  mcp codex  (synced)")
 
 
+def sync_opencode_skills():
+    """Sync individual skills from .agents/skills to ~/.config/opencode/skills."""
+    source_dir = DOTFILES / ".agents" / "skills"
+    target_dir = HOME / ".config" / "opencode" / "skills"
+
+    # Skills to exclude from OpenCode (already have plugin equivalents)
+    EXCLUDED_SKILLS = {"tmux-processes"}
+
+    if not source_dir.exists():
+        return
+
+    target_dir.mkdir(parents=True, exist_ok=True)
+
+    for skill_dir in source_dir.iterdir():
+        if not skill_dir.is_dir():
+            continue
+
+        skill_name = skill_dir.name
+
+        # Skip excluded skills (have OpenCode plugin equivalents)
+        if skill_name in EXCLUDED_SKILLS:
+            print(f"  --  .config/opencode/skills/{skill_name} (excluded)")
+            continue
+
+        target_skill = target_dir / skill_name
+
+        # Skip if target already exists (don't overwrite)
+        if target_skill.exists() or target_skill.is_symlink():
+            print(f"  ok  .config/opencode/skills/{skill_name}")
+            continue
+
+        # Create symlink for this skill
+        target_skill.symlink_to(skill_dir)
+        print(f"  ln  .config/opencode/skills/{skill_name}")
+
+
 if __name__ == "__main__":
     main()
     sync_mcp()
+    sync_opencode_skills()
