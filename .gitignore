@@ -2,6 +2,7 @@ packer_compiled.lua
 .luarc.json
 .aider*
 .opencode
+.zshrc.local
 .gitconfig
 .config/gtk-3.0
 .config/eww
