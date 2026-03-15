@@ -329,7 +329,7 @@ export const TmuxPlugin: Plugin = async ({ client, $ }) => {
 
         const resolved = await resolvePane(input.sessionID, selector)
         if ("error" in resolved) {
-          await sendNoReplyMessage(client, input.sessionID, resolved.error)
+          await sendNoReplyMessage(client, input.sessionID, resolved.error ?? "Unknown error")
           throw new Error("Command handled by tmux plugin")
         }
 
@@ -369,7 +369,7 @@ export const TmuxPlugin: Plugin = async ({ client, $ }) => {
           )
         } catch (error) {
           const message = error instanceof Error ? error.message : String(error)
-          throw new Error(`tmux pane expansion blocked this message: ${message}`)
+          part.text = part.text.replace(/(?<!\S)@pane(?::([^\s`'"",;!?()[\]{}<>]+))?(?!\S)/g, () => `[tmux: ${message}]`)
         }
       }
     },
