@@ -180,3 +180,8 @@ alias sshx='ssh -YC felix@192.168.1.24 -p 456 x2x -east -to :0'
 
 # opencode
 export PATH=$HOME/.opencode/bin:$PATH
+
+# local secrets and machine-specific overrides
+if [[ -f "$HOME/.zshrc.local" ]]; then
+  source "$HOME/.zshrc.local"
+fi
