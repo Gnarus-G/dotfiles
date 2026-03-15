@@ -225,6 +225,9 @@ def sync_opencode_skills():
 
     target_dir.mkdir(parents=True, exist_ok=True)
 
+    # Track which skills we symlink for gitignore
+    symlinked_skills = []
+
     for skill_dir in source_dir.iterdir():
         if not skill_dir.is_dir():
             continue
@@ -241,10 +244,14 @@ def sync_opencode_skills():
         # Skip if target already exists (don't overwrite)
         if target_skill.exists() or target_skill.is_symlink():
             print(f"  ok  .config/opencode/skills/{skill_name}")
+            # Track if it's a symlink we created
+            if target_skill.is_symlink():
+                symlinked_skills.append(skill_name)
             continue
 
         # Create symlink for this skill
         target_skill.symlink_to(skill_dir)
+        symlinked_skills.append(skill_name)
         print(f"  ln  .config/opencode/skills/{skill_name}")
 
 
