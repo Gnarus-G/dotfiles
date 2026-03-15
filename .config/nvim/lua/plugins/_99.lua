@@ -20,10 +20,10 @@ return {
     function CodexProvider._build_command(_, query, context)
       return {
         "codex",
-        "chat",
+        "exec",
         "--model",
         context.model,
-        "--output",
+        "--output-last-message",
         context.tmp_file,
         query,
       }
