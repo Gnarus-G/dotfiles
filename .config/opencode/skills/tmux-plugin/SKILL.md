@@ -21,8 +21,8 @@ Use these commands:
 
 Then reference panes in prompts:
 
-- `@pane` uses the selected pane for the current OpenCode session
-- `@pane:<target>` uses an explicit pane target
+- `` `@pane` `` uses the selected pane for the current OpenCode session
+- `` `@pane:<target>` `` uses an explicit pane target
 
 Supported target styles:
 
@@ -52,8 +52,8 @@ Avoid inline `tmux new-session ... '<command>'` when shell init matters.
 
 Use pane references in chat when you want model context from tmux logs:
 
-- "Check this server output: @pane"
-- "Inspect this pane for errors: @pane:%351"
+- "Check this server output: `@pane`"
+- "Inspect this pane for errors: `@pane:%351`"
 
 ## Isolation Rules
 
