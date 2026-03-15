@@ -19,7 +19,7 @@
       "model": "ollama-cloud/minimax-m2.5"
     },
     "multimodal-looker": {
-      "model": "google/gemini-3-flash-preview"
+      "model": "ollama-cloud/kimi-k2.5"
     },
     "prometheus": {
       "model": "openai/gpt-5.4",
@@ -62,7 +62,7 @@
       "variant": "medium"
     },
     "writing": {
-      "model": "google/gemini-3-flash-preview"
+      "model": "ollama-cloud/kimi-k2.5"
     }
   }
 }
