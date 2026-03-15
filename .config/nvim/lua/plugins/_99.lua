@@ -10,35 +10,6 @@ return {
     local cwd = vim.uv.cwd()
     local basename = vim.fs.basename(cwd)
 
-    -- CodexProvider: custom provider for codex CLI
-    --- @class CodexProvider : _99.Providers.BaseProvider
-    local CodexProvider = setmetatable({}, { __index = _99.Providers.BaseProvider })
-
-    --- @param query string
-    --- @param context _99.Prompt
-    --- @return string[]
-    function CodexProvider._build_command(_, query, context)
-      return {
-        "codex",
-        "exec",
-        "--model",
-        context.model,
-        "--output-last-message",
-        context.tmp_file,
-        query,
-      }
-    end
-
-    --- @return string
-    function CodexProvider._get_provider_name()
-      return "CodexProvider"
-    end
-
-    --- @return string
-    function CodexProvider._get_default_model()
-      return "claude-sonnet-4-5"
-    end
-
     local function cli_exists(name)
       return vim.fn.executable(name) == 1
     end
@@ -50,14 +21,6 @@ return {
           value = {
             provider = _99.Providers.ClaudeCodeProvider,
             model = "claude-sonnet-4-5"
-          }
-        },
-        {
-          vars = { "GNARUS_ALLOW_VENDOR_LLM" },
-          _if = cli_exists("codex"),
-          value = {
-            provider = CodexProvider,
-            model = "gpt-5.3-codex"
           }
         },
       },
