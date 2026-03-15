@@ -8,3 +8,6 @@ packer_compiled.lua
 .config/leftwm/themes/*
 !.config/leftwm/themes/ignorant/
 !.config/leftwm/themes/ignorant/**
+# Symlinked skills (managed by ./dev script)
+.config/opencode/skills/*
+!.config/opencode/skills/tmux-plugin/
