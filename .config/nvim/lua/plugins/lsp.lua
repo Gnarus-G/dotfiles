@@ -68,21 +68,6 @@ return {
         }
       })
 
-      vim.lsp.config("rust_analyzer", {
-        capabilities = lsp_capabilities,
-        settings = {
-          ['rust-analyzer'] = {
-            checkOnSave = {
-              command = "clippy",
-              extraArgs = { "--", "-D", "warnings" },
-            },
-            rustfmt = {
-              overrideCommand = { "rustfmt", "+nightly" },
-            }
-          }
-        }
-      })
-
       vim.lsp.config("jsonls", {
         settings = {
           json = {
@@ -137,7 +122,7 @@ return {
     "williamboman/mason-lspconfig.nvim",
     dependencies = { "williamboman/mason.nvim" },
     opts = {
-      ensure_installed = { 'rust_analyzer', 'dockerls', "cssls", "clangd", "lua_ls", "jsonls" },
+      ensure_installed = { 'dockerls', "cssls", "clangd", "lua_ls", "jsonls" },
       automatic_enable = true
     },
   },

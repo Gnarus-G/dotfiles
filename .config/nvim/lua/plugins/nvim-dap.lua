@@ -56,11 +56,6 @@ return {
         args = { "--interpreter=dap", "--eval-command", "set print pretty on" }
       }
 
-      dap.adapters.codelldb = {
-        type = "executable",
-        command = "codelldb", -- or if not in $PATH: "/absolute/path/to/codelldb"
-      }
-
       -- Configurations
       local node_launcher = {
         name = 'Launch',
@@ -177,10 +172,6 @@ return {
         attach_exe_debugger,
       }
       dap.configurations.c = {
-        launch_exe_debugger,
-        attach_exe_debugger,
-      }
-      dap.configurations.rust = {
         launch_exe_debugger,
         attach_exe_debugger,
       }
