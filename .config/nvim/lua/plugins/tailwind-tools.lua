@@ -8,6 +8,29 @@ return {
   config = function()
     local lsp_capabilities = require('cmp_nvim_lsp').default_capabilities()
 
+    -- Configure tailwindcss LSP directly for nvim 0.11+
+    -- (nvim-lspconfig v3.0.0 deprecated the old API)
+    vim.lsp.config('tailwindcss', {
+      cmd = { 'tailwindcss-language-server', '--stdio' },
+      root_markers = {
+        'tailwind.config.{js,cjs,mjs,ts}',
+        'postcss.config.{js,cjs,mjs,ts}',
+        'package.json',
+      },
+      capabilities = lsp_capabilities,
+      settings = {
+        tailwindCSS = {
+          classAttributes = { "class", "className", "ngClass", "class:list", "classes" },
+          classFunctions = { "cva", "cx" },
+          experimental = {
+            classRegex = {
+              { "className\\: '([^']*)'" },
+            },
+          },
+        },
+      },
+    })
+
     require("tailwind-tools").setup(
       {
         document_color = {
@@ -24,20 +47,7 @@ return {
           },
         },
         server = {
-          override = true,
-          capabilities = lsp_capabilities,
-          settings = {
-            classAttributes = { "class", "className", "ngClass", "class:list", "classes" },
-            classFunctions = { "cva", "cx" },
-            experimental = {
-              classRegex = {
-                --[[ { "cva\\(([^)]*)\\)",       "[\"'`]([^\"'`]*).*?[\"'`]" }, ]]
-                --[[ { "cx\\(([^)]*)\\)",        "(?:'|\"|`)([^']*)(?:'|\"|`)" }, ]]
-                --[[ { "classes=\\{([^}]*)\\}",  "[\"'`]([^\"'`]*).*?[\"'`]" }, ]]
-                { "className\\: '([^']*)'", } -- https://github.com/tailwindlabs/tailwindcss/issues/7553
-              },
-            },
-          }
+          override = false, -- Don't use lspconfig, we configured vim.lsp.config above
         },
         cmp = {
           highlight = "foreground",
