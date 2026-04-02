@@ -12,8 +12,12 @@ HOME = Path.home()
 # source dir (relative to dotfiles repo) -> list of symlink targets (relative to ~)
 # Most map 1:1 to the same relative path under ~.
 LINKS: dict[str, list[str]] = {
-    ".agents": [".agents"],
-    ".agents/skills": [".claude/skills"],
+    # individual skills from .agents/skills/* -> ~/.claude/skills/*
+    **{
+        f".agents/skills/{d.name}": [f".claude/skills/{d.name}"]
+        for d in sorted((DOTFILES / ".agents" / "skills").iterdir())
+        if d.is_dir()
+    },
     ".config/nvim": [".config/nvim"],
     ".config/mcphub": [".config/mcphub"],
     ".config/opencode": [".config/opencode"],
