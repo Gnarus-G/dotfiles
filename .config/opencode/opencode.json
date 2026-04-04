@@ -7,7 +7,7 @@
     }
   },
   "autoupdate": true,
-  "plugin": ["opencode-agent-skills@0.6.4", "oh-my-openagent"],
+  "plugin": ["opencode-agent-skills@0.6.4"],
   "instructions": ["~/d/dotfiles/.config/opencode/system.md"],
   "provider": {
     "ollama": {
@@ -21,6 +21,10 @@
     }
   },
   "mcp": {
+    "context7-mcp": {
+      "type": "local",
+      "command": ["npx", "-y", "@upstash/context7-mcp"]
+    },
     "tts": {
       "type": "local",
       "command": ["tts-mcp"],
