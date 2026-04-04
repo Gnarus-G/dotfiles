@@ -7,7 +7,7 @@
     }
   },
   "autoupdate": true,
-  "plugin": ["opencode-agent-skills@0.6.4", "oh-my-opencode"],
+  "plugin": ["opencode-agent-skills@0.6.4", "oh-my-openagent"],
   "instructions": ["~/d/dotfiles/.config/opencode/system.md"],
   "provider": {
     "ollama": {
