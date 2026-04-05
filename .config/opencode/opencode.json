@@ -16,7 +16,8 @@
         "baseURL": "http://localhost:11434/v1"
       },
       "models": {
-        "glm-5:cloud": {}
+        "glm-5:cloud": {},
+        "minimax-m2.7:cloud": {}
       }
     }
   },
