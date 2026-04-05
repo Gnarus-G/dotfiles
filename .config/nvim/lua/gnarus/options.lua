@@ -20,5 +20,6 @@ o.scrolloff = 8
 o.signcolumn = "yes"
 o.colorcolumn = "80"
 o.mouse = "a"
+o.laststatus = 3
 
 vim.cmd "filetype plugin indent on"
