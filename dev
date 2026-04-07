@@ -23,7 +23,6 @@ LINKS: dict[str, list[str]] = {
     ".config/opencode": [".config/opencode"],
     ".config/awesome": [".config/awesome"],
     ".config/gtk-3.0": [".config/gtk-3.0"],
-    ".config/eww": [".config/eww"],
     ".config/leftwm": [".config/leftwm"],
     ".config/ghostty/config": [".config/ghostty/config"],
     ".config/himither": [".config/himither"],
