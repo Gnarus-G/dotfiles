@@ -103,7 +103,7 @@ path=($HOME/.local/bin $path)
 path=($HOME/.cargo/bin $path)
 
 # for cargo release binaries built under ~/d/
-path=(${(f)"$(fd -t d --full-path '/target/release$' ~/d)"} $path)
+path=(~/d/*/target/release(N/) ~/d/*/*/target/release(N/) $path)
 
 # for "go install" binaries
 path=($HOME/go/bin $path)
