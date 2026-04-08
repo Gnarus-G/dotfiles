@@ -18,6 +18,12 @@ LINKS: dict[str, list[str]] = {
         for d in sorted((DOTFILES / ".agents" / "skills").iterdir())
         if d.is_dir()
     },
+    # individual skills from .agents/skills/* -> ~/.agents/skills/*
+    **{
+        f".agents/skills/{d.name}": [f".agents/skills/{d.name}"]
+        for d in sorted((DOTFILES / ".agents" / "skills").iterdir())
+        if d.is_dir()
+    },
     ".config/nvim": [".config/nvim"],
     ".config/mcphub": [".config/mcphub"],
     ".config/opencode": [".config/opencode"],
