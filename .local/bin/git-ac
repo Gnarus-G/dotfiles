@@ -7,20 +7,18 @@ set -euo pipefail
 MODEL="qwen3-coder-next:cloud"
 NO_EDIT=false
 DRY_RUN=false
-USE_OPENCODE=false
 VERBOSE=false
 
 usage() {
   cat <<EOF
 Usage: git ac [options]
 
-Generate a commit message using OpenCode CLI for staged changes.
+Generate a commit message using Ollama for staged changes.
 
 Options:
   -y, --no-edit       Skip editor, commit directly with generated message
   -n, --dry-run       Print generated message to stdout, don't commit
   -m, --model MODEL   Override model (default: $MODEL)
-  -o, --opencode      Use OpenCode CLI instead of direct Ollama
   -v, --verbose       Show timing and quality metrics
   -h, --help          Show this help message
 
@@ -28,7 +26,7 @@ Examples:
   git add -p && git ac       Stage changes interactively, then generate and edit message
   git ac -y                  Quick commit without editing
   git ac --dry-run           Preview the generated message
-  git ac --model ollama-cloud/kimi-k2.5   Use a different model
+  git ac --model devstral-2:123b-cloud   Use a different model
 EOF
 }
 
@@ -46,10 +44,6 @@ while [[ $# -gt 0 ]]; do
   -m | --model)
     MODEL="$2"
     shift 2
-    ;;
-  -o | --opencode)
-USE_OPENCODE=false
-    shift
     ;;
   -v | --verbose)
     VERBOSE=true
@@ -80,7 +74,7 @@ DIFF=$(git diff --staged)
 SYSTEM_PROMPT="Generate a git commit message for these changes.
 
 Format:
-- Line 1: Subject (max 50 chars, imperative, no prefix)
+- Line 1: Subject (max 75 chars, imperative, no prefix)
 - Line 2: Blank
 - Line 3+: Body (explain what/why, wrap at 72 chars)
 
@@ -91,32 +85,22 @@ Do NOT include:
 
 Output ONLY the commit message."
 
-# Check/pull model if using Ollama directly
-if ! $USE_OPENCODE; then
-  if ! curl -s http://localhost:11434/api/tags | jq -e ".models[] | select(.name == \"$MODEL\")" >/dev/null 2>&1; then
-    echo "Model $MODEL not found. Pulling..." >&2
-    ollama pull "$MODEL" >&2
-  fi
+# Check/pull model
+if ! curl -s http://localhost:11434/api/tags | jq -e ".models[] | select(.name == \"$MODEL\")" >/dev/null 2>&1; then
+  echo "Model $MODEL not found. Pulling..." >&2
+  ollama pull "$MODEL" >&2
 fi
 
 # Generate commit message
 START_TIME=$(date +%s.%N)
 
-if $USE_OPENCODE; then
-  MESSAGE=$(echo "$SYSTEM_PROMPT
-
-Write a commit message for this Git diff:
-
-$DIFF" | opencode run --model "$MODEL" --variant none -)
-else
-  PROMPT="$SYSTEM_PROMPT
+PROMPT="$SYSTEM_PROMPT
 
 Write a commit message for this Git diff:
 
 $DIFF"
-  MESSAGE=$(curl -s http://localhost:11434/api/generate \
-    -d "{\"model\": \"$MODEL\", \"prompt\": $(echo "$PROMPT" | jq -Rs .), \"stream\": false}" | jq -r '.response')
-fi
+MESSAGE=$(curl -s http://localhost:11434/api/generate \
+  -d "{\"model\": \"$MODEL\", \"prompt\": $(echo "$PROMPT" | jq -Rs .), \"stream\": false}" | jq -r '.response')
 
 END_TIME=$(date +%s.%N)
 DURATION=$(echo "$END_TIME - $START_TIME" | bc)
@@ -161,15 +145,15 @@ if $VERBOSE; then
   echo "---"
   echo "Model: $MODEL"
   printf "Generation time: %.2fs\n" "$DURATION"
-  
+
   SUBJECT=$(echo "$MESSAGE" | head -n1)
   echo "Subject: $SUBJECT"
-  echo "Subject length: $(echo "$SUBJECT" | wc -c) chars (limit: 50)"
-  
-  if [[ ${#SUBJECT} -gt 50 ]]; then
-    echo "⚠️  Warning: Subject exceeds 50 characters"
+  echo "Subject length: $(echo "$SUBJECT" | wc -c) chars (limit: 75)"
+
+  if [[ ${#SUBJECT} -gt 75 ]]; then
+    echo "⚠️  Warning: Subject exceeds 75 characters"
   fi
-  
+
   if echo "$SUBJECT" | grep -qE "^(feat|fix|chore|refactor|test|docs):"; then
     echo "⚠️  Warning: Subject has type prefix (should be plain imperative)"
   fi
