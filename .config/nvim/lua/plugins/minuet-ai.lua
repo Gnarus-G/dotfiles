@@ -30,7 +30,7 @@ return {
       -- request_timeout = 10,
       provider_options = {
         claude = {
-          model = 'claude-haiku-4-5',
+          model = 'claude-haiku-4-5', -- $0.80/$4.00 per 1M tokens (input/output)
           chat_input = {
             template = "{{{extra_context}}}\n" ..
                 minuet_config.default_chat_input_prefix_first.template,
@@ -38,7 +38,9 @@ return {
           },
         },
         gemini = {
-          model = "gemini-2.5-flash",
+          -- gemini-3.1-flash-lite-preview $0.25/$1.50 per 1M tokens (input/output)
+          -- Upgrade: gemini-3-flash-preview, gemini-2.5-pro ($1.25/$5.00)
+          model = "gemini-3.1-flash-lite-preview",
           chat_input = {
             template = "{{{extra_context}}}\n" ..
                 minuet_config.default_chat_input_prefix_first.template,
@@ -54,7 +56,9 @@ return {
           },
         },
         openai = {
-          model = "gpt-5.1",
+          -- gpt-5.4-nano $0.20/$1.25 per 1M tokens (input/output)
+          -- Upgrade: gpt-5.4-mini ($0.75/$4.50), gpt-5.4 ($2.50/$15.00)
+          model = "gpt-5.4-nano",
           chat_input = {
             template = "{{{extra_context}}}\n" ..
                 minuet_config.default_chat_input_prefix_first.template,
@@ -67,6 +71,7 @@ return {
           },
         },
         openai_compatible = {
+          -- Free (local/self-hosted via Ollama)
           name = "ollama",
           model = 'deepseek-v4-flash:cloud',
           chat_input = {
@@ -85,6 +90,7 @@ return {
           },
         },
         openai_fim_compatible = {
+          -- Free (local/self-hosted via Ollama)
           name = "ollama-fim",
           model = 'qwen3-coder:480b-cloud', -- qwen2.5-coder:32b-base-q2_K
           chat_input = {
@@ -105,7 +111,8 @@ return {
     }
 
     local config                  = env_cascade({
-      -- { vars = { "GNARUS_ALLOW_VENDOR_LLM", "GEMINI_API_KEY" }, value = { "gemini", 2 } },
+      { vars = { "GNARUS_ALLOW_VENDOR_LLM", "OPENAI_API_KEY" }, value = { "openai", 2 } },
+      { vars = { "GNARUS_ALLOW_VENDOR_LLM", "GEMINI_API_KEY" }, value = { "gemini", 2 } },
     }, { "openai_compatible", 2 })
     local provider, n_completions = config[1], config[2]
     vim.notify(string.format("Minuet AI configured with provider: %s, completions: %s", provider, n_completions),
