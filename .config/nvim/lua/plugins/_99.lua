@@ -20,13 +20,13 @@ return {
           _if = cli_exists("claude"),
           value = {
             provider = _99.Providers.ClaudeCodeProvider,
-            model = "claude-sonnet-4-5"
+            model = "claude-sonnet-4-6"
           }
         },
       },
       {
         provider = _99.Providers.OpenCodeProvider,
-        model = "ollama-cloud/glm-5"
+        model = "ollama-cloud/glm-5.1"
       }
     )
 
