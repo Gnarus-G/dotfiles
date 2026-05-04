@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import argparse
 import json
+import logging
 import os
 import shutil
 import subprocess
@@ -9,8 +10,15 @@ import tempfile
 import time
 import urllib.request
 
+logger = logging.getLogger("git-ac")
+
 DEFAULT_MODEL = "deepseek-v4-flash:cloud"
 OLLAMA_HOST = os.environ.get("OLLAMA_HOST", "http://localhost:11434")
+OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "")
+OPENAI_BASE_URL = os.environ.get("OPENAI_BASE_URL", "https://api.openai.com/v1")
+
+OLLAMA_PREFIXES = ("ollama/", "deepseek-", "qwen", "devstral")
+OPENAI_PREFIXES = ("openai/", "gpt-", "o1", "o3", "o4")
 
 PROMPT_TEMPLATE = """Generate a git commit message for these changes.
 
@@ -31,12 +39,37 @@ Write a commit message for this Git diff:
 {diff}"""
 
 
-def ollama_request(path, data=None):
-    url = f"{OLLAMA_HOST.rstrip('/')}{path}"
+def detect_provider(model):
+    if any(model.startswith(p) for p in OPENAI_PREFIXES) or model.startswith("openai/"):
+        return "openai"
+    return "ollama"
+
+
+def strip_prefix(model):
+    if model.startswith("openai/"):
+        return model[len("openai/"):]
+    return model
+
+
+def http_request(url, data=None, headers=None):
     body = json.dumps(data).encode() if data else None
-    req = urllib.request.Request(url, data=body, headers={"Content-Type": "application/json"} if body else {})
+    hdrs = headers or {}
+    if body and "Content-Type" not in hdrs:
+        hdrs["Content-Type"] = "application/json"
+    req = urllib.request.Request(url, data=body, headers=hdrs)
     with urllib.request.urlopen(req) as resp:
         return json.loads(resp.read().decode())
+
+
+def ollama_request(path, data=None):
+    url = f"{OLLAMA_HOST.rstrip('/')}{path}"
+    return http_request(url, data)
+
+
+def openai_request(path, data=None):
+    url = f"{OPENAI_BASE_URL.rstrip('/')}/{path.lstrip('/')}"
+    headers = {"Authorization": f"Bearer {OPENAI_API_KEY}"}
+    return http_request(url, data, headers)
 
 
 def model_exists(model):
@@ -48,22 +81,35 @@ def model_exists(model):
 
 
 def pull_model(model):
-    print(f"Model {model} not found. Pulling...", file=sys.stderr)
+    logger.info("Model %s not found locally, pulling...", model)
     subprocess.run(["ollama", "pull", model], check=True)
 
 
 def generate_message(model, diff_text):
+    provider = detect_provider(model)
+    logger.debug("Using provider=%s model=%s", provider, model)
     prompt = PROMPT_TEMPLATE.format(diff=diff_text)
     payload = {
-        "model": model,
+        "model": strip_prefix(model),
         "stream": False,
-        "reasoning_effort": "none",
         "messages": [{"role": "user", "content": prompt}],
     }
+
     start = time.perf_counter()
-    resp = ollama_request("/v1/chat/completions", payload)
+    match provider:
+        case "openai":
+            if not OPENAI_API_KEY:
+                logger.error("OPENAI_API_KEY not set")
+                sys.exit(1)
+            payload["reasoning_effort"] = "none"
+            resp = openai_request("/chat/completions", payload)
+        case "ollama":
+            payload["reasoning_effort"] = "none"
+            resp = ollama_request("/v1/chat/completions", payload)
+
     elapsed = time.perf_counter() - start
     content = resp["choices"][0]["message"]["content"]
+    logger.debug("Generated message in %.2fs (%d chars)", elapsed, len(content))
     return content, elapsed
 
 
@@ -74,17 +120,23 @@ def main():
     )
     parser.add_argument("-y", "--no-edit", action="store_true", help="Commit directly without editing")
     parser.add_argument("-n", "--dry-run", action="store_true", help="Print message, don't commit")
-    parser.add_argument("-m", "--model", default=DEFAULT_MODEL, help=f"Ollama model (default: {DEFAULT_MODEL})")
+    parser.add_argument("-m", "--model", default=DEFAULT_MODEL, help=f"Model (default: {DEFAULT_MODEL})")
     parser.add_argument("-v", "--verbose", action="store_true", help="Show timing and quality metrics")
+    parser.add_argument("-d", "--debug", action="store_true", help="Enable debug logging")
     args = parser.parse_args()
 
+    log_level = logging.DEBUG if args.debug else logging.WARNING
+    logging.basicConfig(level=log_level, format="%(name)s: %(message)s")
+
     if subprocess.run(["git", "diff", "--staged", "--quiet"]).returncode == 0:
-        print("Error: No staged changes", file=sys.stderr)
+        logger.error("No staged changes")
         sys.exit(1)
 
     diff_text = subprocess.run(["git", "diff", "--staged"], capture_output=True, text=True).stdout
+    logger.debug("Diff size: %d bytes", len(diff_text))
 
-    if not model_exists(args.model):
+    provider = detect_provider(args.model)
+    if provider == "ollama" and not model_exists(args.model):
         pull_model(args.model)
 
     message, elapsed = generate_message(args.model, diff_text)
@@ -96,6 +148,7 @@ def main():
             body_lines = message.split("\n")[2:] if "\n\n" in message else []
             print()
             print("---")
+            print(f"Provider: {provider}")
             print(f"Model: {args.model}")
             print(f"Generation time: {elapsed:.2f}s")
             print(f"Subject line length: {len(subject)} chars")
@@ -113,7 +166,7 @@ def main():
             subprocess.run(f"{editor} {tmpfile}", shell=True, check=True)
 
         if os.path.getsize(tmpfile) == 0:
-            print("Aborting: empty commit message", file=sys.stderr)
+            logger.error("Empty commit message, aborting")
             sys.exit(1)
 
         subprocess.run(["git", "commit", "-F", tmpfile], check=True)
@@ -124,6 +177,7 @@ def main():
         subject = message.split("\n", 1)[0]
         print()
         print("---")
+        print(f"Provider: {provider}")
         print(f"Model: {args.model}")
         print(f"Generation time: {elapsed:.2f}s")
         print(f"Subject: {subject}")
@@ -135,4 +189,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main()# test
