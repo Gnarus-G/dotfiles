@@ -23,3 +23,8 @@
 - For new skills: Research first with web search or Context7
 - For refactoring: Load the appropriate skill before proposing changes
 - For unfamiliar tools: Research before implementing
+
+## API keys
+
+- **Never hardcode** real API keys in repo files; use environment variables instead
+- Never attempt to read the values of API keys. Do not expose them in the chat.
