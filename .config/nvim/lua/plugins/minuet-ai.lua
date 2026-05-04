@@ -68,6 +68,7 @@ return {
         },
         openai_compatible = {
           name = "ollama",
+          model = 'deepseek-v4-flash:cloud',
           chat_input = {
             template = "{{{extra_context}}}\n" ..
                 minuet_config.default_chat_input_prefix_first.template,
