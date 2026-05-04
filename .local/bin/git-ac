@@ -4,7 +4,7 @@ set -euo pipefail
 # git-ac: Automated commit message generation using Ollama
 # Usage: git ac [options]
 
-MODEL="qwen3-coder-next:cloud"
+MODEL="deepseek-v4-flash:cloud"
 NO_EDIT=false
 DRY_RUN=false
 VERBOSE=false
@@ -70,8 +70,16 @@ fi
 # Get staged diff
 DIFF=$(git diff --staged)
 
-# System prompt
-SYSTEM_PROMPT="Generate a git commit message for these changes.
+# Check/pull model
+if ! curl -s http://localhost:11434/api/tags | jq -e ".models[] | select(.name == \"$MODEL\")" >/dev/null 2>&1; then
+  echo "Model $MODEL not found. Pulling..." >&2
+  ollama pull "$MODEL" >&2
+fi
+
+# Generate commit message using OpenAI-compatible chat endpoint
+START_TIME=$(date +%s.%N)
+
+PROMPT="Generate a git commit message for these changes.
 
 Format:
 - Line 1: Subject (max 75 chars, imperative, no prefix)
@@ -83,24 +91,19 @@ Do NOT include:
 - Markdown code blocks
 - Explanations or commentary
 
-Output ONLY the commit message."
-
-# Check/pull model
-if ! curl -s http://localhost:11434/api/tags | jq -e ".models[] | select(.name == \"$MODEL\")" >/dev/null 2>&1; then
-  echo "Model $MODEL not found. Pulling..." >&2
-  ollama pull "$MODEL" >&2
-fi
-
-# Generate commit message
-START_TIME=$(date +%s.%N)
-
-PROMPT="$SYSTEM_PROMPT
+Output ONLY the commit message.
 
 Write a commit message for this Git diff:
 
 $DIFF"
-MESSAGE=$(curl -s http://localhost:11434/api/generate \
-  -d "{\"model\": \"$MODEL\", \"prompt\": $(echo "$PROMPT" | jq -Rs .), \"stream\": false}" | jq -r '.response')
+MESSAGE=$(curl -s http://localhost:11434/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d "$(jq -n --arg PROMPT "$PROMPT" '{
+    model: "'"$MODEL"'",
+    stream: false,
+    reasoning_effort: "none",
+    messages: [{role: "user", content: $PROMPT}]
+  }')" | jq -r '.choices[0].message.content')
 
 END_TIME=$(date +%s.%N)
 DURATION=$(echo "$END_TIME - $START_TIME" | bc)
