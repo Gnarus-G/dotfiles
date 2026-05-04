@@ -1,16 +1,59 @@
 return {
   "nickjvandyke/opencode.nvim",
+  version = "*",
   dependencies = {
-    -- Recommended for `ask()` and `select()`.
-    -- Required for `snacks` provider.
-    ---@module 'snacks' <- Loads `snacks.nvim` types for configuration intellisense.
-    { "folke/snacks.nvim", opts = { input = {}, picker = {}, terminal = {} } },
+    {
+      "folke/snacks.nvim",
+      optional = true,
+      ---@module 'snacks'
+      opts = {
+        input = {},
+        terminal = {},
+        picker = {
+          actions = {
+            opencode_send = function(...) return require("opencode").snacks_picker_send(...) end,
+          },
+          win = {
+            input = {
+              keys = {
+                ["<a-a>"] = { "opencode_send", mode = { "n", "i" } },
+              },
+            },
+          },
+        },
+      },
+    },
   },
   config = function()
-    -- Required for `opts.events.reload`.
+    ---@type opencode.Opts
+    vim.g.opencode_opts = {
+      events = {
+        enabled = true,
+        reload = true,
+        permissions = {
+          enabled = true,
+          edits = { enabled = true },
+        },
+      },
+      lsp = {
+        enabled = false,
+      },
+      prompts = {
+        diagnostics = { prompt = "Explain @diagnostics", submit = true },
+        diff = { prompt = "Review the following git diff for correctness and readability: @diff", submit = true },
+        explain = { prompt = "Explain @this and its context", submit = true },
+        review = { prompt = "Review @this for correctness and readability", submit = true },
+        document = { prompt = "Add comments documenting @this", submit = true },
+        fix = { prompt = "Fix @diagnostics", submit = true },
+        implement = { prompt = "Implement @this", submit = true },
+        optimize = { prompt = "Optimize @this for performance and readability", submit = true },
+        test = { prompt = "Add tests for @this", submit = true },
+        debug = { prompt = "Add debug logging to @this", ask = true, submit = false },
+      },
+    }
+
     vim.o.autoread = true
 
-    -- Recommended/example keymaps.
     vim.keymap.set({ "n", "x" }, "<C-a>", function() require("opencode").ask("@this: ", { submit = true }) end,
       { desc = "Ask opencode…" })
     vim.keymap.set({ "n", "x" }, "<C-x>", function() require("opencode").select() end,
@@ -27,8 +70,8 @@ return {
     vim.keymap.set("n", "<S-C-d>", function() require("opencode").command("session.half.page.down") end,
       { desc = "Scroll opencode down" })
 
-    -- You may want these if you stick with the opinionated "<C-a>" and "<C-x>" above — otherwise consider "<leader>o…".
     vim.keymap.set("n", "+", "<C-a>", { desc = "Increment under cursor", noremap = true })
     vim.keymap.set("n", "-", "<C-x>", { desc = "Decrement under cursor", noremap = true })
   end,
 }
+
