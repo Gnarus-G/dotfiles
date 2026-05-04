@@ -27,7 +27,7 @@ return {
         },
       },
       -- Increase timeout slightly since non-streamed responses arrive in one chunk
-      request_timeout = 10,
+      request_timeout = 20,
       provider_options = {
         claude = {
           model = 'claude-haiku-4-5',
@@ -80,6 +80,7 @@ return {
           optional = {
             max_tokens = 256,
             top_p = 0.9,
+            think = false,
           },
         },
         openai_fim_compatible = {
@@ -95,6 +96,7 @@ return {
           optional = {
             max_tokens = 256,
             top_p = 0.9,
+            think = false,
           },
         },
       }
