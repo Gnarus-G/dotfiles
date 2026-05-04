@@ -1,85 +1,18 @@
-#!/usr/bin/env bash
-set -euo pipefail
+#!/usr/bin/env python3
+import argparse
+import json
+import os
+import shutil
+import subprocess
+import sys
+import tempfile
+import time
+import urllib.request
 
-# git-ac: Automated commit message generation using Ollama
-# Usage: git ac [options]
+DEFAULT_MODEL = "deepseek-v4-flash:cloud"
+OLLAMA_HOST = os.environ.get("OLLAMA_HOST", "http://localhost:11434")
 
-MODEL="deepseek-v4-flash:cloud"
-NO_EDIT=false
-DRY_RUN=false
-VERBOSE=false
-
-usage() {
-  cat <<EOF
-Usage: git ac [options]
-
-Generate a commit message using Ollama for staged changes.
-
-Options:
-  -y, --no-edit       Skip editor, commit directly with generated message
-  -n, --dry-run       Print generated message to stdout, don't commit
-  -m, --model MODEL   Override model (default: $MODEL)
-  -v, --verbose       Show timing and quality metrics
-  -h, --help          Show this help message
-
-Examples:
-  git add -p && git ac       Stage changes interactively, then generate and edit message
-  git ac -y                  Quick commit without editing
-  git ac --dry-run           Preview the generated message
-  git ac --model devstral-2:123b-cloud   Use a different model
-EOF
-}
-
-# Parse arguments
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-  -y | --no-edit)
-    NO_EDIT=true
-    shift
-    ;;
-  -n | --dry-run)
-    DRY_RUN=true
-    shift
-    ;;
-  -m | --model)
-    MODEL="$2"
-    shift 2
-    ;;
-  -v | --verbose)
-    VERBOSE=true
-    shift
-    ;;
-  -h | --help)
-    usage
-    exit 0
-    ;;
-  *)
-    echo "Unknown option: $1" >&2
-    usage >&2
-    exit 1
-    ;;
-  esac
-done
-
-# Check for staged changes
-if git diff --staged --quiet; then
-  echo "Error: No staged changes" >&2
-  exit 1
-fi
-
-# Get staged diff
-DIFF=$(git diff --staged)
-
-# Check/pull model
-if ! curl -s http://localhost:11434/api/tags | jq -e ".models[] | select(.name == \"$MODEL\")" >/dev/null 2>&1; then
-  echo "Model $MODEL not found. Pulling..." >&2
-  ollama pull "$MODEL" >&2
-fi
-
-# Generate commit message using OpenAI-compatible chat endpoint
-START_TIME=$(date +%s.%N)
-
-PROMPT="Generate a git commit message for these changes.
+PROMPT_TEMPLATE = """Generate a git commit message for these changes.
 
 Format:
 - Line 1: Subject (max 75 chars, imperative, no prefix)
@@ -95,69 +28,111 @@ Output ONLY the commit message.
 
 Write a commit message for this Git diff:
 
-$DIFF"
-MESSAGE=$(curl -s http://localhost:11434/v1/chat/completions \
-  -H "Content-Type: application/json" \
-  -d "$(jq -n --arg PROMPT "$PROMPT" '{
-    model: "'"$MODEL"'",
-    stream: false,
-    reasoning_effort: "none",
-    messages: [{role: "user", content: $PROMPT}]
-  }')" | jq -r '.choices[0].message.content')
+{diff}"""
 
-END_TIME=$(date +%s.%N)
-DURATION=$(echo "$END_TIME - $START_TIME" | bc)
 
-# Handle --dry-run
-if $DRY_RUN; then
-  echo "$MESSAGE"
-  if $VERBOSE; then
-    echo ""
-    echo "---"
-    echo "Model: $MODEL"
-    printf "Generation time: %.2fs\n" "$DURATION"
-    echo "Subject line length: $(echo "$MESSAGE" | head -n1 | wc -c) chars"
-    echo "Body lines: $(echo "$MESSAGE" | tail -n +3 | wc -l)"
-  fi
-  exit 0
-fi
+def ollama_request(path, data=None):
+    url = f"{OLLAMA_HOST.rstrip('/')}{path}"
+    body = json.dumps(data).encode() if data else None
+    req = urllib.request.Request(url, data=body, headers={"Content-Type": "application/json"} if body else {})
+    with urllib.request.urlopen(req) as resp:
+        return json.loads(resp.read().decode())
 
-# Write to temp file with name nvim recognizes as gitcommit
-TMPDIR=$(mktemp -d)
-TMPFILE="$TMPDIR/COMMIT_EDITMSG"
-trap 'rm -rf "$TMPDIR"' EXIT
-echo "$MESSAGE" >"$TMPFILE"
 
-# Open editor unless --no-edit
-if ! $NO_EDIT; then
-  ${GIT_EDITOR:-${EDITOR:-vi}} "$TMPFILE"
-fi
+def model_exists(model):
+    try:
+        tags = ollama_request("/api/tags")
+        return any(m["name"] == model for m in tags.get("models", []))
+    except Exception:
+        return False
 
-# Check if message is empty
-if [[ ! -s "$TMPFILE" ]]; then
-  echo "Aborting: empty commit message" >&2
-  exit 1
-fi
 
-# Commit with the message
-git commit -F "$TMPFILE"
+def pull_model(model):
+    print(f"Model {model} not found. Pulling...", file=sys.stderr)
+    subprocess.run(["ollama", "pull", model], check=True)
 
-# Show quality metrics if verbose
-if $VERBOSE; then
-  echo ""
-  echo "---"
-  echo "Model: $MODEL"
-  printf "Generation time: %.2fs\n" "$DURATION"
 
-  SUBJECT=$(echo "$MESSAGE" | head -n1)
-  echo "Subject: $SUBJECT"
-  echo "Subject length: $(echo "$SUBJECT" | wc -c) chars (limit: 75)"
+def generate_message(model, diff_text):
+    prompt = PROMPT_TEMPLATE.format(diff=diff_text)
+    payload = {
+        "model": model,
+        "stream": False,
+        "reasoning_effort": "none",
+        "messages": [{"role": "user", "content": prompt}],
+    }
+    start = time.perf_counter()
+    resp = ollama_request("/v1/chat/completions", payload)
+    elapsed = time.perf_counter() - start
+    content = resp["choices"][0]["message"]["content"]
+    return content, elapsed
 
-  if [[ ${#SUBJECT} -gt 75 ]]; then
-    echo "⚠️  Warning: Subject exceeds 75 characters"
-  fi
 
-  if echo "$SUBJECT" | grep -qE "^(feat|fix|chore|refactor|test|docs):"; then
-    echo "⚠️  Warning: Subject has type prefix (should be plain imperative)"
-  fi
-fi
+def main():
+    parser = argparse.ArgumentParser(
+        prog="git-ac",
+        description="Generate a commit message using Ollama for staged changes.",
+    )
+    parser.add_argument("-y", "--no-edit", action="store_true", help="Commit directly without editing")
+    parser.add_argument("-n", "--dry-run", action="store_true", help="Print message, don't commit")
+    parser.add_argument("-m", "--model", default=DEFAULT_MODEL, help=f"Ollama model (default: {DEFAULT_MODEL})")
+    parser.add_argument("-v", "--verbose", action="store_true", help="Show timing and quality metrics")
+    args = parser.parse_args()
+
+    if subprocess.run(["git", "diff", "--staged", "--quiet"]).returncode == 0:
+        print("Error: No staged changes", file=sys.stderr)
+        sys.exit(1)
+
+    diff_text = subprocess.run(["git", "diff", "--staged"], capture_output=True, text=True).stdout
+
+    if not model_exists(args.model):
+        pull_model(args.model)
+
+    message, elapsed = generate_message(args.model, diff_text)
+
+    if args.dry_run:
+        print(message)
+        if args.verbose:
+            subject = message.split("\n", 1)[0]
+            body_lines = message.split("\n")[2:] if "\n\n" in message else []
+            print()
+            print("---")
+            print(f"Model: {args.model}")
+            print(f"Generation time: {elapsed:.2f}s")
+            print(f"Subject line length: {len(subject)} chars")
+            print(f"Body lines: {len(body_lines)}")
+        sys.exit(0)
+
+    tmpdir = tempfile.mkdtemp()
+    try:
+        tmpfile = os.path.join(tmpdir, "COMMIT_EDITMSG")
+        with open(tmpfile, "w") as f:
+            f.write(message)
+
+        if not args.no_edit:
+            editor = os.environ.get("GIT_EDITOR") or os.environ.get("EDITOR", "vi")
+            subprocess.run(f"{editor} {tmpfile}", shell=True, check=True)
+
+        if os.path.getsize(tmpfile) == 0:
+            print("Aborting: empty commit message", file=sys.stderr)
+            sys.exit(1)
+
+        subprocess.run(["git", "commit", "-F", tmpfile], check=True)
+    finally:
+        shutil.rmtree(tmpdir, ignore_errors=True)
+
+    if args.verbose:
+        subject = message.split("\n", 1)[0]
+        print()
+        print("---")
+        print(f"Model: {args.model}")
+        print(f"Generation time: {elapsed:.2f}s")
+        print(f"Subject: {subject}")
+        print(f"Subject length: {len(subject)} chars (limit: 75)")
+        if len(subject) > 75:
+            print("Warning: Subject exceeds 75 characters")
+        if any(subject.startswith(p) for p in ("feat:", "fix:", "chore:", "refactor:", "test:", "docs:")):
+            print("Warning: Subject has type prefix (should be plain imperative)")
+
+
+if __name__ == "__main__":
+    main()
