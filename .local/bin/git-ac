@@ -12,10 +12,14 @@ import urllib.request
 
 logger = logging.getLogger("git-ac")
 
-DEFAULT_MODEL = "deepseek-v4-flash:cloud"
 OLLAMA_HOST = os.environ.get("OLLAMA_HOST", "http://localhost:11434")
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "")
 OPENAI_BASE_URL = os.environ.get("OPENAI_BASE_URL", "https://api.openai.com/v1")
+GNARUS_ALLOW_VENDOR_LLM = os.environ.get("GNARUS_ALLOW_VENDOR_LLM", "")
+
+DEFAULT_MODEL_OLLAMA = "deepseek-v4-flash:cloud"
+DEFAULT_MODEL_OPENAI = "gpt-5.4-nano"
+DEFAULT_MODEL = DEFAULT_MODEL_OPENAI if GNARUS_ALLOW_VENDOR_LLM else DEFAULT_MODEL_OLLAMA
 
 OLLAMA_PREFIXES = ("ollama/", "deepseek-", "qwen", "devstral")
 OPENAI_PREFIXES = ("openai/", "gpt-", "o1", "o3", "o4")
@@ -142,17 +146,17 @@ def main():
     message, elapsed = generate_message(args.model, diff_text)
 
     if args.dry_run:
-        print(message)
+        logger.info(message)
         if args.verbose:
             subject = message.split("\n", 1)[0]
             body_lines = message.split("\n")[2:] if "\n\n" in message else []
-            print()
-            print("---")
-            print(f"Provider: {provider}")
-            print(f"Model: {args.model}")
-            print(f"Generation time: {elapsed:.2f}s")
-            print(f"Subject line length: {len(subject)} chars")
-            print(f"Body lines: {len(body_lines)}")
+            logger.info("")
+            logger.info("---")
+            logger.info("Provider: %s", provider)
+            logger.info("Model: %s", args.model)
+            logger.info("Generation time: %.2fs", elapsed)
+            logger.info("Subject line length: %d chars", len(subject))
+            logger.info("Body lines: %d", len(body_lines))
         sys.exit(0)
 
     tmpdir = tempfile.mkdtemp()
@@ -175,17 +179,17 @@ def main():
 
     if args.verbose:
         subject = message.split("\n", 1)[0]
-        print()
-        print("---")
-        print(f"Provider: {provider}")
-        print(f"Model: {args.model}")
-        print(f"Generation time: {elapsed:.2f}s")
-        print(f"Subject: {subject}")
-        print(f"Subject length: {len(subject)} chars (limit: 75)")
+        logger.info("")
+        logger.info("---")
+        logger.info("Provider: %s", provider)
+        logger.info("Model: %s", args.model)
+        logger.info("Generation time: %.2fs", elapsed)
+        logger.info("Subject: %s", subject)
+        logger.info("Subject length: %d chars (limit: 75)", len(subject))
         if len(subject) > 75:
-            print("Warning: Subject exceeds 75 characters")
+            logger.warning("Subject exceeds 75 characters")
         if any(subject.startswith(p) for p in ("feat:", "fix:", "chore:", "refactor:", "test:", "docs:")):
-            print("Warning: Subject has type prefix (should be plain imperative)")
+            logger.warning("Subject has type prefix (should be plain imperative)")
 
 
 if __name__ == "__main__":
