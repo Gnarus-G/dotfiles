@@ -402,6 +402,8 @@ unbind C-b
 set-option -g prefix M-a
 bind-key M-a send-prefix
 
+bind P run-shell "echo -n '#{session_name}:#{window_index}.#{pane_index}' | xclip -selection clipboard" \; display-message "Copied pane ID: #{session_name}:#{window_index}.#{pane_index}"
+
 # if you don't want Oh my tmux! to alter a binding, use #!important
 # bind c new-window -c '#{pane_current_path}' #!important
 
