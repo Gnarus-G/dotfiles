@@ -27,6 +27,7 @@ LINKS: dict[str, list[str]] = {
     ".config/nvim": [".config/nvim"],
     ".config/mcphub": [".config/mcphub"],
     ".config/opencode": [".config/opencode"],
+    ".config/opencode/system.md": [".claude/CLAUDE.md"],
     ".config/awesome": [".config/awesome"],
     ".config/gtk-3.0": [".config/gtk-3.0"],
     ".config/leftwm": [".config/leftwm"],
