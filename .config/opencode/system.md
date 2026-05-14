@@ -5,11 +5,18 @@
 - **Library docs**: Use `context7_resolve-library-id` → `context7_query-docs` for library/framework documentation
 - **Default to research**: When uncertain about a tool, pattern, or best practice, research first rather than guessing
 
-## Skills
+## Tmux
 
-- **Tmux**: Use `tmux-processes` skill if working in tmux environment to manage panes effectively for workflows involving multiple files/screens/tabs
-- **Consiceness**: Use `caveman` skill.
-- **Confidence**: Use TDD, systematic-debugging, and or syllogism to do RCA's or other debugging.
+Use `tmux-processes` skill if working in tmux environment to manage panes effectively for workflows involving multiple files/screens/tabs
+Watch out for the syntax which should let you know to look for a pane and capture it. That syntax is like <session>:<id>, eg: Work:1, Whatever:2.2, etc...
+
+## Conciseness
+
+Use `caveman` skill.
+
+## Confidence
+
+Use skills like `test-driven-development`, `systematic-debugging`, and or `syllogism` to do RCA's or other debugging.
 
 ## Workflow Quality
 
