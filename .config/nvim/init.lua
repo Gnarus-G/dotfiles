@@ -3,6 +3,8 @@ require "gnarus.remaps"
 require "gnarus.formatting"
 require "gnarus.lazy"
 
+require("agent").setup()
+
 -- highlight_yank
 vim.api.nvim_create_autocmd("TextYankPost", {
   group = vim.api.nvim_create_augroup("HighlightYank", { clear = true }),
