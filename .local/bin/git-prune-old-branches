@@ -1,0 +1,185 @@
+#!/usr/bin/env bash
+# Walk through git repos under ~/d and delete local branches whose last
+# commit is older than $DAYS days. Never deletes main/master. Skips the
+# current branch when the working tree is dirty. With --remote, also
+# deletes the corresponding branch on origin. With --prune-worktrees,
+# removes stale linked worktrees under $WORKTREE_ALLOW_PREFIX that hold
+# a deletion-candidate branch, then proceeds with the delete. Dry-run by
+# default; pass --execute to actually delete.
+
+set -euo pipefail
+
+ROOT="${ROOT:-$HOME/d}"
+DAYS="${DAYS:-30}"
+WORKTREE_ALLOW_PREFIX="${WORKTREE_ALLOW_PREFIX:-$HOME/d/agentic/}"
+EXECUTE=0
+REMOTE=0
+PRUNE_WT=0
+PROTECTED_RE='^(main|master)$'
+REMOTE_ALLOW_RE='^ghislain/'
+
+for arg in "$@"; do
+    case "$arg" in
+        --execute) EXECUTE=1 ;;
+        --remote) REMOTE=1 ;;
+        --prune-worktrees) PRUNE_WT=1 ;;
+        --days=*) DAYS="${arg#--days=}" ;;
+        --root=*) ROOT="${arg#--root=}" ;;
+        -h|--help|help)
+            cat <<EOF
+Usage: git prune-old-branches [--execute] [--remote] [--prune-worktrees] [--days=N] [--root=PATH]
+  --execute           Actually delete branches (default: dry-run).
+  --remote            Also delete the branch on origin (push --delete).
+                      Only branches matching $REMOTE_ALLOW_RE are pushed.
+  --prune-worktrees   Remove linked worktrees under $WORKTREE_ALLOW_PREFIX
+                      that hold a deletion-candidate branch, then delete.
+                      Skips worktrees with uncommitted changes.
+  --days=N            Age threshold in days (default: 30).
+  --root=DIR          Directory to scan for repos (default: \$HOME/d).
+EOF
+            exit 0
+            ;;
+        *) echo "unknown arg: $arg" >&2; exit 2 ;;
+    esac
+done
+
+cutoff=$(date -d "${DAYS} days ago" +%s)
+now=$(date +%s)
+total_candidates=0
+total_deleted=0
+total_remote_candidates=0
+total_remote_deleted=0
+total_skipped_dirty=0
+total_wt_removed=0
+total_wt_failed=0
+
+prune_repo() {
+    local repo="$1"
+    local current dirty=0 branch ts age_days has_origin=0
+    local -a remote_batch=()
+    local -A wt_for_branch=()
+
+    current=$(git -C "$repo" symbolic-ref --quiet --short HEAD 2>/dev/null || echo "")
+
+    if ! git -C "$repo" diff --quiet --ignore-submodules HEAD 2>/dev/null \
+        || [ -n "$(git -C "$repo" status --porcelain --untracked-files=no 2>/dev/null)" ]; then
+        dirty=1
+    fi
+
+    if [ "$REMOTE" = 1 ] && git -C "$repo" remote get-url origin >/dev/null 2>&1; then
+        has_origin=1
+    fi
+
+    if [ "$PRUNE_WT" = 1 ]; then
+        local wt_path="" wt_branch=""
+        while IFS= read -r line; do
+            case "$line" in
+                "worktree "*) wt_path="${line#worktree }"; wt_branch="" ;;
+                "branch refs/heads/"*)
+                    wt_branch="${line#branch refs/heads/}"
+                    if [[ "$wt_path" == "$WORKTREE_ALLOW_PREFIX"* ]] && [ "$wt_path" != "$repo" ]; then
+                        wt_for_branch["$wt_branch"]="$wt_path"
+                    fi
+                    ;;
+                "") wt_path=""; wt_branch="" ;;
+            esac
+        done < <(git -C "$repo" worktree list --porcelain)
+    fi
+
+    while IFS=$'\t' read -r ts branch; do
+        [ -z "$branch" ] && continue
+        if [[ "$branch" =~ $PROTECTED_RE ]]; then continue; fi
+        if [ "$branch" = "$current" ]; then
+            if [ "$dirty" = 1 ]; then
+                total_skipped_dirty=$((total_skipped_dirty + 1))
+                printf '  SKIP  %s (current branch, working tree dirty)\n' "$branch"
+            fi
+            continue
+        fi
+        [ "$ts" -lt "$cutoff" ] || continue
+
+        age_days=$(( (now - ts) / 86400 ))
+        total_candidates=$((total_candidates + 1))
+
+        local has_remote=0
+        if [ "$has_origin" = 1 ] && [[ "$branch" =~ $REMOTE_ALLOW_RE ]] && \
+            git -C "$repo" show-ref --verify --quiet "refs/remotes/origin/$branch"; then
+            has_remote=1
+            total_remote_candidates=$((total_remote_candidates + 1))
+        fi
+
+        local wt="${wt_for_branch[$branch]:-}"
+
+        if [ "$EXECUTE" = 1 ]; then
+            local local_ok=0
+            if [ -n "$wt" ]; then
+                local wt_err
+                if wt_err=$(git -C "$repo" worktree remove "$wt" 2>&1); then
+                    printf '  RM-WT %s\n' "${wt#$HOME/}"
+                    total_wt_removed=$((total_wt_removed + 1))
+                else
+                    printf '  WT-FAIL %s\n' "${wt#$HOME/}"
+                    printf '          %s\n' "$wt_err"
+                    total_wt_failed=$((total_wt_failed + 1))
+                    printf '  FAIL  %s (worktree blocks delete)\n' "$branch"
+                    continue
+                fi
+            fi
+            local del_err
+            if del_err=$(git -C "$repo" branch -D "$branch" 2>&1); then
+                printf '  DEL   %s (%dd old)\n' "$branch" "$age_days"
+                total_deleted=$((total_deleted + 1))
+                local_ok=1
+            else
+                printf '  FAIL  %s (%s)\n' "$branch" "$del_err"
+            fi
+            if [ "$local_ok" = 1 ] && [ "$has_remote" = 1 ]; then
+                remote_batch+=("$branch")
+            fi
+        else
+            local tags=""
+            [ "$has_remote" = 1 ] && tags+=" [+remote]"
+            [ -n "$wt" ] && tags+=" [+rm-wt: ${wt#$HOME/}]"
+            printf '  WOULD %s (%dd old)%s\n' "$branch" "$age_days" "$tags"
+        fi
+    done < <(git -C "$repo" for-each-ref --format='%(committerdate:unix)%09%(refname:short)' refs/heads/)
+
+    if [ "$EXECUTE" = 1 ] && [ "${#remote_batch[@]}" -gt 0 ]; then
+        printf '  PUSH  origin --delete (%d branch(es))\n' "${#remote_batch[@]}"
+        if git -C "$repo" push origin --delete "${remote_batch[@]}" 2>&1 \
+            | sed 's/^/    /'; then
+            total_remote_deleted=$((total_remote_deleted + ${#remote_batch[@]}))
+        else
+            echo '    (push partially or fully failed; check output above)'
+        fi
+    fi
+}
+
+shopt -s nullglob
+for entry in "$ROOT"/*/; do
+    repo="${entry%/}"
+    [ -d "$repo/.git" ] || continue
+    # skip worktree dirs under the allow prefix; they're handled via their main repo
+    case "$repo/" in "$WORKTREE_ALLOW_PREFIX"*) continue ;; esac
+    printf '\n== %s ==\n' "${repo#$HOME/}"
+    prune_repo "$repo"
+done
+
+echo
+if [ "$EXECUTE" = 1 ]; then
+    printf 'Deleted %d local branch(es).' "$total_deleted"
+    [ "$REMOTE" = 1 ] && printf ' Pushed delete for %d remote branch(es).' "$total_remote_deleted"
+    [ "$PRUNE_WT" = 1 ] && printf ' Removed %d worktree(s) (%d failed).' \
+        "$total_wt_removed" "$total_wt_failed"
+    printf ' Skipped %d dirty current branch(es).\n' "$total_skipped_dirty"
+else
+    printf 'DRY RUN: %d local branch(es) would be deleted' "$total_candidates"
+    if [ "$REMOTE" = 1 ]; then
+        printf ' (%d also on origin, marked [+remote])' "$total_remote_candidates"
+    fi
+    printf '. Skipped %d dirty current branch(es).\n' "$total_skipped_dirty"
+    flags='--execute'
+    [ "$REMOTE" = 1 ] && flags+=' --remote'
+    [ "$PRUNE_WT" = 1 ] && flags+=' --prune-worktrees'
+    echo "Re-run with $flags to actually delete."
+fi
