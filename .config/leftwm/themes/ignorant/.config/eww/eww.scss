@@ -458,3 +458,28 @@ $background: #0f172a;
       rgba(168, 85, 247, 0.2),
       rgba(168, 85, 247, 0.1));
 }
+
+.udo-bar {
+  padding: 2px 8px;
+}
+
+.udo-icon {
+  color: $secondary;
+  font-size: 12px;
+}
+
+.udo-active {
+  color: #22d3ee;
+  font-weight: 700;
+  font-size: 12px;
+}
+
+.udo-recent {
+  color: $light;
+  font-size: 12px;
+}
+
+.udo-idle {
+  color: $dark;
+  font-size: 12px;
+}

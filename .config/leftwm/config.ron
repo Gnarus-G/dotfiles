@@ -37,6 +37,7 @@
         (name: "Whatever", value: "ghostty", args: ["-e", "tmux", "new-session", "-As", "Whatever"], x: .25, y: .25, height: .50, width: .50),
         (name: "Work", value: "ghostty", args: ["-e", "tmux", "new-session", "-As", "Work"], x: .10, y: .10, height: .80, width: .80),
         (name: "todos", value: ".local/bin/mynd", x: .35, y: .25, height: .50, width: .30),
+        (name: "udo", value: "ghostty", args: ["-e", "udo", "watch"], x: .15, y: .15, height: .70, width: .70),
     ],
     window_rules: [
         (window_title: "Picture-in-Picture", spawn_as_type: Normal),
@@ -50,6 +51,7 @@
         (command: ToggleScratchPad, value: "Whatever", modifier: ["modkey"], key: "t"),
         (command: ToggleScratchPad, value: "Work", modifier: ["modkey", "Shift"], key: "t"),
         (command: ToggleScratchPad, value: "todos", modifier: ["modkey", "Shift"], key: "u"),
+        (command: ToggleScratchPad, value: "udo", modifier: ["modkey", "Shift"], key: "a"),
         (command: Execute, value: "rofi -show drun", modifier: ["modkey"], key: "d"),
         (command: Execute, 
           value: "spectacle -mcb -o Pictures/Screenshots/$(date +\"%Y-%m-%d_%H-%M-%S.png\")", 
