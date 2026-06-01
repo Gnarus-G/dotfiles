@@ -74,6 +74,10 @@ ZSH_THEME="sunrise"
 # Add wisely, as too many plugins slow down shell startup.
 plugins=(git vi-mode zsh-autosuggestions zsh-syntax-highlighting direnv)
 
+# Skip the insecure-directory audit (compaudit) on a single-user machine; it
+# forks on every startup for no benefit here.
+ZSH_DISABLE_COMPFIX="true"
+
 source $ZSH/oh-my-zsh.sh
 
 # User configuration
@@ -188,7 +192,11 @@ alias jq2env='jq -r "to_entries | .[] | [.key, .value] | join(\"=\")"'
 alias cp2='rsync -aPWh'
 alias sshx='ssh -YC felix@192.168.1.24 -p 456 x2x -east -to :0'
 
-[ ! -f "$HOME/.x-cmd.root/X" ] || . "$HOME/.x-cmd.root/X" # boot up x-cmd.
+# x-cmd: lazy-loaded (its bootstrap sources the full framework + advise hooks,
+# ~60ms). Sourced on first `x` invocation instead of every shell.
+if [ -f "$HOME/.x-cmd.root/X" ]; then
+  x() { unset -f x; . "$HOME/.x-cmd.root/X"; x "$@"; }
+fi
 
 # opencode
 export PATH=$HOME/.opencode/bin:$PATH
