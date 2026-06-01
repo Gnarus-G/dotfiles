@@ -1,0 +1,11 @@
+(defpoll udo_running :interval "1s" :initial "0" "udo status 2>/dev/null | jq -r '.running_count // 0'")
+(defpoll udo_recent :interval "1s" :initial "0" "udo status 2>/dev/null | jq -r '.recent_count // 0'")
+(defpoll udo_worst :interval "1s" :initial "\"\"" "udo status 2>/dev/null | jq -r '.worst_state // \"\"'")
+
+(defwidget udo_bar []
+  (button :onclick 'leftwm-command "ToggleScratchPad udo"'
+    :class "udo-bar"
+    (box :orientation "h" :space-evenly false :halign "center"
+      (label :class "udo-icon" :text "⚙")
+      (label :class {udo_running > 0 ? "udo-active" : udo_recent > 0 ? "udo-recent" : "udo-idle"}
+             :text {udo_running > 0 ? " ${udo_running}" : ""}))))
