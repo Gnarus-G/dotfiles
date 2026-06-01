@@ -1,4 +1,5 @@
 (include "./todos.yuck")
+(include "./udo.yuck")
 
 (defwidget bar [index]
   (box :orientation "h" :class "bar" :space-evenly false
@@ -8,6 +9,8 @@
      (button :onclick 'leftwm command "ToggleScratchPad todos"' "📜")
      (todo :item earliest_todo))
     (box :hexpand true)
+    (box :orientation "h" :visible {(udo_running > 0) || (udo_recent > 0)} :space-evenly false :halign "center"
+     (udo_bar))
     (sidestuff)
     (systray :class "border-l" :style "margin-left: 10px; padding-left: 10px" :spacing 10 :icon-size 20)))
     
