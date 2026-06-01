@@ -1,185 +1,340 @@
-#!/usr/bin/env bash
-# Walk through git repos under ~/d and delete local branches whose last
-# commit is older than $DAYS days. Never deletes main/master. Skips the
-# current branch when the working tree is dirty. With --remote, also
-# deletes the corresponding branch on origin. With --prune-worktrees,
-# removes stale linked worktrees under $WORKTREE_ALLOW_PREFIX that hold
-# a deletion-candidate branch, then proceeds with the delete. Dry-run by
-# default; pass --execute to actually delete.
+#!/usr/bin/env python3
+"""Prune stale local branches across repositories under a root directory."""
 
-set -euo pipefail
+from __future__ import annotations
 
-ROOT="${ROOT:-$HOME/d}"
-DAYS="${DAYS:-30}"
-WORKTREE_ALLOW_PREFIX="${WORKTREE_ALLOW_PREFIX:-$HOME/d/agentic/}"
-EXECUTE=0
-REMOTE=0
-PRUNE_WT=0
-PROTECTED_RE='^(main|master)$'
-REMOTE_ALLOW_RE='^ghislain/'
+import argparse
+import os
+import re
+import subprocess
+import sys
+import time
+from dataclasses import dataclass, field
+from pathlib import Path
 
-for arg in "$@"; do
-    case "$arg" in
-        --execute) EXECUTE=1 ;;
-        --remote) REMOTE=1 ;;
-        --prune-worktrees) PRUNE_WT=1 ;;
-        --days=*) DAYS="${arg#--days=}" ;;
-        --root=*) ROOT="${arg#--root=}" ;;
-        -h|--help|help)
-            cat <<EOF
-Usage: git prune-old-branches [--execute] [--remote] [--prune-worktrees] [--days=N] [--root=PATH]
-  --execute           Actually delete branches (default: dry-run).
-  --remote            Also delete the branch on origin (push --delete).
-                      Only branches matching $REMOTE_ALLOW_RE are pushed.
-  --prune-worktrees   Remove linked worktrees under $WORKTREE_ALLOW_PREFIX
-                      that hold a deletion-candidate branch, then delete.
-                      Skips worktrees with uncommitted changes.
-  --days=N            Age threshold in days (default: 30).
-  --root=DIR          Directory to scan for repos (default: \$HOME/d).
-EOF
-            exit 0
-            ;;
-        *) echo "unknown arg: $arg" >&2; exit 2 ;;
-    esac
-done
+HOME = str(Path.home())
+PROTECTED_RE = re.compile(r"^(main|master)$")
+REMOTE_ALLOW_RE = re.compile(r"^ghislain/")
 
-cutoff=$(date -d "${DAYS} days ago" +%s)
-now=$(date +%s)
-total_candidates=0
-total_deleted=0
-total_remote_candidates=0
-total_remote_deleted=0
-total_skipped_dirty=0
-total_wt_removed=0
-total_wt_failed=0
 
-prune_repo() {
-    local repo="$1"
-    local current dirty=0 branch ts age_days has_origin=0
-    local -a remote_batch=()
-    local -A wt_for_branch=()
+@dataclass
+class Config:
+    root: str = os.environ.get("ROOT", f"{HOME}/d")
+    days: int = int(os.environ.get("DAYS", "30"))
+    worktree_allow_prefix: str = os.environ.get("WORKTREE_ALLOW_PREFIX", f"{HOME}/d/agentic/")
+    execute: bool = False
+    remote: bool = False
+    prune_worktrees: bool = False
 
-    current=$(git -C "$repo" symbolic-ref --quiet --short HEAD 2>/dev/null || echo "")
 
-    if ! git -C "$repo" diff --quiet --ignore-submodules HEAD 2>/dev/null \
-        || [ -n "$(git -C "$repo" status --porcelain --untracked-files=no 2>/dev/null)" ]; then
-        dirty=1
-    fi
+@dataclass
+class Totals:
+    candidates: int = 0
+    deleted: int = 0
+    remote_candidates: int = 0
+    remote_deleted: int = 0
+    skipped_dirty: int = 0
+    worktrees_removed: int = 0
+    worktrees_failed: int = 0
 
-    if [ "$REMOTE" = 1 ] && git -C "$repo" remote get-url origin >/dev/null 2>&1; then
-        has_origin=1
-    fi
 
-    if [ "$PRUNE_WT" = 1 ]; then
-        local wt_path="" wt_branch=""
-        while IFS= read -r line; do
-            case "$line" in
-                "worktree "*) wt_path="${line#worktree }"; wt_branch="" ;;
-                "branch refs/heads/"*)
-                    wt_branch="${line#branch refs/heads/}"
-                    if [[ "$wt_path" == "$WORKTREE_ALLOW_PREFIX"* ]] && [ "$wt_path" != "$repo" ]; then
-                        wt_for_branch["$wt_branch"]="$wt_path"
-                    fi
-                    ;;
-                "") wt_path=""; wt_branch="" ;;
-            esac
-        done < <(git -C "$repo" worktree list --porcelain)
-    fi
+@dataclass(frozen=True)
+class Branch:
+    name: str
+    timestamp: int
 
-    while IFS=$'\t' read -r ts branch; do
-        [ -z "$branch" ] && continue
-        if [[ "$branch" =~ $PROTECTED_RE ]]; then continue; fi
-        if [ "$branch" = "$current" ]; then
-            if [ "$dirty" = 1 ]; then
-                total_skipped_dirty=$((total_skipped_dirty + 1))
-                printf '  SKIP  %s (current branch, working tree dirty)\n' "$branch"
-            fi
+
+@dataclass
+class RepoState:
+    current_branch: str
+    dirty: bool
+    has_origin: bool
+    worktree_by_branch: dict[str, str] = field(default_factory=dict)
+
+
+def parse_args(argv: list[str]) -> Config:
+    defaults = Config()
+    if argv == ["help"]:
+        argv = ["--help"]
+
+    parser = argparse.ArgumentParser(
+        prog="git prune-old-branches",
+        description="Prune stale local branches across repositories under a root directory.",
+    )
+    parser.add_argument(
+        "--execute",
+        action="store_true",
+        help="actually delete branches (default: dry-run)",
+    )
+    parser.add_argument(
+        "--remote",
+        action="store_true",
+        help=f"also delete the branch on origin; only branches matching {REMOTE_ALLOW_RE.pattern} are pushed",
+    )
+    parser.add_argument(
+        "--prune-worktrees",
+        action="store_true",
+        help=(
+            f"remove linked worktrees under {defaults.worktree_allow_prefix} that hold a "
+            "deletion-candidate branch, then delete; skips worktrees with uncommitted changes"
+        ),
+    )
+    parser.add_argument(
+        "--days",
+        type=int,
+        default=defaults.days,
+        metavar="N",
+        help="age threshold in days (default: %(default)s)",
+    )
+    parser.add_argument(
+        "--root",
+        default=defaults.root,
+        metavar="DIR",
+        help="directory to scan for repos (default: %(default)s)",
+    )
+
+    args = parser.parse_args(argv)
+    return Config(
+        root=args.root,
+        days=args.days,
+        worktree_allow_prefix=defaults.worktree_allow_prefix,
+        execute=args.execute,
+        remote=args.remote,
+        prune_worktrees=args.prune_worktrees,
+    )
+
+
+def git(repo: str, *args: str, check: bool = False, capture: bool = True) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        ["git", "-C", repo, *args],
+        check=check,
+        stdout=subprocess.PIPE if capture else None,
+        stderr=subprocess.STDOUT if capture else None,
+        text=True,
+    )
+
+
+def display_path(path: str) -> str:
+    home_prefix = f"{HOME}/"
+    if path.startswith(home_prefix):
+        return path[len(home_prefix) :]
+    return path
+
+
+def current_branch(repo: str) -> str:
+    result = git(repo, "symbolic-ref", "--quiet", "--short", "HEAD")
+    if result.returncode != 0:
+        return ""
+    return result.stdout.strip()
+
+
+def is_dirty(repo: str) -> bool:
+    diff = git(repo, "diff", "--quiet", "--ignore-submodules", "HEAD")
+    if diff.returncode != 0:
+        return True
+
+    status = git(repo, "status", "--porcelain", "--untracked-files=no")
+    return bool(status.stdout.strip())
+
+
+def has_origin(repo: str, config: Config) -> bool:
+    return config.remote and git(repo, "remote", "get-url", "origin").returncode == 0
+
+
+def parse_worktrees(repo: str, config: Config) -> dict[str, str]:
+    if not config.prune_worktrees:
+        return {}
+
+    result = git(repo, "worktree", "list", "--porcelain")
+    worktree_by_branch: dict[str, str] = {}
+    worktree_path = ""
+
+    for line in result.stdout.splitlines():
+        if line.startswith("worktree "):
+            worktree_path = line.removeprefix("worktree ")
+        elif line.startswith("branch refs/heads/"):
+            branch = line.removeprefix("branch refs/heads/")
+            if worktree_path.startswith(config.worktree_allow_prefix) and worktree_path != repo:
+                worktree_by_branch[branch] = worktree_path
+        elif line == "":
+            worktree_path = ""
+
+    return worktree_by_branch
+
+
+def repo_state(repo: str, config: Config) -> RepoState:
+    return RepoState(
+        current_branch=current_branch(repo),
+        dirty=is_dirty(repo),
+        has_origin=has_origin(repo, config),
+        worktree_by_branch=parse_worktrees(repo, config),
+    )
+
+
+def local_branches(repo: str) -> list[Branch]:
+    result = git(repo, "for-each-ref", "--format=%(committerdate:unix)%09%(refname:short)", "refs/heads/")
+    branches: list[Branch] = []
+
+    for line in result.stdout.splitlines():
+        if not line:
             continue
-        fi
-        [ "$ts" -lt "$cutoff" ] || continue
 
-        age_days=$(( (now - ts) / 86400 ))
-        total_candidates=$((total_candidates + 1))
+        timestamp, branch = line.split("\t", 1)
+        branches.append(Branch(name=branch, timestamp=int(timestamp)))
 
-        local has_remote=0
-        if [ "$has_origin" = 1 ] && [[ "$branch" =~ $REMOTE_ALLOW_RE ]] && \
-            git -C "$repo" show-ref --verify --quiet "refs/remotes/origin/$branch"; then
-            has_remote=1
-            total_remote_candidates=$((total_remote_candidates + 1))
-        fi
+    return branches
 
-        local wt="${wt_for_branch[$branch]:-}"
 
-        if [ "$EXECUTE" = 1 ]; then
-            local local_ok=0
-            if [ -n "$wt" ]; then
-                local wt_err
-                if wt_err=$(git -C "$repo" worktree remove "$wt" 2>&1); then
-                    printf '  RM-WT %s\n' "${wt#$HOME/}"
-                    total_wt_removed=$((total_wt_removed + 1))
-                else
-                    printf '  WT-FAIL %s\n' "${wt#$HOME/}"
-                    printf '          %s\n' "$wt_err"
-                    total_wt_failed=$((total_wt_failed + 1))
-                    printf '  FAIL  %s (worktree blocks delete)\n' "$branch"
-                    continue
-                fi
-            fi
-            local del_err
-            if del_err=$(git -C "$repo" branch -D "$branch" 2>&1); then
-                printf '  DEL   %s (%dd old)\n' "$branch" "$age_days"
-                total_deleted=$((total_deleted + 1))
-                local_ok=1
-            else
-                printf '  FAIL  %s (%s)\n' "$branch" "$del_err"
-            fi
-            if [ "$local_ok" = 1 ] && [ "$has_remote" = 1 ]; then
-                remote_batch+=("$branch")
-            fi
-        else
-            local tags=""
-            [ "$has_remote" = 1 ] && tags+=" [+remote]"
-            [ -n "$wt" ] && tags+=" [+rm-wt: ${wt#$HOME/}]"
-            printf '  WOULD %s (%dd old)%s\n' "$branch" "$age_days" "$tags"
-        fi
-    done < <(git -C "$repo" for-each-ref --format='%(committerdate:unix)%09%(refname:short)' refs/heads/)
+def branch_has_remote(repo: str, branch: str, state: RepoState) -> bool:
+    if not state.has_origin or not REMOTE_ALLOW_RE.search(branch):
+        return False
 
-    if [ "$EXECUTE" = 1 ] && [ "${#remote_batch[@]}" -gt 0 ]; then
-        printf '  PUSH  origin --delete (%d branch(es))\n' "${#remote_batch[@]}"
-        if git -C "$repo" push origin --delete "${remote_batch[@]}" 2>&1 \
-            | sed 's/^/    /'; then
-            total_remote_deleted=$((total_remote_deleted + ${#remote_batch[@]}))
-        else
-            echo '    (push partially or fully failed; check output above)'
-        fi
-    fi
-}
+    return git(repo, "show-ref", "--verify", "--quiet", f"refs/remotes/origin/{branch}").returncode == 0
 
-shopt -s nullglob
-for entry in "$ROOT"/*/; do
-    repo="${entry%/}"
-    [ -d "$repo/.git" ] || continue
-    # skip worktree dirs under the allow prefix; they're handled via their main repo
-    case "$repo/" in "$WORKTREE_ALLOW_PREFIX"*) continue ;; esac
-    printf '\n== %s ==\n' "${repo#$HOME/}"
-    prune_repo "$repo"
-done
 
-echo
-if [ "$EXECUTE" = 1 ]; then
-    printf 'Deleted %d local branch(es).' "$total_deleted"
-    [ "$REMOTE" = 1 ] && printf ' Pushed delete for %d remote branch(es).' "$total_remote_deleted"
-    [ "$PRUNE_WT" = 1 ] && printf ' Removed %d worktree(s) (%d failed).' \
-        "$total_wt_removed" "$total_wt_failed"
-    printf ' Skipped %d dirty current branch(es).\n' "$total_skipped_dirty"
-else
-    printf 'DRY RUN: %d local branch(es) would be deleted' "$total_candidates"
-    if [ "$REMOTE" = 1 ]; then
-        printf ' (%d also on origin, marked [+remote])' "$total_remote_candidates"
-    fi
-    printf '. Skipped %d dirty current branch(es).\n' "$total_skipped_dirty"
-    flags='--execute'
-    [ "$REMOTE" = 1 ] && flags+=' --remote'
-    [ "$PRUNE_WT" = 1 ] && flags+=' --prune-worktrees'
-    echo "Re-run with $flags to actually delete."
-fi
+def remove_worktree(repo: str, worktree: str, totals: Totals) -> bool:
+    result = git(repo, "worktree", "remove", worktree)
+    if result.returncode == 0:
+        print(f"  RM-WT {display_path(worktree)}")
+        totals.worktrees_removed += 1
+        return True
+
+    print(f"  WT-FAIL {display_path(worktree)}")
+    print(f"          {result.stdout.rstrip()}")
+    totals.worktrees_failed += 1
+    return False
+
+
+def delete_local_branch(repo: str, branch: str, age_days: int, totals: Totals) -> bool:
+    result = git(repo, "branch", "-D", branch)
+    if result.returncode == 0:
+        print(f"  DEL   {branch} ({age_days}d old)")
+        totals.deleted += 1
+        return True
+
+    print(f"  FAIL  {branch} ({result.stdout.rstrip()})")
+    return False
+
+
+def push_remote_deletes(repo: str, remote_batch: list[str], totals: Totals) -> None:
+    if not remote_batch:
+        return
+
+    print(f"  PUSH  origin --delete ({len(remote_batch)} branch(es))")
+    result = git(repo, "push", "origin", "--delete", *remote_batch)
+    if result.stdout:
+        for line in result.stdout.rstrip().splitlines():
+            print(f"    {line}")
+
+    if result.returncode == 0:
+        totals.remote_deleted += len(remote_batch)
+    else:
+        print("    (push partially or fully failed; check output above)")
+
+
+def prune_repo(repo: str, config: Config, totals: Totals, cutoff: int, now: int) -> None:
+    state = repo_state(repo, config)
+    remote_batch: list[str] = []
+
+    for branch in local_branches(repo):
+        if PROTECTED_RE.search(branch.name):
+            continue
+
+        if branch.name == state.current_branch:
+            if state.dirty:
+                totals.skipped_dirty += 1
+                print(f"  SKIP  {branch.name} (current branch, working tree dirty)")
+            continue
+
+        if branch.timestamp >= cutoff:
+            continue
+
+        age_days = (now - branch.timestamp) // 86400
+        totals.candidates += 1
+
+        has_remote_branch = branch_has_remote(repo, branch.name, state)
+        if has_remote_branch:
+            totals.remote_candidates += 1
+
+        worktree = state.worktree_by_branch.get(branch.name, "")
+
+        if config.execute:
+            if worktree and not remove_worktree(repo, worktree, totals):
+                print(f"  FAIL  {branch.name} (worktree blocks delete)")
+                continue
+
+            if delete_local_branch(repo, branch.name, age_days, totals) and has_remote_branch:
+                remote_batch.append(branch.name)
+        else:
+            tags = ""
+            if has_remote_branch:
+                tags += " [+remote]"
+            if worktree:
+                tags += f" [+rm-wt: {display_path(worktree)}]"
+            print(f"  WOULD {branch.name} ({age_days}d old){tags}")
+
+    if config.execute:
+        push_remote_deletes(repo, remote_batch, totals)
+
+
+def iter_repos(config: Config) -> list[str]:
+    root = Path(config.root)
+    if not root.is_dir():
+        return []
+
+    repos: list[str] = []
+    for entry in sorted(root.iterdir()):
+        repo = str(entry)
+        if not entry.is_dir() or not (entry / ".git").is_dir():
+            continue
+        if f"{repo}/".startswith(config.worktree_allow_prefix):
+            continue
+        repos.append(repo)
+
+    return repos
+
+
+def print_summary(config: Config, totals: Totals) -> None:
+    print()
+    if config.execute:
+        print(f"Deleted {totals.deleted} local branch(es).", end="")
+        if config.remote:
+            print(f" Pushed delete for {totals.remote_deleted} remote branch(es).", end="")
+        if config.prune_worktrees:
+            print(
+                f" Removed {totals.worktrees_removed} worktree(s) ({totals.worktrees_failed} failed).",
+                end="",
+            )
+        print(f" Skipped {totals.skipped_dirty} dirty current branch(es).")
+        return
+
+    print(f"DRY RUN: {totals.candidates} local branch(es) would be deleted", end="")
+    if config.remote:
+        print(f" ({totals.remote_candidates} also on origin, marked [+remote])", end="")
+    print(f". Skipped {totals.skipped_dirty} dirty current branch(es).")
+
+    flags = ["--execute"]
+    if config.remote:
+        flags.append("--remote")
+    if config.prune_worktrees:
+        flags.append("--prune-worktrees")
+    print(f"Re-run with {' '.join(flags)} to actually delete.")
+
+
+def main() -> int:
+    config = parse_args(sys.argv[1:])
+    totals = Totals()
+    now = int(time.time())
+    cutoff = now - config.days * 86400
+
+    for repo in iter_repos(config):
+        print()
+        print(f"== {display_path(repo)} ==")
+        prune_repo(repo, config, totals, cutoff, now)
+
+    print_summary(config, totals)
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
