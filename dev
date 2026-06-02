@@ -44,6 +44,7 @@ LINKS: dict[str, list[str]] = {
     ".local/bin/git-ac": [".local/bin/git-ac"],
     ".local/bin/git-prune-old-branches": [".local/bin/git-prune-old-branches"],
     ".local/bin/git-wt": [".local/bin/git-wt"],
+    ".local/bin/tmux-center-toggle": [".local/bin/tmux-center-toggle"],
     ".local/bin/ollama-websearch-mcp.py": [".local/bin/ollama-websearch-mcp.py"],
 }
 
