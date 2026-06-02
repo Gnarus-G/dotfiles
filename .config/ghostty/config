@@ -1,7 +1,44 @@
-background-opacity = 0.7
+# ── Readability-first Ghostty config ───────────────────────────────
+# Tuned for long reading sessions with LLM agents (Claude Code, codex,
+# opencode) on a 3440x1440 ultrawide. Goal: low tracking effort.
 
-# font-family = "FiraCodeNerdFont"
-font-size = 14
+# Fonts
+# JetBrainsMono Nerd Font — tall x-height, well-distinguished glyphs
+# (0/O, 1/l/I), and ships powerline + devicon glyphs so prompt/tmux/nvim
+# icons render without a fallback font.
+font-family = JetBrainsMono Nerd Font
+
+# Medium weight for regular text — thicker strokes are easier to track.
+# (font-thicken is macOS-only and a no-op on Linux, so we use weight.)
+font-style = Medium
+font-style-bold = Bold
+font-style-italic = Italic
+# font-thicken = true   # macOS only; harmless if this config is shared
+
+font-size = 19
+
+# Kill programming ligatures so on-screen width matches typed characters
+# (more predictable for tracking).
+font-feature = -calt
+font-feature = -liga
+font-feature = -dlig
+
+# Layout / spacing
+# Extra line spacing is the single biggest tracking win after font size.
+adjust-cell-height = 20%
+window-padding-x = 20
+window-padding-y = 12
+
+# Contrast
+# Solid background — transparency lowers text contrast and lets desktop
+# clutter bleed through, both bad for focus/tracking.
+background-opacity = 1.0
+# Guarantee a minimum text/background contrast ratio so low-contrast
+# theme colors (e.g. comments) stay legible.
+minimum-contrast = 1.1
+
+# Keep lots of context without feeling pressure to skim (~50 MB).
+scrollback-limit = 50000000
 
 window-inherit-font-size = true
 window-decoration = false
