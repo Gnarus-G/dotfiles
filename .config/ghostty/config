@@ -6,6 +6,8 @@
 # JetBrainsMono Nerd Font — tall x-height, well-distinguished glyphs
 # (0/O, 1/l/I), and ships powerline + devicon glyphs so prompt/tmux/nvim
 # icons render without a fallback font.
+font-family = FiraCode Nerd Font
+font-family = Atkinson Hyperlegible Mono
 font-family = JetBrainsMono Nerd Font
 
 # Medium weight for regular text — thicker strokes are easier to track.
