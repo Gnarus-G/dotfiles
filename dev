@@ -30,6 +30,8 @@ LINKS: dict[str, list[str]] = {
     ".config/opencode/system.md": [".claude/CLAUDE.md", ".codex/AGENTS.md"],
     ".config/awesome": [".config/awesome"],
     ".config/gtk-3.0": [".config/gtk-3.0"],
+    ".config/gtk-4.0/settings.ini": [".config/gtk-4.0/settings.ini"],
+    ".config/fontconfig/fonts.conf": [".config/fontconfig/fonts.conf"],
     ".config/leftwm": [".config/leftwm"],
     ".config/ghostty/config": [".config/ghostty/config"],
     ".config/himither": [".config/himither"],
