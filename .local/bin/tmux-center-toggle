@@ -1,0 +1,49 @@
+#!/usr/bin/env sh
+# Center a ~100-column reading column for the current tmux pane.
+#
+# LLM agents (Claude Code / codex / opencode) have no native width limit and
+# wrap to the full terminal width. tmux can't center a shrunk window (it
+# anchors top-left), so instead we flank the active pane with two blank
+# padding panes — that centers the content on a wide/ultrawide display.
+#
+# Usage: tmux-center-toggle [toggle|on|off] [width]   (defaults: toggle 100)
+#
+# Pad panes are tagged with the @pad option so "off" only kills the pads we
+# created, never a real split.
+
+set -eu
+
+ACTION=${1:-toggle}
+TARGET=${2:-100}
+BLANK='clear; while :; do sleep 86400; done'
+
+has_pads() { tmux list-panes -F '#{@pad}' | grep -q 1; }
+
+pad_off() {
+    for p in $(tmux list-panes -F '#{pane_id} #{@pad}' | awk '$2==1 {print $1}'); do
+        tmux kill-pane -t "$p"
+    done
+}
+
+pad_on() {
+    WIDTH=$(tmux display -p '#{window_width}')
+    AGENT=$(tmux display -p '#{pane_id}')
+    PAD=$(( (WIDTH - TARGET) / 2 ))
+    if [ "$PAD" -lt 2 ]; then
+        tmux display-message "terminal too narrow to center ${TARGET} cols"
+        return 0
+    fi
+    LP=$(tmux split-window -hb -l "$PAD" -t "$AGENT" -P -F '#{pane_id}' "$BLANK")
+    tmux set -p -t "$LP" @pad 1
+    RP=$(tmux split-window -h -l "$PAD" -t "$AGENT" -P -F '#{pane_id}' "$BLANK")
+    tmux set -p -t "$RP" @pad 1
+    tmux select-pane -t "$AGENT"
+    tmux display-message "centered -> ${TARGET} cols"
+}
+
+case "$ACTION" in
+    on)     has_pads || pad_on ;;
+    off)    has_pads && { pad_off; tmux display-message "width -> full"; } || true ;;
+    toggle) if has_pads; then pad_off; tmux display-message "width -> full"; else pad_on; fi ;;
+    *)      echo "usage: $0 [toggle|on|off] [width]" >&2; exit 2 ;;
+esac
