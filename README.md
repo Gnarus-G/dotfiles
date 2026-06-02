@@ -89,6 +89,13 @@ or, after running `./dev` from this dotfiles directory.
 getfonts.sh
 ```
 
+`getfonts.sh` also pulls **Atkinson Hyperlegible Mono** (Google Fonts), the
+system-wide UI/monospace family. `./dev` symlinks the font rules that point
+the generic `monospace`/`sans-serif`/`serif` aliases at it:
+
+- `.config/fontconfig/fonts.conf` — base layer, honored by most apps
+- `.config/gtk-3.0/settings.ini`, `.config/gtk-4.0/settings.ini` — GTK UI font
+
 ## Mouse driver
 
 ```sh
