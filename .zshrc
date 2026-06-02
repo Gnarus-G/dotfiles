@@ -188,6 +188,20 @@ cdd() {
   repo=${selection%%$'\t'*}
   [[ -n "$repo" ]] && cd "$HOME/d/$repo"
 }
+# Claude Code: auto-center a ~100-col reading column inside tmux for
+# readability, then restore full width on exit. Opt out with NO_CENTER=1.
+claude() {
+  if [[ -z "$TMUX" || -n "$NO_CENTER" ]]; then
+    command claude "$@"
+    return $?
+  fi
+  tmux-center-toggle on 100
+  command claude "$@"
+  local code=$?
+  tmux-center-toggle off
+  return $code
+}
+
 alias jq2env='jq -r "to_entries | .[] | [.key, .value] | join(\"=\")"'
 alias cp2='rsync -aPWh'
 alias sshx='ssh -YC felix@192.168.1.24 -p 456 x2x -east -to :0'
