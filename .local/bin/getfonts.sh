@@ -33,4 +33,16 @@ done
 
 find "$fonts_dir" -name '*Windows Compatible*' -delete
 
+# Atkinson Hyperlegible Mono — not a Nerd Font, comes from Google Fonts.
+# Used as the system-wide UI/monospace family (see .config/fontconfig).
+# Variable fonts (wght axis); fontconfig resolves Medium/Bold from it.
+echo "Downloading Atkinson Hyperlegible Mono"
+atkinson_dir="$fonts_dir/AtkinsonHyperlegibleMono"
+atkinson_base="https://raw.githubusercontent.com/google/fonts/main/ofl/atkinsonhyperlegiblemono"
+mkdir -p "$atkinson_dir"
+wget -O "$atkinson_dir/AtkinsonHyperlegibleMono[wght].ttf" \
+    "$atkinson_base/AtkinsonHyperlegibleMono%5Bwght%5D.ttf"
+wget -O "$atkinson_dir/AtkinsonHyperlegibleMono-Italic[wght].ttf" \
+    "$atkinson_base/AtkinsonHyperlegibleMono-Italic%5Bwght%5D.ttf"
+
 fc-cache -fv
