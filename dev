@@ -29,6 +29,7 @@ LINKS: dict[str, list[str]] = {
     ".config/opencode": [".config/opencode"],
     ".config/opencode/system.md": [".claude/CLAUDE.md", ".codex/AGENTS.md"],
     ".pi/agent/extensions": [".pi/agent/extensions"],
+    ".pi/agent/models.json": [".pi/agent/models.json"],
     ".config/awesome": [".config/awesome"],
     ".config/gtk-3.0": [".config/gtk-3.0"],
     ".config/gtk-4.0/settings.ini": [".config/gtk-4.0/settings.ini"],
