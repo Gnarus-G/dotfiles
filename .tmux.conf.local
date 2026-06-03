@@ -408,7 +408,7 @@ bind P run-shell "echo -n '#{session_name}:#{window_index}.#{pane_index}' | xcli
 # codex / opencode have no native width limit). Flanks the active pane with
 # blank padding panes so the content is centered on the ultrawide. Tap
 # prefix+W again to restore. Claude auto-centers via a .zshrc wrapper.
-bind W run-shell "tmux-center-toggle toggle 100"
+bind W run-shell "$HOME/.local/bin/tmux-center-toggle toggle 100"
 
 # if you don't want Oh my tmux! to alter a binding, use #!important
 # bind c new-window -c '#{pane_current_path}' #!important

@@ -100,6 +100,11 @@ fi
 # Compilation flags
 # export ARCHFLAGS="-arch x86_64"
 
+# Keep Pi's bundled Node out of the global PATH so it doesn't override nvm.
+_pi_node_bin="$HOME/.local/share/pi-node/node-v22.22.3-linux-x64/bin"
+path=(${path:#$_pi_node_bin})
+unset _pi_node_bin
+
 # personal scripts and bin
 path=($HOME/.local/bin $path)
 
@@ -195,10 +200,10 @@ claude() {
     command claude "$@"
     return $?
   fi
-  tmux-center-toggle on 100
+  "$HOME/.local/bin/tmux-center-toggle" on 100
   command claude "$@"
   local code=$?
-  tmux-center-toggle off
+  "$HOME/.local/bin/tmux-center-toggle" off
   return $code
 }
 
@@ -207,10 +212,10 @@ codex() {
     command codex "$@"
     return $?
   fi
-  tmux-center-toggle on 100
+  "$HOME/.local/bin/tmux-center-toggle" on 100
   command codex "$@"
   local code=$?
-  tmux-center-toggle off
+  "$HOME/.local/bin/tmux-center-toggle" off
   return $code
 }
 
@@ -232,5 +237,13 @@ if [[ -f "$HOME/.zshrc.local" ]]; then
   source "$HOME/.zshrc.local"
 fi
 
-# Pi
-export PATH="$HOME/.local/share/pi-node/node-v22.22.3-linux-x64/bin:$PATH"
+# Re-apply after local overrides in case an inherited PATH reintroduced it.
+_pi_node_bin="$HOME/.local/share/pi-node/node-v22.22.3-linux-x64/bin"
+path=(${path:#$_pi_node_bin})
+unset _pi_node_bin
+
+# Pi: keep Pi's bundled Node out of the global PATH so it doesn't override nvm.
+pi() {
+  local pi_bin="$HOME/.local/share/pi-node/node-v22.22.3-linux-x64/bin"
+  PATH="$pi_bin:$PATH" command "$pi_bin/pi" "$@"
+}
