@@ -64,10 +64,10 @@ function requestPaneCapture(pi: ExtensionAPI, ctx: ExtensionCommandContext, pane
 	}
 }
 
-async function selectAndRequestCapture(pi: ExtensionAPI, ctx: ExtensionCommandContext, visibleOnly = true): Promise<void> {
-	const panes = (await listPanes(pi)).filter((pane) => !visibleOnly || pane.visible);
+async function selectAndRequestCapture(pi: ExtensionAPI, ctx: ExtensionCommandContext): Promise<void> {
+	const panes = await listPanes(pi);
 	if (panes.length === 0) {
-		ctx.ui.notify(visibleOnly ? "No visible tmux panes found. Try /tmux all" : "No tmux panes found", "warning");
+		ctx.ui.notify("No tmux panes found", "warning");
 		return;
 	}
 
@@ -78,10 +78,10 @@ async function selectAndRequestCapture(pi: ExtensionAPI, ctx: ExtensionCommandCo
 export default function tmuxPanesExtension(pi: ExtensionAPI) {
 	pi.registerCommand("tmux", {
 		description: "Select a tmux pane for the model to capture",
-		handler: async (args, ctx) => {
+		handler: async (_args, ctx) => {
 			if (!ctx.hasUI) return;
 			try {
-				await selectAndRequestCapture(pi, ctx, !(args ?? "").includes("all"));
+				await selectAndRequestCapture(pi, ctx);
 			} catch (error) {
 				ctx.ui.notify(error instanceof Error ? error.message : String(error), "error");
 			}
@@ -92,7 +92,7 @@ export default function tmuxPanesExtension(pi: ExtensionAPI) {
 		description: "Select tmux pane for capture",
 		handler: async (ctx) => {
 			try {
-				await selectAndRequestCapture(pi, ctx, true);
+				await selectAndRequestCapture(pi, ctx);
 			} catch (error) {
 				ctx.ui.notify(error instanceof Error ? error.message : String(error), "error");
 			}
@@ -102,21 +102,20 @@ export default function tmuxPanesExtension(pi: ExtensionAPI) {
 	pi.registerTool({
 		name: "tmux_panes",
 		label: "Tmux Panes",
-		description: "List tmux panes with visibility or capture scrollback from a selected pane. Output is capped to 10,000 lines.",
-		promptSnippet: "List visible/all tmux panes or capture scrollback from a selected pane",
+		description: "List all tmux panes, including hidden panes, or capture scrollback from a selected pane. Output is capped to 10,000 lines.",
+		promptSnippet: "List all tmux panes, including hidden panes, or capture scrollback from a selected pane",
 		promptGuidelines: [
 			"Use tmux_panes when the user asks to inspect text from another tmux pane instead of using bash tmux commands directly.",
 		],
 		parameters: Type.Object({
 			action: StringEnum(["list", "capture"] as const),
 			target: Type.Optional(Type.String({ description: "tmux pane id such as %4; required for capture" })),
-			visibleOnly: Type.Optional(Type.Boolean({ description: "Only include visible panes when listing; default true" })),
+			visibleOnly: Type.Optional(Type.Boolean({ description: "Deprecated; hidden panes are always included" })),
 			lines: Type.Optional(Type.Number({ description: "Scrollback lines to capture, max 10000; default 1000" })),
 		}),
 		async execute(_toolCallId, params) {
 			if (params.action === "list") {
-				const visibleOnly = params.visibleOnly ?? true;
-				const panes = (await listPanes(pi)).filter((pane) => !visibleOnly || pane.visible);
+				const panes = await listPanes(pi);
 				return {
 					content: [{ type: "text", text: panes.map((pane) => `${pane.id}\t${pane.label}\t${pane.description}`).join("\n") || "No panes found" }],
 					details: { panes },
