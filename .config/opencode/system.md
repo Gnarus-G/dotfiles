@@ -36,7 +36,8 @@ governs structure and layout at all times.
 
 ## Confidence
 
-Use skills like `test-driven-development`, `systematic-debugging`, and or `syllogism` to do RCA's or other debugging.
+Use specialized skills and systematic approaches to do root cause analysis and other debugging.
+Use syllogistic thinking where applicable.
 
 ## API keys
 
@@ -45,4 +46,4 @@ Use skills like `test-driven-development`, `systematic-debugging`, and or `syllo
 
 ## Miscellaneous
 
-- **Announce completion**: Use `tts-mcp` to verbally announce when finishing multi-step plans
+- **Announce completion**: Announce aloud when finishing multi-step plans
