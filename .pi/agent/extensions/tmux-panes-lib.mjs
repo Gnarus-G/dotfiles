@@ -54,9 +54,3 @@ export function parsePaneRows(output) {
       };
     });
 }
-
-export function selectedText(lines, anchor, cursor) {
-  const start = Math.max(0, Math.min(anchor, cursor));
-  const end = Math.min(lines.length - 1, Math.max(anchor, cursor));
-  return lines.slice(start, end + 1).join('\n');
-}
