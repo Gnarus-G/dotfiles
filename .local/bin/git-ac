@@ -132,6 +132,10 @@ def main():
     log_level = logging.DEBUG if args.debug else logging.WARNING
     logging.basicConfig(level=log_level, format="%(name)s: %(message)s")
 
+    if args.model == DEFAULT_MODEL and detect_provider(args.model) == "openai" and not OPENAI_API_KEY:
+        logger.warning("OPENAI_API_KEY not set, falling back to %s", DEFAULT_MODEL_OLLAMA)
+        args.model = DEFAULT_MODEL_OLLAMA
+
     if subprocess.run(["git", "diff", "--staged", "--quiet"]).returncode == 0:
         logger.error("No staged changes")
         sys.exit(1)
