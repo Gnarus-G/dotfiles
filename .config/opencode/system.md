@@ -5,11 +5,6 @@
 - **Library docs**: Use `context7_resolve-library-id` → `context7_query-docs` for library/framework documentation
 - **Default to research**: When uncertain about a tool, pattern, or best practice, research first rather than guessing
 
-## Tmux
-
-Use `tmux-processes` skill if working in tmux environment to manage panes effectively for workflows involving multiple files/screens/tabs
-Watch out for the syntax which should let you know to look for a pane and capture it. That syntax is like <session>:<id>, eg: Work:1, Whatever:2.2, etc...
-
 ## Readability
 
 Format every response for low cognitive load and easy visual tracking. The
