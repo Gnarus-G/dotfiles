@@ -21,27 +21,25 @@
  *   }
  *
  * Tools exposed:
- *   - mcp_<server>_list      (no args) -> { tools: [{ name, description, inputSchema }] }
- *   - mcp_<server>_call      (name, arguments) -> forwards to the server
- *   - mcp_<server>_resources (uri?) -> reads server resources
+ *   - mcp_list_servers          -> list configured MCP servers
+ *   - mcp_list_tools(server)    -> list tools exposed by one server
+ *   - mcp_call(server, name, arguments) -> forwards to one server tool
+ *   - mcp_resources(server, uri?) -> list/read resources from one server
  *
- * The model gets a small, predictable surface per server regardless of how
- * many tools the server actually exposes. Discovery happens once on first
- * call; the result is cached for the rest of the session.
+ * The model gets a fixed, predictable surface regardless of how many MCP
+ * servers or server tools are configured. Discovery happens once on first
+ * call per server; the result is cached for the rest of the session.
  *
- * Lazy by design: `session_start` only reads config and registers the
- * generic dispatcher tools. The MCP server process is not spawned until
- * the first `mcp_<server>_*` call, so pi startup is unaffected by MCP
- * cost (e.g. `npx -y` downloads).
+ * Lazy by design: startup only reads config and registers dispatcher tools.
+ * MCP server processes are not spawned until the first server-specific MCP
+ * call, so pi startup is unaffected by MCP cost (e.g. `npx -y` downloads).
  */
 
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { Type } from "typebox";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
-import type {
-	Tool as McpTool,
-} from "@modelcontextprotocol/sdk/types.js";
+import type { Tool as McpTool } from "@modelcontextprotocol/sdk/types.js";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { homedir } from "node:os";
@@ -94,27 +92,6 @@ function loadConfig(): PiMcpConfig {
 }
 
 // ---------------------------------------------------------------------------
-// Tool name sanitization (pi requires `^[a-zA-Z][a-zA-Z0-9_]*$`, max 64)
-// ---------------------------------------------------------------------------
-
-const TOOL_NAME_RE = /^[a-zA-Z][a-zA-Z0-9_]*$/;
-
-function sanitizeSegment(input: string): string {
-	let s = input.replace(/[^a-zA-Z0-9_]/g, "_");
-	if (!/^[a-zA-Z_]/.test(s)) s = "_" + s;
-	return s;
-}
-
-function buildToolName(serverName: string, suffix: string): string {
-	const full = `mcp_${sanitizeSegment(serverName)}_${suffix}`;
-	return full.length > 64 ? full.slice(0, 64) : full;
-}
-
-function isValidToolName(name: string): boolean {
-	return TOOL_NAME_RE.test(name) && name.length <= 64;
-}
-
-// ---------------------------------------------------------------------------
 // MCP result → pi tool result
 // ---------------------------------------------------------------------------
 
@@ -151,13 +128,20 @@ function mcpResultToPiContent(
 // Lazy server runtime
 // ---------------------------------------------------------------------------
 
+interface McpResource {
+	uri: string;
+	name: string;
+	description?: string;
+	mimeType?: string;
+}
+
 interface ServerState {
 	name: string;
 	config: ServerConfig;
 	connectPromise: Promise<Client> | null;
 	client: Client | null;
 	tools: McpTool[] | null;
-	resources: { uri: string; name: string; description?: string; mimeType?: string }[] | null;
+	resources: McpResource[] | null;
 }
 
 function newServerState(name: string, config: ServerConfig): ServerState {
@@ -170,16 +154,17 @@ async function ensureConnected(state: ServerState, signal?: AbortSignal): Promis
 
 	state.connectPromise = (async () => {
 		const client = new Client({ name: "pi", version: "0.1.0" }, { capabilities: {} });
+		state.client = client;
 		const transport = new StdioClientTransport({
 			command: state.config.command,
 			args: state.config.args ?? [],
 			env: state.config.env,
 		});
 		await client.connect(transport, signal ? { signal } : undefined);
-		state.client = client;
 		state.connectPromise = null;
 		return client;
 	})().catch((err) => {
+		state.client = null;
 		state.connectPromise = null;
 		throw err;
 	});
@@ -195,10 +180,7 @@ async function listTools(state: ServerState, signal?: AbortSignal): Promise<McpT
 	return tools;
 }
 
-async function listResources(
-	state: ServerState,
-	signal?: AbortSignal,
-): Promise<{ uri: string; name: string; description?: string; mimeType?: string }[]> {
+async function listResources(state: ServerState, signal?: AbortSignal): Promise<McpResource[]> {
 	if (state.resources) return state.resources;
 	const client = await ensureConnected(state, signal);
 	try {
@@ -209,11 +191,19 @@ async function listResources(
 			description: r.description,
 			mimeType: r.mimeType,
 		}));
-	} catch {
-		// Server doesn't support resources; treat as empty.
-		state.resources = [];
+		return state.resources;
+	} catch (err) {
+		if (isUnsupportedResourcesError(err)) {
+			state.resources = [];
+			return state.resources;
+		}
+		throw err;
 	}
-	return state.resources;
+}
+
+function isUnsupportedResourcesError(err: unknown): boolean {
+	const message = err instanceof Error ? err.message.toLowerCase() : String(err).toLowerCase();
+	return message.includes("method not found") || message.includes("not implemented") || message.includes("unsupported");
 }
 
 async function callTool(
@@ -259,6 +249,12 @@ function formatToolForDiscovery(t: McpTool): {
 	return { name: t.name, description: t.description ?? "", inputSchema: t.inputSchema };
 }
 
+function formatServerList(states: Map<string, ServerState>): string {
+	return Array.from(states.values())
+		.map((state) => `- ${state.name}: ${state.config.command}${state.config.args?.length ? ` ${state.config.args.join(" ")}` : ""}`)
+		.join("\n");
+}
+
 // ---------------------------------------------------------------------------
 // Extension
 // ---------------------------------------------------------------------------
@@ -280,160 +276,169 @@ export default function mcpExtension(pi: ExtensionAPI) {
 		states.set(name, newServerState(name, serverCfg));
 	}
 
-	// For each server, register 3 dispatcher tools: list / call / resources.
-	for (const [serverName, state] of states) {
-		const listName = buildToolName(serverName, "list");
-		const callName = buildToolName(serverName, "call");
-		const resourcesName = buildToolName(serverName, "resources");
-
-		if (isValidToolName(listName)) {
-			pi.registerTool({
-				name: listName,
-				label: `MCP ${serverName}: list`,
-				description:
-					`List tools exposed by the MCP server "${serverName}". ` +
-					`Returns tool names, descriptions, and JSON-Schema input schemas. ` +
-					`Call this first to discover what's available, then use ` +
-					`${callName} to invoke a specific tool.`,
-				promptSnippet: `Discover tools on the ${serverName} MCP server`,
-				promptGuidelines: [
-					`Use ${listName} before ${callName} when you need to know what tools the ${serverName} MCP server exposes or what their argument shapes are.`,
-				],
-				parameters: Type.Object({}),
-				async execute(_toolCallId, _params, signal) {
-					try {
-						const tools = await listTools(state, signal);
-						return {
-							content: [
-								{
-									type: "text" as const,
-									text: `Tools on MCP server "${serverName}" (${tools.length}):\n\n${formatToolList(tools)}`,
-								},
-							],
-							details: {
-								server: serverName,
-								tools: tools.map(formatToolForDiscovery),
-							},
-						};
-					} catch (err) {
-						return mcpErrorResult(err, serverName, "list");
-					}
-				},
-			});
-		}
-
-		if (isValidToolName(callName)) {
-			pi.registerTool({
-				name: callName,
-				label: `MCP ${serverName}: call`,
-				description:
-					`Invoke a tool on the MCP server "${serverName}". ` +
-					`Pass the tool's ` +
-					`"name" and an "arguments" object matching its inputSchema ` +
-					`(use ${listName} to discover them).`,
-				promptSnippet: `Call a tool on the ${serverName} MCP server`,
-				promptGuidelines: [
-					`Before calling ${callName}, prefer ${listName} if you are unsure of the tool's exact name or argument shape.`,
-				],
-				parameters: Type.Object({
-					name: Type.String({ description: `Name of the tool on the "${serverName}" server` }),
-					arguments: Type.Optional(
-						Type.Record(Type.String(), Type.Unknown(), {
-							description: "Arguments matching the tool's inputSchema",
-						}),
-					),
-				}),
-				async execute(_toolCallId, params, signal) {
-					const toolName = String(params.name ?? "").trim();
-					if (!toolName) {
-						return {
-							content: [{ type: "text" as const, text: `Error: "name" parameter is required.` }],
-							details: { server: serverName, error: "missing_name" },
-							isError: true,
-						};
-					}
-					try {
-						const result = await callTool(
-							state,
-							toolName,
-							(params.arguments ?? {}) as Record<string, unknown>,
-							signal,
-						);
-						const content = mcpResultToPiContent((result.content ?? []) as McpContentBlock[]);
-						const details: Record<string, unknown> = {
-							server: serverName,
-							tool: toolName,
-							isError: Boolean(result.isError),
-						};
-						if (result.structuredContent !== undefined) {
-							details.structuredContent = result.structuredContent;
-						}
-						return {
-							content: content.length > 0 ? content : [{ type: "text" as const, text: "(empty result)" }],
-							details,
-						};
-					} catch (err) {
-						return mcpErrorResult(err, serverName, toolName);
-					}
-				},
-			});
-		}
-
-		if (isValidToolName(resourcesName)) {
-			pi.registerTool({
-				name: resourcesName,
-				label: `MCP ${serverName}: resources`,
-				description:
-					`Read resources from the MCP server "${serverName}". ` +
-					`Pass a "uri" to read a specific resource, or omit it to list available resources. ` +
-					`If the server does not support resources, the list is empty.`,
-				promptSnippet: `List or read resources on the ${serverName} MCP server`,
-				parameters: Type.Object({
-					uri: Type.Optional(
-						Type.String({ description: "Resource URI to read; omit to list all resources" }),
-					),
-				}),
-				async execute(_toolCallId, params, signal) {
-					try {
-						const uri = typeof params.uri === "string" && params.uri.length > 0 ? params.uri : undefined;
-						if (uri) {
-							const result = await readResource(state, uri, signal);
-							const blocks = (result.contents ?? []) as Array<{
-								text?: string;
-								uri: string;
-								mimeType?: string;
-							}>;
-							const text = blocks
-								.map((b) => `[${b.uri}${b.mimeType ? ` (${b.mimeType})` : ""}]\n${b.text ?? ""}`)
-								.join("\n\n");
-							return {
-								content: [{ type: "text" as const, text: text || "(empty resource)" }],
-								details: { server: serverName, uri, contents: blocks },
-							};
-						}
-						const resources = await listResources(state, signal);
-						const lines = resources.map(
-							(r) => `- ${r.name} (${r.uri})${r.description ? ` — ${r.description}` : ""}`,
-						);
-						return {
-							content: [
-								{
-									type: "text" as const,
-									text:
-										resources.length > 0
-											? `Resources on "${serverName}" (${resources.length}):\n\n${lines.join("\n")}`
-											: `MCP server "${serverName}" exposes no resources.`,
-								},
-							],
-							details: { server: serverName, resources },
-						};
-					} catch (err) {
-						return mcpErrorResult(err, serverName, "resources");
-					}
-				},
-			});
-		}
+	function getState(serverName: string) {
+		const state = states.get(serverName);
+		if (state) return state;
+		return undefined;
 	}
+
+	function missingServerResult(serverName: string) {
+		return {
+			content: [{ type: "text" as const, text: `Unknown MCP server "${serverName}". Available servers:\n\n${formatServerList(states)}` }],
+			details: { server: serverName, availableServers: Array.from(states.keys()), error: "unknown_server" },
+			isError: true as const,
+		};
+	}
+
+	pi.registerTool({
+		name: "mcp_list_servers",
+		label: "MCP: list servers",
+		description: "List configured MCP servers available through the Pi MCP extension.",
+		promptSnippet: "List configured MCP servers",
+		parameters: Type.Object({}),
+		async execute() {
+			const serverNames = Array.from(states.keys());
+			return {
+				content: [{ type: "text" as const, text: `MCP servers (${serverNames.length}):\n\n${formatServerList(states)}` }],
+				details: { servers: serverNames },
+			};
+		},
+	});
+
+	pi.registerTool({
+		name: "mcp_list_tools",
+		label: "MCP: list tools",
+		description:
+			"List tools exposed by a configured MCP server. " +
+			"Returns tool names, descriptions, and JSON-Schema input schemas. " +
+			"Call this before mcp_call when you need to discover names or argument shapes.",
+		promptSnippet: "Discover tools on a configured MCP server",
+		promptGuidelines: [
+			"Use mcp_list_servers to discover available MCP server names when you are unsure which server to use.",
+			"Use mcp_list_tools before mcp_call when you need to know what tools an MCP server exposes or what their argument shapes are.",
+		],
+		parameters: Type.Object({
+			server: Type.String({ description: "Configured MCP server name" }),
+		}),
+		async execute(_toolCallId, params, signal) {
+			const serverName = String(params.server ?? "").trim();
+			const state = getState(serverName);
+			if (!state) return missingServerResult(serverName);
+			try {
+				const tools = await listTools(state, signal);
+				return {
+					content: [{ type: "text" as const, text: `Tools on MCP server "${serverName}" (${tools.length}):\n\n${formatToolList(tools)}` }],
+					details: { server: serverName, tools: tools.map(formatToolForDiscovery) },
+				};
+			} catch (err) {
+				return mcpErrorResult(err, serverName, "list_tools");
+			}
+		},
+	});
+
+	pi.registerTool({
+		name: "mcp_call",
+		label: "MCP: call tool",
+		description:
+			"Invoke a tool on a configured MCP server. " +
+			"Pass the server name, tool name, and an arguments object matching the MCP tool inputSchema " +
+			"(use mcp_list_tools to discover them).",
+		promptSnippet: "Call a tool on a configured MCP server",
+		promptGuidelines: [
+			"Before calling mcp_call, prefer mcp_list_tools if you are unsure of the MCP tool's exact name or argument shape.",
+		],
+		parameters: Type.Object({
+			server: Type.String({ description: "Configured MCP server name" }),
+			name: Type.String({ description: "Name of the tool on the MCP server" }),
+			arguments: Type.Optional(
+				Type.Record(Type.String(), Type.Unknown(), {
+					description: "Arguments matching the MCP tool's inputSchema",
+				}),
+			),
+		}),
+		async execute(_toolCallId, params, signal) {
+			const serverName = String(params.server ?? "").trim();
+			const toolName = String(params.name ?? "").trim();
+			const state = getState(serverName);
+			if (!state) return missingServerResult(serverName);
+			if (!toolName) {
+				return {
+					content: [{ type: "text" as const, text: `Error: "name" parameter is required.` }],
+					details: { server: serverName, error: "missing_name" },
+					isError: true as const,
+				};
+			}
+			try {
+				const result = await callTool(state, toolName, (params.arguments ?? {}) as Record<string, unknown>, signal);
+				const content = mcpResultToPiContent((result.content ?? []) as McpContentBlock[]);
+				const details: Record<string, unknown> = {
+					server: serverName,
+					tool: toolName,
+					isError: Boolean(result.isError),
+				};
+				if (result.structuredContent !== undefined) {
+					details.structuredContent = result.structuredContent;
+				}
+				return {
+					content: content.length > 0 ? content : [{ type: "text" as const, text: "(empty result)" }],
+					details,
+					isError: Boolean(result.isError),
+				};
+			} catch (err) {
+				return mcpErrorResult(err, serverName, toolName);
+			}
+		},
+	});
+
+	pi.registerTool({
+		name: "mcp_resources",
+		label: "MCP: resources",
+		description:
+			"Read resources from a configured MCP server. " +
+			"Pass a uri to read a specific resource, or omit uri to list available resources. " +
+			"If the server does not support resources, the list is empty.",
+		promptSnippet: "List or read resources on a configured MCP server",
+		parameters: Type.Object({
+			server: Type.String({ description: "Configured MCP server name" }),
+			uri: Type.Optional(Type.String({ description: "Resource URI to read; omit to list all resources" })),
+		}),
+		async execute(_toolCallId, params, signal) {
+			const serverName = String(params.server ?? "").trim();
+			const state = getState(serverName);
+			if (!state) return missingServerResult(serverName);
+			try {
+				const uri = typeof params.uri === "string" && params.uri.length > 0 ? params.uri : undefined;
+				if (uri) {
+					const result = await readResource(state, uri, signal);
+					const blocks = (result.contents ?? []) as Array<{ text?: string; uri: string; mimeType?: string }>;
+					const text = blocks
+						.map((b) => `[${b.uri}${b.mimeType ? ` (${b.mimeType})` : ""}]\n${b.text ?? ""}`)
+						.join("\n\n");
+					return {
+						content: [{ type: "text" as const, text: text || "(empty resource)" }],
+						details: { server: serverName, uri, contents: blocks },
+					};
+				}
+				const resources = await listResources(state, signal);
+				const lines = resources.map(
+					(r) => `- ${r.name} (${r.uri})${r.description ? ` — ${r.description}` : ""}`,
+				);
+				return {
+					content: [
+						{
+							type: "text" as const,
+							text: resources.length > 0
+								? `Resources on "${serverName}" (${resources.length}):\n\n${lines.join("\n")}`
+								: `MCP server "${serverName}" exposes no resources.`,
+						},
+					],
+					details: { server: serverName, resources },
+				};
+			} catch (err) {
+				return mcpErrorResult(err, serverName, "resources");
+			}
+		},
+	});
 
 	// Update footer status to reflect the lazy-loaded state.
 	pi.on("session_start", (_event, ctx) => {
@@ -448,13 +453,14 @@ export default function mcpExtension(pi: ExtensionAPI) {
 	pi.on("session_shutdown", async () => {
 		await Promise.all(
 			Array.from(states.values()).map(async (state) => {
-				if (state.client) {
-					try {
-						await state.client.close();
-					} catch (err) {
-						console.warn(`[mcp] error closing "${state.name}":`, err);
-					}
+				try {
+					if (state.connectPromise) await state.connectPromise;
+					if (state.client) await state.client.close();
+				} catch (err) {
+					console.warn(`[mcp] error closing "${state.name}":`, err);
+				} finally {
 					state.client = null;
+					state.connectPromise = null;
 				}
 			}),
 		);
