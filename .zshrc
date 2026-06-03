@@ -231,3 +231,6 @@ export PATH=$HOME/.opencode/bin:$PATH
 if [[ -f "$HOME/.zshrc.local" ]]; then
   source "$HOME/.zshrc.local"
 fi
+
+# Pi
+export PATH="$HOME/.local/share/pi-node/node-v22.22.3-linux-x64/bin:$PATH"
