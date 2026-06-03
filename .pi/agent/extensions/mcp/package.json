@@ -7,7 +7,8 @@
 	"scripts": {
 		"clean": "rm -rf node_modules",
 		"build": "echo nothing to build",
-		"check": "tsc --noEmit"
+		"check": "tsc --noEmit",
+		"test": "node --test index.test.ts"
 	},
 	"pi": {
 		"extensions": ["./index.ts"]
