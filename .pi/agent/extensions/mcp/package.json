@@ -1,0 +1,22 @@
+{
+	"name": "pi-mcp-extension",
+	"private": true,
+	"version": "0.1.0",
+	"type": "module",
+	"description": "Model Context Protocol extension for pi. Spawns stdio MCP servers and registers their tools.",
+	"scripts": {
+		"clean": "rm -rf node_modules",
+		"build": "echo nothing to build",
+		"check": "tsc --noEmit"
+	},
+	"pi": {
+		"extensions": ["./index.ts"]
+	},
+	"dependencies": {
+		"@modelcontextprotocol/sdk": "1.29.0"
+	},
+	"devDependencies": {
+		"@types/node": "^22.10.0",
+		"typescript": "^5.7.0"
+	}
+}
