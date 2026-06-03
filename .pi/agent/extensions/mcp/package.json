@@ -14,10 +14,12 @@
 		"extensions": ["./index.ts"]
 	},
 	"dependencies": {
-		"@modelcontextprotocol/sdk": "1.29.0"
+		"@earendil-works/pi-coding-agent": "0.78.0",
+		"@modelcontextprotocol/sdk": "1.29.0",
+		"typebox": "1.1.38"
 	},
 	"devDependencies": {
-		"@types/node": "^22.10.0",
-		"typescript": "^5.7.0"
+		"@types/node": "22.19.19",
+		"typescript": "5.9.3"
 	}
 }
