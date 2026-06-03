@@ -27,7 +27,11 @@ LINKS: dict[str, list[str]] = {
     ".config/nvim": [".config/nvim"],
     ".config/mcphub": [".config/mcphub"],
     ".config/opencode": [".config/opencode"],
-    ".config/opencode/system.md": [".claude/CLAUDE.md", ".codex/AGENTS.md"],
+    ".config/opencode/system.md": [
+        ".claude/CLAUDE.md",
+        ".codex/AGENTS.md",
+        ".pi/agent/APPEND_SYSTEM.md",
+    ],
     ".pi/agent/extensions": [".pi/agent/extensions"],
     ".pi/agent/models.json": [".pi/agent/models.json"],
     ".config/awesome": [".config/awesome"],
