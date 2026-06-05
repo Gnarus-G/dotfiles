@@ -54,9 +54,12 @@
 
 (defwidget sidestuff []
   (box :class "sidestuff" :orientation "h" :space-evenly false :halign "end"
-    (toggle_audio_icon_button)
-    (metric :value volume
-            :onchange "pamixer --set-volume {}")
+    (eventbox :onscroll "sh -c 'case \"$1\" in up) pamixer --increase 5 ;; down) pamixer --decrease 5 ;; esac' sh {}"
+              :tooltip "Scroll to adjust volume"
+      (box :orientation "h" :space-evenly false
+        (toggle_audio_icon_button)
+        (metric :value volume
+                :onchange "pamixer --set-volume {}")))
     (eventbox :onclick "${EWW_CMD} poll net_interface; ${EWW_CMD} poll ip_address"
               :tooltip "Click to refresh network info"
       (box :class "px border-x network-info" :space-evenly false "${net_interface} ${ip_address}"))
