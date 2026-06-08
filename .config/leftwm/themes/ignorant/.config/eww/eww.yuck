@@ -54,12 +54,12 @@
 
 (defwidget sidestuff []
   (box :class "sidestuff" :orientation "h" :space-evenly false :halign "end"
-    (eventbox :onscroll "sh -c 'case \"$1\" in up) pamixer --increase 5 ;; down) pamixer --decrease 5 ;; esac' sh {}"
+    (eventbox :onscroll "sh -c 'case \"$1\" in up) wpctl set-volume --limit 1.5 @DEFAULT_AUDIO_SINK@ 5%+ ;; down) wpctl set-volume --limit 1.5 @DEFAULT_AUDIO_SINK@ 5%- ;; esac' sh {}"
               :tooltip "Scroll to adjust volume"
       (box :orientation "h" :space-evenly false
         (toggle_audio_icon_button)
         (metric :value volume
-                :onchange "pamixer --set-volume {}")))
+                :onchange "wpctl set-volume --limit 1.5 @DEFAULT_AUDIO_SINK@ $(awk \"BEGIN { printf(\\\"%.2f\\\", {}/100) }\"")))
     (eventbox :onclick "${EWW_CMD} poll net_interface; ${EWW_CMD} poll ip_address"
               :tooltip "Click to refresh network info"
       (box :class "px border-x network-info" :space-evenly false "${net_interface} ${ip_address}"))
@@ -74,7 +74,7 @@
        :space-evenly false
     ;; Volume icon button
     (button :class "volume-icon-btn ${volume_muted ? 'muted' : ''}" 
-            :onclick 'pamixer -t'
+            :onclick 'wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle'
             :tooltip "Click to ${volume_muted ? 'unmute' : 'mute'}"
             {volume_muted ? "🔇" : volume < 30 ? "🔈" : volume < 70 ? "🔉" : "🔊"})
     ;; Volume percentage display
@@ -109,7 +109,7 @@
        :class "metric"
        :space-evenly false
     (scale :min 0
-           :max 101
+           :max 151
            :active {onchange != ""}
            :value value
            :onchange onchange)))
@@ -117,10 +117,10 @@
 
 
 (defpoll volume :interval "200ms" :initial 0
-  "pamixer --get-volume")
+  "wpctl get-volume @DEFAULT_AUDIO_SINK@ | awk '{printf \"%d\", $2*100}'")
 
 (defpoll volume_muted :interval "100ms" :initial false
-  "pamixer --get-mute")
+  "wpctl get-mute @DEFAULT_AUDIO_SINK@ | grep -q MUTED")
 
 (defpoll ip_address :interval "60s"
   "ip route get 1.1.1.1 2>/dev/null | awk '{for(i=1;i<=NF;i++)if($i==\"src\")print $(i+1)}' || echo 'N/A'")
