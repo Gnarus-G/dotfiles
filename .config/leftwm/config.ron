@@ -59,6 +59,8 @@
         (command: Execute, 
           value: "spectacle -acb -o Pictures/Screenshots/$(date +\"%Y-%m-%d_%H-%M-%S.png\")", 
           modifier: ["modkey", "Shift"], key: "s"),
+        (command: Execute, value: "/usr/bin/sg video -c 'brightnessctl set 5%-'", modifier: [], key: "XF86MonBrightnessDown"),
+        (command: Execute, value: "/usr/bin/sg video -c 'brightnessctl set +5%'", modifier: [], key: "XF86MonBrightnessUp"),
         (command: CloseWindow, value: "", modifier: ["modkey", "Shift"], key: "q"),
         (command: SoftReload, value: "", modifier: ["modkey", "Shift"], key: "r"),
         (command: Execute, value: "loginctl kill-session $XDG_SESSION_ID", modifier: ["modkey", "Shift"], key: "x"),
