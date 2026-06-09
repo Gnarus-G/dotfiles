@@ -155,6 +155,21 @@ git pull
 [opencode-agent-skills](https://github.com/joshuadavidthomas/opencode-agent-skills)
 are configured in `opencode.json` and installed automatically on startup.
 
+### Browser plugin
+
+The repo also includes the Chrome extension browser plugin:
+
+- package: `@different-ai/opencode-browser@4.6.1`
+- setup guide: [`.config/opencode/browser-plugin-setup.md`](.config/opencode/browser-plugin-setup.md)
+
+Use the setup guide on a new machine. It covers:
+
+- syncing the dotfiles-managed OpenCode config
+- launching the dedicated Chrome profile
+- running the plugin installer once
+- loading the unpacked extension
+- verifying the broker/extension connection
+
 ### Superpowers (optional)
 
 [Superpowers](https://github.com/obra/superpowers) is included as a git submodule.
