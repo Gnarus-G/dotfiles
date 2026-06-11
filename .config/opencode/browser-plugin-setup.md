@@ -1,10 +1,12 @@
 # OpenCode browser plugin setup
 
 This repo uses the **Chrome extension backend** for OpenCode browser automation.
-It works with both **Google Chrome** and **Brave**.
+On this machine, use **Chromium only**.
 
 - package: `@different-ai/opencode-browser@4.6.1`
 - OpenCode config: `.config/opencode/opencode.json`
+- browser: `chromium`
+- dedicated profile: `~/.opencode-browser/chromium-profile`
 - extension directory: `~/.opencode-browser/extension`
 - broker socket: `~/.opencode-browser/broker.sock`
 - expected extension ID: `ncfalpcdanbcccbaakenefpokeioldgd`
@@ -18,20 +20,18 @@ There are two parts.
 
 2. **Machine-local install**
    - unpacked browser extension in `~/.opencode-browser/extension`
-   - native messaging host manifests for installed Chromium browsers
+   - Chromium native messaging host manifest
    - local broker at `~/.opencode-browser/broker.sock`
-   - optional dedicated browser launchers/profiles
+   - dedicated Chromium launcher/profile
 
 `./dev` handles the repo-managed config.
 You must run the plugin installer once for the machine-local install.
 
 ## Prerequisites
 
+- Chromium installed: `chromium`
 - `node` / `npx` available
 - this dotfiles repo synced with `./dev`
-- at least one supported Chromium browser:
-  - Chrome: `google-chrome`
-  - Brave: `brave`
 
 ## 1. Sync dotfiles
 
@@ -53,38 +53,21 @@ The config should include:
 "plugin": ["@different-ai/opencode-browser@4.6.1"]
 ```
 
-## 2. Choose browser profile
+## 2. Start the dedicated Chromium profile
 
-Use a **dedicated browser profile** for automation.
-Do not use your primary personal profile.
-
-### Brave profile
-
-This machine uses Brave with a dedicated profile:
-
-```bash
-brave --user-data-dir="$HOME/.opencode-browser/brave-profile" --no-first-run
-```
-
-A local desktop launcher also exists on this machine:
+Use the local desktop launcher:
 
 ```text
-~/.local/share/applications/opencode-brave.desktop
+~/.local/share/applications/opencode-chromium.desktop
 ```
 
-### Chrome profile
-
-If Chrome is installed, use a dedicated Chrome profile:
+Or run it directly:
 
 ```bash
-google-chrome --user-data-dir="$HOME/.opencode-browser/chrome-profile" --no-first-run
+chromium --user-data-dir="$HOME/.opencode-browser/chromium-profile" --no-first-run --load-extension="$HOME/.opencode-browser/extension"
 ```
 
-If you prefer Chrome's named profiles, use the profile directory that matches your dedicated automation profile:
-
-```bash
-google-chrome --profile-directory="Profile 2"
-```
+Do not use your primary personal browser profile.
 
 ## 3. Run the plugin installer once
 
@@ -96,10 +79,11 @@ When prompted, follow the sections below.
 
 ### Step 3: Load & pin extension
 
-Open the extension page in the dedicated browser profile:
+In the dedicated Chromium profile, open:
 
-- Brave: `brave://extensions`
-- Chrome: `chrome://extensions`
+```text
+chrome://extensions
+```
 
 Then:
 
@@ -124,19 +108,23 @@ Expected ID:
 ncfalpcdanbcccbaakenefpokeioldgd
 ```
 
-### Step 6: Native messaging manifests
+### Step 6: Native messaging manifest
 
-The installer writes manifests for supported Chromium browsers.
-
-Expected paths include:
+The installer should write:
 
 ```text
-~/.config/google-chrome/NativeMessagingHosts/com.opencode.browser_automation.json
 ~/.config/chromium/NativeMessagingHosts/com.opencode.browser_automation.json
-~/.config/BraveSoftware/Brave-Browser/NativeMessagingHosts/com.opencode.browser_automation.json
 ```
 
-The manifest should point to:
+For the dedicated `--user-data-dir` profile on this machine, also mirror it into the profile-local native messaging directory:
+
+```bash
+mkdir -p ~/.opencode-browser/chromium-profile/NativeMessagingHosts
+cp ~/.config/chromium/NativeMessagingHosts/com.opencode.browser_automation.json \
+  ~/.opencode-browser/chromium-profile/NativeMessagingHosts/com.opencode.browser_automation.json
+```
+
+Both manifests should point to:
 
 ```text
 ~/.opencode-browser/host-wrapper.sh
@@ -164,11 +152,11 @@ We do not need to copy the package skill into every repo.
 
 ### Step 9: Verify Extension Connection
 
-You can skip this in the installer and verify manually after the browser is ready.
+You can skip this in the installer and verify manually after Chromium is ready.
 
 ## 4. Connect the extension
 
-In the dedicated browser profile:
+In the dedicated Chromium profile:
 
 1. Make sure **OpenCode Browser Automation** is enabled.
 2. Click the extension icon once.
@@ -195,35 +183,35 @@ You should also see the socket:
 ls -l ~/.opencode-browser/broker.sock
 ```
 
-## 6. Auto-launch Brave for browser ops
+## 6. Auto-launch Chromium for browser ops
 
-For this machine, Brave is auto-launched at desktop login with an XDG autostart entry:
+Chromium is auto-launched at desktop login with an XDG autostart entry:
 
 ```text
-~/.config/autostart/opencode-brave.desktop
+~/.config/autostart/opencode-chromium.desktop
 ```
 
-It points to the same dedicated browser profile:
+It launches the dedicated profile and loads the unpacked extension:
 
 ```bash
-brave --user-data-dir="$HOME/.opencode-browser/brave-profile" --no-first-run
+chromium --user-data-dir="$HOME/.opencode-browser/chromium-profile" --no-first-run --load-extension="$HOME/.opencode-browser/extension"
 ```
 
 The source launcher is:
 
 ```text
-~/.local/share/applications/opencode-brave.desktop
+~/.local/share/applications/opencode-chromium.desktop
 ```
 
 To enable manually:
 
 ```bash
 mkdir -p ~/.config/autostart
-cp ~/.local/share/applications/opencode-brave.desktop ~/.config/autostart/opencode-brave.desktop
-chmod +x ~/.config/autostart/opencode-brave.desktop
+cp ~/.local/share/applications/opencode-chromium.desktop ~/.config/autostart/opencode-chromium.desktop
+chmod +x ~/.config/autostart/opencode-chromium.desktop
 ```
 
-After the extension has been clicked once and permissions are granted, it should reconnect automatically when Brave starts.
+After the extension has been clicked once and permissions are granted, it should reconnect automatically when Chromium starts.
 
 ## 7. Restart OpenCode
 
@@ -263,26 +251,19 @@ Press **Ctrl+H** in the file picker if hidden folders are not visible.
 
 ### `Broker status: connect ENOENT ~/.opencode-browser/broker.sock`
 
-The browser side has not started the broker yet.
+The Chromium side has not started the broker yet.
 
 Check:
 
-1. The dedicated browser profile is open.
+1. The dedicated Chromium profile is open.
 2. The extension is loaded from `~/.opencode-browser/extension`.
 3. The extension is enabled.
 4. You clicked the extension icon once.
-5. The native messaging manifest exists for your browser.
-
-Chrome:
+5. The Chromium native messaging manifests exist:
 
 ```bash
-ls ~/.config/google-chrome/NativeMessagingHosts/com.opencode.browser_automation.json
-```
-
-Brave:
-
-```bash
-ls ~/.config/BraveSoftware/Brave-Browser/NativeMessagingHosts/com.opencode.browser_automation.json
+ls ~/.config/chromium/NativeMessagingHosts/com.opencode.browser_automation.json
+ls ~/.opencode-browser/chromium-profile/NativeMessagingHosts/com.opencode.browser_automation.json
 ```
 
 Then rerun:
@@ -295,8 +276,10 @@ npx @different-ai/opencode-browser@4.6.1 status
 
 The broker is running, but the extension is not connected.
 
-Click the **OpenCode Browser Automation** extension icon once in the dedicated browser profile.
+Click the **OpenCode Browser Automation** extension icon once in the dedicated Chromium profile.
 Then rerun `status`.
+
+If it still stays false, restart the dedicated Chromium profile after mirroring the native messaging manifest into `~/.opencode-browser/chromium-profile/NativeMessagingHosts/`.
 
 ### OpenCode still says browser backend is not running
 
@@ -310,13 +293,14 @@ Rerun:
 npx @different-ai/opencode-browser@4.6.1 install
 ```
 
-Then reload the unpacked extension:
+Then reload the unpacked extension in:
 
-- Brave: `brave://extensions`
-- Chrome: `chrome://extensions`
+```text
+chrome://extensions
+```
 
 ## Notes
 
-- Use a dedicated Chrome or Brave profile for automation.
-- Do not use your primary personal profile.
+- Use only the dedicated Chromium profile for automation.
+- Do not use your primary personal browser profile.
 - The plugin has broader trust requirements than the CDP-only browser plugin.
