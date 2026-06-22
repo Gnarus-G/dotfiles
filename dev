@@ -12,15 +12,12 @@ HOME = Path.home()
 # source dir (relative to dotfiles repo) -> list of symlink targets (relative to ~)
 # Most map 1:1 to the same relative path under ~.
 LINKS: dict[str, list[str]] = {
-    # individual skills from .agents/skills/* -> ~/.claude/skills/*
+    # individual skills from .agents/skills/* -> both ~/.claude/skills/* and ~/.agents/skills/*
     **{
-        f".agents/skills/{d.name}": [f".claude/skills/{d.name}"]
-        for d in sorted((DOTFILES / ".agents" / "skills").iterdir())
-        if d.is_dir()
-    },
-    # individual skills from .agents/skills/* -> ~/.agents/skills/*
-    **{
-        f".agents/skills/{d.name}": [f".agents/skills/{d.name}"]
+        f".agents/skills/{d.name}": [
+            f".claude/skills/{d.name}",
+            f".agents/skills/{d.name}",
+        ]
         for d in sorted((DOTFILES / ".agents" / "skills").iterdir())
         if d.is_dir()
     },
