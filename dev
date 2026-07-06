@@ -37,6 +37,7 @@ LINKS: dict[str, list[str]] = {
     ".config/fontconfig/fonts.conf": [".config/fontconfig/fonts.conf"],
     ".config/leftwm": [".config/leftwm"],
     ".config/ghostty/config": [".config/ghostty/config"],
+    ".config/systemd/user/ollama.service": [".config/systemd/user/ollama.service"],
     ".config/himither": [".config/himither"],
     ".config/maccel": [".config/maccel"],
     ".tmux.conf.local": [".tmux.conf.local"],
