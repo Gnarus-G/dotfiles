@@ -63,3 +63,8 @@ Codex is not Claude — prompt it simpler:
   `codex-` so it's visible which agents are delegating.
 - Codex cannot see this conversation. The prompt must be fully
   self-contained: paths, commands, ports, credentials source, expectations.
+- A "failed" exit code does not mean the work failed. Under
+  `danger-full-access` Codex may clean up processes on its own and can kill
+  its wrapper shell (observed: exit 144 after the report was written).
+  Always check the artifact dir for `report.md` before treating a nonzero
+  exit as failure.
