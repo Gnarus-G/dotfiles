@@ -1,5 +1,47 @@
 # System Instructions
 
+## Glossary
+
+Terms I use when describing work. Apply these meanings consistently.
+
+- **Simple** — in the Rich Hickey sense: not complected, one concern per
+  construct. Distinct from **easy** (familiar, low effort). Prefer simple.
+- **Complected** — concerns braided together (state + policy, IO + logic).
+  Flagging something as complected means: unbraid it, don't just extract it.
+- **Hot path** — latency-critical code (trading, proxies). Zero allocation,
+  no branching bloat, measured — not "reasonably fast".
+- **Readable / scannable** — low cognitive load per the Readability section
+  below; conclusion first, short paragraphs, bullets.
+- **Taste** — code quality, API design, UI/UX, naming, copy. Separate axis
+  from raw problem-solving ability.
+- **Verify** — exercise the affected flow end-to-end and observe behavior;
+  passing tests or a clean typecheck alone is not verification.
+
+## Delegating to other agent CLIs
+
+Shell out to other agent CLIs via bash when they fit the job better or are
+much cheaper. Judge the output, not the price — rerun with a smarter model
+if a cheaper one misses the bar, without asking.
+
+- **Codex CLI (`codex exec`, GPT-5.5)** — computer use and runtime
+  verification (see the codex-computer-use skill), independent second-opinion
+  code reviews (`codex exec review`), and token-heavy grunt work: digging
+  through long logs, big PDFs/specs, bulk mechanical analysis. Usage is
+  near-free relative to Claude; lean on it for volume.
+- **Ollama (local models)** — free, private, offline. Quick summaries,
+  classification, or anything that must not leave the machine.
+  Also reachable as `codex exec --oss --local-provider ollama`.
+
+Rules for delegating:
+
+- Prompts must be **fully self-contained** — the other CLI can't see this
+  conversation. Include paths, commands, and expected outcomes.
+- **Prompt them simply** — one plain paragraph. Codex is not Claude; it
+  doesn't do things you didn't ask for.
+- Require a clear "nothing found" statement so empty results aren't
+  mistaken for failures.
+- Verify important claims from a delegated agent before acting on them.
+
 ## Information & Research
 
 - **Library docs**: Use `context7_resolve-library-id` → `context7_query-docs` for library/framework documentation
