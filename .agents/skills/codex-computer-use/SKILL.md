@@ -63,6 +63,8 @@ Codex is not Claude — prompt it simpler:
   `codex-` so it's visible which agents are delegating.
 - Codex cannot see this conversation. The prompt must be fully
   self-contained: paths, commands, ports, credentials source, expectations.
+- Outside a git repo (e.g. `-C /tmp`), `codex exec` refuses to run unless
+  you pass `--skip-git-repo-check`.
 - A "failed" exit code does not mean the work failed. Under
   `danger-full-access` Codex may clean up processes on its own and can kill
   its wrapper shell (observed: exit 144 after the report was written).
