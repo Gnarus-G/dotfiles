@@ -29,13 +29,9 @@ fi
 leftwm-command "LoadTheme $SCRIPTPATH/theme.ron"
 
 if [ -x "$(command -v feh)" ]; then
-  feh --randomize --bg-max \
-    "$SCRIPTPATH"/wallpaper/*.png \
-    "$SCRIPTPATH"/wallpaper/*.jpg \
-    "$SCRIPTPATH"/wallpaper/*.jpeg \
-    "$SCRIPTPATH"/wallpaper/**/*.png \
-    "$SCRIPTPATH"/wallpaper/**/*.jpg \
-    "$SCRIPTPATH"/wallpaper/**/*.jpeg
+  find "$SCRIPTPATH/wallpaper" -type f \
+    \( -iname '*.png' -o -iname '*.jpg' -o -iname '*.jpeg' \) \
+    -print0 | shuf -z | xargs -0 -r feh --bg-max
 fi
 
 # Start dunst.
