@@ -10,7 +10,7 @@ Usage:
 Commands:
   -b <branch>   Create a new branch from a selected base branch
   rm            Remove selected worktrees
-  rm -f         Force remove selected worktrees
+  rm -f         Force remove selected worktrees (--force also accepted)
 EOF
 }
 
@@ -215,7 +215,7 @@ main() {
       [[ $# -eq 1 ]] || die 'rm does not take extra arguments'
       remove_worktree
       ;;
-    -f)
+    -f|--force)
       [[ $# -eq 2 ]] || die 'rm -f does not take extra arguments'
       remove_worktree true
       ;;
