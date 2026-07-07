@@ -12,12 +12,13 @@ HOME = Path.home()
 # source dir (relative to dotfiles repo) -> list of symlink targets (relative to ~)
 # Most map 1:1 to the same relative path under ~.
 LINKS: dict[str, list[str]] = {
-    # individual skills from .agents/skills/* -> both ~/.claude/skills/* and ~/.agents/skills/*
+    # ~/.claude/skills is a single top-level symlink to the dotfiles repo's
+    # .agents/skills — do NOT manage per-skill symlinks under it (that would
+    # mutate the repo dir itself, since ~/.claude/skills resolves into the repo).
+    ".agents/skills": [".claude/skills"],
+    # ~/.agents/skills is a real dir holding per-skill symlinks into the repo.
     **{
-        f".agents/skills/{d.name}": [
-            f".claude/skills/{d.name}",
-            f".agents/skills/{d.name}",
-        ]
+        f".agents/skills/{d.name}": [f".agents/skills/{d.name}"]
         for d in sorted((DOTFILES / ".agents" / "skills").iterdir())
         if d.is_dir()
     },
@@ -102,7 +103,16 @@ def absorb(source: Path, target: Path):
     if source.exists() or source.is_symlink():
         # Merge: for dirs, copy tree contents over; for files, replace.
         if source.is_dir() and target.is_dir():
-            shutil.copytree(target, source, dirs_exist_ok=True)
+            try:
+                shutil.copytree(target, source, dirs_exist_ok=True)
+            except shutil.Error as e:
+                # Python 3.14+ refuses to copy a file onto itself (e.g. when
+                # the target contains hardlinks to the source). If every
+                # colliding entry is a same-file copy, treat as already-synced.
+                if shares_inode(source, target):
+                    pass
+                else:
+                    raise
         else:
             if source.is_symlink():
                 source.unlink()
@@ -132,6 +142,39 @@ def is_correct_link(source: Path, target: Path) -> bool:
     return target.is_symlink() and target.resolve() == source.resolve()
 
 
+def _walk_files(root: Path):
+    """Yield every file under root, following symlinks but not descending into dirs that are symlinks (we only want real files)."""
+    if root.is_file() and not root.is_symlink():
+        yield root
+        return
+    for path in root.rglob("*"):
+        if path.is_file() and not path.is_symlink():
+            yield path
+
+
+def shares_inode(source: Path, target: Path) -> bool:
+    """True iff every file in target is the same inode as the corresponding file in source.
+
+    A target of hardlinks to the source files means the data is physically
+    already in the dotfiles repo, so absorb would be a no-op (and Python 3.14's
+    shutil.copytree refuses to copy a file onto itself). Detecting this lets
+    us short-circuit to overwrite/relink without prompting.
+    """
+    if not source.exists() or not target.exists():
+        return False
+    if source.is_symlink() or target.is_symlink():
+        return False
+
+    source_files = list(_walk_files(source))
+    target_files = list(_walk_files(target))
+    if len(source_files) != len(target_files):
+        return False
+
+    source_inodes = {p.stat().st_ino for p in source_files}
+    target_inodes = {p.stat().st_ino for p in target_files}
+    return source_inodes == target_inodes and len(source_inodes) > 0
+
+
 def main():
     print(f"dotfiles: {DOTFILES}")
     print(f"home:     {HOME}\n")
@@ -140,6 +183,14 @@ def main():
         source = DOTFILES / src_rel
         for dst_rel in dst_rels:
             target = HOME / dst_rel
+
+            # Source and target are the same path — symlinking a path onto
+            # itself would otherwise destroy the source dir. Compare the
+            # literal paths, not resolved targets (a correct existing symlink
+            # legitimately resolves to the source).
+            if target == source:
+                print(f"  --  {dst_rel} (skipped: target == source)")
+                continue
 
             # Already correct — nothing to do.
             if is_correct_link(source, target):
@@ -150,6 +201,15 @@ def main():
             if not target.exists() and not target.is_symlink():
                 link(source, target)
                 print(f"  ln  {dst_rel}")
+                continue
+
+            # Target is a hardlink farm pointing at the source — the data is
+            # already in the dotfiles repo. Replace the target with a real
+            # symlink; nothing is lost.
+            if shares_inode(source, target):
+                remove(target)
+                link(source, target)
+                print(f"  ln  {dst_rel} (relinked hardlinks)")
                 continue
 
             # Conflict: something is there that doesn't match.
