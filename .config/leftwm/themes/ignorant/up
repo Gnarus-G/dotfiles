@@ -9,6 +9,14 @@ if [ -f "/tmp/leftwm-theme-down" ]; then
 fi
 ln -s $SCRIPTPATH/down /tmp/leftwm-theme-down
 
+# Keep GTK/libadwaita apps on the dark variant. Firefox follows this when using
+# the default/system theme.
+if [ -x "$(command -v gsettings)" ]; then
+  gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
+  gsettings set org.gnome.desktop.interface gtk-theme 'Breeze-Dark'
+  gsettings set org.gnome.desktop.interface icon-theme 'breeze-dark'
+fi
+
 # Kill any existing picom (e.g., from XDG autostart) before starting fresh
 pkill picom 2>/dev/null
 
@@ -21,7 +29,13 @@ fi
 leftwm-command "LoadTheme $SCRIPTPATH/theme.ron"
 
 if [ -x "$(command -v feh)" ]; then
-  feh --randomize --bg-fill "$SCRIPTPATH"/wallpaper/*.png "$SCRIPTPATH"/wallpaper/**/*.png
+  feh --randomize --bg-max \
+    "$SCRIPTPATH"/wallpaper/*.png \
+    "$SCRIPTPATH"/wallpaper/*.jpg \
+    "$SCRIPTPATH"/wallpaper/*.jpeg \
+    "$SCRIPTPATH"/wallpaper/**/*.png \
+    "$SCRIPTPATH"/wallpaper/**/*.jpg \
+    "$SCRIPTPATH"/wallpaper/**/*.jpeg
 fi
 
 # Start dunst.
