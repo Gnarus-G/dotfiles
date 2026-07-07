@@ -224,6 +224,28 @@ test_force_remove_dirty_worktree() {
   assert_dir_missing "$tmpdir/dirty-tree" 'force remove should delete dirty worktree'
 }
 
+test_force_remove_dirty_worktree_long_flag() {
+  local tmpdir
+  tmpdir=$(mktemp -d)
+  trap 'rm -rf "$tmpdir"' RETURN
+
+  local fake_bin="$tmpdir/bin"
+  make_fake_fzf "$fake_bin"
+
+  local repo_dir
+  repo_dir=$(setup_repo "$tmpdir")
+  git -C "$repo_dir" worktree add "$tmpdir/dirty-tree" feature/base >/dev/null
+  printf 'dirty\n' >>"$tmpdir/dirty-tree/file.txt"
+
+  (
+    cd "$repo_dir" &&
+      HOME="$tmpdir/home" PATH="$fake_bin:$PATH" \
+      FZF_CHOICE="$tmpdir/dirty-tree" "$SCRIPT" rm --force >/dev/null 2>&1
+  )
+
+  assert_dir_missing "$tmpdir/dirty-tree" 'force remove with --force should delete dirty worktree'
+}
+
 test_zsh_wrapper_auto_cd() {
   local tmpdir
   tmpdir=$(mktemp -d)
@@ -265,6 +287,7 @@ test_create_named_branch
 test_remove_selected_worktree
 test_remove_multiple_worktrees
 test_force_remove_dirty_worktree
+test_force_remove_dirty_worktree_long_flag
 test_zsh_wrapper_auto_cd
 
 printf 'ok\n'
