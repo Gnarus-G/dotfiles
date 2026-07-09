@@ -23,6 +23,12 @@ LINKS: dict[str, list[str]] = {
         for d in sorted((DOTFILES / ".agents" / "skills").iterdir())
         if d.is_dir()
     },
+    **{
+        f".agents/skills/{d.name}": [f".agents/skills/{d.name}"]
+        for d in sorted((DOTFILES / ".agents" / "skills").iterdir())
+        if d.is_dir()
+        and not d.name.startswith("claude-")  # ignore claude-* cli agent use skills
+    },
     ".config/nvim": [".config/nvim"],
     ".config/mcphub": [".config/mcphub"],
     ".config/opencode": [".config/opencode"],
