@@ -26,8 +26,8 @@ LINKS: dict[str, list[str]] = {
     ".config/nvim": [".config/nvim"],
     ".config/mcphub": [".config/mcphub"],
     ".config/opencode": [".config/opencode"],
+    ".claude/CLAUDE.md": [".claude/CLAUDE.md"],
     ".config/opencode/system.md": [
-        ".claude/CLAUDE.md",
         ".codex/AGENTS.md",
         ".pi/agent/APPEND_SYSTEM.md",
     ],
