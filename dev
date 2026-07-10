@@ -20,11 +20,11 @@ LINKS: dict[str, list[str]] = {
     },
     **{
         f".claude/skills/{d.name}": [f".claude/skills/{d.name}"]
-        for d in sorted((DOTFILES / ".agents" / "skills").iterdir())
+        for d in sorted((DOTFILES / ".claude" / "skills").iterdir())
         if d.is_dir()
     },
     **{
-        f".agents/skills/{d.name}": [f".agents/skills/{d.name}"]
+        f".agents/skills/{d.name}": [f".claude/skills/{d.name}"]
         for d in sorted((DOTFILES / ".agents" / "skills").iterdir())
         if d.is_dir()
         and not d.name.startswith("claude-")  # ignore claude-* cli agent use skills
