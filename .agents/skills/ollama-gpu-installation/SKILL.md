@@ -47,12 +47,19 @@ else echo NONE; fi
 
 2. Install Ollama in user space
 
+The base archive is required on both GPU types. The AMD archive is a ROCm
+library overlay and does not contain the `ollama` executable, so AMD requires
+both archives.
+
 ```bash
+set -e -o pipefail
 mkdir -p ~/.local/opt/ollama ~/.local/bin
-# AMD (ROCm runtime bundled):
-curl -fsSL https://ollama.com/download/ollama-linux-amd64-rocm.tar.zst | tar x --zstd -C ~/.local/opt/ollama
-# NVIDIA (CUDA runtime bundled):
+
+# AMD and NVIDIA (base executable and libraries):
 curl -fsSL https://ollama.com/download/ollama-linux-amd64.tar.zst | tar x --zstd -C ~/.local/opt/ollama
+
+# AMD only (additional ROCm library overlay):
+curl -fsSL https://ollama.com/download/ollama-linux-amd64-rocm.tar.zst | tar x --zstd -C ~/.local/opt/ollama
 
 ln -sf ~/.local/opt/ollama/bin/ollama ~/.local/bin/ollama
 ```
