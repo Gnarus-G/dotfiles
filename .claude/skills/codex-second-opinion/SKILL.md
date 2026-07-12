@@ -1,11 +1,11 @@
 ---
 name: codex-second-opinion
-description: Get an independent second opinion from the Codex CLI (GPT-5.5) on a code-behavior claim, diagnosis, or review verdict BEFORE delivering it. Use when a claim Claude made is disputed or contested, when the answer will drive a trade, deploy, incident verdict, or debate with a colleague, when the user asks "are you sure?" / "double-check that" / "verify independently", or before posting a diagnosis to an issue tracker or chat. Codex is near-free; an independent confirmation costs one command.
+description: Get an independent second opinion from the Codex CLI (GPT-5.6 Sol, high reasoning) on a code-behavior claim, diagnosis, or review verdict BEFORE delivering it. Use when a claim Claude made is disputed or contested, when the answer will drive a trade, deploy, incident verdict, or debate with a colleague, when the user asks "are you sure?" / "double-check that" / "verify independently", or before posting a diagnosis to an issue tracker or chat. Codex is near-free; an independent confirmation costs one command.
 ---
 
 # Codex Second Opinion
 
-Delegate an independent read of the code to `codex exec` (GPT-5.5) before
+Delegate an independent read of the code to `codex exec` (GPT-5.6 Sol, high reasoning) before
 delivering a contested or high-stakes claim. The value is independence:
 Codex must reach its conclusion from the code alone, not from your
 reasoning — so never tell it what you concluded.
@@ -40,15 +40,16 @@ already have, or claims about this conversation rather than the code.
      { echo "<questions, one plain paragraph>";
        echo "=== fn decide_stopped (lines 1050-1200) ===";
        sed -n '1050,1200p' src/spreader.rs;
-     } | codex exec - 2>/dev/null
+     } | codex exec -m gpt-5.6-sol -c model_reasoning_effort="high" \
+       - 2>/dev/null
      ```
 
      Label each excerpt with real line numbers. Include enough
      surrounding code that the answer isn't forced; deliberately
      include code that could refute you.
 
-   - **Whole-repo reads:** `codex exec -s danger-full-access -C <repo>
-     "<prompt>"` — only when excerpts genuinely can't bound the
+   - **Whole-repo reads:** `codex exec -m gpt-5.6-sol -c
+     model_reasoning_effort="high" -s danger-full-access -C <repo> "<prompt>"` — only when excerpts genuinely can't bound the
      question, and only in a repo where write access is acceptable
      (use a scratch worktree).
 
@@ -63,7 +64,7 @@ already have, or claims about this conversation rather than the code.
    - "Not found" → your excerpt was insufficient; widen it and rerun.
      Never count a non-answer as agreement.
 
-5. **Report honestly.** Name the tool ("independent GPT-5.5 review
+5. **Report honestly.** Name the tool ("independent GPT-5.6 Sol review
    concurred / dissented"), including when it dissented and you
    overrode it — say why.
 
