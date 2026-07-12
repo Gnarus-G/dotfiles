@@ -1,11 +1,11 @@
 ---
 name: codex-computer-use
-description: Shell out to the Codex CLI (GPT-5.5) for local app verification that needs computer use — browser automation, running and inspecting apps, capturing screenshots, exercising UI flows, or independent runtime inspection. Use when the user asks to test a flow, verify UI behavior, inspect a running app, capture screenshots, or confirm implemented behavior end-to-end. Also the route for token-heavy verification (many screenshots, long logs) that would burn Claude usage.
+description: Shell out to the Codex CLI (GPT-5.6 Sol, medium reasoning) for local app verification that needs computer use — browser automation, running and inspecting apps, capturing screenshots, exercising UI flows, or independent runtime inspection. Use when the user asks to test a flow, verify UI behavior, inspect a running app, capture screenshots, or confirm implemented behavior end-to-end. Also the route for token-heavy verification (many screenshots, long logs) that would burn Claude usage.
 ---
 
 # Codex Computer Use
 
-Delegate runtime/UI verification to `codex exec` (GPT-5.5) instead of doing it
+Delegate runtime/UI verification to `codex exec` (GPT-5.6 Sol, medium reasoning) instead of doing it
 with Claude tools. Codex usage is cheap; treat it as an independent verifier
 whose claims you check before reporting.
 
@@ -27,8 +27,8 @@ worktree), or quick single-page checks where `claude-in-chrome` is faster.
 3. Run Codex non-interactively with a simple, self-contained prompt:
 
    ```bash
-   codex exec -s danger-full-access \
-     -C /path/to/project \
+   codex exec -m gpt-5.6-sol -c model_reasoning_effort="medium" \
+     -s danger-full-access -C /path/to/project \
      "Start the app with <command>. Open <URL>. Exercise <flow>.
       Capture screenshots of each step into $ARTIFACTS.
       Write a short report to $ARTIFACTS/report.md describing what you
@@ -38,7 +38,7 @@ worktree), or quick single-page checks where `claude-in-chrome` is faster.
    ```
 
    - Read-only inspection (logs, artifacts, no app control): use
-     `codex exec -s read-only` instead.
+     `codex exec -m gpt-5.6-sol -c model_reasoning_effort="medium" -s read-only` instead.
    - Attach reference images with `-i screenshot.png` when comparing
      against an expected state.
 4. Read `$ARTIFACTS/report.md` and the screenshots. **Verify important

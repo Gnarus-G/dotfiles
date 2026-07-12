@@ -1,11 +1,11 @@
 ---
 name: codex-implement
-description: Delegate a bounded, well-specified implementation task to the Codex CLI (GPT-5.5) in a git worktree — mechanical migrations, clear-spec implementations, repetitive multi-file edits, test scaffolding from a known pattern. Use when the task has a crisp spec and objective done-criteria (compiles, tests pass) and doesn't need this conversation's judgment or taste. Near-free; Claude reviews the result before it merges.
+description: Delegate a bounded, well-specified implementation task to the Codex CLI (GPT-5.6 Sol, medium reasoning) in a git worktree — mechanical migrations, clear-spec implementations, repetitive multi-file edits, test scaffolding from a known pattern. Use when the task has a crisp spec and objective done-criteria (compiles, tests pass) and doesn't need this conversation's judgment or taste. Near-free; Claude reviews the result before it merges.
 ---
 
 # Codex Implement
 
-Delegate bounded implementation to `codex exec` (GPT-5.5). Good fits:
+Delegate bounded implementation to `codex exec` (GPT-5.6 Sol, medium reasoning). Good fits:
 mechanical migrations, implement-to-spec, bulk repetitive edits.
 Bad fits: anything needing taste (API design, naming, UX), hot-path
 code, exploratory work where the spec emerges while coding — keep
@@ -27,7 +27,8 @@ those on Claude.
    is broken on this box; full-access is required for writes anyway):
 
    ```bash
-   codex exec -s danger-full-access -C /tmp/codex-impl-<topic> \
+   codex exec -m gpt-5.6-sol -c model_reasoning_effort="medium" \
+     -s danger-full-access -C /tmp/codex-impl-<topic> \
      "<one plain paragraph: exact change, files/pattern, the check
       command to run, and: commit the result with message '<msg>'.
       If you cannot complete it, say exactly what blocked you.>"
