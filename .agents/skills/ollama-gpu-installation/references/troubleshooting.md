@@ -18,10 +18,13 @@ journalctl --user -u ollama -n 100 --no-pager
 Common fixes:
 
 - Confirm binary exists: `~/.local/opt/ollama/bin/ollama --version`
-- Reinstall ROCm runtime tarball:
+- If the executable is missing, reinstall the base archive and then the ROCm
+  overlay (the ROCm archive does not contain `bin/ollama`):
 
 ```bash
-curl -fsSL https://ollama.com/download/ollama-linux-amd64-rocm.tar.zst | tar x -C ~/.local/opt/ollama
+set -e -o pipefail
+curl -fsSL https://ollama.com/download/ollama-linux-amd64.tar.zst | tar x --zstd -C ~/.local/opt/ollama
+curl -fsSL https://ollama.com/download/ollama-linux-amd64-rocm.tar.zst | tar x --zstd -C ~/.local/opt/ollama
 systemctl --user restart ollama
 ```
 

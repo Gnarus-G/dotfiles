@@ -4,9 +4,13 @@ Prerequisite: ROCm works and `rocminfo` detects the GPU.
 
 ## Install
 
+The ROCm archive is only a library overlay; install the base archive first.
+
 ```bash
+set -e -o pipefail
 mkdir -p ~/.local/opt/ollama ~/.local/bin
-curl -fsSL https://ollama.com/download/ollama-linux-amd64-rocm.tar.zst | tar x -C ~/.local/opt/ollama
+curl -fsSL https://ollama.com/download/ollama-linux-amd64.tar.zst | tar x --zstd -C ~/.local/opt/ollama
+curl -fsSL https://ollama.com/download/ollama-linux-amd64-rocm.tar.zst | tar x --zstd -C ~/.local/opt/ollama
 ln -sf ~/.local/opt/ollama/bin/ollama ~/.local/bin/ollama
 ```
 
