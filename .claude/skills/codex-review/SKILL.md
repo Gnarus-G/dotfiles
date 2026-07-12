@@ -1,11 +1,11 @@
 ---
 name: codex-review
-description: Independent code review of a diff by the Codex CLI (GPT-5.5) — uncommitted changes, a branch diff against main, a specific commit, or a named implementation. Use when the user asks for a second-pass or independent review, when a change is broad enough that another perspective helps, before opening a PR on nontrivial work, or as the cheap first-pass reviewer before spending Claude tokens on a deep review. Near-free; treat as an extra reviewer whose findings you verify before presenting.
+description: Independent code review of a diff by the Codex CLI (GPT-5.6 Sol, high reasoning) — uncommitted changes, a branch diff against main, a specific commit, or a named implementation. Use when the user asks for a second-pass or independent review, when a change is broad enough that another perspective helps, before opening a PR on nontrivial work, or as the cheap first-pass reviewer before spending Claude tokens on a deep review. Near-free; treat as an extra reviewer whose findings you verify before presenting.
 ---
 
 # Codex Review
 
-Delegate diff review to `codex exec` (GPT-5.5). It's an independent
+Delegate diff review to `codex exec` (GPT-5.6 Sol, high reasoning). It's an independent
 reviewer, not an oracle: verify its findings against the code before
 presenting them, and expect lower taste than Claude — it's strongest on
 correctness/logic findings, weakest on API design and naming.
@@ -24,16 +24,18 @@ correctness/logic findings, weakest on API design and naming.
      file, line, severity, and a concrete failure scenario. If you find
      no issues, say so explicitly and state what you reviewed.";
      git diff main...HEAD;
-   } | codex exec --skip-git-repo-check - > "$ARTIFACTS/report.md"
+   } | codex exec -m gpt-5.6-sol -c model_reasoning_effort="high" \
+     --skip-git-repo-check - > "$ARTIFACTS/report.md"
    ```
 
    or, when the review needs surrounding context beyond the diff, run
-   in the repo with `codex exec -s danger-full-access -C <repo> "..."`
+   in the repo with `codex exec -m gpt-5.6-sol -c
+   model_reasoning_effort="high" -s danger-full-access -C <repo> "..."`
    (use a scratch worktree if it must not touch the working tree).
 
 4. Read the report. **Verify each finding against the code** — codex
    findings on unfamiliar codebases include plausible-but-wrong ones.
-5. Present verified findings, attributed ("independent GPT-5.5 review
+5. Present verified findings, attributed ("independent GPT-5.6 Sol review
    flagged..."), and note dismissed false positives briefly.
 
 ## Prompting
