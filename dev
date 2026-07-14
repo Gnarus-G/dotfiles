@@ -312,21 +312,6 @@ def sync_mcp():
     sync_codex_mcp(servers)
 
 
-def sync_pi_extension_deps():
-    """Install npm dependencies for local Pi extensions that declare packages."""
-    extensions_dir = DOTFILES / ".pi" / "agent" / "extensions"
-    if not extensions_dir.exists():
-        return
-
-    for package_json in sorted(extensions_dir.glob("*/package.json")):
-        extension_dir = package_json.parent
-        package_lock = extension_dir / "package-lock.json"
-
-        npm_cmd = ["npm", "ci"] if package_lock.exists() else ["npm", "install"]
-        print(f"  npm {' '.join(npm_cmd[1:])}  {extension_dir.relative_to(DOTFILES)}")
-        subprocess.run(npm_cmd, cwd=extension_dir, check=True)
-
-
 def sync_opencode_skills():
     """Sync individual skills from .agents/skills to ~/.config/opencode/skills."""
     source_dir = DOTFILES / ".agents" / "skills"
@@ -366,5 +351,4 @@ def sync_opencode_skills():
 if __name__ == "__main__":
     main()
     sync_mcp()
-    sync_pi_extension_deps()
     sync_opencode_skills()
