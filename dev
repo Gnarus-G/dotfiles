@@ -14,7 +14,10 @@ HOME = Path.home()
 LINKS: dict[str, list[str]] = {
     # ~/.agents/skills is a real dir holding per-skill symlinks into the repo.
     **{
-        f".agents/skills/{d.name}": [f".agents/skills/{d.name}"]
+        f".agents/skills/{d.name}": [
+            f".agents/skills/{d.name}",
+            *([] if d.name.startswith("claude-") else [f".claude/skills/{d.name}"]),
+        ]
         for d in sorted((DOTFILES / ".agents" / "skills").iterdir())
         if d.is_dir()
     },
@@ -22,12 +25,6 @@ LINKS: dict[str, list[str]] = {
         f".claude/skills/{d.name}": [f".claude/skills/{d.name}"]
         for d in sorted((DOTFILES / ".claude" / "skills").iterdir())
         if d.is_dir()
-    },
-    **{
-        f".agents/skills/{d.name}": [f".claude/skills/{d.name}"]
-        for d in sorted((DOTFILES / ".agents" / "skills").iterdir())
-        if d.is_dir()
-        and not d.name.startswith("claude-")  # ignore claude-* cli agent use skills
     },
     ".config/nvim": [".config/nvim"],
     ".config/mcphub": [".config/mcphub"],
@@ -144,6 +141,13 @@ def link(source: Path, target: Path):
     target.symlink_to(source)
 
 
+def same_location(left: Path, right: Path) -> bool:
+    """Check whether paths name the same location, including through symlinked parents."""
+    return left.absolute() == right.absolute() or left.resolve(strict=False) == right.resolve(
+        strict=False
+    )
+
+
 def is_correct_link(source: Path, target: Path) -> bool:
     """Check if target is already a symlink pointing to source."""
     return target.is_symlink() and target.resolve() == source.resolve()
@@ -191,11 +195,9 @@ def main():
         for dst_rel in dst_rels:
             target = HOME / dst_rel
 
-            # Source and target are the same path — symlinking a path onto
-            # itself would otherwise destroy the source dir. Compare the
-            # literal paths, not resolved targets (a correct existing symlink
-            # legitimately resolves to the source).
-            if target == source:
+            # Never operate through a symlinked parent that resolves back into
+            # the source tree; removing that target would remove the source.
+            if same_location(target, source):
                 print(f"  --  {dst_rel} (skipped: target == source)")
                 continue
 
