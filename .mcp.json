@@ -5,18 +5,6 @@
       "command": "npx",
       "args": ["-y", "@upstash/context7-mcp"],
       "env": {}
-    },
-    "tts": {
-      "type": "stdio",
-      "command": "tts-mcp",
-      "args": [],
-      "env": {
-        "DBUS_SESSION_BUS_ADDRESS": "unix:path=/run/user/1000/bus",
-        "HIMITHER_TTS_LOG_FILE": "/tmp/tts-mcp-server.log",
-        "LD_LIBRARY_PATH": "~/.cargo/bin",
-        "RUST_LOG": "debug",
-        "XDG_RUNTIME_DIR": "/run/user/1000"
-      }
     }
   }
 }
