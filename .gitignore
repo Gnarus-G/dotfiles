@@ -4,6 +4,7 @@ packer_compiled.lua
 .opencode
 .zshrc.local
 .gitconfig
+__pycache__/
 .config/gtk-3.0
 .config/eww
 .config/leftwm/themes/*
