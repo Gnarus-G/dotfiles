@@ -1,5 +1,8 @@
 {
   "tts_backend": "kokoro",
+  "tts_voice": "",
   "tts_voice_kokoro": "af_nova",
-  "tts_voice_piper": "150"
+  "tts_voice_piper": "150",
+  "tts_speed": 1.0,
+  "tts_volume": 1.0
 }
