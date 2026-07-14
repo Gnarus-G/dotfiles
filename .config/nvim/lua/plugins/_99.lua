@@ -3,6 +3,7 @@ return {
   config = function()
     local _99 = require("99")
     local PiProvider = require("gnarus.pi_provider")
+    local env_cascade = require("gnarus.utils").env_var_cascade
 
     -- For logging that is to a file if you wish to trace through requests
     -- for reporting bugs, i would not rely on this, but instead the provided
@@ -14,29 +15,39 @@ return {
       return vim.fn.executable(name) == 1
     end
 
+    local pi_available = cli_exists("pi")
     local fallback = {
       provider = _99.Providers.OpenCodeProvider,
-      model = "ollama-cloud/glm-5.2"
+      model = "ollama-cloud/glm-5.2",
     }
-    if cli_exists("pi") then
+
+    if pi_available then
       fallback = {
         provider = PiProvider,
-        model = PiProvider._get_default_model()
+        model = PiProvider._get_default_model(),
       }
     end
 
-    local config = require("gnarus.utils").env_var_cascade({
-        {
-          vars = { "GNARUS_ALLOW_VENDOR_LLM" },
-          _if = cli_exists("claude"),
-          value = {
-            provider = _99.Providers.ClaudeCodeProvider,
-            model = "claude-opus-4-8"
-          }
+    local config = env_cascade({
+      {
+        vars = { "GNARUS_ALLOW_VENDOR_LLM" },
+        _if = function()
+          return pi_available and PiProvider._has_model(PiProvider._get_vendor_model())
+        end,
+        value = {
+          provider = PiProvider,
+          model = PiProvider._get_vendor_model(),
         },
       },
-      fallback
-    )
+      {
+        vars = { "GNARUS_ALLOW_VENDOR_LLM" },
+        _if = cli_exists("claude"),
+        value = {
+          provider = _99.Providers.ClaudeCodeProvider,
+          model = "claude-opus-4-8",
+        },
+      },
+    }, fallback)
 
     _99.setup({
       model = config.model,
