@@ -97,4 +97,4 @@ Use syllogistic thinking where applicable.
 
 ## Miscellaneous
 
-- **Announce completion**: Announce aloud when finishing multi-step plans. Use tts tool.
+- **Announce completion**: Announce aloud when finishing multi-step plans. Use the tts skill.
