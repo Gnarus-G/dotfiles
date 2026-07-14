@@ -100,7 +100,7 @@ fi
 # Compilation flags
 # export ARCHFLAGS="-arch x86_64"
 
-# Keep Pi's bundled Node out of the global PATH so it doesn't override nvm.
+# Keep Pi's bundled Node out of the global PATH so system Node remains authoritative.
 _pi_node_bin="$HOME/.local/share/pi-node/node-v22.22.3-linux-x64/bin"
 path=(${path:#$_pi_node_bin})
 unset _pi_node_bin
@@ -224,7 +224,7 @@ _pi_node_bin="$HOME/.local/share/pi-node/node-v22.22.3-linux-x64/bin"
 path=(${path:#$_pi_node_bin})
 unset _pi_node_bin
 
-# Pi: keep Pi's bundled Node out of the global PATH so it doesn't override nvm.
+# Pi: use Pi's bundled Node only while running Pi.
 pi() {
   local pi_bin="$HOME/.local/share/pi-node/node-v22.22.3-linux-x64/bin"
   PATH="$pi_bin:$PATH" command "$pi_bin/pi" "$@"
