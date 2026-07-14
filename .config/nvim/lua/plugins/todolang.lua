@@ -3,7 +3,7 @@ return {
   dependencies = {
     "neovim/nvim-lspconfig",
   },
-  config = function()
+  init = function()
     local codelens_augroup = vim.api.nvim_create_augroup("todols:codeLenses", { clear = true })
 
     vim.api.nvim_create_autocmd('LspAttach', {
@@ -30,18 +30,16 @@ return {
     })
 
     -- Syntax highlighting for todolang using tree-sitter
-    local parser_config = require "nvim-treesitter.parsers".get_parser_configs()
-    parser_config.todolang = {
-      install_info = {
-        url = "https://github.com/Gnarus-G/tree-sitter-todolang", -- local path or git repo
-        files = { "src/parser.c" },                               -- note that some parsers also require src/scanner.c or src/scanner.cc
-        -- optional entries:
-        branch = "main",                                          -- default branch in case of git repo if different from master
-        generate_requires_npm = false,                            -- if stand-alone parser without npm dependencies
-        requires_generate_from_grammar = false,                   -- if folder contains pre-generated src/parser.c
-      },
-    }
-
-
+    vim.api.nvim_create_autocmd("User", {
+      pattern = "TSUpdate",
+      callback = function()
+        require("nvim-treesitter.parsers").todolang = {
+          install_info = {
+            url = "https://github.com/Gnarus-G/tree-sitter-todolang",
+            branch = "main",
+          },
+        }
+      end,
+    })
   end,
 }

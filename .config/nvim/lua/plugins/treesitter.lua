@@ -1,29 +1,34 @@
 return {
   {
     "nvim-treesitter/nvim-treesitter",
-    event = { "BufReadPost", "BufNewFile" },
+    branch = "main",
+    lazy = false,
     build = ":TSUpdate",
-    dependencies = {
-      "nvim-treesitter/playground",
-    },
     config = function()
-      ---@diagnostic disable-next-line: missing-fields
-      require('nvim-treesitter.configs').setup({
-        ensure_installed = { "html", "lua", "rust", "javascript", "typescript", "tsx", "yaml" },
-        sync_install = false,
-        auto_install = true,
-        highlight = { enable = true },
-        incremental_selection = { enable = true },
-        textobjects = { enable = true },
-        ignore_install = {}
+      local parsers = {
+        "bash",
+        "html",
+        "javascript",
+        "lua",
+        "markdown",
+        "markdown_inline",
+        "rust",
+        "todolang",
+        "tsx",
+        "typescript",
+        "yaml",
+      }
+
+      require("nvim-treesitter").install(parsers)
+
+      vim.api.nvim_create_autocmd("FileType", {
+        group = vim.api.nvim_create_augroup("TreesitterHighlight", { clear = true }),
+        callback = function(event)
+          pcall(vim.treesitter.start, event.buf)
+        end,
       })
 
       vim.treesitter.language.register("markdown", "mdx")
     end,
-  },
-  {
-    "nvim-treesitter/playground",
-    dependencies = { "nvim-treesitter/nvim-treesitter" },
-    cmd = { "TSPlaygroundToggle", "TSHighlightCapturesUnderCursor" },
   },
 }
