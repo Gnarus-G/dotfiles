@@ -1,6 +1,6 @@
 ---
 name: tts
-description: Speak text aloud through the local gnarus-tts engine without MCP. Use whenever the user asks to say, speak, read, or announce something aloud.
+description: Speak brief text aloud through the local gnarus-tts engine. Use for audible completion announcements after multi-step work, or when the user asks to say, speak, or read something aloud.
 compatibility: Linux with gnarus-tts installed and audio available through the user session.
 ---
 
