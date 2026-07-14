@@ -82,7 +82,7 @@ Mechanics:
 
 ## Information & Research
 
-- **Library docs**: Use `context7_resolve-library-id` → `context7_query-docs` for library/framework documentation
+- **Library docs**: Use the `context7` skill to fetch library/framework documentation through the Context7 REST API
 - **Default to research**: When uncertain about a tool, pattern, or best practice, research first rather than guessing
 
 ## Confidence

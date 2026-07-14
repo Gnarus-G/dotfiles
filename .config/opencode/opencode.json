@@ -19,10 +19,6 @@
     }
   },
   "mcp": {
-    "context7-mcp": {
-      "type": "local",
-      "command": ["npx", "-y", "@upstash/context7-mcp"]
-    },
     "websearch": {
       "type": "local",
       "command": [
