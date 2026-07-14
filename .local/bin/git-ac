@@ -167,7 +167,7 @@ def main():
     try:
         tmpfile = os.path.join(tmpdir, "COMMIT_EDITMSG")
         with open(tmpfile, "w") as f:
-            f.write(message)
+            f.write(f"{message.rstrip()}\n\n# Model: {args.model}\n")
 
         if not args.no_edit:
             editor = os.environ.get("GIT_EDITOR") or os.environ.get("EDITOR", "vi")
@@ -177,7 +177,7 @@ def main():
             logger.error("Empty commit message, aborting")
             sys.exit(1)
 
-        subprocess.run(["git", "commit", "-F", tmpfile], check=True)
+        subprocess.run(["git", "commit", "--cleanup=strip", "-F", tmpfile], check=True)
     finally:
         shutil.rmtree(tmpdir, ignore_errors=True)
 
