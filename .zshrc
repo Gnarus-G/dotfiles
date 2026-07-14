@@ -126,22 +126,28 @@ export PNPM_HOME="/home/gnarus/.local/share/pnpm"
 export PATH="$PNPM_HOME:$PATH"
 # pnpm end
 
-# nvm (lazy-loaded: sourcing nvm.sh eagerly costs ~1.4s per shell)
-export NVM_DIR="$HOME/.nvm"
-# Put the default node version's bin on PATH so node/npm/npx run instantly,
-# with zero nvm load. Only the `nvm` command itself triggers a full load.
-if [[ -s "$NVM_DIR/alias/default" ]]; then
-  _nvm_default=${"$(<"$NVM_DIR/alias/default")"#v}
-  _nvm_default_bin=("$NVM_DIR"/versions/node/v${_nvm_default}*/bin(N))
-  [[ -d "$_nvm_default_bin[1]" ]] && path=("$_nvm_default_bin[1]" $path)
-  unset _nvm_default _nvm_default_bin
-fi
-nvm() {
-  unset -f nvm
-  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-  [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
-  nvm "$@"
-}
+# nvm — DISABLED 2026-07-14. proto (see ~/.zshenv PROTO_HOME/shims) is now the
+# single source of truth for node/npm/npx. The old block below prepended nvm's
+# default node (v20) ahead of proto's shims in every *interactive* shell, which
+# shadowed proto and broke projects needing node >= 22 with type stripping
+# (e.g. ~/d/spreader/web vitest: ERR_UNKNOWN_FILE_EXTENSION on a .ts vite
+# config under node 20). ~/.nvm is left intact on disk; to re-enable nvm,
+# uncomment this block — but prefer `proto install node <ver>` + a .prototools
+# pin instead.
+#
+# export NVM_DIR="$HOME/.nvm"
+# if [[ -s "$NVM_DIR/alias/default" ]]; then
+#   _nvm_default=${"$(<"$NVM_DIR/alias/default")"#v}
+#   _nvm_default_bin=("$NVM_DIR"/versions/node/v${_nvm_default}*/bin(N))
+#   [[ -d "$_nvm_default_bin[1]" ]] && path=("$_nvm_default_bin[1]" $path)
+#   unset _nvm_default _nvm_default_bin
+# fi
+# nvm() {
+#   unset -f nvm
+#   [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+#   [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+#   nvm "$@"
+# }
 # nvm end
 
 # Set personal aliases, overriding those provided by oh-my-zsh libs,
