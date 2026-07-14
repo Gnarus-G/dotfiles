@@ -25,7 +25,7 @@ return {
       },
       {
         provider = _99.Providers.OpenCodeProvider,
-        model = "ollama-cloud/glm-5.1"
+        model = "ollama-cloud/glm-5.2"
       }
     )
 
