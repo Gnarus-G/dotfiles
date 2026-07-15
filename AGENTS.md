@@ -13,7 +13,6 @@ Configuration for AI coding assistants (OpenCode, Claude Code, etc). The `dev` s
 | Source                   | Target                     | Description         |
 | ------------------------ | -------------------------- | ------------------- |
 | `.config/nvim/`          | `~/.config/nvim`           | Neovim config       |
-| `.config/mcphub/`        | `~/.config/mcphub`         | MCP Hub servers     |
 | `.config/opencode/`      | `~/.config/opencode`       | OpenCode settings   |
 | `.config/awesome/`       | `~/.config/awesome`        | Awesome WM theme    |
 | `.config/leftwm/`        | `~/.config/leftwm`         | LeftWM config       |
