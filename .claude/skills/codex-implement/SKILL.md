@@ -1,15 +1,15 @@
 ---
 name: codex-implement
-description: Delegate a bounded, well-specified implementation task to the Codex CLI (GPT-5.6 Sol, medium reasoning) in a git worktree — mechanical migrations, clear-spec implementations, repetitive multi-file edits, test scaffolding from a known pattern. Use when the task has a crisp spec and objective done-criteria (compiles, tests pass) and doesn't need this conversation's judgment or taste. Near-free; Claude reviews the result before it merges.
+description: Delegate a bounded, well-specified implementation task to the Codex CLI (GPT-5.6 Sol, medium reasoning) in a git worktree — mechanical migrations, clear-spec implementations, repetitive multi-file edits, and test scaffolding from a known pattern. Use when the task has a crisp spec and objective done-criteria (compiles, tests pass) and does not need this conversation's judgment or taste. The invoking agent reviews and verifies the result before it merges.
 ---
 
 # Codex Implement
 
 Delegate bounded implementation to `codex exec` (GPT-5.6 Sol, medium reasoning). Good fits:
 mechanical migrations, implement-to-spec, bulk repetitive edits.
-Bad fits: anything needing taste (API design, naming, UX), hot-path
-code, exploratory work where the spec emerges while coding — keep
-those on Claude.
+Bad fits: anything needing taste (API design, naming, UX), hot-path code, or
+exploratory work where the spec emerges while coding. Keep precision work
+inline; route taste-sensitive implementation through claude-implement.
 
 ## Workflow
 
@@ -34,9 +34,9 @@ those on Claude.
       If you cannot complete it, say exactly what blocked you.>"
    ```
 
-4. **Review the diff yourself** (`git diff main...codex/<topic>`) —
-   Claude owns correctness and style conformance. Optionally run
-   codex-review on it too; two GPT passes are still near-free.
+4. **Review the diff yourself** (`git diff main...codex/<topic>`) — the
+   invoking agent owns correctness and style conformance. Optionally run
+   codex-review for an independent pass.
 5. **Run the verification** (the done-criteria commands) yourself;
    don't trust codex's claim that they passed.
 6. Merge/rebase per the repo's rules, or discard — a dead worktree
