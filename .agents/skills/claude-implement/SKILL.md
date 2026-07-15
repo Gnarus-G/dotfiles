@@ -1,27 +1,33 @@
 ---
 name: claude-implement
-description: Delegate taste-sensitive or judgment-heavy implementation to Claude Opus 4.8 via the headless `claude -p` CLI — API/SDK design, naming, UX, copy, code-quality decisions, and exploratory work where the spec emerges while coding. Use when the task needs taste or judgment that bounded Codex work does not. Claude works in an isolated git worktree; you review and verify the result before it merges.
+description: Delegate implementation or analysis to Claude via the headless `claude -p` CLI. Use Haiku 4.5 for short, straightforward, latency-sensitive tasks; Sonnet 5 for well-defined medium-length work; and Opus 4.8 for complex tasks needing deeper reasoning, stronger judgment, or greater reliability. Claude works in an isolated git worktree for writes; you review and verify the result.
 ---
 
 # Claude Implement
 
-Delegate to Claude Opus via `claude -p` (headless print mode). Good fits:
+Delegate through `claude -p` (headless print mode). Choose the cheapest model
+that can hit the bar:
 
-- **Taste-sensitive implementation** — API/SDK design, naming, UX, copy,
-  and code-quality judgment. Claude has higher taste than GPT-5.6 Sol here.
-- **Judgment-heavy or exploratory work** — the spec emerges while coding,
-  or correctness depends on tradeoffs that cannot be reduced to objective
-  done-criteria.
+- **Haiku 4.5** — short, straightforward work where speed matters:
+  classification, extraction, concise summaries, simple transformations, and
+  bounded subagent tasks. Avoid it for sustained reasoning or taste.
+- **Sonnet 5** — well-defined, medium-length implementation or analysis with
+  a clear outcome. It balances speed, cost, and capability.
+- **Opus 4.8** — complex or demanding work needing deeper reasoning, stronger
+  judgment, or greater reliability: API/SDK design, naming, UX, copy,
+  code-quality decisions, and exploratory implementation where the spec
+  emerges while coding.
 
-Bad fits: bounded mechanical implementation, bulk analysis, large logs or
-specs, and conclusion-only digging. Route those to Codex; use Claude when its
-judgment or taste changes the result, not merely to save context.
+Bad fits: bounded mechanical implementation and conclusion-only bulk analysis.
+Route those to Codex. Keep precision work such as hot-path edits inline.
 
 ## Workflow
 
-1. **Scope the task.** State the design judgment Claude owns and write
-   objective done-criteria it can self-check ("compiles with `cargo check -p
-   X`", "tests pass").
+1. **Scope the task.** State the outcome Claude owns and write objective
+   done-criteria it can self-check ("compiles with `cargo check -p X`",
+   "tests pass"). Pick Haiku 4.5 for short straightforward work, Sonnet 5 for
+   coherent medium-length tasks, and Opus 4.8 when complexity, stakes, or
+   judgment warrants escalation.
 
 2. **Isolate writes in a worktree** so Claude never touches your working
    tree:
@@ -30,15 +36,16 @@ judgment or taste changes the result, not merely to save context.
    git -C <repo> worktree add /tmp/claude-impl-<topic> -b claude/<topic>
    ```
 
-3. **Run Claude headless with Opus.** `-p` prints and exits;
-   `--dangerously-skip-permissions` lets it edit/run without prompts:
+3. **Run Claude headless.** `-p` prints and exits;
+   `--dangerously-skip-permissions` lets it edit/run without prompts. Set
+   `<model>` to `haiku`, `sonnet`, or `opus` according to the routing above:
 
    ```bash
    claude -p "<one plain paragraph: exact task, files/paths, the check
      command to run, and — for implementation — commit the result with
      message '<msg>'. If you cannot complete it, say exactly what
      blocked you.>" \
-     --model opus \
+     --model <model> \
      --dangerously-skip-permissions \
      -C /tmp/claude-impl-<topic>
    ```
@@ -69,5 +76,6 @@ judgment or taste changes the result, not merely to save context.
 ## Guardrails
 
 - Never point Claude at your main working tree or let it push.
-- Escalate to Claude for quality, not to dodge bounded work — if you can
-  hit the bar yourself, do it; Claude tokens cost real money.
+- Use the cheapest tier suited to the task: Haiku 4.5 for short straightforward
+  work, Sonnet 5 for coherent medium tasks, and Opus 4.8 when deeper capability
+  changes the expected result.

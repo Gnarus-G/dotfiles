@@ -59,7 +59,9 @@ and taste.
   orchestration.
 - **Sonnet low** — bridge from a Claude workflow to `codex exec`; prefix the
   subagent name with `codex-` so delegation is visible.
-- **Haiku** — do not use; GPT-5.6 Sol is cheaper per quality for the same work.
+- **Haiku 4.5** — fast, inexpensive classification, extraction, summarization,
+  simple transformations, and bounded subagent tasks. Do not use it when the
+  task needs sustained reasoning or taste.
 
 Skills: codex-computer-use, codex-second-opinion, codex-review,
 codex-implement, and claude-implement.
