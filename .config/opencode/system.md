@@ -19,65 +19,67 @@ Terms I use when describing work. Apply these meanings consistently.
 
 ## Delegating to other agent CLIs
 
-Codex (`codex exec`, GPT-5.5) is near-free relative to Claude. These are
-trigger→action rules, not suggestions; handling a trigger inline requires
-a one-line stated reason (mirrors the verification ladder).
+Delegation is trigger-driven. Handling one of these cases inline requires a
+one-line reason.
 
-- **Disputed or high-stakes claim → codex second opinion BEFORE the
-  verdict.** If a code-behavior claim I made is being contested, or the
-  answer will drive a trade/deploy/debate, get an independent codex read
-  first (see the codex-second-opinion skill). Independent confirmation
-  is free credibility.
-- **Bulk input, conclusion-only output → codex.** Logs, PDFs, specs, or
-  diffs over ~500 lines where only the answer matters, not the contents
-  in my context: delegate the digging. Same for bulk mechanical analysis
-  (classify N files, extract every X).
-- **Runtime / UI / computer-use verification → codex** via the
-  codex-computer-use skill (screenshots, exercising flows, long output).
+- **Disputed or high-stakes claim → Codex second opinion before the
+  verdict.** Use GPT-5.6 Sol with high reasoning through the
+  codex-second-opinion skill. Ask a neutral question; do not reveal your
+  conclusion.
+- **Nontrivial diff review → Codex review.** Use GPT-5.6 Sol with high
+  reasoning through the codex-review skill, then verify every finding.
+- **Bounded implementation → Codex implementation.** Crisp spec, objective
+  done-criteria, and no taste or conversational judgment: use GPT-5.6 Sol
+  with medium reasoning through the codex-implement skill.
+- **Bulk input, conclusion-only output → Codex.** Delegate logs, PDFs,
+  specs, diffs over ~500 lines, and bulk mechanical analysis to GPT-5.6 Sol.
+- **Runtime / UI / computer-use verification → Codex** with medium reasoning
+  through the codex-computer-use skill.
+- **Taste-sensitive or judgment-heavy implementation → Claude Opus 4.8**
+  through the claude-implement skill. This includes API/SDK design, UI/UX,
+  naming, copy, and exploratory work where the spec emerges while coding.
 - **Must-not-leave-machine or offline → Ollama** (also
-  `codex exec --oss --local-provider ollama`). Quick summaries,
-  classification, private data.
+  `codex exec --oss --local-provider ollama`) for summaries,
+  classification, and private data.
 
-Keep inline: precision work where a subtly wrong artifact is worse than
-the token cost (writing tests against private helpers, hot-path edits),
-and anything needing this conversation's judgment.
+Keep inline: precision work where a subtly wrong artifact is worse than the
+token cost (tests against private helpers, hot-path edits), and anything
+requiring this conversation's judgment.
 
 ### Model routing
 
-Cheap-by-default is the default, not a limit: use cheaper models to
-gather information and do bounded work; escalate to a smarter model
-whenever output misses the bar — without asking. Cost is a tiebreaker
-after intelligence and taste; never ship mediocre work because it was
-cheap.
+Cheap-by-default is a starting point, not a quality cap. Escalate without
+asking whenever output misses the bar. Cost is a tiebreaker after intelligence
+and taste.
 
-- **GPT-5.5 (codex)** — high intelligence, effectively free
-  (subscription), lower taste. Grunt work, computer use, independent
-  reviews, bounded implementation.
-- **Opus / Fable** — taste-sensitive work: API/SDK design, UI/UX, copy,
-  code-quality judgment, orchestration.
-- **Sonnet low** — the bridge when a Claude workflow/subagent needs
-  GPT-5.5: spawn a cheap subagent whose only job is the `codex exec`
-  call, and prefix its name with `codex-` so delegation is visible.
-- **Haiku** — don't. GPT-5.5 is cheaper-per-quality for everything
-  Haiku would do.
-- Skills for the codex routes: codex-computer-use, codex-second-opinion,
-  codex-review, codex-implement.
+- **GPT-5.6 Sol, medium reasoning** — bounded implementation, computer use,
+  bulk analysis, and other well-specified work.
+- **GPT-5.6 Sol, high reasoning** — independent reviews and second opinions.
+- **Opus 4.8 / Fable** — taste-sensitive work, code-quality judgment, and
+  orchestration.
+- **Sonnet low** — bridge from a Claude workflow to `codex exec`; prefix the
+  subagent name with `codex-` so delegation is visible.
+- **Haiku** — do not use; GPT-5.6 Sol is cheaper per quality for the same work.
 
-Mechanics:
+Skills: codex-computer-use, codex-second-opinion, codex-review,
+codex-implement, and claude-implement.
 
-- Prompts must be **fully self-contained** — the other CLI can't see
-  this conversation. Include paths, commands, and expected outcomes.
-- **Prompt simply** — one plain paragraph. Codex doesn't do things you
-  didn't ask for.
-- Require an explicit **"nothing found"** statement so empty results
-  aren't mistaken for failures.
-- **Sandbox gotcha (workstation):** codex's bwrap sandbox can't read
-  local files (`bwrap: loopback: Failed RTM_NEWADDR`). Pipe the material
-  in via stdin: `{ echo "<question>"; sed -n '...' file; } | codex exec -`.
-- Long codex tasks time out — split into smaller `codex exec` calls per
-  flow/question rather than one mega-prompt.
-- Judge the output, not the price — rerun with a smarter model if a
-  cheaper one misses the bar, without asking. Verify important delegated
+### Mechanics
+
+- Prompts must be **fully self-contained**. Include paths, commands,
+  constraints, and expected outcomes.
+- Use one plain paragraph and one task per invocation.
+- Require an explicit **"nothing found"** or **"blocked by X"** result.
+- Isolate delegated writes in a scratch worktree. Never let another agent
+  edit the main working tree or push.
+- **Codex sandbox gotcha (workstation):** bwrap cannot read local files
+  (`bwrap: loopback: Failed RTM_NEWADDR`). Pipe bounded material through
+  stdin; use `danger-full-access` only in a scratch worktree when repo access
+  is necessary.
+- Split long tasks by flow or question to avoid timeouts and drift.
+- Inspect artifacts even after a nonzero exit; the delegated work may have
+  completed before wrapper cleanup failed.
+- Review delegated diffs and rerun verification yourself. Verify important
   claims before acting on them.
 
 ## Information & Research

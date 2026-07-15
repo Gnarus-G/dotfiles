@@ -1,6 +1,6 @@
 ---
 name: claude-implement
-description: Delegate implementation or high-token work to Claude (Opus 4.8) via the headless `claude -p` CLI — taste-sensitive code (API/SDK design, naming, UX, copy), tricky work needing judgment, and token-heavy digging (reading many files, large logs/specs) you want kept out of your own context. Use when the task needs quality Codex can't reliably hit, or would burn a lot of your context to read. Claude does the work and returns a conclusion; you review the result before it merges.
+description: Delegate taste-sensitive or judgment-heavy implementation to Claude Opus 4.8 via the headless `claude -p` CLI — API/SDK design, naming, UX, copy, code-quality decisions, and exploratory work where the spec emerges while coding. Use when the task needs taste or judgment that bounded Codex work does not. Claude works in an isolated git worktree; you review and verify the result before it merges.
 ---
 
 # Claude Implement
@@ -8,26 +8,23 @@ description: Delegate implementation or high-token work to Claude (Opus 4.8) via
 Delegate to Claude Opus via `claude -p` (headless print mode). Good fits:
 
 - **Taste-sensitive implementation** — API/SDK design, naming, UX, copy,
-  code-quality judgment. Claude has higher taste than GPT-5.5 here.
+  and code-quality judgment. Claude has higher taste than GPT-5.6 Sol here.
 - **Judgment-heavy or exploratory work** — the spec emerges while coding,
-  or correctness matters more than the token cost.
-- **High-token digging** — reading many files, large logs/specs/diffs,
-  bulk analysis. Offload it so your own context stays clean; Claude reads
-  everything and returns just the conclusion.
+  or correctness depends on tradeoffs that cannot be reduced to objective
+  done-criteria.
 
-Bad fits: bounded mechanical work you can do yourself (migrations, bulk
-repetitive edits, compiles-and-passes-to-spec) — keep those on Codex, it's
-cheaper-per-quality for grunt work.
+Bad fits: bounded mechanical implementation, bulk analysis, large logs or
+specs, and conclusion-only digging. Route those to Codex; use Claude when its
+judgment or taste changes the result, not merely to save context.
 
 ## Workflow
 
-1. **Scope the task.** For implementation, write done-criteria Claude can
-   self-check ("compiles with `cargo check -p X`", "tests pass"). For a
-   read/analysis task, state exactly what conclusion you want back and in
-   what shape (a list, a diff, a yes/no with evidence).
+1. **Scope the task.** State the design judgment Claude owns and write
+   objective done-criteria it can self-check ("compiles with `cargo check -p
+   X`", "tests pass").
 
 2. **Isolate writes in a worktree** so Claude never touches your working
-   tree (skip for read-only tasks):
+   tree:
 
    ```bash
    git -C <repo> worktree add /tmp/claude-impl-<topic> -b claude/<topic>
@@ -46,13 +43,9 @@ cheaper-per-quality for grunt work.
      -C /tmp/claude-impl-<topic>
    ```
 
-   For a read-only dig, drop `-C`/worktree and point it at the repo;
-   add `--output-format json` if you want to parse the result.
-
-4. **Review the result yourself.** For code, read the diff
-   (`git diff main...claude/<topic>`) — you own final correctness and that
-   it fits the repo. For analysis, sanity-check the conclusion against a
-   spot source before acting on it.
+4. **Review the result yourself.** Read the diff
+   (`git diff main...claude/<topic>`) — you own final correctness, taste,
+   and conformance with the repo.
 
 5. **Run the verification** (the done-criteria commands) yourself; don't
    trust the claim that they passed.
@@ -68,8 +61,8 @@ cheaper-per-quality for grunt work.
   matter for THIS task.
 - One task per invocation. A list of tasks becomes a loop of separate
   `claude -p` calls, not one mega-prompt (drift, timeouts).
-- Require an explicit **"nothing found" / "blocked by X"** statement so an
-  empty result isn't mistaken for failure.
+- Require an explicit **"blocked by X"** statement when it cannot complete
+  the task.
 - A nonzero exit doesn't always mean failure — check the worktree diff or
   the returned text before rerunning.
 

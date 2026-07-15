@@ -6,8 +6,8 @@ description: Shell out to the Codex CLI (GPT-5.6 Sol, medium reasoning) for loca
 # Codex Computer Use
 
 Delegate runtime/UI verification to `codex exec` (GPT-5.6 Sol, medium reasoning) instead of doing it
-with Claude tools. Codex usage is cheap; treat it as an independent verifier
-whose claims you check before reporting.
+inline. Treat Codex as an independent verifier whose claims you check before
+reporting.
 
 ## When
 
@@ -16,8 +16,8 @@ whose claims you check before reporting.
 - Independent "does this actually work?" pass after implementing a change
 - Token-heavy inspection: long logs, many screenshots, big artifacts
 
-Not for: writing or editing code in this repo (do that yourself or use a
-worktree), or quick single-page checks where `claude-in-chrome` is faster.
+Not for writing or editing code. Route bounded implementation through the
+codex-implement skill and keep judgment-heavy work inline.
 
 ## Workflow
 
@@ -37,8 +37,9 @@ worktree), or quick single-page checks where `claude-in-chrome` is faster.
       and describe exactly what you tested."
    ```
 
-   - Read-only inspection (logs, artifacts, no app control): use
-     `codex exec -m gpt-5.6-sol -c model_reasoning_effort="medium" -s read-only` instead.
+   - The workstation bwrap sandbox cannot read local files. For bounded
+     read-only inspection, pipe the material through stdin. When repo access is
+     necessary, use `danger-full-access` only in a scratch worktree.
    - Attach reference images with `-i screenshot.png` when comparing
      against an expected state.
 4. Read `$ARTIFACTS/report.md` and the screenshots. **Verify important
