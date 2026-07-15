@@ -93,7 +93,10 @@ return {
       input = { enabled = true },
       notifier = { enabled = true },
       picker = { enabled = true },
-      quickfile = { enabled = true },
+      quickfile = {
+        enabled = true,
+        exclude = { "gitcommit", "latex" },
+      },
       scope = { enabled = true },
       statuscolumn = { enabled = true },
       words = { enabled = true },
