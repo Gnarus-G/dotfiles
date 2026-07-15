@@ -1,14 +1,14 @@
 ---
 name: codex-review
-description: Independent code review of a diff by the Codex CLI (GPT-5.6 Sol, high reasoning) — uncommitted changes, a branch diff against main, a specific commit, or a named implementation. Use when the user asks for a second-pass or independent review, when a change is broad enough that another perspective helps, before opening a PR on nontrivial work, or as the cheap first-pass reviewer before spending Claude tokens on a deep review. Near-free; treat as an extra reviewer whose findings you verify before presenting.
+description: Independent code review of a diff by the Codex CLI (GPT-5.6 Sol, high reasoning) — uncommitted changes, a branch diff against main, a specific commit, or a named implementation. Use when the user asks for a second pass, when a change is broad enough that another perspective helps, before opening a PR on nontrivial work, or as a correctness-focused pass before taste-sensitive review. Treat Codex as an extra reviewer whose findings the invoking agent verifies before presenting.
 ---
 
 # Codex Review
 
 Delegate diff review to `codex exec` (GPT-5.6 Sol, high reasoning). It's an independent
 reviewer, not an oracle: verify its findings against the code before
-presenting them, and expect lower taste than Claude — it's strongest on
-correctness/logic findings, weakest on API design and naming.
+presenting them. It is strongest on correctness and logic, and weakest on API
+design and naming; keep taste-sensitive review with Opus/Fable.
 
 ## Workflow
 

@@ -1,6 +1,6 @@
 ---
 name: codex-second-opinion
-description: Get an independent second opinion from the Codex CLI (GPT-5.6 Sol, high reasoning) on a code-behavior claim, diagnosis, or review verdict BEFORE delivering it. Use when a claim Claude made is disputed or contested, when the answer will drive a trade, deploy, incident verdict, or debate with a colleague, when the user asks "are you sure?" / "double-check that" / "verify independently", or before posting a diagnosis to an issue tracker or chat. Codex is near-free; an independent confirmation costs one command.
+description: Get an independent second opinion from the Codex CLI (GPT-5.6 Sol, high reasoning) on a code-behavior claim, diagnosis, or review verdict BEFORE delivering it. Use when a claim you made is disputed, when the answer will drive a trade, deploy, incident verdict, or debate, when the user asks "are you sure?" / "double-check that" / "verify independently", or before posting a diagnosis to an issue tracker or chat. Ask Codex neutrally and verify its conclusion against the code.
 ---
 
 # Codex Second Opinion
@@ -12,8 +12,8 @@ reasoning — so never tell it what you concluded.
 
 ## When
 
-- A code-behavior claim you made is being disputed ("that's wrong",
-  "LLMBS", a colleague disagrees)
+- A code-behavior claim you made is being disputed ("that's wrong" or a
+  colleague disagrees)
 - The verdict drives a trade, deploy, rollback, or incident report
 - The user asks to double-check, verify independently, or "are you sure?"
 - Before posting a diagnosis to an issue / PR / team chat
