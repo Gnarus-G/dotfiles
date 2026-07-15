@@ -26,7 +26,6 @@ LINKS: dict[str, list[str]] = {
         if d.is_dir()
     },
     ".config/nvim": [".config/nvim"],
-    ".config/mcphub": [".config/mcphub"],
     ".config/opencode": [".config/opencode"],
     ".claude/CLAUDE.md": [".claude/CLAUDE.md"],
     ".config/opencode/system.md": [
