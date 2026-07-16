@@ -1,4 +1,4 @@
 return {
   "MeanderingProgrammer/render-markdown.nvim",
-  ft = { "markdown", "opencode_output" }
+  ft = { "markdown", "opencode_output", "Avante" }
 }

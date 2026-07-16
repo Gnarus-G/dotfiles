@@ -135,6 +135,7 @@ export PATH="$PNPM_HOME:$PATH"
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 alias vim=nvim
+alias avante="nvim -c 'lua vim.defer_fn(function() require(\"avante.api\").zen_mode() end, 100)'"
 git() {
   if [[ "$1" != "wt" ]]; then
     command git "$@"
