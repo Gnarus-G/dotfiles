@@ -28,10 +28,8 @@ LINKS: dict[str, list[str]] = {
     ".config/nvim": [".config/nvim"],
     ".config/opencode": [".config/opencode"],
     ".claude/CLAUDE.md": [".claude/CLAUDE.md"],
-    ".config/opencode/system.md": [
-        ".codex/AGENTS.md",
-        ".pi/agent/APPEND_SYSTEM.md",
-    ],
+    ".config/opencode/system.md": [".pi/agent/APPEND_SYSTEM.md"],
+    ".codex/AGENTS.md": [".codex/AGENTS.md"],
     ".pi/agent/extensions": [".pi/agent/extensions"],
     ".pi/agent/models.json": [".pi/agent/models.json"],
     ".config/awesome": [".config/awesome"],
