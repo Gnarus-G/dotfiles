@@ -135,7 +135,7 @@ export PATH="$PNPM_HOME:$PATH"
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 alias vim=nvim
-alias avante="nvim -c 'lua vim.defer_fn(function() require(\"avante.api\").zen_mode() end, 100)'"
+alias avante="nvim -c 'lua vim.defer_fn(function() for _, b in ipairs(vim.api.nvim_list_bufs()) do if vim.bo[b].filetype == \"snacks_dashboard\" then vim.api.nvim_buf_delete(b, { force = true }) end end require(\"avante.api\").zen_mode() end, 100)'"
 git() {
   if [[ "$1" != "wt" ]]; then
     command git "$@"
