@@ -24,6 +24,28 @@ def test_agent_skills_sync_to_agents_and_claude():
     ]
 
 
+def test_codex_and_opencode_use_separate_instruction_sources():
+    dev = load_dev_module()
+
+    assert dev.LINKS[".codex/AGENTS.md"] == [".codex/AGENTS.md"]
+    assert dev.LINKS[".config/opencode/system.md"] == [
+        ".pi/agent/APPEND_SYSTEM.md"
+    ]
+
+
+def test_codex_supports_claude_implement_without_delegating_reasoning():
+    instructions = (
+        Path(__file__).resolve().parents[1] / ".codex" / "AGENTS.md"
+    ).read_text()
+
+    assert "claude-implement" in instructions
+    assert "bounded implementation" in instructions
+    assert "Keep reasoning, planning, judgment, and review inline" in instructions
+    assert "Sonnet 5" not in instructions
+    assert "Opus 4.8" not in instructions
+    assert "codex-implement" not in instructions
+
+
 def test_same_location_detects_paths_reached_through_symlinked_parent(tmp_path):
     dev = load_dev_module()
     source_root = tmp_path / "source"
