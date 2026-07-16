@@ -28,9 +28,11 @@ one-line reason.
   conclusion.
 - **Nontrivial diff review → Codex review.** Use GPT-5.6 Sol with high
   reasoning through the codex-review skill, then verify every finding.
-- **Bounded implementation → Codex implementation.** Crisp spec, objective
-  done-criteria, and no taste or conversational judgment: use GPT-5.6 Sol
-  with medium reasoning through the codex-implement skill.
+- **Bounded, mechanical implementation → Codex implementation.** When the
+  spec is crisp, done-criteria are objective, and the task needs no taste or
+  conversational judgment, use GPT-5.6 Sol with medium reasoning through the
+  codex-implement skill. Do not treat Codex as the default for every
+  implementation; choose the delegate based on the task shape.
 - **Bulk input, conclusion-only output → Codex.** Delegate logs, PDFs,
   specs, diffs over ~500 lines, and bulk mechanical analysis to GPT-5.6 Sol.
 - **Runtime / UI / computer-use verification → Codex** with medium reasoning
@@ -39,13 +41,15 @@ one-line reason.
   through the claude-implement skill. Good fits include classification,
   extraction, concise summaries, simple transformations, and bounded subagent
   work where speed matters.
-- **Well-defined, medium-length task → Claude Sonnet 5** through the
-  claude-implement skill. Sonnet is the balanced Claude delegate for coherent
-  tasks with a clear outcome.
-- **Longer or more demanding delegated task → Claude Opus 4.8** through the
-  claude-implement skill. Escalate when the task needs deeper reasoning,
-  stronger judgment, or greater reliability. Taste-sensitive work includes
-  API/SDK design, UI/UX, naming, copy, and exploratory implementation.
+- **Well-defined, medium-length task or implementation → Claude Sonnet 5**
+  through the claude-implement skill. Sonnet is the default Claude delegate
+  for coherent implementation tasks with a clear outcome and moderate
+  complexity.
+- **Long or agentic implementation → Claude Opus 4.8** through the
+  claude-implement skill. Prefer Opus when implementation requires sustained
+  work across many files, repeated tool use, or a large context. Do not route
+  to Opus merely because a task needs the strongest reasoning or judgment;
+  use Codex for hard reasoning and Fable for highest-taste work.
 - **Must-not-leave-machine or offline → Ollama** (also
   `codex exec --oss --local-provider ollama`) for summaries,
   classification, and private data.
@@ -64,11 +68,12 @@ and taste.
   bulk analysis, and other well-specified work.
 - **GPT-5.6 Sol, high reasoning** — independent reviews and second opinions.
 - **Sonnet 5** — default Claude delegate for well-defined, medium-length
-  tasks; faster and cheaper, with capability close to Opus 4.8.
-- **Opus 4.8** — escalation for complex agentic coding, deep reasoning,
-  judgment-heavy work, and tasks where getting it right matters most.
-- **Fable** — highest-taste work and orchestration when Opus still misses the
-  bar.
+  tasks and implementations; faster and cheaper, with capability close to
+  Opus 4.8.
+- **Opus 4.8** — implementation workhorse for long, multi-file, and agentic
+  coding tasks where sustained execution and context capacity matter; not the
+  default choice for the hardest reasoning.
+- **Fable** — highest-taste work and orchestration.
 - **Haiku 4.5** — fast, inexpensive classification, extraction, summarization,
   simple transformations, and bounded subagent tasks. Do not use it when the
   task needs sustained reasoning or taste.
