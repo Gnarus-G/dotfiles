@@ -4,7 +4,7 @@ return {
   version = false,
   build = "make",
   opts = {
-    provider = "codex",
+    provider = "claude-code",
     mode = "agentic",
     acp_providers = {
       codex = {
