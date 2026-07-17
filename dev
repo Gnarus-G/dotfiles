@@ -8,23 +8,30 @@ from pathlib import Path
 DOTFILES = Path(__file__).resolve().parent
 HOME = Path.home()
 
+def compose_skills(source_root: str, target_roots: tuple[str, ...]):
+    """Map one immutable skill set into each consumer-specific directory."""
+    source_dir = DOTFILES / source_root
+    return {
+        f"{source_root}/{skill.name}": [
+            f"{target_root}/{skill.name}" for target_root in target_roots
+        ]
+        for skill in sorted(source_dir.iterdir())
+        if skill.is_dir()
+    }
+
+
+# Canonical skill sets are composed into consumer directories. Shared skills
+# have no host-specific policy; host-only skills live in a separate source set.
+SKILL_LINKS = {
+    **compose_skills(".agents/skills", (".agents/skills", ".claude/skills")),
+    **compose_skills(".claude.only/skills", (".claude/skills",)),
+    **compose_skills(".codex.only/skills", (".agents/skills",)),
+}
+
 # source dir (relative to dotfiles repo) -> list of symlink targets (relative to ~)
 # Most map 1:1 to the same relative path under ~.
 LINKS: dict[str, list[str]] = {
-    # ~/.agents/skills is a real dir holding per-skill symlinks into the repo.
-    **{
-        f".agents/skills/{d.name}": [
-            f".agents/skills/{d.name}",
-            *([] if d.name.startswith("claude-") else [f".claude/skills/{d.name}"]),
-        ]
-        for d in sorted((DOTFILES / ".agents" / "skills").iterdir())
-        if d.is_dir()
-    },
-    **{
-        f".claude/skills/{d.name}": [f".claude/skills/{d.name}"]
-        for d in sorted((DOTFILES / ".claude" / "skills").iterdir())
-        if d.is_dir()
-    },
+    **SKILL_LINKS,
     ".config/nvim": [".config/nvim"],
     ".config/opencode": [".config/opencode"],
     ".claude/CLAUDE.md": [".claude/CLAUDE.md"],
@@ -149,6 +156,30 @@ def is_correct_link(source: Path, target: Path) -> bool:
     return target.is_symlink() and target.resolve() == source.resolve()
 
 
+def symlink_destination(target: Path) -> Path:
+    """Return a symlink's lexical absolute destination without requiring it to exist."""
+    destination = Path(os.readlink(target))
+    if not destination.is_absolute():
+        destination = target.parent / destination
+    return destination.absolute()
+
+
+def points_within(target: Path, root: Path) -> bool:
+    """Check whether a symlink lexically points within root."""
+    if not target.is_symlink():
+        return False
+    try:
+        symlink_destination(target).relative_to(root.absolute())
+        return True
+    except ValueError:
+        return False
+
+
+def is_stale_dotfiles_link(target: Path) -> bool:
+    """Check whether a dangling symlink points into this dotfiles repository."""
+    return target.is_symlink() and not target.exists() and points_within(target, DOTFILES)
+
+
 def _walk_files(root: Path):
     """Yield every file under root, following symlinks but not descending into dirs that are symlinks (we only want real files)."""
     if root.is_file() and not root.is_symlink():
@@ -208,6 +239,14 @@ def main():
                 print(f"  ln  {dst_rel}")
                 continue
 
+            # A source-set move can leave a managed target dangling. Relink it
+            # without prompting; the repository remains the source of truth.
+            if is_stale_dotfiles_link(target):
+                remove(target)
+                link(source, target)
+                print(f"  ln  {dst_rel} (relinked moved source)")
+                continue
+
             # Target is a hardlink farm pointing at the source — the data is
             # already in the dotfiles repo. Replace the target with a real
             # symlink; nothing is lost.
@@ -245,28 +284,42 @@ def sync_opencode_skills():
         return
 
     target_dir.mkdir(parents=True, exist_ok=True)
+    shared_skills = {
+        skill_dir.name: skill_dir
+        for skill_dir in source_dir.iterdir()
+        if skill_dir.is_dir() and skill_dir.name not in EXCLUDED_SKILLS
+    }
 
-    for skill_dir in source_dir.iterdir():
-        if not skill_dir.is_dir():
+    # Reconciliation makes the target a projection of the shared source set.
+    # Preserve user-owned files and links to sources outside this repository.
+    for target_skill in target_dir.iterdir():
+        if target_skill.name in shared_skills:
             continue
+        if points_within(target_skill, source_dir):
+            target_skill.unlink()
+            print(f"  rm  .config/opencode/skills/{target_skill.name} (not shared)")
 
-        skill_name = skill_dir.name
-
-        # Skip excluded skills (have OpenCode plugin equivalents)
-        if skill_name in EXCLUDED_SKILLS:
-            print(f"  --  .config/opencode/skills/{skill_name} (excluded)")
-            continue
-
+    for skill_name, skill_dir in shared_skills.items():
         target_skill = target_dir / skill_name
 
-        # Skip if target already exists (don't overwrite)
-        if target_skill.exists() or target_skill.is_symlink():
+        if is_correct_link(skill_dir, target_skill):
             print(f"  ok  .config/opencode/skills/{skill_name}")
             continue
 
-        # Create symlink for this skill
+        if points_within(target_skill, source_dir):
+            target_skill.unlink()
+
+        # Preserve anything not managed by this projection.
+        if target_skill.exists() or target_skill.is_symlink():
+            print(f"  --  .config/opencode/skills/{skill_name} (unmanaged conflict)")
+            continue
+
         target_skill.symlink_to(skill_dir)
         print(f"  ln  .config/opencode/skills/{skill_name}")
+
+    for skill_name in sorted(EXCLUDED_SKILLS):
+        if (source_dir / skill_name).is_dir():
+            print(f"  --  .config/opencode/skills/{skill_name} (excluded)")
 
 
 if __name__ == "__main__":

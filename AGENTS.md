@@ -25,7 +25,18 @@ Configuration for AI coding assistants (OpenCode, Claude Code, etc). The `dev` s
 
 Skills are specialized instructions loaded by AI assistants for specific tasks.
 
-### Adding Skills
+### Skill Source Sets
+
+| Source                    | Consumers                    |
+| ------------------------- | ---------------------------- |
+| `.agents/skills/`         | Claude, Codex, and OpenCode  |
+| `.claude.only/skills/`    | Claude only                  |
+| `.codex.only/skills/`     | Codex-compatible agents only |
+
+OpenCode disables automatic `.claude`/`.agents` discovery and receives a
+reconciled projection of shared skills under `~/.config/opencode/skills`.
+
+### Adding Shared Skills
 
 1. Create directory: `.agents/skills/<skill-name>/`
 2. Add `SKILL.md` with YAML frontmatter:
@@ -43,11 +54,13 @@ Skills are specialized instructions loaded by AI assistants for specific tasks.
 
 ## Files
 
-| File        | Purpose                                    |
-| ----------- | ------------------------------------------ |
-| `AGENTS.md` | Instructions for AI assistants (this file) |
-| `system.md` | System-level configuration for OpenCode    |
-| `dev`       | Symlink script                             |
+| File                         | Purpose                                    |
+| ---------------------------- | ------------------------------------------ |
+| `AGENTS.md`                  | Project instructions for AI assistants     |
+| `.claude/CLAUDE.md`          | Claude-only system instructions            |
+| `.codex/AGENTS.md`           | Codex-only system instructions             |
+| `.config/opencode/system.md` | OpenCode and Pi system instructions        |
+| `dev`                        | Symlink and skill composition script       |
 
 ## Guidelines
 

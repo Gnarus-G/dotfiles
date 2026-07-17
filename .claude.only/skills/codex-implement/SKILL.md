@@ -8,8 +8,8 @@ description: Delegate a bounded, well-specified implementation task to the Codex
 Delegate bounded implementation to `codex exec` (GPT-5.6 Sol, medium reasoning). Good fits:
 mechanical migrations, implement-to-spec, bulk repetitive edits.
 Bad fits: anything needing taste (API design, naming, UX), hot-path code, or
-exploratory work where the spec emerges while coding. Keep precision work
-inline; route taste-sensitive implementation through claude-implement.
+exploratory work where the spec emerges while coding. Keep precision and
+taste-sensitive work inline.
 
 ## Workflow
 
