@@ -35,9 +35,9 @@ one-line reason.
   specs, diffs over ~500 lines, and bulk mechanical analysis to GPT-5.6 Sol.
 - **Runtime / UI / computer-use verification → Codex** with medium reasoning
   through the codex-computer-use skill.
-- **Taste-sensitive or judgment-heavy implementation → Claude Opus 4.8**
-  through the claude-implement skill. This includes API/SDK design, UI/UX,
-  naming, copy, and exploratory work where the spec emerges while coding.
+- **Taste-sensitive or judgment-heavy implementation → keep inline.** This
+  includes API/SDK design, UI/UX, naming, copy, and exploratory work where the
+  spec emerges while coding.
 - **Must-not-leave-machine or offline → Ollama** (also
   `codex exec --oss --local-provider ollama`) for summaries,
   classification, and private data.
@@ -63,8 +63,8 @@ and taste.
   simple transformations, and bounded subagent tasks. Do not use it when the
   task needs sustained reasoning or taste.
 
-Skills: codex-computer-use, codex-second-opinion, codex-review,
-codex-implement, and claude-implement.
+Skills: codex-computer-use, codex-second-opinion, codex-review, and
+codex-implement.
 
 ### Mechanics
 
@@ -114,9 +114,6 @@ pad short replies with headings or section scaffolding. Reserve explicit
 sections (Summary / Details / Example) for genuinely long technical answers.
 When forced to choose, favor scanability and clarity over completeness; push
 less-important detail into an optional closing note rather than the main flow.
-
-This complements the caveman skill: caveman cuts tokens when invoked; this
-governs structure and layout at all times.
 
 ## Confidence
 

@@ -200,7 +200,8 @@ if [ -f "$HOME/.x-cmd.root/X" ]; then
   x() { unset -f x; . "$HOME/.x-cmd.root/X"; x "$@"; }
 fi
 
-# opencode
+# OpenCode receives its curated skills from ~/.config/opencode/skills only.
+export OPENCODE_DISABLE_CLAUDE_CODE_SKILLS=true
 export PATH=$HOME/.opencode/bin:$PATH
 
 # local secrets and machine-specific overrides
