@@ -62,6 +62,10 @@ reconciled projection of shared skills under `~/.config/opencode/skills`.
 | `.config/opencode/system.md` | OpenCode and Pi system instructions        |
 | `dev`                        | Symlink and skill composition script       |
 
+## Response Length — **ONE SENTENCE BY DEFAULT**
+
+**Unless the user explicitly requests otherwise, every user-facing response must be exactly one concise sentence.** Do not add explanations, summaries, progress narration, headings, or follow-up offers; this default is mandatory and takes precedence over general readability guidance.
+
 ## Guidelines
 
 - Make minimal, targeted changes
