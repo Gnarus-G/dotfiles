@@ -35,6 +35,7 @@ LINKS: dict[str, list[str]] = {
     ".config/nvim": [".config/nvim"],
     ".config/opencode": [".config/opencode"],
     ".claude/CLAUDE.md": [".claude/CLAUDE.md"],
+    ".claude/output-styles": [".claude/output-styles"],
     ".config/opencode/system.md": [".pi/agent/APPEND_SYSTEM.md"],
     ".codex/AGENTS.md": [".codex/AGENTS.md"],
     ".pi/agent/extensions": [".pi/agent/extensions"],
