@@ -1,6 +1,0 @@
-#!/bin/sh
-
-node_bin=$(proto --config-mode global bin node) || exit
-proto_node_bin=${node_bin%/*}
-
-PATH="$proto_node_bin:$PATH" exec "$proto_node_bin/codex" "$@"
