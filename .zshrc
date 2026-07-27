@@ -121,11 +121,6 @@ path=($HOME/go/bin $path)
 export MAKEFLAGS="-j16"
 export LLVM="1"
 
-# pnpm
-export PNPM_HOME="/home/gnarus/.local/share/pnpm"
-export PATH="$PNPM_HOME:$PATH"
-# pnpm end
-
 # Set personal aliases, overriding those provided by oh-my-zsh libs,
 # plugins, and themes. Aliases can be placed here, though oh-my-zsh
 # users are encouraged to define aliases within the ZSH_CUSTOM folder.
@@ -213,6 +208,20 @@ fi
 _pi_node_bin="$HOME/.local/share/pi-node/node-v22.22.3-linux-x64/bin"
 path=(${path:#$_pi_node_bin})
 unset _pi_node_bin
+
+# Keep Proto authoritative after plugins, direnv, and local overrides mutate PATH.
+typeset -U path PATH
+PROTO_GLOBAL_NODE_BIN="${$(proto --config-mode global bin node 2> /dev/null):h}"
+path=(
+  "$PROTO_HOME/shims"
+  "$PROTO_HOME/bin"
+  "$PROTO_GLOBAL_NODE_BIN"
+  "$HOME/.opencode/bin"
+  "$HOME/.local/bin"
+  "$HOME/.cargo/bin"
+  "$BUN_INSTALL/bin"
+  $path
+)
 
 # Pi: use Pi's bundled Node only while running Pi.
 pi() {
