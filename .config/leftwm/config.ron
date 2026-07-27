@@ -36,10 +36,11 @@
     scratchpad: [
         (name: "Whatever", value: "ghostty", args: ["-e", "tmux", "new-session", "-As", "Whatever"], x: .25, y: .25, height: .50, width: .50),
         (name: "Work", value: "ghostty", args: ["-e", "tmux", "new-session", "-As", "Work"], x: .10, y: .10, height: .80, width: .80),
-        (name: "todos", value: ".local/bin/mynd", x: .35, y: .25, height: .50, width: .30),
+        (name: "todos", value: "/usr/bin/chromium", args: ["--profile-directory=Default", "--app-id=hcenedefeplinmokonjlppanijfggjja", "--window-size=1000,720"], x: .35, y: .25, height: .50, width: .30),
         (name: "udo", value: "ghostty", args: ["-e", "udo", "watch"], x: .15, y: .15, height: .70, width: .70),
     ],
     window_rules: [
+        (window_class: "crx_hcenedefeplinmokonjlppanijfggjja", spawn_floating: true),
         (window_title: "Picture-in-Picture", spawn_as_type: Normal),
     ],
     disable_current_tag_swap: true,
