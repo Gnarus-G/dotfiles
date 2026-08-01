@@ -119,3 +119,54 @@ def test_same_location_detects_paths_reached_through_symlinked_parent(tmp_path):
     linked_root.symlink_to(source_root)
 
     assert dev.same_location(source, linked_root / "tts")
+
+
+def test_compose_skills_ignores_symlinked_directories(tmp_path):
+    dev = load_dev_module()
+    dev.DOTFILES = tmp_path / "dotfiles"
+    shared = dev.DOTFILES / ".agents" / "skills"
+    shared.mkdir(parents=True)
+    (shared / "common").mkdir()
+    external = tmp_path / "external"
+    external.mkdir()
+    (shared / "injected").symlink_to(external)
+
+    assert dev.compose_skills(".agents/skills", (".agents/skills",)) == {
+        ".agents/skills/common": [".agents/skills/common"]
+    }
+
+
+def test_prepare_skill_targets_replaces_legacy_link_and_cleans_pollution(tmp_path):
+    dev = load_dev_module()
+    dev.DOTFILES = tmp_path / "dotfiles"
+    dev.HOME = tmp_path / "home"
+    shared = dev.DOTFILES / ".agents" / "skills"
+    claude_only = dev.DOTFILES / ".claude.only" / "skills" / "private"
+    shared.mkdir(parents=True)
+    claude_only.mkdir(parents=True)
+    (shared / "private").symlink_to(claude_only)
+    legacy = dev.HOME / ".claude" / "skills"
+    legacy.parent.mkdir(parents=True)
+    legacy.symlink_to(shared)
+
+    dev.prepare_skill_targets()
+
+    assert legacy.is_dir() and not legacy.is_symlink()
+    assert not (shared / "private").is_symlink()
+
+
+def test_reconcile_skill_targets_removes_only_obsolete_managed_links(tmp_path):
+    dev = load_dev_module()
+    dev.DOTFILES = tmp_path / "dotfiles"
+    dev.HOME = tmp_path / "home"
+    target = dev.HOME / ".agents" / "skills"
+    target.mkdir(parents=True)
+    stale_source = dev.DOTFILES / ".agents" / "skills" / "stale"
+    external_source = tmp_path / "external"
+    (target / "stale").symlink_to(stale_source)
+    (target / "external").symlink_to(external_source)
+
+    dev.reconcile_skill_targets()
+
+    assert not (target / "stale").is_symlink()
+    assert (target / "external").is_symlink()

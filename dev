@@ -16,7 +16,7 @@ def compose_skills(source_root: str, target_roots: tuple[str, ...]):
             f"{target_root}/{skill.name}" for target_root in target_roots
         ]
         for skill in sorted(source_dir.iterdir())
-        if skill.is_dir()
+        if skill.is_dir() and not skill.is_symlink()
     }
 
 
@@ -144,6 +144,43 @@ def link(source: Path, target: Path):
     """Create a symlink: target -> source."""
     target.parent.mkdir(parents=True, exist_ok=True)
     target.symlink_to(source)
+
+
+def prepare_skill_targets():
+    """Replace legacy directory-level links before composing individual skills."""
+    for relative_target in (".agents/skills", ".claude/skills"):
+        target = HOME / relative_target
+        if target.is_symlink() and points_within(target, DOTFILES):
+            target.unlink()
+            target.mkdir(parents=True)
+            print(f"  dir {relative_target} (replaced legacy symlink)")
+
+    # A legacy ~/.claude/skills link allowed Claude-only skills to be written
+    # into the canonical shared source. They belong only in the consumer tree.
+    shared_dir = DOTFILES / ".agents" / "skills"
+    claude_only_dir = DOTFILES / ".claude.only" / "skills"
+    for skill in shared_dir.iterdir():
+        if skill.is_symlink() and points_within(skill, claude_only_dir):
+            skill.unlink()
+            print(f"  rm  .agents/skills/{skill.name} (misplaced Claude-only skill)")
+
+
+def reconcile_skill_targets():
+    """Remove obsolete links managed by an earlier skill composition."""
+    for relative_target in (".agents/skills", ".claude/skills"):
+        target_dir = HOME / relative_target
+        if not target_dir.is_dir():
+            continue
+        expected_names = {
+            Path(target).name
+            for targets in LINKS.values()
+            for target in targets
+            if str(Path(target).parent) == relative_target
+        }
+        for skill in target_dir.iterdir():
+            if skill.name not in expected_names and points_within(skill, DOTFILES):
+                skill.unlink()
+                print(f"  rm  {relative_target}/{skill.name} (not composed)")
 
 
 def same_location(left: Path, right: Path) -> bool:
@@ -325,5 +362,7 @@ def sync_opencode_skills():
 
 
 if __name__ == "__main__":
+    prepare_skill_targets()
     main()
+    reconcile_skill_targets()
     sync_opencode_skills()
