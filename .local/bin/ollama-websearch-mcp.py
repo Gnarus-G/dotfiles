@@ -15,7 +15,6 @@ Environment:
 
 from __future__ import annotations
 
-import asyncio
 import logging
 import os
 from typing import Any, Dict
@@ -24,17 +23,7 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name
 log = logging.getLogger("ollama-websearch-mcp")
 
 from ollama import Client
-
-try:
-  from mcp.server.fastmcp import FastMCP
-
-  _FASTMCP_AVAILABLE = True
-except Exception:
-  _FASTMCP_AVAILABLE = False
-
-if not _FASTMCP_AVAILABLE:
-  from mcp.server import Server
-  from mcp.server.stdio import stdio_server
+from mcp.server import MCPServer
 
 
 if "OLLAMA_API_KEY" not in os.environ and "OLLAMA_WEBSEARCH_API_KEY" in os.environ:
@@ -61,72 +50,39 @@ def _web_fetch_impl(url: str) -> Dict[str, Any]:
   return data
 
 
-if _FASTMCP_AVAILABLE:
-  log.info("Using FastMCP backend")
-  app = FastMCP('ollama-search-fetch')
+app = MCPServer('ollama-search-fetch')
 
-  @app.tool()
-  def web_search(query: str, max_results: int = 3) -> Dict[str, Any]:
-    """
-    Perform a web search using Ollama's hosted search API.
 
-    Args:
-      query: The search query to run.
-      max_results: Maximum results to return (default: 3).
+@app.tool()
+def web_search(query: str, max_results: int = 3) -> Dict[str, Any]:
+  """
+  Perform a web search using Ollama's hosted search API.
 
-    Returns:
-      JSON-serializable dict matching ollama.WebSearchResponse.model_dump()
-    """
+  Args:
+    query: The search query to run.
+    max_results: Maximum results to return (default: 3).
 
-    return _web_search_impl(query=query, max_results=max_results)
+  Returns:
+    JSON-serializable dict matching ollama.WebSearchResponse.model_dump()
+  """
 
-  @app.tool()
-  def web_fetch(url: str) -> Dict[str, Any]:
-    """
-    Fetch the content of a web page for the provided URL.
+  return _web_search_impl(query=query, max_results=max_results)
 
-    Args:
-      url: The absolute URL to fetch.
 
-    Returns:
-      JSON-serializable dict matching ollama.WebFetchResponse.model_dump()
-    """
+@app.tool()
+def web_fetch(url: str) -> Dict[str, Any]:
+  """
+  Fetch the content of a web page for the provided URL.
 
-    return _web_fetch_impl(url=url)
+  Args:
+    url: The absolute URL to fetch.
 
-  if __name__ == '__main__':
-    app.run()
+  Returns:
+    JSON-serializable dict matching ollama.WebFetchResponse.model_dump()
+  """
 
-else:
-  log.info("Using low-level Server backend (FastMCP unavailable)")
-  server = Server('ollama-search-fetch')
+  return _web_fetch_impl(url=url)
 
-  @server.tool()
-  async def web_search(query: str, max_results: int = 3) -> Dict[str, Any]:
-    """
-    Perform a web search using Ollama's hosted search API.
 
-    Args:
-      query: The search query to run.
-      max_results: Maximum results to return (default: 3).
-    """
-
-    return await asyncio.to_thread(_web_search_impl, query, max_results)
-
-  @server.tool()
-  async def web_fetch(url: str) -> Dict[str, Any]:
-    """
-    Fetch the content of a web page for the provided URL.
-
-    Args:
-      url: The absolute URL to fetch.
-    """
-
-    return await asyncio.to_thread(_web_fetch_impl, url)
-
-  async def _main() -> None:
-    async with stdio_server() as (read, write):
-      await server.run(read, write)
-
-  if __name__ == '__main__':
-    asyncio.run(_main())
+if __name__ == '__main__':
+  app.run()
