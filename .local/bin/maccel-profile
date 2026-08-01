@@ -1,0 +1,161 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+profiles_dir="${MACCEL_PROFILE_DIR:-${XDG_CONFIG_HOME:-$HOME/.config}/maccel/profiles}"
+maccel_bin="${MACCEL_BIN:-maccel}"
+
+usage() {
+  cat <<'EOF'
+Usage: maccel-profile backup NAME
+       maccel-profile restore NAME
+       maccel-profile list
+EOF
+}
+
+profile_path() {
+  local name=$1
+
+  if [[ ! $name =~ ^[[:alnum:]][[:alnum:]_.-]*$ || $name == *.json ]]; then
+    printf 'Invalid profile name: %s\n' "$name" >&2
+    exit 2
+  fi
+
+  printf '%s/%s.json\n' "$profiles_dir" "$name"
+}
+
+current_mode() {
+  local output
+  output=$("$maccel_bin" get mode)
+
+  case ${output%%$'\n'*} in
+    "Linear Acceleration") printf 'Linear\n' ;;
+    "Natural (w/ Gain)") printf 'Natural\n' ;;
+    "Synchronous") printf 'Synchronous\n' ;;
+    "No Acceleration") printf 'NoAccel\n' ;;
+    *) printf 'Unknown maccel mode: %s\n' "${output%%$'\n'*}" >&2; return 1 ;;
+  esac
+}
+
+backup() {
+  local name=$1 file mode tmp
+  file=$(profile_path "$name")
+  mode=$(current_mode)
+  mkdir -p "$profiles_dir"
+  tmp=$(mktemp "$profiles_dir/.${name}.XXXXXX")
+  trap 'rm -f "$tmp"' RETURN
+
+  jq -n \
+    --arg name "$name" \
+    --arg mode "$mode" \
+    --arg created_at "$(date --utc +%Y-%m-%dT%H:%M:%SZ)" \
+    --argjson output_cap "$("$maccel_bin" get param output-cap)" \
+    --argjson smooth "$("$maccel_bin" get param smooth)" \
+    --argjson input_dpi "$("$maccel_bin" get param input-dpi)" \
+    --argjson offset "$("$maccel_bin" get param offset-linear)" \
+    --argjson accel "$("$maccel_bin" get param accel)" \
+    --argjson sens_mult "$("$maccel_bin" get param sens-mult)" \
+    --argjson yx_ratio "$("$maccel_bin" get param yx-ratio)" \
+    --argjson decay_rate "$("$maccel_bin" get param decay-rate)" \
+    --argjson limit "$("$maccel_bin" get param limit)" \
+    --argjson gamma "$("$maccel_bin" get param gamma)" \
+    --argjson sync_speed "$("$maccel_bin" get param sync-speed)" \
+    --argjson angle_rotation "$("$maccel_bin" get param angle-rotation)" \
+    --argjson motivity "$("$maccel_bin" get param motivity)" \
+    '{
+      Name: $name,
+      Mode: $mode,
+      Params: {
+        OUTPUT_CAP: $output_cap,
+        SMOOTH: $smooth,
+        INPUT_DPI: $input_dpi,
+        OFFSET: $offset,
+        ACCEL: $accel,
+        SENS_MULT: $sens_mult,
+        YX_RATIO: $yx_ratio,
+        DECAY_RATE: $decay_rate,
+        LIMIT: $limit,
+        GAMMA: $gamma,
+        SYNC_SPEED: $sync_speed,
+        ANGLE_ROTATION: $angle_rotation,
+        MOTIVITY: $motivity
+      },
+      CreatedAt: $created_at
+    }' >"$tmp"
+
+  mv "$tmp" "$file"
+  trap - RETURN
+  printf 'Backed up %s\n' "$file"
+}
+
+restore() {
+  local name=$1 file mode key param value
+  local -a params=(
+    OUTPUT_CAP output-cap
+    SMOOTH smooth
+    INPUT_DPI input-dpi
+    OFFSET offset-linear
+    ACCEL accel
+    SENS_MULT sens-mult
+    YX_RATIO yx-ratio
+    DECAY_RATE decay-rate
+    LIMIT limit
+    GAMMA gamma
+    SYNC_SPEED sync-speed
+    ANGLE_ROTATION angle-rotation
+    MOTIVITY motivity
+  )
+  file=$(profile_path "$name")
+
+  [[ -f $file ]] || { printf 'Profile not found: %s\n' "$file" >&2; exit 1; }
+  jq -e '
+    .Mode as $mode
+    | .Params as $params
+    | ($mode | IN("Linear", "Natural", "Synchronous", "NoAccel"))
+      and (["OUTPUT_CAP", "SMOOTH", "INPUT_DPI", "OFFSET", "ACCEL",
+            "SENS_MULT", "YX_RATIO", "DECAY_RATE", "LIMIT", "GAMMA",
+            "SYNC_SPEED", "ANGLE_ROTATION", "MOTIVITY"]
+           | all(. as $key | $params[$key] | type == "number"))
+  ' "$file" >/dev/null || { printf 'Invalid profile: %s\n' "$file" >&2; exit 1; }
+
+  for ((i = 0; i < ${#params[@]}; i += 2)); do
+    key=${params[i]}
+    param=${params[i + 1]}
+    value=$(jq -r --arg key "$key" '.Params[$key]' "$file")
+    "$maccel_bin" set param "$param" -- "$value"
+  done
+
+  mode=$(jq -r '.Mode' "$file")
+  case $mode in
+    Linear) mode=linear ;;
+    Natural) mode=natural ;;
+    Synchronous) mode=synchronous ;;
+    NoAccel) mode=no-accel ;;
+  esac
+  "$maccel_bin" set mode "$mode"
+  printf 'Restored %s\n' "$file"
+}
+
+case ${1:-} in
+  backup)
+    [[ $# == 2 ]] || { usage >&2; exit 2; }
+    backup "$2"
+    ;;
+  restore)
+    [[ $# == 2 ]] || { usage >&2; exit 2; }
+    restore "$2"
+    ;;
+  list)
+    [[ $# == 1 ]] || { usage >&2; exit 2; }
+    if [[ -d $profiles_dir ]]; then
+      for file in "$profiles_dir"/*.json; do
+        [[ -e $file ]] || break
+        basename "$file" .json
+      done
+    fi
+    ;;
+  *)
+    usage >&2
+    exit 2
+    ;;
+esac
