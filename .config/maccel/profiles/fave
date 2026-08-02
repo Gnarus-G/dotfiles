@@ -1,0 +1,14 @@
+mode synchronous
+output-cap 0E-9
+smooth 0.500000000
+input-dpi 1600.000000000
+offset-linear 0E-9
+accel 5.000000000
+sens-mult 0.149999999
+yx-ratio 2.000000000
+decay-rate 0.100000000
+limit 1.500000000
+gamma 1.000000000
+sync-speed 16.000000000
+angle-rotation -4.000000000
+motivity 2.000000000

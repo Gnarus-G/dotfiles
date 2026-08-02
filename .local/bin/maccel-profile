@@ -1,161 +1,149 @@
-#!/usr/bin/env bash
+#!/usr/bin/env python3
 
-set -euo pipefail
+import argparse
+import math
+import os
+import re
+import subprocess
+import tempfile
+from pathlib import Path
 
-profiles_dir="${MACCEL_PROFILE_DIR:-${XDG_CONFIG_HOME:-$HOME/.config}/maccel/profiles}"
-maccel_bin="${MACCEL_BIN:-maccel}"
 
-usage() {
-  cat <<'EOF'
-Usage: maccel-profile backup NAME
-       maccel-profile restore NAME
-       maccel-profile list
-EOF
+PARAMS = (
+    "output-cap",
+    "smooth",
+    "input-dpi",
+    "offset-linear",
+    "accel",
+    "sens-mult",
+    "yx-ratio",
+    "decay-rate",
+    "limit",
+    "gamma",
+    "sync-speed",
+    "angle-rotation",
+    "motivity",
+)
+MODES = {
+    "Linear Acceleration": "linear",
+    "Natural (w/ Gain)": "natural",
+    "Synchronous": "synchronous",
+    "No Acceleration": "no-accel",
 }
+NAME_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]*$")
 
-profile_path() {
-  local name=$1
 
-  if [[ ! $name =~ ^[[:alnum:]][[:alnum:]_.-]*$ || $name == *.json ]]; then
-    printf 'Invalid profile name: %s\n' "$name" >&2
-    exit 2
-  fi
+def run_maccel(*args: str) -> str:
+    binary = os.environ.get("MACCEL_BIN", "maccel")
+    return subprocess.run(
+        (binary, *args), check=True, text=True, capture_output=True
+    ).stdout.strip()
 
-  printf '%s/%s.json\n' "$profiles_dir" "$name"
-}
 
-current_mode() {
-  local output
-  output=$("$maccel_bin" get mode)
+def profile_dir() -> Path:
+    configured = os.environ.get("MACCEL_PROFILE_DIR")
+    if configured:
+        return Path(configured).expanduser()
+    config_home = Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config"))
+    return config_home / "maccel" / "profiles"
 
-  case ${output%%$'\n'*} in
-    "Linear Acceleration") printf 'Linear\n' ;;
-    "Natural (w/ Gain)") printf 'Natural\n' ;;
-    "Synchronous") printf 'Synchronous\n' ;;
-    "No Acceleration") printf 'NoAccel\n' ;;
-    *) printf 'Unknown maccel mode: %s\n' "${output%%$'\n'*}" >&2; return 1 ;;
-  esac
-}
 
-backup() {
-  local name=$1 file mode tmp
-  file=$(profile_path "$name")
-  mode=$(current_mode)
-  mkdir -p "$profiles_dir"
-  tmp=$(mktemp "$profiles_dir/.${name}.XXXXXX")
-  trap 'rm -f "$tmp"' RETURN
+def profile_path(name: str) -> Path:
+    if not NAME_PATTERN.fullmatch(name):
+        raise ValueError(f"invalid profile name: {name}")
+    return profile_dir() / name
 
-  jq -n \
-    --arg name "$name" \
-    --arg mode "$mode" \
-    --arg created_at "$(date --utc +%Y-%m-%dT%H:%M:%SZ)" \
-    --argjson output_cap "$("$maccel_bin" get param output-cap)" \
-    --argjson smooth "$("$maccel_bin" get param smooth)" \
-    --argjson input_dpi "$("$maccel_bin" get param input-dpi)" \
-    --argjson offset "$("$maccel_bin" get param offset-linear)" \
-    --argjson accel "$("$maccel_bin" get param accel)" \
-    --argjson sens_mult "$("$maccel_bin" get param sens-mult)" \
-    --argjson yx_ratio "$("$maccel_bin" get param yx-ratio)" \
-    --argjson decay_rate "$("$maccel_bin" get param decay-rate)" \
-    --argjson limit "$("$maccel_bin" get param limit)" \
-    --argjson gamma "$("$maccel_bin" get param gamma)" \
-    --argjson sync_speed "$("$maccel_bin" get param sync-speed)" \
-    --argjson angle_rotation "$("$maccel_bin" get param angle-rotation)" \
-    --argjson motivity "$("$maccel_bin" get param motivity)" \
-    '{
-      Name: $name,
-      Mode: $mode,
-      Params: {
-        OUTPUT_CAP: $output_cap,
-        SMOOTH: $smooth,
-        INPUT_DPI: $input_dpi,
-        OFFSET: $offset,
-        ACCEL: $accel,
-        SENS_MULT: $sens_mult,
-        YX_RATIO: $yx_ratio,
-        DECAY_RATE: $decay_rate,
-        LIMIT: $limit,
-        GAMMA: $gamma,
-        SYNC_SPEED: $sync_speed,
-        ANGLE_ROTATION: $angle_rotation,
-        MOTIVITY: $motivity
-      },
-      CreatedAt: $created_at
-    }' >"$tmp"
 
-  mv "$tmp" "$file"
-  trap - RETURN
-  printf 'Backed up %s\n' "$file"
-}
+def validate_number(value: str) -> None:
+    try:
+        valid = math.isfinite(float(value))
+    except ValueError:
+        valid = False
+    if not valid:
+        raise ValueError(f"invalid numeric value: {value}")
 
-restore() {
-  local name=$1 file mode key param value
-  local -a params=(
-    OUTPUT_CAP output-cap
-    SMOOTH smooth
-    INPUT_DPI input-dpi
-    OFFSET offset-linear
-    ACCEL accel
-    SENS_MULT sens-mult
-    YX_RATIO yx-ratio
-    DECAY_RATE decay-rate
-    LIMIT limit
-    GAMMA gamma
-    SYNC_SPEED sync-speed
-    ANGLE_ROTATION angle-rotation
-    MOTIVITY motivity
-  )
-  file=$(profile_path "$name")
 
-  [[ -f $file ]] || { printf 'Profile not found: %s\n' "$file" >&2; exit 1; }
-  jq -e '
-    .Mode as $mode
-    | .Params as $params
-    | ($mode | IN("Linear", "Natural", "Synchronous", "NoAccel"))
-      and (["OUTPUT_CAP", "SMOOTH", "INPUT_DPI", "OFFSET", "ACCEL",
-            "SENS_MULT", "YX_RATIO", "DECAY_RATE", "LIMIT", "GAMMA",
-            "SYNC_SPEED", "ANGLE_ROTATION", "MOTIVITY"]
-           | all(. as $key | $params[$key] | type == "number"))
-  ' "$file" >/dev/null || { printf 'Invalid profile: %s\n' "$file" >&2; exit 1; }
+def backup(name: str) -> None:
+    path = profile_path(name)
+    mode_output = run_maccel("get", "mode").splitlines()[0]
+    try:
+        mode = MODES[mode_output]
+    except KeyError as error:
+        raise ValueError(f"unknown maccel mode: {mode_output}") from error
 
-  for ((i = 0; i < ${#params[@]}; i += 2)); do
-    key=${params[i]}
-    param=${params[i + 1]}
-    value=$(jq -r --arg key "$key" '.Params[$key]' "$file")
-    "$maccel_bin" set param "$param" -- "$value"
-  done
+    values = []
+    for param in PARAMS:
+        value = run_maccel("get", "param", param)
+        validate_number(value)
+        values.append((param, value))
 
-  mode=$(jq -r '.Mode' "$file")
-  case $mode in
-    Linear) mode=linear ;;
-    Natural) mode=natural ;;
-    Synchronous) mode=synchronous ;;
-    NoAccel) mode=no-accel ;;
-  esac
-  "$maccel_bin" set mode "$mode"
-  printf 'Restored %s\n' "$file"
-}
+    path.parent.mkdir(parents=True, exist_ok=True)
+    content = "\n".join((f"mode {mode}", *(f"{key} {value}" for key, value in values))) + "\n"
+    with tempfile.NamedTemporaryFile("w", dir=path.parent, delete=False) as file:
+        try:
+            file.write(content)
+            temp_path = Path(file.name)
+        except Exception:
+            Path(file.name).unlink(missing_ok=True)
+            raise
+    temp_path.replace(path)
+    print(f"Backed up {path}")
 
-case ${1:-} in
-  backup)
-    [[ $# == 2 ]] || { usage >&2; exit 2; }
-    backup "$2"
-    ;;
-  restore)
-    [[ $# == 2 ]] || { usage >&2; exit 2; }
-    restore "$2"
-    ;;
-  list)
-    [[ $# == 1 ]] || { usage >&2; exit 2; }
-    if [[ -d $profiles_dir ]]; then
-      for file in "$profiles_dir"/*.json; do
-        [[ -e $file ]] || break
-        basename "$file" .json
-      done
-    fi
-    ;;
-  *)
-    usage >&2
-    exit 2
-    ;;
-esac
+
+def read_profile(path: Path) -> tuple[str, dict[str, str]]:
+    entries: dict[str, str] = {}
+    for line_number, line in enumerate(path.read_text().splitlines(), 1):
+        parts = line.split()
+        if len(parts) != 2 or parts[0] in entries:
+            raise ValueError(f"invalid profile line {line_number}: {line}")
+        entries[parts[0]] = parts[1]
+
+    mode = entries.pop("mode", None)
+    if mode not in MODES.values() or set(entries) != set(PARAMS):
+        raise ValueError(f"invalid profile: {path}")
+    for value in entries.values():
+        validate_number(value)
+    return mode, entries
+
+
+def restore(name: str) -> None:
+    path = profile_path(name)
+    if not path.is_file():
+        raise FileNotFoundError(f"profile not found: {path}")
+    mode, values = read_profile(path)
+    for param in PARAMS:
+        run_maccel("set", "param", param, "--", values[param])
+    run_maccel("set", "mode", mode)
+    print(f"Restored {path}")
+
+
+def list_profiles() -> None:
+    directory = profile_dir()
+    if directory.is_dir():
+        for path in sorted(directory.iterdir()):
+            if path.is_file():
+                print(path.name)
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser()
+    subparsers = parser.add_subparsers(dest="command", required=True)
+    for command in ("backup", "restore"):
+        subparser = subparsers.add_parser(command)
+        subparser.add_argument("name")
+    subparsers.add_parser("list")
+    args = parser.parse_args()
+
+    try:
+        if args.command == "backup":
+            backup(args.name)
+        elif args.command == "restore":
+            restore(args.name)
+        else:
+            list_profiles()
+    except (FileNotFoundError, OSError, subprocess.CalledProcessError, ValueError) as error:
+        parser.exit(1, f"maccel-profile: {error}\n")
+
+
+if __name__ == "__main__":
+    main()
