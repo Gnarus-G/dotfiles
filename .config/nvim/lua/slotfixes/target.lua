@@ -26,6 +26,45 @@ local function selection_covers(node, selection)
   return starts_inside and ends_inside
 end
 
+local function selection_overlaps(node, selection)
+  local start_row, start_col, end_row, end_col = node:range()
+  local starts_before_end = start_row < selection.end_row or
+      (start_row == selection.end_row and start_col < selection.end_col)
+  local ends_after_start = end_row > selection.start_row or
+      (end_row == selection.start_row and end_col > selection.start_col)
+  return starts_before_end and ends_after_start
+end
+
+---@param bufnr integer
+---@param node TSNode
+local function node_size(bufnr, node)
+  local start_row, start_col, end_row, end_col = node:range()
+  local start_offset = vim.api.nvim_buf_get_offset(bufnr, start_row) + start_col
+  local end_offset = vim.api.nvim_buf_get_offset(bufnr, end_row) + end_col
+  return end_offset - start_offset
+end
+
+---@param bufnr integer
+---@param selection table
+---@return TSNode?
+local function largest_covered_node(bufnr, selection)
+  local tree = vim.treesitter.get_parser(bufnr):parse()[1]
+  local stack = { tree:root() }
+  local best
+
+  while #stack > 0 do
+    local node = table.remove(stack)
+    if node:named() and selection_covers(node, selection) then
+      if not best or node_size(bufnr, node) > node_size(bufnr, best) then best = node end
+    elseif selection_overlaps(node, selection) then
+      for child in node:iter_children() do
+        table.insert(stack, child)
+      end
+    end
+  end
+  return best
+end
+
 ---@param bufnr integer
 ---@return table
 local function selection_range(bufnr)
@@ -55,13 +94,7 @@ local function selected_node(bufnr)
     return vim.treesitter.get_node({ bufnr = bufnr })
   end
 
-  local selection = selection_range(bufnr)
-  local cursor = vim.api.nvim_win_get_cursor(0)
-  local node = vim.treesitter.get_node({ bufnr = bufnr, pos = { cursor[1] - 1, cursor[2] } })
-  while node and node:parent() and selection_covers(node:parent(), selection) do
-    node = node:parent()
-  end
-  return node
+  return largest_covered_node(bufnr, selection_range(bufnr))
 end
 
 ---@param bufnr integer
