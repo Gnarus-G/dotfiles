@@ -17,6 +17,7 @@ end
 function M.start_loading(target, request)
   local frames = { "-", "\\", "|", "/" }
   local prompt = request:gsub("%s+", " ")
+  local indent = string.rep(" ", target.start_col)
   local end_row, end_col = target_end(target)
   local timer = vim.uv.new_timer()
   local active = true
@@ -29,14 +30,13 @@ function M.start_loading(target, request)
     marks[1] = vim.api.nvim_buf_set_extmark(target.bufnr, loading_namespace, target.start_row, target.start_col, {
       id = marks[1],
       right_gravity = false,
-      virt_text = { { string.format("[slotfixes %s] %s -> ", indicator, prompt), "DiagnosticInfo" } },
-      virt_text_pos = "inline",
+      virt_lines = { { { string.format("%s[slotfixes %s] %s", indent, indicator, prompt), "DiagnosticInfo" } } },
+      virt_lines_above = true,
     })
     marks[2] = vim.api.nvim_buf_set_extmark(target.bufnr, loading_namespace, end_row, end_col, {
       id = marks[2],
       right_gravity = true,
-      virt_text = { { string.format(" <- [slotfixes %s]", indicator), "DiagnosticInfo" } },
-      virt_text_pos = "inline",
+      virt_lines = { { { string.format("%s[slotfixes %s]", indent, indicator), "DiagnosticInfo" } } },
     })
     frame = frame % #frames + 1
   end
