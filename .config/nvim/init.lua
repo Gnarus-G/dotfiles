@@ -4,6 +4,7 @@ require "gnarus.formatting"
 require "gnarus.lazy"
 
 require("agent").setup()
+require("slotfixes").setup()
 
 -- highlight_yank
 vim.api.nvim_create_autocmd("TextYankPost", {
