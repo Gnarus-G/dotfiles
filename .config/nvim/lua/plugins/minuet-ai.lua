@@ -38,9 +38,9 @@ return {
           },
         },
         gemini = {
-          -- gemini-3.1-flash-lite-preview $0.25/$1.50 per 1M tokens (input/output)
+          -- gemini-3.1-flash-lite $0.25/$1.50 per 1M tokens (input/output)
           -- Upgrade: gemini-3-flash-preview, gemini-2.5-pro ($1.25/$5.00)
-          model = "gemini-3.1-flash-lite-preview",
+          model = "gemini-3.1-flash-lite",
           chat_input = {
             template = "{{{extra_context}}}\n" ..
                 minuet_config.default_chat_input_prefix_first.template,
