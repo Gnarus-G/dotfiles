@@ -70,6 +70,7 @@ return {
       assert(arg.value, string.format("cascade value for env var names {%s} is required", table.concat(arg.vars, ",")))
 
       -- Check if _if condition is met (if provided)
+      --- @type boolean | fun(): boolean
       local if_condition_met = true
       if arg._if ~= nil then
         if type(arg._if) == "function" then
