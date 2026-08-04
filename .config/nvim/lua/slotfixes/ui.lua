@@ -56,26 +56,34 @@ function M.start_loading(target, presentation)
   end
 end
 
-local function choice_lines(target, replacements, presentation)
-  local choices = vim.iter(replacements):enumerate():map(function(index)
+local function choice_keys(replacements)
+  return vim.iter(replacements):enumerate():map(function(index)
     return tostring(index)
   end):totable()
+end
+
+local function quoted(text)
+  return vim.iter(vim.split(text, "\n", { plain = true })):map(function(line)
+    return "> " .. line
+  end):totable()
+end
+
+local function choice_lines(target, replacements, presentation)
   local lines = {
-    "# slotfixes",
+    "# Fix candidates",
     "",
-    "**Model:** " .. presentation.model,
+    string.format("`%s` | reasoning `%s`", presentation.model, presentation.reasoning),
     "",
-    "**System prompt:** " .. presentation.system_prompt,
-    "",
-    "**Prompt:** " .. presentation.prompt,
-    "",
-    string.format("Press %s to apply a fix; Esc cancels.", table.concat(choices, ", ")),
+    "> **Prompt**",
   }
+  vim.list_extend(lines, quoted(presentation.prompt))
   for index, replacement in ipairs(replacements) do
-    vim.list_extend(lines, { "", string.format("## %d", index), "```" .. vim.bo[target.bufnr].filetype })
+    vim.list_extend(lines, { "", string.format("## Option %d", index), "```" .. vim.bo[target.bufnr].filetype })
     vim.list_extend(lines, vim.split(replacement, "\n", { plain = true }))
     table.insert(lines, "```")
   end
+  vim.list_extend(lines, { "", "---", "", "## System prompt", "" })
+  vim.list_extend(lines, quoted(presentation.system_prompt))
   return lines
 end
 
@@ -96,6 +104,7 @@ function M.show_choices(target, replacements, presentation, select)
   vim.bo[buf].modifiable = false
 
   local width, height = window_size()
+  local keys = choice_keys(replacements)
   local win = vim.api.nvim_open_win(buf, true, {
     relative = "editor",
     row = math.floor((vim.o.lines - height) / 2),
@@ -104,12 +113,16 @@ function M.show_choices(target, replacements, presentation, select)
     height = height,
     border = "rounded",
     style = "minimal",
-    title = " slotfixes ",
+    title = " slotfixes review ",
     title_pos = "center",
+    footer = string.format(" %s apply | Esc cancel ", table.concat(keys, " / ")),
+    footer_pos = "center",
   })
   vim.wo[win].wrap = true
   vim.wo[win].linebreak = true
   vim.wo[win].breakindent = true
+  vim.wo[win].conceallevel = 2
+  vim.wo[win].winhighlight = "Normal:NormalFloat,FloatBorder:DiagnosticInfo,FloatTitle:DiagnosticInfo"
 
   local function close()
     if vim.api.nvim_win_is_valid(win) then vim.api.nvim_win_close(win, true) end
