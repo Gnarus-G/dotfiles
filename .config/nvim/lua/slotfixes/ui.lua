@@ -56,9 +56,11 @@ function M.start_loading(target, request)
   end
 end
 
-local function choice_lines(target, replacements, request)
+local function choice_lines(target, replacements, request, system_prompt)
   local lines = {
     "# slotfixes",
+    "",
+    "**System prompt:** " .. system_prompt,
     "",
     "**Prompt:** " .. request,
     "",
@@ -80,12 +82,13 @@ end
 ---@param target SlotfixTarget
 ---@param replacements string[]
 ---@param request string
+---@param system_prompt string
 ---@param select fun(replacement: string)
-function M.show_choices(target, replacements, request, select)
+function M.show_choices(target, replacements, request, system_prompt, select)
   local buf = vim.api.nvim_create_buf(false, true)
   vim.bo[buf].bufhidden = "wipe"
   vim.bo[buf].filetype = "markdown"
-  vim.api.nvim_buf_set_lines(buf, 0, -1, false, choice_lines(target, replacements, request))
+  vim.api.nvim_buf_set_lines(buf, 0, -1, false, choice_lines(target, replacements, request, system_prompt))
   vim.bo[buf].modifiable = false
 
   local width, height = window_size()
@@ -100,7 +103,9 @@ function M.show_choices(target, replacements, request, select)
     title = " slotfixes ",
     title_pos = "center",
   })
-  vim.wo[win].wrap = false
+  vim.wo[win].wrap = true
+  vim.wo[win].linebreak = true
+  vim.wo[win].breakindent = true
 
   local function close()
     if vim.api.nvim_win_is_valid(win) then vim.api.nvim_win_close(win, true) end
