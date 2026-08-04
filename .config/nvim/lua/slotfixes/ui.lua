@@ -57,6 +57,9 @@ function M.start_loading(target, request)
 end
 
 local function choice_lines(target, replacements, request, system_prompt)
+  local choices = vim.iter(replacements):enumerate():map(function(index)
+    return tostring(index)
+  end):totable()
   local lines = {
     "# slotfixes",
     "",
@@ -64,7 +67,7 @@ local function choice_lines(target, replacements, request, system_prompt)
     "",
     "**Prompt:** " .. request,
     "",
-    "Press 1, 2, or 3 to apply a fix; Esc cancels.",
+    string.format("Press %s to apply a fix; Esc cancels.", table.concat(choices, ", ")),
   }
   for index, replacement in ipairs(replacements) do
     vim.list_extend(lines, { "", string.format("## %d", index), "```" .. vim.bo[target.bufnr].filetype })
