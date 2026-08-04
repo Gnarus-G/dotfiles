@@ -8,8 +8,9 @@ M.config = {
   count = 3,
   context_lines = 40,
   keymap = "<leader>cf",
-  model = "openai-codex/gpt-5.6-luna",
+  model = "openai-codex/gpt-5.6-sol",
   prompt = "Fix the diagnostics on this line.",
+  reasoning = "low",
 }
 
 M.state = { running = false }
@@ -24,6 +25,7 @@ local function pi_command(captured, request, alternative)
     "--no-extensions",
     "--print",
     "--model", M.config.model,
+    "--thinking", M.config.reasoning,
     "--system-prompt", prompt.system,
     prompt.build(captured, request, alternative, M.config),
   }
@@ -104,6 +106,40 @@ function M.setup(opts)
   vim.api.nvim_create_user_command("Slotfixes", function(command)
     M.run(command.args ~= "" and command.args or nil)
   end, { nargs = "*" })
+
+  vim.api.nvim_create_user_command("SlotfixesGenerations", function(command)
+    local count = tonumber(command.args)
+    if not count or count % 1 ~= 0 or count < 1 or count > 3 then
+      vim.notify("slotfixes: generations must be an integer from 1 to 3", vim.log.levels.WARN)
+      return
+    end
+    M.config.count = count
+    vim.notify(string.format("slotfixes: generations set to %d", count))
+  end, { nargs = 1, complete = function() return { "1", "2", "3" } end })
+
+  vim.api.nvim_create_user_command("SlotfixesModel", function(command)
+    M.config.model = command.args
+    vim.notify("slotfixes: model set to " .. command.args)
+  end, {
+    nargs = 1,
+    complete = function()
+      return {
+        "openai-codex/gpt-5.6-sol",
+        "openai-codex/gpt-5.6-luna",
+        "openai-codex/gpt-5.6-terra",
+      }
+    end,
+  })
+
+  local reasoning_levels = { "off", "minimal", "low", "medium", "high", "xhigh", "max" }
+  vim.api.nvim_create_user_command("SlotfixesReasoning", function(command)
+    if not vim.tbl_contains(reasoning_levels, command.args) then
+      vim.notify("slotfixes: reasoning must be one of: " .. table.concat(reasoning_levels, ", "), vim.log.levels.WARN)
+      return
+    end
+    M.config.reasoning = command.args
+    vim.notify("slotfixes: reasoning set to " .. command.args)
+  end, { nargs = 1, complete = function() return reasoning_levels end })
 end
 
 return M
