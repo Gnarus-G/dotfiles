@@ -28,6 +28,13 @@ return {
       },
       -- Increase timeout slightly since non-streamed responses arrive in one chunk
       -- request_timeout = 10,
+      -- Model upgrade test flow:
+      -- 1. Stream each candidate over the same Python insertion corpus in alternating order (2+ rounds).
+      -- 2. Record time to first content token and total latency; compare median and p95 values.
+      -- 3. Insert each response between its prefix/suffix, execute it, and score behavioral assertions.
+      -- 4. Upgrade only when the candidate improves both latency and functional pass rate.
+      -- 2026-08-04: DeepSeek 0731 passed 100% vs 50%, but had slower totals and an 18s tail; keep cloud.
+      -- GPT-5.6 Luna remains untested until OPENAI_API_KEY is available in the benchmark shell.
       provider_options = {
         claude = {
           model = 'claude-haiku-4-5', -- $0.80/$4.00 per 1M tokens (input/output)
