@@ -37,9 +37,9 @@ local function result_error(result)
   return result.stderr and result.stderr ~= "" and result.stderr or "invalid response"
 end
 
-local function error_message(errors)
+local function error_message(errors, count)
   local messages = {}
-  for index = 1, M.config.count do
+  for index = 1, count do
     if errors[index] then table.insert(messages, errors[index]) end
   end
   return table.concat(messages, "; ")
@@ -47,7 +47,7 @@ end
 
 local function generate(captured, request)
   M.state.running = true
-  local batch = { remaining = M.config.count, replacements = {}, errors = {} }
+  local batch = { count = M.config.count, remaining = M.config.count, replacements = {}, errors = {} }
   local presentation = {
     model = M.config.model,
     prompt = request,
@@ -69,7 +69,11 @@ local function generate(captured, request)
     stop_loading()
     M.state.running = false
     if next(batch.errors) then
-      vim.notify("slotfixes: generation failed: " .. error_message(batch.errors), vim.log.levels.ERROR)
+      vim.notify("slotfixes: generation failed: " .. error_message(batch.errors, batch.count), vim.log.levels.ERROR)
+      return
+    end
+    if batch.count == 1 then
+      target.apply(captured, batch.replacements[1])
       return
     end
     ui.show_choices(captured, batch.replacements, presentation, function(replacement)
