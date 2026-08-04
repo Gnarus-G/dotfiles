@@ -1,5 +1,6 @@
 local models = require("slotfixes.models")
 local prompt = require("slotfixes.prompt")
+local settings = require("slotfixes.settings")
 local target = require("slotfixes.target")
 local ui = require("slotfixes.ui")
 
@@ -106,7 +107,7 @@ function M.run(request)
 end
 
 function M.setup(opts)
-  M.config = vim.tbl_deep_extend("force", M.config, opts or {})
+  M.config = vim.tbl_deep_extend("force", M.config, settings.load(), opts or {})
   vim.keymap.set({ "n", "x" }, M.config.keymap, function() M.run() end,
     { desc = "Generate diagnostic fixes" })
   vim.api.nvim_create_user_command("Slotfixes", function(command)
@@ -120,26 +121,28 @@ function M.setup(opts)
       return
     end
     M.config.count = count
+    settings.save(M.config)
     vim.notify(string.format("slotfixes: generations set to %d", count))
   end, { nargs = 1, complete = function() return { "1", "2", "3" } end })
 
   vim.api.nvim_create_user_command("SlotfixesModel", function(command)
     M.config.model = command.args
+    settings.save(M.config)
     vim.notify("slotfixes: model set to " .. command.args)
   end, {
     nargs = 1,
     complete = models.complete,
   })
 
-  local reasoning_levels = { "off", "minimal", "low", "medium", "high", "xhigh", "max" }
   vim.api.nvim_create_user_command("SlotfixesReasoning", function(command)
-    if not vim.tbl_contains(reasoning_levels, command.args) then
-      vim.notify("slotfixes: reasoning must be one of: " .. table.concat(reasoning_levels, ", "), vim.log.levels.WARN)
+    if not vim.tbl_contains(settings.reasoning_levels, command.args) then
+      vim.notify("slotfixes: reasoning must be one of: " .. table.concat(settings.reasoning_levels, ", "), vim.log.levels.WARN)
       return
     end
     M.config.reasoning = command.args
+    settings.save(M.config)
     vim.notify("slotfixes: reasoning set to " .. command.args)
-  end, { nargs = 1, complete = function() return reasoning_levels end })
+  end, { nargs = 1, complete = function() return settings.reasoning_levels end })
 end
 
 return M
