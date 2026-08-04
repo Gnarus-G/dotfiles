@@ -1,4 +1,5 @@
 local extra_files = require("minuet_ctx.extra_files")
+local diagnostics = require("minuet_ctx.diagnostics")
 local harpoon_ctx = nil -- Lazy-loaded to avoid circular dependency
 
 local function is_file_of_current_buffer(filepath)
@@ -87,6 +88,7 @@ vim.api.nvim_create_user_command('MinuetShowContext', function()
     local data = {}
 
     data.extra_files = extra_files.files()
+    data.diagnostics = diagnostics.get()
 
     local llm_chats_buffers = {}
     data.llm_chats_buffers = llm_chats_buffers
@@ -124,6 +126,16 @@ vim.api.nvim_create_user_command('MinuetShowContext', function()
     add_markdown_header("Files")
     if #data.extra_files > 0 then
       for _, f in ipairs(data.extra_files) do add_list_item(f) end
+    else
+      add_list_item("(none)")
+    end
+    add_empty_line()
+
+    add_markdown_header("Current Buffer Diagnostics")
+    if #data.diagnostics > 0 then
+      for _, diagnostic in ipairs(data.diagnostics) do
+        table.insert(content_lines, diagnostics.format(diagnostic))
+      end
     else
       add_list_item("(none)")
     end
@@ -222,10 +234,20 @@ return {
   end,
   get_chats_context = function() return {} end,
   get_formatted_context = function()
-    local files_contents = get_formatted_files_context(all_extra_files())
-    if files_contents ~= '' then
-      return '<extra_context>\n' .. files_contents .. '\n</extra_context>'
+    local context = {}
+    local files_context = get_formatted_files_context(all_extra_files())
+    local diagnostics_context = diagnostics.get_formatted_context()
+
+    if files_context ~= '' then
+      table.insert(context, files_context)
     end
-    return ''
+    if diagnostics_context ~= '' then
+      table.insert(context, diagnostics_context)
+    end
+    if #context == 0 then
+      return ''
+    end
+
+    return '<extra_context>\n' .. table.concat(context, '\n') .. '\n</extra_context>'
   end
 }
