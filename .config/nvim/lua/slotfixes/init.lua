@@ -1,3 +1,4 @@
+local models = require("slotfixes.models")
 local prompt = require("slotfixes.prompt")
 local target = require("slotfixes.target")
 local ui = require("slotfixes.ui")
@@ -46,7 +47,12 @@ end
 local function generate(captured, request)
   M.state.running = true
   local batch = { remaining = M.config.count, replacements = {}, errors = {} }
-  local stop_loading = ui.start_loading(captured, request)
+  local presentation = {
+    model = M.config.model,
+    prompt = request,
+    system_prompt = prompt.system,
+  }
+  local stop_loading = ui.start_loading(captured, presentation)
 
   local function complete(index, result)
     local replacement = result.code == 0 and prompt.parse(result.stdout or "") or nil
@@ -64,7 +70,7 @@ local function generate(captured, request)
       vim.notify("slotfixes: generation failed: " .. error_message(batch.errors), vim.log.levels.ERROR)
       return
     end
-    ui.show_choices(captured, batch.replacements, request, prompt.system, function(replacement)
+    ui.show_choices(captured, batch.replacements, presentation, function(replacement)
       target.apply(captured, replacement)
     end)
   end
@@ -122,13 +128,7 @@ function M.setup(opts)
     vim.notify("slotfixes: model set to " .. command.args)
   end, {
     nargs = 1,
-    complete = function()
-      return {
-        "openai-codex/gpt-5.6-sol",
-        "openai-codex/gpt-5.6-luna",
-        "openai-codex/gpt-5.6-terra",
-      }
-    end,
+    complete = models.complete,
   })
 
   local reasoning_levels = { "off", "minimal", "low", "medium", "high", "xhigh", "max" }
