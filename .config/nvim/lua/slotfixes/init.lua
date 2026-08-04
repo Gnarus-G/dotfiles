@@ -51,6 +51,7 @@ local function generate(captured, request)
   local presentation = {
     model = M.config.model,
     prompt = request,
+    reasoning = M.config.reasoning,
     system_prompt = prompt.system,
   }
   local stop_loading = ui.start_loading(captured, presentation)
