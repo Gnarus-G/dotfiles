@@ -18,7 +18,7 @@ OPENAI_BASE_URL = os.environ.get("OPENAI_BASE_URL", "https://api.openai.com/v1")
 GNARUS_ALLOW_VENDOR_LLM = os.environ.get("GNARUS_ALLOW_VENDOR_LLM", "")
 
 DEFAULT_MODEL_OLLAMA = "deepseek-v4-flash:cloud"
-DEFAULT_MODEL_OPENAI = "gpt-5.4-nano"
+DEFAULT_MODEL_OPENAI = "gpt-5.6-luna"
 DEFAULT_MODEL = DEFAULT_MODEL_OPENAI if GNARUS_ALLOW_VENDOR_LLM else DEFAULT_MODEL_OLLAMA
 
 OLLAMA_PREFIXES = ("ollama/", "deepseek-", "qwen", "devstral")
