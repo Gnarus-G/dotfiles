@@ -11,8 +11,8 @@
       },
       "models": [
         {
-          "id": "gemma4",
-          "name": "Gemma 4 (cloud)",
+          "id": "gemma4:31b",
+          "name": "Gemma 4 31B (cloud)",
           "input": ["text", "image"],
           "reasoning": true,
           "contextWindow": 256000,
@@ -20,11 +20,20 @@
           "cost": { "input": 0, "output": 0, "cacheRead": 0, "cacheWrite": 0 }
         },
         {
-          "id": "gemma4:31b",
-          "name": "Gemma 4 31B (cloud)",
-          "input": ["text", "image"],
+          "id": "gpt-oss:20b",
+          "name": "GPT-OSS 20B",
+          "input": ["text"],
           "reasoning": true,
-          "contextWindow": 256000,
+          "contextWindow": 128000,
+          "maxTokens": 16384,
+          "cost": { "input": 0, "output": 0, "cacheRead": 0, "cacheWrite": 0 }
+        },
+        {
+          "id": "gpt-oss:120b",
+          "name": "GPT-OSS 120B",
+          "input": ["text"],
+          "reasoning": true,
+          "contextWindow": 128000,
           "maxTokens": 16384,
           "cost": { "input": 0, "output": 0, "cacheRead": 0, "cacheWrite": 0 }
         },
@@ -60,7 +69,25 @@
           "name": "Kimi K2.6",
           "input": ["text", "image"],
           "reasoning": true,
-          "contextWindow": 128000,
+          "contextWindow": 256000,
+          "maxTokens": 16384,
+          "cost": { "input": 0, "output": 0, "cacheRead": 0, "cacheWrite": 0 }
+        },
+        {
+          "id": "kimi-k3",
+          "name": "Kimi K3",
+          "input": ["text", "image"],
+          "reasoning": true,
+          "contextWindow": 1000000,
+          "maxTokens": 16384,
+          "cost": { "input": 0, "output": 0, "cacheRead": 0, "cacheWrite": 0 }
+        },
+        {
+          "id": "minimax-m2.7",
+          "name": "MiniMax M2.7",
+          "input": ["text"],
+          "reasoning": true,
+          "contextWindow": 200000,
           "maxTokens": 16384,
           "cost": { "input": 0, "output": 0, "cacheRead": 0, "cacheWrite": 0 }
         },
@@ -70,6 +97,15 @@
           "input": ["text", "image"],
           "reasoning": true,
           "contextWindow": 512000,
+          "maxTokens": 16384,
+          "cost": { "input": 0, "output": 0, "cacheRead": 0, "cacheWrite": 0 }
+        },
+        {
+          "id": "mistral-large-3:675b",
+          "name": "Mistral Large 3 675B",
+          "input": ["text", "image"],
+          "reasoning": false,
+          "contextWindow": 256000,
           "maxTokens": 16384,
           "cost": { "input": 0, "output": 0, "cacheRead": 0, "cacheWrite": 0 }
         },
@@ -108,6 +144,23 @@
           "cost": { "input": 0, "output": 0, "cacheRead": 0, "cacheWrite": 0 }
         },
         {
+          "id": "deepseek-v4-flash:0731",
+          "name": "DeepSeek V4 Flash 0731",
+          "input": ["text"],
+          "reasoning": true,
+          "contextWindow": 1000000,
+          "maxTokens": 32768,
+          "thinkingLevelMap": {
+            "off": "no",
+            "minimal": null,
+            "low": null,
+            "medium": "high",
+            "high": "high",
+            "xhigh": "max"
+          },
+          "cost": { "input": 0, "output": 0, "cacheRead": 0, "cacheWrite": 0 }
+        },
+        {
           "id": "nemotron-3-ultra",
           "name": "NVIDIA Nemotron 3 Ultra",
           "input": ["text"],
@@ -117,17 +170,26 @@
           "cost": { "input": 0, "output": 0, "cacheRead": 0, "cacheWrite": 0 }
         },
         {
-          "id": "qwen3.5",
-          "name": "Qwen 3.5 (cloud)",
-          "input": ["text", "image"],
+          "id": "nemotron-3-nano:30b",
+          "name": "NVIDIA Nemotron 3 Nano 30B",
+          "input": ["text"],
+          "reasoning": true,
+          "contextWindow": 1000000,
+          "maxTokens": 16384,
+          "cost": { "input": 0, "output": 0, "cacheRead": 0, "cacheWrite": 0 }
+        },
+        {
+          "id": "nemotron-3-super",
+          "name": "NVIDIA Nemotron 3 Super",
+          "input": ["text"],
           "reasoning": true,
           "contextWindow": 256000,
           "maxTokens": 16384,
           "cost": { "input": 0, "output": 0, "cacheRead": 0, "cacheWrite": 0 }
         },
         {
-          "id": "qwen3.5:397b-cloud",
-          "name": "Qwen 3.5 397B (cloud)",
+          "id": "qwen3.5:397b",
+          "name": "Qwen 3.5 397B",
           "input": ["text", "image"],
           "reasoning": true,
           "contextWindow": 256000,
