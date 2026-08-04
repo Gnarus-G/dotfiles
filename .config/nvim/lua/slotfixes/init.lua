@@ -62,7 +62,7 @@ local function generate(captured, request)
       vim.notify("slotfixes: generation failed: " .. error_message(batch.errors), vim.log.levels.ERROR)
       return
     end
-    ui.show_choices(captured, batch.replacements, request, function(replacement)
+    ui.show_choices(captured, batch.replacements, request, prompt.system, function(replacement)
       target.apply(captured, replacement)
     end)
   end
