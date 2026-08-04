@@ -12,11 +12,11 @@ local function target_end(target)
 end
 
 ---@param target SlotfixTarget
----@param request string
+---@param presentation table
 ---@return function stop
-function M.start_loading(target, request)
+function M.start_loading(target, presentation)
   local frames = { "-", "\\", "|", "/" }
-  local prompt = request:gsub("%s+", " ")
+  local prompt = presentation.prompt:gsub("%s+", " ")
   local indent = string.rep(" ", target.start_col)
   local end_row, end_col = target_end(target)
   local timer = vim.uv.new_timer()
@@ -30,13 +30,13 @@ function M.start_loading(target, request)
     marks[1] = vim.api.nvim_buf_set_extmark(target.bufnr, loading_namespace, target.start_row, target.start_col, {
       id = marks[1],
       right_gravity = false,
-      virt_lines = { { { string.format("%s[slotfixes %s] %s", indent, indicator, prompt), "DiagnosticInfo" } } },
+      virt_lines = { { { string.format("%s[%s %s] %s", indent, presentation.model, indicator, prompt), "DiagnosticInfo" } } },
       virt_lines_above = true,
     })
     marks[2] = vim.api.nvim_buf_set_extmark(target.bufnr, loading_namespace, end_row, end_col, {
       id = marks[2],
       right_gravity = true,
-      virt_lines = { { { string.format("%s[slotfixes %s]", indent, indicator), "DiagnosticInfo" } } },
+      virt_lines = { { { string.format("%s[%s %s]", indent, presentation.model, indicator), "DiagnosticInfo" } } },
     })
     frame = frame % #frames + 1
   end
@@ -56,16 +56,18 @@ function M.start_loading(target, request)
   end
 end
 
-local function choice_lines(target, replacements, request, system_prompt)
+local function choice_lines(target, replacements, presentation)
   local choices = vim.iter(replacements):enumerate():map(function(index)
     return tostring(index)
   end):totable()
   local lines = {
     "# slotfixes",
     "",
-    "**System prompt:** " .. system_prompt,
+    "**Model:** " .. presentation.model,
     "",
-    "**Prompt:** " .. request,
+    "**System prompt:** " .. presentation.system_prompt,
+    "",
+    "**Prompt:** " .. presentation.prompt,
     "",
     string.format("Press %s to apply a fix; Esc cancels.", table.concat(choices, ", ")),
   }
@@ -84,14 +86,13 @@ end
 
 ---@param target SlotfixTarget
 ---@param replacements string[]
----@param request string
----@param system_prompt string
+---@param presentation table
 ---@param select fun(replacement: string)
-function M.show_choices(target, replacements, request, system_prompt, select)
+function M.show_choices(target, replacements, presentation, select)
   local buf = vim.api.nvim_create_buf(false, true)
   vim.bo[buf].bufhidden = "wipe"
   vim.bo[buf].filetype = "markdown"
-  vim.api.nvim_buf_set_lines(buf, 0, -1, false, choice_lines(target, replacements, request, system_prompt))
+  vim.api.nvim_buf_set_lines(buf, 0, -1, false, choice_lines(target, replacements, presentation))
   vim.bo[buf].modifiable = false
 
   local width, height = window_size()
