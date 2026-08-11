@@ -58,15 +58,33 @@ def test_codex_and_opencode_use_separate_instruction_sources():
     ]
 
 
-def test_commit_agents_are_installed_for_claude_and_codex():
+def test_commit_workflows_are_installed_for_claude_and_codex():
     dev = load_dev_module()
 
-    assert dev.LINKS[".claude/agents/commit.md"] == [
-        ".claude/agents/commit.md"
+    assert dev.LINKS[".agents/skills/commit"] == [
+        ".agents/skills/commit"
+    ]
+    assert dev.LINKS[".claude.only/skills/commit"] == [
+        ".claude/skills/commit"
     ]
     assert dev.LINKS[".codex/agents/commit.toml"] == [
         ".codex/agents/commit.toml"
     ]
+
+
+def test_claude_commit_skill_runs_on_haiku_fork():
+    skill = (
+        Path(__file__).resolve().parents[1]
+        / ".claude.only"
+        / "skills"
+        / "commit"
+        / "SKILL.md"
+    ).read_text()
+
+    assert "context: fork" in skill
+    assert "model: haiku" in skill
+    assert "effort: low" in skill
+    assert "background: false" in skill
 
 
 def test_commit_skill_routes_primary_agents_to_the_subagent():
@@ -116,6 +134,18 @@ def test_stale_dotfiles_link_can_be_replaced_without_prompt(tmp_path):
     target.symlink_to(dev.DOTFILES / ".agents" / "skills" / "old")
 
     assert dev.is_stale_dotfiles_link(target)
+
+
+def test_live_dotfiles_link_can_be_relinked_to_a_new_source(tmp_path):
+    dev = load_dev_module()
+    dev.DOTFILES = tmp_path / "dotfiles"
+    old_source = dev.DOTFILES / ".agents" / "skills" / "commit"
+    old_source.mkdir(parents=True)
+    target = tmp_path / "home" / ".claude" / "skills" / "commit"
+    target.parent.mkdir(parents=True)
+    target.symlink_to(old_source)
+
+    assert dev.is_managed_dotfiles_link(target)
 
 
 def test_opencode_sync_removes_managed_skills_absent_from_shared_set(tmp_path):
