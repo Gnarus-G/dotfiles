@@ -1,6 +1,6 @@
 ---
 name: simple
-description: "Applies a composite simplicity discipline: Rich Hickey's Simple Made Easy lens plus cyclomatic complexity measurement to unbraid concerns and reduce branch-heavy code. Use when designing, reviewing, or refactoring code for simplicity, accidental complexity, tangled logic, branching hotspots, boolean modes, state/effect coupling, Rust control flow, or when the user invokes /simple."
+description: "Applies a composite simplicity discipline: Rich Hickey's Simple Made Easy lens plus cyclomatic complexity measurement to unbraid concerns and reduce branch-heavy code. Use when designing and writing code."
 license: MIT
 compatibility: opencode
 metadata:
@@ -40,6 +40,7 @@ When applying this skill, report findings as:
 
 ```md
 Simple findings:
+
 - Concern braided: <state/time/policy/control-flow/etc.>
 - Branch hotspot: <function/module and observed complexity signal>
 - Why it is complex: <what must be understood together>

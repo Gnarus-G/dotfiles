@@ -26,11 +26,11 @@ Deliver the **single most pertinent fact** as one sentence. Prioritize relevance
 
 ## Examples
 
-| User asks             | Response                                                                                    |
-| --------------------- | ------------------------------------------------------------------------------------------- |
-| What is RDTSC?        | A CPU instruction that reads the timestamp counter into a register for cycle-precise timing. |
-| How does git rebase work? | Replays your local commits on top of a new base commit, rewriting their history.         |
-| Why use SvelteKit?    | Combines Svelte's compile-time reactivity with file-based routing, SSR, and server endpoints. |
+| User asks                 | Response                                                                                      |
+| ------------------------- | --------------------------------------------------------------------------------------------- |
+| What is RDTSC?            | A CPU instruction that reads the timestamp counter into a register for cycle-precise timing.  |
+| How does git rebase work? | Replays your local commits on top of a new base commit, rewriting their history.              |
+| Why use SvelteKit?        | Combines Svelte's compile-time reactivity with file-based routing, SSR, and server endpoints. |
 
 ## When to Ask
 
