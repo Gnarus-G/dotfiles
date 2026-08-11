@@ -1,6 +1,6 @@
 ---
 name: codex-implement
-description: Delegate a bounded, well-specified implementation task to the Codex CLI (GPT-5.6 Sol, medium reasoning) in a git worktree — mechanical migrations, clear-spec implementations, repetitive multi-file edits, and test scaffolding from a known pattern. Use when the task has a crisp spec and objective done-criteria (compiles, tests pass) and does not need this conversation's judgment or taste. The invoking agent reviews and verifies the result before it merges.
+description: Use when a bounded implementation task has a crisp specification, objective completion criteria, and does not need conversational judgment or taste; delegates mechanical migrations, clear-spec implementations, repetitive multi-file edits, or patterned test scaffolding to the Codex CLI (GPT-5.6 Sol, medium reasoning) in a git worktree.
 ---
 
 # Codex Implement

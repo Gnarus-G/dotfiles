@@ -1,6 +1,6 @@
 ---
 name: codex-review
-description: Independent code review of a diff by the Codex CLI (GPT-5.6 Sol, high reasoning) — uncommitted changes, a branch diff against main, a specific commit, or a named implementation. Use when the user asks for a second pass, when a change is broad enough that another perspective helps, before opening a PR on nontrivial work, or as a correctness-focused pass before taste-sensitive review. Treat Codex as an extra reviewer whose findings the invoking agent verifies before presenting.
+description: Use when a diff or implementation needs an independent code review from the Codex CLI (GPT-5.6 Sol, high reasoning), including a requested second pass, broad changes, nontrivial pre-PR review, or a correctness-focused pass before taste-sensitive review.
 ---
 
 # Codex Review
