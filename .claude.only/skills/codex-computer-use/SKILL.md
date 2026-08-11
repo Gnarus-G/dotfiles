@@ -1,73 +1,29 @@
 ---
 name: codex-computer-use
-description: Use when local app verification needs computer use through the Codex CLI (GPT-5.6 Sol, medium reasoning), including browser automation, running and inspecting apps, capturing screenshots, exercising UI flows, independent runtime inspection, or token-heavy verification.
+description: Use when Codex should verify a running app, browser flow, screenshot, or other runtime behavior.
 ---
 
 # Codex Computer Use
 
-Delegate runtime/UI verification to `codex exec` (GPT-5.6 Sol, medium reasoning) instead of doing it
-inline. Treat Codex as an independent verifier whose claims you check before
-reporting.
-
-## When
-
-- Testing or verifying a user-facing flow in a running app
-- Browser automation, screenshots, visual inspection
-- Independent "does this actually work?" pass after implementing a change
-- Token-heavy inspection: long logs, many screenshots, big artifacts
-
-Not for writing or editing code. Route bounded implementation through the
-codex-implement skill and keep judgment-heavy work inline.
+Delegate runtime and UI verification to `codex exec` with medium reasoning.
+Do not use this skill to edit code.
 
 ## Workflow
 
-1. Identify the verification target: app, URL, flow, expected behavior.
-2. Create a scratch artifact dir for Codex's report and screenshots:
-   `ARTIFACTS=$(mktemp -d /tmp/codex-verify.XXXX)`
-3. Run Codex non-interactively with a simple, self-contained prompt:
+1. Define the app, command, URL, flow, and expected behavior.
+2. Create an artifact directory: `ARTIFACTS=$(mktemp -d /tmp/codex-verify.XXXX)`.
+3. Run Codex with a self-contained prompt:
 
    ```bash
    codex exec -m gpt-5.6-sol -c model_reasoning_effort="medium" \
      -s danger-full-access -C /path/to/project \
-     "Start the app with <command>. Open <URL>. Exercise <flow>.
-      Capture screenshots of each step into $ARTIFACTS.
-      Write a short report to $ARTIFACTS/report.md describing what you
-      observed, what worked, and what failed.
-      If everything works and you find no issues, say that explicitly
-      and describe exactly what you tested."
+      "Run <command>, open <URL>, and test <flow>. Save screenshots and a
+       report describing what worked or failed in $ARTIFACTS."
    ```
 
-   - The workstation bwrap sandbox cannot read local files. For bounded
-     read-only inspection, pipe the material through stdin. When repo access is
-     necessary, use `danger-full-access` only in a scratch worktree.
-   - Attach reference images with `-i screenshot.png` when comparing
-     against an expected state.
-4. Read `$ARTIFACTS/report.md` and the screenshots. **Verify important
-   claims against the code or by re-checking** before presenting them.
+4. Read the report and inspect the screenshots; verify important claims yourself.
 5. Report findings with paths to the artifacts.
 
-## Prompting Codex
-
-Codex is not Claude — prompt it simpler:
-
-- One plain paragraph: what to run, what to check, where to put output.
-- No role-play, no elaborate constraints; it doesn't do things you didn't
-  ask for.
-- Always require: "if you find nothing wrong, say so explicitly and state
-  what you inspected" — otherwise a clean result looks like a failure and
-  triggers pointless re-runs.
-
-## Gotchas
-
-- Long flows can time out; split into smaller `codex exec` calls per flow.
-- When called from a subagent or workflow, prefix the subagent name with
-  `codex-` so it's visible which agents are delegating.
-- Codex cannot see this conversation. The prompt must be fully
-  self-contained: paths, commands, ports, credentials source, expectations.
-- Outside a git repo (e.g. `-C /tmp`), `codex exec` refuses to run unless
-  you pass `--skip-git-repo-check`.
-- A "failed" exit code does not mean the work failed. Under
-  `danger-full-access` Codex may clean up processes on its own and can kill
-  its wrapper shell (observed: exit 144 after the report was written).
-  Always check the artifact dir for `report.md` before treating a nonzero
-  exit as failure.
+The local sandbox cannot read files, so use `danger-full-access` only where
+repo access is acceptable. Split long flows, require an explicit clean result,
+and check the artifact directory even after a nonzero exit.

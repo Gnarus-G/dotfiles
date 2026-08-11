@@ -1,81 +1,38 @@
 ---
 name: claude-implement
-description: Use when implementation or analysis should be delegated to Claude via the headless `claude -p` CLI; choose Haiku 4.5 for short latency-sensitive tasks, Sonnet 5 for well-defined medium-length work, or Opus 4.8 for complex work requiring deeper reasoning, stronger judgment, or greater reliability.
+description: Use when Claude should handle implementation or analysis in an isolated worktree.
 ---
 
 # Claude Implement
 
-Delegate through `claude -p` (headless print mode). Choose the cheapest model
-that can hit the bar:
+Delegate through `claude -p` and choose the cheapest suitable model:
 
-- **Haiku 4.5** — short, straightforward work where speed matters:
-  classification, extraction, concise summaries, simple transformations, and
-  bounded subagent tasks. Avoid it for sustained reasoning or taste.
-- **Sonnet 5** — well-defined, medium-length implementation or analysis with
-  a clear outcome. It balances speed, cost, and capability.
-- **Opus 4.8** — complex or demanding work needing deeper reasoning, stronger
-  judgment, or greater reliability: API/SDK design, naming, UX, copy,
-  code-quality decisions, and exploratory implementation where the spec
-  emerges while coding.
+- **Haiku 4.5:** short, straightforward tasks.
+- **Sonnet 5:** well-defined, medium-sized tasks.
+- **Opus 5:** complex or judgment-heavy tasks.
 
-Bad fits: bounded mechanical implementation and conclusion-only bulk analysis.
-Route those to Codex. Keep precision work such as hot-path edits inline.
+Use Codex for mechanical work and keep hot-path edits inline.
 
 ## Workflow
 
-1. **Scope the task.** State the outcome Claude owns and write objective
-   done-criteria it can self-check ("compiles with `cargo check -p X`",
-   "tests pass"). Pick Haiku 4.5 for short straightforward work, Sonnet 5 for
-   coherent medium-length tasks, and Opus 4.8 when complexity, stakes, or
-   judgment warrants escalation.
-
-2. **Isolate writes in a worktree** so Claude never touches your working
-   tree:
+1. State the outcome, relevant constraints, and verification command.
+2. Create a worktree:
 
    ```bash
    git -C <repo> worktree add /tmp/claude-impl-<topic> -b claude/<topic>
    ```
 
-3. **Run Claude headless.** `-p` prints and exits;
-   `--dangerously-skip-permissions` lets it edit/run without prompts. Set
-   `<model>` to `haiku`, `sonnet`, or `opus` according to the routing above:
+3. Run Claude headless:
 
    ```bash
-   claude -p "<one plain paragraph: exact task, files/paths, the check
-     command to run, and — for implementation — commit the result with
-     message '<msg>'. If you cannot complete it, say exactly what
-     blocked you.>" \
-     --model <model> \
+    claude -p "<exact task, files, constraints, check, and commit message>" \
+      --model <model> \
      --dangerously-skip-permissions \
      -C /tmp/claude-impl-<topic>
    ```
 
-4. **Review the result yourself.** Read the diff
-   (`git diff main...claude/<topic>`) — you own final correctness, taste,
-   and conformance with the repo.
+4. Review the diff and run the verification yourself.
+5. Merge or discard the worktree, then remove it and run `git worktree prune`.
 
-5. **Run the verification** (the done-criteria commands) yourself; don't
-   trust the claim that they passed.
-
-6. Merge/rebase per the repo's rules, or discard — a dead worktree costs
-   nothing. Clean up: `git worktree remove --force ... && git worktree
-   prune`.
-
-## Prompting
-
-- Fully self-contained: Claude can't see your session. Include paths,
-  exact commands, expected outcome, and any project constraints that
-  matter for THIS task.
-- One task per invocation. A list of tasks becomes a loop of separate
-  `claude -p` calls, not one mega-prompt (drift, timeouts).
-- Require an explicit **"blocked by X"** statement when it cannot complete
-  the task.
-- A nonzero exit doesn't always mean failure — check the worktree diff or
-  the returned text before rerunning.
-
-## Guardrails
-
-- Never point Claude at your main working tree or let it push.
-- Use the cheapest tier suited to the task: Haiku 4.5 for short straightforward
-  work, Sonnet 5 for coherent medium tasks, and Opus 4.8 when deeper capability
-  changes the expected result.
+Give Claude one self-contained task per invocation. Never use the main working
+tree or let Claude push.
