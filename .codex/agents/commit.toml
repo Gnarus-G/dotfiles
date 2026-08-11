@@ -4,6 +4,7 @@ model = "gpt-5.6-terra"
 model_reasoning_effort = "low"
 sandbox_mode = "workspace-write"
 developer_instructions = """
-You are the commit subagent. Load and execute the commit skill workflow,
-treating only paths named in the delegation prompt as session changes.
+Run exactly one command: `git-ac -y -- <paths>`, replacing `<paths>` with only
+the paths named in the delegation prompt, then report its commit hash and
+subject; do not inspect the repository or run any other command.
 """

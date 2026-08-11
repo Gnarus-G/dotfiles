@@ -26,17 +26,13 @@ OPENAI_PREFIXES = ("openai/", "gpt-", "o1", "o3", "o4")
 
 PROMPT_TEMPLATE = """Generate a git commit message for these changes.
 
-Format:
-- Line 1: Subject (max 75 chars, imperative, no prefix)
-- Line 2: Blank
-- Line 3+: Body (explain what/why, wrap at 72 chars)
+Infer the commit message conventions from these recent commits, including
+subject format, prefixes, capitalization, mood, body usage, and line length:
 
-Do NOT include:
-- Type prefixes (feat:, fix:, etc.)
-- Markdown code blocks
-- Explanations or commentary
+{history}
 
-Output ONLY the commit message.
+Follow those conventions and output only the commit message, without Markdown
+code blocks, explanations, commentary, or model attribution.
 
 Write a commit message for this Git diff:
 
@@ -89,10 +85,26 @@ def pull_model(model):
     subprocess.run(["ollama", "pull", model], check=True)
 
 
-def generate_message(model, diff_text):
+def build_prompt(diff_text, history):
+    return PROMPT_TEMPLATE.format(diff=diff_text, history=history)
+
+
+def stage_paths(paths):
+    if paths:
+        subprocess.run(["git", "add", "--", *paths], check=True)
+
+
+def commit_command(message_file, paths):
+    command = ["git", "commit", "--cleanup=strip", "-F", message_file]
+    if paths:
+        command.extend(["--only", "--", *paths])
+    return command
+
+
+def generate_message(model, diff_text, history):
     provider = detect_provider(model)
     logger.debug("Using provider=%s model=%s", provider, model)
-    prompt = PROMPT_TEMPLATE.format(diff=diff_text)
+    prompt = build_prompt(diff_text, history)
     payload = {
         "model": strip_prefix(model),
         "stream": False,
@@ -127,6 +139,7 @@ def main():
     parser.add_argument("-m", "--model", default=DEFAULT_MODEL, help=f"Model (default: {DEFAULT_MODEL})")
     parser.add_argument("-v", "--verbose", action="store_true", help="Show timing and quality metrics")
     parser.add_argument("-d", "--debug", action="store_true", help="Enable debug logging")
+    parser.add_argument("paths", nargs="*", help="Paths to stage before committing")
     args = parser.parse_args()
 
     log_level = logging.DEBUG if args.debug else logging.WARNING
@@ -136,18 +149,23 @@ def main():
         logger.warning("OPENAI_API_KEY not set, falling back to %s", DEFAULT_MODEL_OLLAMA)
         args.model = DEFAULT_MODEL_OLLAMA
 
+    stage_paths(args.paths)
+
     if subprocess.run(["git", "diff", "--staged", "--quiet"]).returncode == 0:
         logger.error("No staged changes")
         sys.exit(1)
 
     diff_text = subprocess.run(["git", "diff", "--staged"], capture_output=True, text=True).stdout
+    history = subprocess.run(
+        ["git", "log", "-10", "--format=%B%n---"], capture_output=True, text=True
+    ).stdout
     logger.debug("Diff size: %d bytes", len(diff_text))
 
     provider = detect_provider(args.model)
     if provider == "ollama" and not model_exists(args.model):
         pull_model(args.model)
 
-    message, elapsed = generate_message(args.model, diff_text)
+    message, elapsed = generate_message(args.model, diff_text, history)
 
     if args.dry_run:
         logger.info(message)
@@ -177,7 +195,7 @@ def main():
             logger.error("Empty commit message, aborting")
             sys.exit(1)
 
-        subprocess.run(["git", "commit", "--cleanup=strip", "-F", tmpfile], check=True)
+        subprocess.run(commit_command(tmpfile, args.paths), check=True)
     finally:
         shutil.rmtree(tmpdir, ignore_errors=True)
 
@@ -189,11 +207,7 @@ def main():
         logger.info("Model: %s", args.model)
         logger.info("Generation time: %.2fs", elapsed)
         logger.info("Subject: %s", subject)
-        logger.info("Subject length: %d chars (limit: 75)", len(subject))
-        if len(subject) > 75:
-            logger.warning("Subject exceeds 75 characters")
-        if any(subject.startswith(p) for p in ("feat:", "fix:", "chore:", "refactor:", "test:", "docs:")):
-            logger.warning("Subject has type prefix (should be plain imperative)")
+        logger.info("Subject length: %d chars", len(subject))
 
 
 if __name__ == "__main__":
