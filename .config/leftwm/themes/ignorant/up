@@ -17,6 +17,11 @@ if [ -x "$(command -v gsettings)" ]; then
   gsettings set org.gnome.desktop.interface icon-theme 'breeze-dark'
 fi
 
+# Never blank or power off the display when idle
+if [ -x "$(command -v xset)" ]; then
+  xset s off -dpms
+fi
+
 # Kill any existing picom (e.g., from XDG autostart) before starting fresh
 pkill picom 2>/dev/null
 
