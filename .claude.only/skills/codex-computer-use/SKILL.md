@@ -1,6 +1,6 @@
 ---
 name: codex-computer-use
-description: Shell out to the Codex CLI (GPT-5.6 Sol, medium reasoning) for local app verification that needs computer use — browser automation, running and inspecting apps, capturing screenshots, exercising UI flows, or independent runtime inspection. Use when the user asks to test a flow, verify UI behavior, inspect a running app, capture screenshots, or confirm implemented behavior end-to-end. Also the route for token-heavy verification (many screenshots, long logs) that would burn Claude usage.
+description: Use when local app verification needs computer use through the Codex CLI (GPT-5.6 Sol, medium reasoning), including browser automation, running and inspecting apps, capturing screenshots, exercising UI flows, independent runtime inspection, or token-heavy verification.
 ---
 
 # Codex Computer Use

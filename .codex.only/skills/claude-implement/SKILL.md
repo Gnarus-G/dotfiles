@@ -1,6 +1,6 @@
 ---
 name: claude-implement
-description: Delegate implementation or analysis to Claude via the headless `claude -p` CLI. Use Haiku 4.5 for short, straightforward, latency-sensitive tasks; Sonnet 5 for well-defined medium-length work; and Opus 4.8 for complex tasks needing deeper reasoning, stronger judgment, or greater reliability. Claude works in an isolated git worktree for writes; you review and verify the result.
+description: Use when implementation or analysis should be delegated to Claude via the headless `claude -p` CLI; choose Haiku 4.5 for short latency-sensitive tasks, Sonnet 5 for well-defined medium-length work, or Opus 4.8 for complex work requiring deeper reasoning, stronger judgment, or greater reliability.
 ---
 
 # Claude Implement
