@@ -58,6 +58,30 @@ def test_codex_and_opencode_use_separate_instruction_sources():
     ]
 
 
+def test_commit_agents_are_installed_for_claude_and_codex():
+    dev = load_dev_module()
+
+    assert dev.LINKS[".claude/agents/commit.md"] == [
+        ".claude/agents/commit.md"
+    ]
+    assert dev.LINKS[".codex/agents/commit.toml"] == [
+        ".codex/agents/commit.toml"
+    ]
+
+
+def test_commit_skill_routes_primary_agents_to_the_subagent():
+    skill = (
+        Path(__file__).resolve().parents[1]
+        / ".agents"
+        / "skills"
+        / "commit"
+        / "SKILL.md"
+    ).read_text()
+
+    assert "If you are the primary agent, do not run Git commands" in skill
+    assert "delegate to the custom `commit` subagent" in skill
+
+
 def test_codex_supports_claude_implement_without_delegating_reasoning():
     instructions = (
         Path(__file__).resolve().parents[1] / ".codex" / "AGENTS.md"
