@@ -1,6 +1,6 @@
 ---
 name: context7
-description: "Use when looking up library documentation, API references, framework patterns, or code examples for ANY library (React, Next.js, Vue, Django, Laravel, etc.) and the Context7 MCP server is unavailable or not configured. Fetches the same current docs directly via the Context7 REST API as a fallback. Triggers on: how to use library, API docs, framework pattern, import usage, library example."
+description: "Use when looking up library documentation, tech/tool docs, API references, framework patterns, or code examples for ANY library (React, Next.js, Vue, Django, Laravel, etc.) and the Context7 MCP server is unavailable or not configured. Fetches the same current docs directly via the Context7 REST API as a fallback. Triggers on: how to use library, API docs, framework pattern, import usage, library example."
 license: "(MIT AND CC-BY-SA-4.0)"
 compatibility: "Requires curl or fetch, jq."
 metadata:
@@ -37,6 +37,7 @@ Do NOT use this skill for:
 ## Core Workflow
 
 1. **Search** for the library ID:
+
    ```bash
    scripts/context7.sh search "library-name"
    ```
@@ -52,11 +53,11 @@ Always extract a specific topic from the user's question. For "How does React Su
 
 ## Parameters
 
-| Parameter | Required | Description |
-|-----------|----------|-------------|
-| `library-id` | Yes | From search results, format `/vendor/library` |
-| `topic` | No | Focus area extracted from user query (e.g., `hooks`, `routing`, `validation`) |
-| `mode` | No | `code` (default) for API references; `info` for conceptual guides |
+| Parameter    | Required | Description                                                                   |
+| ------------ | -------- | ----------------------------------------------------------------------------- |
+| `library-id` | Yes      | From search results, format `/vendor/library`                                 |
+| `topic`      | No       | Focus area extracted from user query (e.g., `hooks`, `routing`, `validation`) |
+| `mode`       | No       | `code` (default) for API references; `info` for conceptual guides             |
 
 ## Examples
 

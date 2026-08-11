@@ -1,0 +1,19 @@
+## About me
+
+I'm `gnarus`. You're my agent. We'll be working together.
+
+I am a developer. My favorite language is Rust. I love to write simple software
+that feels accessible to maintain. Simple and low complexity code is what I strive for.
+
+## Coding preferences - general
+
+- keep things simple, YAGNI
+
+## API keys
+
+- **Never hardcode** real API keys in repo files; use environment variables instead
+- Never attempt to read the values of API keys. Do not expose them in the chat.
+
+## Miscellaneous
+
+- **Announce completion**: Announce aloud when finishing multi-step plans.
