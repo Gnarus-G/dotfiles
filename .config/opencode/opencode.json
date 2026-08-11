@@ -8,7 +8,7 @@
   },
   "autoupdate": true,
   "plugin": ["@different-ai/opencode-browser@4.6.1"],
-  "instructions": ["~/d/dotfiles/.config/opencode/system.md"],
+  "instructions": ["~/d/dotfiles/AGENTS_SYSTEM_PROMPT.md"],
   "provider": {
     "ollama": {
       "npm": "@ai-sdk/openai-compatible",

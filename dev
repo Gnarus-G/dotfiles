@@ -36,7 +36,7 @@ LINKS: dict[str, list[str]] = {
     ".config/opencode": [".config/opencode"],
     ".claude/CLAUDE.md": [".claude/CLAUDE.md"],
     ".claude/output-styles": [".claude/output-styles"],
-    ".config/opencode/system.md": [".pi/agent/APPEND_SYSTEM.md"],
+    "AGENTS_SYSTEM_PROMPT.md": [".pi/agent/APPEND_SYSTEM.md"],
     ".codex/AGENTS.md": [".codex/AGENTS.md"],
     ".pi/agent/extensions": [".pi/agent/extensions"],
     ".pi/agent/models.json": [".pi/agent/models.json"],
