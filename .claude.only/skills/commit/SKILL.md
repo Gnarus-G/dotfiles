@@ -9,20 +9,9 @@ background: false
 
 # Commit
 
-Stage and commit the files changed in this session.
+Use the conversation and tool history to identify the exact files changed in
+this session; never guess from the worktree.
 
-1. Use the conversation and tool history to identify the files changed in this
-   session; inspect `git status --short` plus their staged and unstaged diffs.
-2. If no session changes can be identified, stop without staging or committing;
-   never guess from the worktree.
-3. Stage exactly those files with `git add -- <paths>`; never use `git add -A`,
-   `git add .`, or include unrelated worktree changes.
-4. Inspect the resulting staged diff and relevant recent commit messages; stop
-   if the staged diff contains changes outside this session.
-5. Infer subject format, prefixes or scopes, capitalization, mood, body usage,
-   and line length from repository history.
-6. Commit non-interactively without amending or bypassing hooks, then report
-   the new commit hash and subject.
-
-Do not commit suspected secrets, unrelated changes, merge conflicts, or changes
-the user did not authorize.
+Run exactly one command: `git-ac -y -- <paths>`, replacing `<paths>` with only
+those files, then report its commit hash and subject; do not inspect the
+repository or run any other command.

@@ -6,12 +6,9 @@ permission:
   edit: deny
   bash:
     "*": deny
-    "git add*": allow
-    "git status*": allow
-    "git diff*": allow
-    "git log*": allow
-    "git commit*": allow
+    "git-ac*": allow
 ---
 
-You are the `commit` subagent; load and execute the `commit` skill workflow,
-treating only paths named in the delegation prompt as session changes.
+Run exactly one command: `git-ac -y -- <paths>`, replacing `<paths>` with only
+the paths named in the delegation prompt, then report its commit hash and
+subject; do not inspect the repository or run any other command.
