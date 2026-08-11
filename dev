@@ -22,8 +22,14 @@ def compose_skills(source_root: str, target_roots: tuple[str, ...]):
 
 # Canonical skill sets are composed into consumer directories. Shared skills
 # have no host-specific policy; host-only skills live in a separate source set.
+SHARED_SKILL_LINKS = compose_skills(
+    ".agents/skills", (".agents/skills", ".claude/skills")
+)
+# Claude's commit skill uses native fork/model frontmatter unsupported by other hosts.
+SHARED_SKILL_LINKS[".agents/skills/commit"].remove(".claude/skills/commit")
+
 SKILL_LINKS = {
-    **compose_skills(".agents/skills", (".agents/skills", ".claude/skills")),
+    **SHARED_SKILL_LINKS,
     **compose_skills(".claude.only/skills", (".claude/skills",)),
     **compose_skills(".codex.only/skills", (".agents/skills",)),
 }
@@ -34,7 +40,6 @@ LINKS: dict[str, list[str]] = {
     **SKILL_LINKS,
     ".config/nvim": [".config/nvim"],
     ".config/opencode": [".config/opencode"],
-    ".claude/agents/commit.md": [".claude/agents/commit.md"],
     ".claude/CLAUDE.md": [".claude/CLAUDE.md"],
     ".claude/output-styles": [".claude/output-styles"],
     "AGENTS_SYSTEM_PROMPT.md": [".pi/agent/APPEND_SYSTEM.md"],
@@ -218,7 +223,12 @@ def points_within(target: Path, root: Path) -> bool:
 
 def is_stale_dotfiles_link(target: Path) -> bool:
     """Check whether a dangling symlink points into this dotfiles repository."""
-    return target.is_symlink() and not target.exists() and points_within(target, DOTFILES)
+    return not target.exists() and is_managed_dotfiles_link(target)
+
+
+def is_managed_dotfiles_link(target: Path) -> bool:
+    """Check whether a symlink points into this dotfiles repository."""
+    return target.is_symlink() and points_within(target, DOTFILES)
 
 
 def _walk_files(root: Path):
@@ -280,9 +290,8 @@ def main():
                 print(f"  ln  {dst_rel}")
                 continue
 
-            # A source-set move can leave a managed target dangling. Relink it
-            # without prompting; the repository remains the source of truth.
-            if is_stale_dotfiles_link(target):
+            # Source-set overrides can move a managed target to another source.
+            if is_managed_dotfiles_link(target):
                 remove(target)
                 link(source, target)
                 print(f"  ln  {dst_rel} (relinked moved source)")
