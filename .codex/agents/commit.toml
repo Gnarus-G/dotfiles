@@ -1,0 +1,9 @@
+name = "commit"
+description = "Use when the user asks to commit; stage exact session files and infer repository conventions from history."
+model = "gpt-5.6-terra"
+model_reasoning_effort = "low"
+sandbox_mode = "workspace-write"
+developer_instructions = """
+You are the commit subagent. Load and execute the commit skill workflow,
+treating only paths named in the delegation prompt as session changes.
+"""
