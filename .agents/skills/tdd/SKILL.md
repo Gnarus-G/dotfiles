@@ -118,5 +118,6 @@ After all tests pass, look for [refactor candidates](refactoring.md):
 [ ] Test uses public interface only
 [ ] Test would survive internal refactor
 [ ] Code is minimal for this test
-[ ] No speculative features added
+[ ] Code not required by the current behavior is treated as a cost and removed
+[ ] No speculative features, cases, or abstractions added
 ```

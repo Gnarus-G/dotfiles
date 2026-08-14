@@ -69,5 +69,7 @@ reconciled projection of shared skills under `~/.config/opencode/skills`.
 ## Guidelines
 
 - Make minimal, targeted changes
+- Treat code the current goal does not need as a cost and a smell; apply YAGNI and do not overshoot
+- Keep review findings relevant to the goal and realistic scenarios; omit speculative corrections and hypothetical findings
 - Run available linters/typecheckers after edits
 - Research unfamiliar tools before implementing
