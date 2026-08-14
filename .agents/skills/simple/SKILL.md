@@ -24,7 +24,7 @@ Treat those references as the source of truth inside `/simple`. This main file o
 
 ## Operating Principle
 
-Unbraid before extracting. Measure before celebrating.
+Unbraid before extracting. Measure before celebrating. Treat code the current goal does not need as a cost and a smell.
 
 ## Workflow
 
@@ -32,7 +32,8 @@ Unbraid before extracting. Measure before celebrating.
 2. Use `cyclomatic-complexity` when branching, Rust control flow, or measurable complexity is relevant.
 3. Separate inherent domain complexity from accidental implementation complexity.
 4. Prefer the smallest behavior-preserving change that unbraids one concern or removes one accidental decision path.
-5. Validate with existing tests, characterization tests, and complexity measurement when available.
+5. Apply YAGNI: do not add abstractions, flexibility, cases, or cleanup beyond the current goal.
+6. Validate with existing tests, characterization tests, and complexity measurement when available.
 
 ## Reporting Format
 
@@ -49,4 +50,4 @@ Simple findings:
 - Tradeoff: <what gets less easy, familiar, or compact>
 ```
 
-If code is already simple enough, say so and identify the remaining risk instead of inventing refactors.
+Keep review findings relevant to the stated goal and realistic scenarios. If code is already simple enough, say so instead of inventing speculative risks or refactors.

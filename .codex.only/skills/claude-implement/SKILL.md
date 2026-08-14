@@ -5,7 +5,7 @@ description: Use when large code work or other token-heavy drudgery can be offlo
 
 # Claude Implement
 
-Delegate with enough context for Claude to work independently:
+Delegate with enough context for Claude to work independently, explicitly requiring YAGNI and no code beyond the current goal:
 
 ```bash
 cd /path/to/project

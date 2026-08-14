@@ -21,8 +21,9 @@ Use `simple` to choose a shape that is not complected; use this skill to make th
 3. Prefer procedural code for orchestration and pure functions for decisions and transformations.
 4. Keep effects at explicit boundaries; pass values into logic and return values or explicit errors.
 5. Make the smallest change that satisfies the contract.
-6. Build the strongest practical evidence for each stability claim.
-7. Verify the affected flow end-to-end and report any guarantee that remains conditional.
+6. Treat every line not needed by the current goal as a cost and a smell; apply YAGNI and do not overshoot.
+7. Build the strongest practical evidence for each stability claim.
+8. Verify the affected flow end-to-end and report any guarantee that remains conditional.
 
 ## Correctness Rules
 
@@ -34,6 +35,7 @@ Use `simple` to choose a shape that is not complected; use this skill to make th
 - Prefer direct loops and named steps when they are clearer than chained transformations.
 - Prefer pure functions when they isolate deterministic policy or computation.
 - Add abstraction only after repeated concrete behavior reveals a stable boundary.
+- In reviews, report only findings relevant to the stated goal and realistically reachable scenarios; omit speculative corrections and hypothetical failures.
 
 ## Stability Evidence
 
