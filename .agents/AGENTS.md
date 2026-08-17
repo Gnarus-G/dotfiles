@@ -34,6 +34,7 @@ Use syllogistic thinking where applicable.
 ## Coding And Review
 
 - Code that the current goal does not need is a cost and a smell; apply YAGNI and do not overshoot when implementing.
+- Always prefer AHA (Avoid Hasty Abstractions) over reflexive DRY: tolerate duplication until a clear, stable abstraction emerges.
 - When reviewing, report only findings relevant to the stated goal and scenarios we can realistically hit; omit speculative corrections and hypothetical findings.
 
 ## API keys
