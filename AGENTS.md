@@ -70,6 +70,7 @@ reconciled projection of shared skills under `~/.config/opencode/skills`.
 
 - Make minimal, targeted changes
 - Treat code the current goal does not need as a cost and a smell; apply YAGNI and do not overshoot
+- Always prefer AHA (Avoid Hasty Abstractions) over reflexive DRY: tolerate duplication until a clear, stable abstraction emerges
 - Keep review findings relevant to the goal and realistic scenarios; omit speculative corrections and hypothetical findings
 - Run available linters/typecheckers after edits
 - Research unfamiliar tools before implementing
