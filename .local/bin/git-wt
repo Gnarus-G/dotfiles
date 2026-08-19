@@ -82,6 +82,30 @@ pick_base_branch() {
     --preview 'ref=$(printf "%s" {} | cut -f2); git -C "$GIT_WT_REPO_ROOT" log --oneline --decorate -n 12 "$ref"'
 }
 
+install_hooks_path() {
+  local root="$1"
+  local worktree_path="$2"
+
+  [[ -d "$worktree_path/.githooks" ]] || return 0
+
+  local configured
+  configured=$(git -C "$worktree_path" config --get core.hooksPath || true)
+  if [[ -n "$configured" ]]; then
+    printf 'Hooks path: %s (already configured)\n' "$configured"
+    return 0
+  fi
+
+  local hooks_dir
+  hooks_dir=$(git -C "$worktree_path" rev-parse --git-path hooks)
+  if [[ -n $(find "$hooks_dir" -maxdepth 1 -type f ! -name '*.sample' -print -quit 2>/dev/null) ]]; then
+    printf 'Hooks path: %s (installed hooks found, leaving .githooks alone)\n' "$hooks_dir"
+    return 0
+  fi
+
+  git -C "$root" config core.hooksPath .githooks
+  printf 'Hooks path: .githooks\n'
+}
+
 create_worktree() {
   local new_branch="${1:-}"
 
@@ -107,6 +131,7 @@ create_worktree() {
   if [[ -n "$new_branch" ]]; then
     validate_branch_name "$new_branch"
     git -C "$root" worktree add -b "$new_branch" "$worktree_path" "$base_ref"
+    install_hooks_path "$root" "$worktree_path"
     printf 'Created worktree: %s\n' "$worktree_path"
     printf 'Base branch: %s\n' "$base_display"
     printf 'New branch: %s\n' "$new_branch"
@@ -115,6 +140,7 @@ create_worktree() {
 
   if [[ "$base_display" != "$current" ]] && git -C "$root" show-ref --verify --quiet "refs/heads/$base_display"; then
     git -C "$root" worktree add "$worktree_path" "$base_display"
+    install_hooks_path "$root" "$worktree_path"
     printf 'Created worktree: %s\n' "$worktree_path"
     printf 'Base branch: %s\n' "$base_display"
     printf 'Mode: attached\n'
@@ -122,6 +148,7 @@ create_worktree() {
   fi
 
   git -C "$root" worktree add --detach "$worktree_path" "$base_ref"
+  install_hooks_path "$root" "$worktree_path"
   printf 'Created worktree: %s\n' "$worktree_path"
   printf 'Base branch: %s\n' "$base_display"
   printf 'Mode: detached\n'
