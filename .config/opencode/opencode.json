@@ -26,6 +26,11 @@
         "-c",
         "uv run --python 3.12 $HOME/.local/bin/ollama-websearch-mcp.py"
       ]
+    },
+    "convex": {
+      "type": "local",
+      "command": ["npx", "-y", "convex@latest", "mcp", "start"],
+      "enabled": true
     }
   }
 }
