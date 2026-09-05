@@ -155,7 +155,7 @@ cdd() {
   local selection repo branch commit
 
   selection=$(
-    fd -HIg "**/.git" --base-directory ~/d --strip-cwd-prefix -x echo {//} |
+    fd -HIgp "**/.git" --base-directory ~/d --strip-cwd-prefix -x echo {//} |
       while IFS= read -r repo; do
         branch=$(git -C "$HOME/d/$repo" branch --show-current 2>/dev/null || true)
         if [[ -z "$branch" ]]; then
