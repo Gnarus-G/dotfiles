@@ -1,7 +1,7 @@
 ---
 description: Use when the user asks to commit; stage exact session files and infer repository conventions from history.
 mode: subagent
-model: openai/gpt-5.6-luna
+model: ollama/deepseek-v4-flash:cloud
 permission:
   edit: deny
   bash:
