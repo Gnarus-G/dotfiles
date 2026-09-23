@@ -63,9 +63,9 @@ return {
           },
         },
         openai = {
-          -- gpt-5.6-luna $0.20/$1.20 per 1M tokens (input/output)
-          -- Upgrade: gpt-5.6-terra ($2.00/$12.00), gpt-5.6-sol ($3.00/$18.00)
-          model = "gpt-5.6-luna",
+          -- gpt-6-luna $0.10/$0.50 per 1M tokens (input/output)
+          -- Upgrade: gpt-6-sol ($2.00/$10.00), gpt-6-astra ($10.00/$50.00)
+          model = "gpt-6-luna",
           chat_input = {
             template = "{{{extra_context}}}\n" ..
                 minuet_config.default_chat_input_prefix_first.template,
@@ -80,7 +80,7 @@ return {
         openai_compatible = {
           -- Free (local/self-hosted via Ollama)
           name = "ollama",
-          model = 'deepseek-v4-flash:cloud',
+          model = 'deepseek-v4.1-flash:cloud',
           chat_input = {
             template = "{{{extra_context}}}\n" ..
                 minuet_config.default_chat_input_prefix_first.template,

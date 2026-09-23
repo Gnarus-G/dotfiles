@@ -10,7 +10,7 @@ M.config = {
   count = 3,
   context_lines = 40,
   keymap = "<leader>cf",
-  model = "openai-codex/gpt-5.6-sol",
+  model = "openai-codex/gpt-6-sol",
   prompt = "Fix the diagnostics on this line.",
   reasoning = "low",
 }
