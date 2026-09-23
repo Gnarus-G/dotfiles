@@ -1,6 +1,6 @@
 import type { Plugin } from "@opencode-ai/plugin"
 
-const VENDOR_MODEL = "openai/gpt-5.6-luna"
+const VENDOR_MODEL = "openai/gpt-6-luna"
 
 export const CommitModelPlugin: Plugin = async () => {
   return {

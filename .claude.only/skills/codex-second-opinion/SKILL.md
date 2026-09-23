@@ -8,7 +8,7 @@ description: Use when an independent code check can be offloaded to Codex to sav
 Ask a neutral question so Codex reaches its own conclusion:
 
 ```bash
-codex exec -m gpt-5.6-sol -c model_reasoning_effort="high" \
+codex exec -m gpt-6-sol -c model_reasoning_effort="high" \
   -s danger-full-access -C /path/to/project "<neutral question>"
 ```
 
