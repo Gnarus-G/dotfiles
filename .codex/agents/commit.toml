@@ -1,6 +1,6 @@
 name = "commit"
 description = "Use when the user asks to commit; stage exact session files and infer repository conventions from history."
-model = "gpt-5.6-terra"
+model = "gpt-6-sol"
 model_reasoning_effort = "low"
 sandbox_mode = "workspace-write"
 developer_instructions = """

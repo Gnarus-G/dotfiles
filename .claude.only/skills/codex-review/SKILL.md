@@ -10,7 +10,7 @@ Delegate the diff and ask only for concrete current failures relevant to the sta
 ```bash
 { echo "Find concrete correctness bugs in this diff that are relevant to its stated goal and realistically reachable scenarios. Omit speculative corrections and report no issues if none exist.";
   git diff main...HEAD;
-} | codex exec -m gpt-5.6-sol -c model_reasoning_effort="high" \
+} | codex exec -m gpt-6-sol -c model_reasoning_effort="high" \
   --skip-git-repo-check -
 ```
 

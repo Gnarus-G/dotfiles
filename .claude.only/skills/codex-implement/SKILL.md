@@ -8,7 +8,7 @@ description: Use when implementation can be offloaded to Codex to save Claude to
 Delegate with enough context for Codex to implement and verify the change, explicitly requiring YAGNI and no code beyond the current goal:
 
 ```bash
-codex exec -m gpt-5.6-sol -c model_reasoning_effort="medium" \
+codex exec -m gpt-6-sol -c model_reasoning_effort="medium" \
   -s danger-full-access -C /path/to/project \
   "<task, context, and expected result>"
 ```

@@ -1,7 +1,7 @@
 ---
 description: Use when the user asks to commit; stage exact session files and infer repository conventions from history.
 mode: subagent
-model: ollama-cloud/deepseek-v4-flash
+model: ollama-cloud/deepseek-v4.1-flash
 permission:
   edit: deny
   bash:
