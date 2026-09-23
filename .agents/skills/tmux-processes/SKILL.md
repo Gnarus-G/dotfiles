@@ -44,9 +44,9 @@ The user runs the [oh-my-tmux](https://github.com/gpakosz/.tmux) base config. Be
 - **`escape-time 10`** — safe to send `Escape` immediately after other keys with `send-keys`.
 - **mouse mode is off by default** (commented out in `.tmux.conf.local`); don't assume mouse interaction works.
 
-## My setup (leftwm scratchpads)
+## My setup (Hyprland special workspaces)
 
-Two tmux sessions are bound to leftwm scratchpads via `ghostty -e tmux new-session -As <name>`:
+Two tmux sessions are bound to Hyprland special workspaces via `ghostty -e tmux new-session -As <name>`:
 
 - **`Whatever`** — toggled with `Mod4+t`, general-purpose pad
 - **`Work`** — toggled with `Mod4+Shift+t`, larger pad (80% screen) for active work

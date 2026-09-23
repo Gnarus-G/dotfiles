@@ -1,0 +1,13 @@
+{
+  "layer": "top",
+  "position": "top",
+  "height": 30,
+  "modules-left": ["hyprland/workspaces"],
+  "modules-right": ["clock"],
+  "hyprland/workspaces": {
+    "all-outputs": true,
+    "format": "{name}",
+    "persistent-workspaces": {"*": 9}
+  },
+  "clock": {"format": "{:%a, %b %d  %l:%M %p}"}
+}

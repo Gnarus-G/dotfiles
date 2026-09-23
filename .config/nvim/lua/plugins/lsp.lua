@@ -56,12 +56,13 @@ return {
               version = 'LuaJIT',
             },
             diagnostics = {
-              globals = { 'vim' },
+              globals = { 'vim', 'hl' },
             },
             workspace = {
               library = {
                 vim.env.VIMRUNTIME,
-                vim.fn.expand "~/.local/share/nvim/lazy/"
+                vim.fn.expand "~/.local/share/nvim/lazy/",
+                "/usr/share/hypr/stubs"
               }
             }
           }

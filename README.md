@@ -37,39 +37,23 @@ cp .tmux/.tmux.conf.local .
 
 ## Misc. Dependencies
 
-Utils
-
 ```sh
 sudo pacman -S fd fzf jq
 ```
 
-Screenshots
-
-```sh
-sudo pacman -S shotgun satty
-```
-
 ## Window Manager
 
-### LeftWM
+### Hyprland
 
 ```sh
-pacman -S leftwm leftwm-theme feh rofi polybar
+sudo pacman -S hyprland hyprpaper hyprlock hyprpolkitagent waybar rofi dunst \
+  grim slurp wl-clipboard brightnessctl xdg-desktop-portal-hyprland \
+  xdg-desktop-portal-gtk pipewire wireplumber qt5-wayland qt6-wayland
 ```
 
-```sh
-paru -S stalonetray picom pamixer
-```
-
-#### Eww
-
-```sh
-mkdir -p ~/d
-git clone https://github.com/elkowar/eww ~/d/eww
-cd ~/d/eww
-cargo build --release --no-default-features --features x11
-sudo install -s -Dm755 target/release/eww -t /usr/bin
-```
+Run `./dev`, log out, then select Hyprland in the display manager; the
+configuration keeps the LeftWM key bindings, maps scratchpads to special
+workspaces, and replaces the X11 Eww bar with Waybar.
 
 ## Theme & Fonts
 
@@ -213,6 +197,6 @@ uvx oterm
 [How to version control them dotfiles](https://stackoverflow.com/questions/46534290/symlink-dotfiles)  
 [Nvim from scratch](https://github.com/LunarVim/Neovim-from-scratch)  
 [Lsp Server Configurations](https://github.com/neovim/nvim-lspconfig/blob/master/doc/server_configurations.md)
-[leftwm](https://github.com/leftwm/leftwm)
-[eww](https://elkowar.github.io/eww/#building)
+[Hyprland](https://wiki.hypr.land/)
+[Waybar](https://github.com/Alexays/Waybar/wiki)
 [Using a NTFS disk with Linux and Windows](https://github.com/ValveSoftware/Proton/wiki/Using-a-NTFS-disk-with-Linux-and-Windows)

@@ -15,8 +15,9 @@ Configuration for AI coding assistants (OpenCode, Claude Code, etc). The `dev` s
 | `.config/nvim/`          | `~/.config/nvim`           | Neovim config       |
 | `.config/opencode/`      | `~/.config/opencode`       | OpenCode settings   |
 | `.config/awesome/`       | `~/.config/awesome`        | Awesome WM theme    |
-| `.config/leftwm/`        | `~/.config/leftwm`         | LeftWM config       |
-| `.config/eww/`           | `~/.config/eww`            | Eww widgets         |
+| `.config/hypr/`          | `~/.config/hypr`           | Hyprland config     |
+| `.config/waybar/`        | `~/.config/waybar`         | Waybar config       |
+| `.config/dunst/`         | `~/.config/dunst`          | Notifications       |
 | `.config/ghostty/config` | `~/.config/ghostty/config` | Ghostty terminal    |
 | `.zshrc`                 | `~/.zshrc`                 | Shell configuration |
 | `.gitconfig`             | `~/.gitconfig`             | Git settings        |

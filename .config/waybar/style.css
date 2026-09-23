@@ -1,0 +1,33 @@
+@define-color background #0f172a;
+@define-color foreground #b0b4bc;
+@define-color primary #60a5fa;
+@define-color muted #4b5563;
+
+* {
+  border: none;
+  border-radius: 0;
+  font-family: "Atkinson Hyperlegible Mono", monospace;
+  font-size: 12px;
+  min-height: 0;
+}
+
+window#waybar {
+  background: @background;
+  color: @foreground;
+}
+
+#workspaces,
+#clock {
+  padding: 7px 10px;
+}
+
+#workspaces button {
+  color: @muted;
+  padding: 0 8px;
+}
+
+#workspaces button.active {
+  background: @primary;
+  border-radius: 4px;
+  color: @background;
+}
