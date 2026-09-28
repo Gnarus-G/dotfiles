@@ -2,12 +2,21 @@
   "layer": "top",
   "position": "top",
   "height": 30,
-  "modules-left": ["hyprland/workspaces"],
-  "modules-right": ["clock"],
-  "hyprland/workspaces": {
+  "modules-left": ["ext/workspaces"],
+  "modules-right": ["pulseaudio", "custom/audio-error", "network", "cpu", "memory", "disk", "battery", "clock#date", "clock", "tray"],
+  "ext/workspaces": {
     "all-outputs": true,
     "format": "{name}",
-    "persistent-workspaces": {"*": 9}
+    "on-click": "activate"
   },
-  "clock": {"format": "{:%a, %b %d  %l:%M %p}"}
+  "pulseaudio": {"format": "{icon} {volume}%", "format-muted": "󰝟 MUTE", "format-icons": ["", "", ""], "on-click": "pactl set-sink-mute @DEFAULT_SINK@ toggle"},
+  "custom/audio-error": {"exec": "sh -c 'pactl info >/dev/null 2>&1 || echo AUDIO!'", "interval": 10, "hide-empty-text": true, "tooltip-format": "Audio unavailable: install and start pipewire-pulse and wireplumber"},
+  "network": {"format": "NET: ↑{bandwidthUpBytes} ↓{bandwidthDownBytes}", "tooltip-format": "{ifname} {ipaddr}", "format-disconnected": ""},
+  "cpu": {"format": "CPU: {usage}%", "states": {"warning": 50, "critical": 80}},
+  "memory": {"format": "RAM: {percentage}%", "states": {"warning": 60, "critical": 85}},
+  "disk": {"format": "DISK: {percentage_used}%", "states": {"warning": 70, "critical": 90}},
+  "battery": {"format": "BAT: {capacity}%", "format-charging": "🔌 {capacity}%", "states": {"warning": 40, "critical": 20}},
+  "clock#date": {"format": "{:%a, %b %d}", "tooltip-format": "<tt>{calendar}</tt>", "calendar": {"mode": "month", "format": {"today": "<span color='#60a5fa'><b>{}</b></span>"}}, "actions": {"on-scroll-up": "shift_up", "on-scroll-down": "shift_down", "on-click-right": "mode"}},
+  "clock": {"format": "{:%I:%M %p}", "tooltip": false},
+  "tray": {"icon-size": 16, "spacing": 10}
 }

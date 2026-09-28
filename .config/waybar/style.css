@@ -1,7 +1,9 @@
 @define-color background #0f172a;
 @define-color foreground #b0b4bc;
+@define-color dark #2e2e2e;
 @define-color primary #60a5fa;
-@define-color muted #4b5563;
+@define-color secondary #a5b4fc;
+@define-color muted #9ca3af;
 
 * {
   border: none;
@@ -14,20 +16,142 @@
 window#waybar {
   background: @background;
   color: @foreground;
+  border-radius: 5px;
 }
 
-#workspaces,
-#clock {
-  padding: 7px 10px;
+#workspaces {
+  padding: 0 2px;
 }
 
 #workspaces button {
   color: @muted;
-  padding: 0 8px;
+  min-width: 22px;
+  min-height: 22px;
+  margin: 4px 1px;
+  padding: 0;
+  border-radius: 50%;
+}
+
+#workspaces button:hover {
+  color: @primary;
+  background: @dark;
 }
 
 #workspaces button.active {
-  background: @primary;
-  border-radius: 4px;
   color: @background;
+  background: @primary;
+  font-weight: bold;
+}
+
+#workspaces button.visible:not(.active) {
+  color: @foreground;
+}
+
+#workspaces button.urgent {
+  color: @dark;
+  background: #d35d6e;
+}
+
+#workspaces button.empty {
+  color: @muted;
+}
+
+#pulseaudio,
+#network,
+#cpu,
+#memory,
+#disk,
+#battery,
+#clock.date,
+#clock,
+#tray {
+  padding: 0 10px;
+  border-left: 2px solid @dark;
+}
+
+#cpu,
+#memory,
+#disk,
+#battery,
+#network {
+  font-family: "JetBrains Mono", "Fira Code", monospace;
+  font-weight: bold;
+}
+
+#cpu {
+  color: @primary;
+  background: rgba(96, 165, 250, 0.1);
+}
+
+#memory {
+  color: @secondary;
+  background: rgba(165, 180, 252, 0.1);
+}
+
+#disk {
+  color: #22c55e;
+  background: rgba(34, 197, 94, 0.1);
+}
+
+#battery {
+  color: #a855f7;
+  background: rgba(168, 85, 247, 0.1);
+}
+
+#network {
+  color: #f97316;
+  background: rgba(249, 115, 22, 0.1);
+}
+
+#cpu.warning,
+#memory.warning,
+#disk.warning,
+#battery.warning {
+  color: #f97316;
+}
+
+#cpu.critical,
+#memory.critical,
+#disk.critical,
+#battery.critical {
+  color: #ef4444;
+}
+
+#pulseaudio {
+  color: @foreground;
+  font-family: "FiraCode Nerd Font", "Atkinson Hyperlegible Mono", monospace;
+}
+
+#pulseaudio.muted {
+  color: @muted;
+}
+
+#custom-audio-error {
+  color: #ef4444;
+  padding: 0 10px;
+  border-left: 2px solid @dark;
+}
+
+#clock.date {
+  color: @secondary;
+}
+
+#clock {
+  font-weight: bold;
+}
+
+#tray {
+  margin-right: 10px;
+}
+
+tooltip {
+  background: @background;
+  border: 2px solid @secondary;
+  border-radius: 5px;
+  color: @foreground;
+}
+
+tooltip label {
+  color: @foreground;
+  padding: 8px;
 }

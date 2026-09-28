@@ -18,6 +18,7 @@ hl.bind(mainMod .. " + SHIFT + Q", hl.dsp.window.close())
 hl.bind(mainMod .. " + SHIFT + X", hl.dsp.exit())
 
 for i = 1, 9 do
+    hl.workspace_rule({ workspace = tostring(i), persistent = true })
     hl.bind(mainMod .. " + " .. i, hl.dsp.focus({ workspace = i }))
-    hl.bind(mainMod .. " + SHIFT + " .. i, hl.dsp.window.move({ workspace = i }))
+    hl.bind(mainMod .. " + SHIFT + " .. i, hl.dsp.window.move({ workspace = i, follow = false }))
 end
