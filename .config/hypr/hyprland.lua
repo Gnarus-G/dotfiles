@@ -19,6 +19,9 @@ hl.window_rule({
 hl.bind(mainMod .. " + D", hl.dsp.exec_cmd("rofi -show drun"))
 hl.bind("ALT + Up", hl.dsp.focus({ direction = "up" }))
 hl.bind("ALT + Down", hl.dsp.focus({ direction = "down" }))
+hl.bind(mainMod .. " + Print",
+  hl.dsp.exec_cmd(
+    'file="$HOME/Pictures/Screenshots/$(date +%Y-%m-%d_%H-%M-%S.png)"; mkdir -p "$HOME/Pictures/Screenshots" && grim "$file" && "$HOME/.local/bin/wl-copy" --type image/png < "$file"'))
 hl.bind(mainMod .. " + SHIFT + S",
   hl.dsp.exec_cmd(
     'file="$HOME/Pictures/Screenshots/$(date +%Y-%m-%d_%H-%M-%S.png)"; mkdir -p "$HOME/Pictures/Screenshots" && grim -g "$(slurp)" "$file" && "$HOME/.local/bin/wl-copy" --type image/png < "$file"'))
