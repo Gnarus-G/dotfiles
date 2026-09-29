@@ -48,7 +48,7 @@ utils.per_rig_profile("work", function()
   })
 
   -- Todos as a terminal: runs `todo ls` in a named tmux session, then drops to a shell
-  scratchpad.setup("Todos", mainMod .. " + Y", 0.5, 0.7, {
+  scratchpad.setup("Todos", mainMod .. " + SHIFT + U", 0.5, 0.7, {
     command =
     "ghostty --gtk-single-instance=false --title=Todos --title-report=false -e tmux new-session -As Todos 'todo ls; exec $SHELL'",
   })
@@ -56,7 +56,7 @@ end)
 
 utils.per_rig_profile("home", function()
   -- Todos as the Mynd PWA window (same app LeftWM launches)
-  scratchpad.setup("Todos", mainMod .. " + Y", 0.5, 0.7, {
+  scratchpad.setup("Todos", mainMod .. " + SHIFT + U", 0.5, 0.7, {
     command = "chromium --profile-directory=Default --app-id=hcenedefeplinmokonjlppanijfggjja",
     class = "crx_hcenedefeplinmokonjlppanijfggjja",
   })
