@@ -75,6 +75,9 @@ hl.bind(mainMod .. " + Print",
 hl.bind(mainMod .. " + SHIFT + S",
   hl.dsp.exec_cmd(
     'file="$HOME/Pictures/Screenshots/$(date +%Y-%m-%d_%H-%M-%S.png)"; mkdir -p "$HOME/Pictures/Screenshots" && grim -g "$(slurp)" "$file" && wl-copy --type image/png < "$file"'))
+hl.bind(mainMod .. " + SHIFT + W",
+  hl.dsp.exec_cmd(
+    [[geometry=$(hyprctl activewindow -j | jq -er 'select(.at and .size) | "\(.at[0]),\(.at[1]) \(.size[0])x\(.size[1])"') && file="$HOME/Pictures/Screenshots/$(date +%Y-%m-%d_%H-%M-%S.png)" && mkdir -p "$HOME/Pictures/Screenshots" && grim -g "$geometry" "$file" && wl-copy --type image/png < "$file"]]))
 hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("/usr/bin/sg video -c 'brightnessctl set 5%-'"), { repeating = true })
 hl.bind("XF86MonBrightnessUp", hl.dsp.exec_cmd("/usr/bin/sg video -c 'brightnessctl set +5%'"), { repeating = true })
 hl.bind(mainMod .. " + SHIFT + R", hl.dsp.exec_cmd("hyprctl reload"))
