@@ -1,202 +1,37 @@
 # .dotfiles
 
-## Zsh
+Wayland-first dotfiles for my Arch workstation.
 
-### [oh-my-zsh](https://github.com/ohmyzsh/ohmyzsh)
-
-```sh
-wget https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh
-sh install.sh
-```
-
-### [autosuggestions](https://github.com/zsh-users/zsh-autosuggestions)
+## Bootstrap
 
 ```sh
-git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
+git clone <this repo> ~/d/dotfiles
+cd ~/d/dotfiles
+.local/bin/required-tools
+./dev
 ```
 
-### [syntax-highlighting](https://github.com/zsh-users/zsh-syntax-highlighting)
+Log out, select Hyprland if needed, then log back in.
 
-```bash
-git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
-```
-
-## [Tmux](https://github.com/gpakosz/.tmux)
+## Optional tools
 
 ```sh
-cd
-git clone https://github.com/gpakosz/.tmux.git
-ln -s -f .tmux/.tmux.conf
+optional-tools
 ```
 
-Get default configs with:
+Use Tab to choose extras such as the mouse driver, VirtManager, Stable Diffusion, or OpenCode browser-plugin notes.
+
+## Daily sync
 
 ```sh
-cp .tmux/.tmux.conf.local .
+./dev
 ```
 
-## Misc. Dependencies
-
-```sh
-sudo pacman -S fd fzf jq
-```
-
-## Window Manager
-
-### Hyprland
-
-```sh
-sudo pacman -S hyprland hyprpaper hyprlock hyprpolkitagent waybar rofi dunst \
-  grim slurp wl-clipboard brightnessctl xdg-desktop-portal-hyprland \
-  xdg-desktop-portal-gtk pipewire wireplumber qt5-wayland qt6-wayland
-```
-
-Run `./dev`, log out, then select Hyprland in the display manager; the
-configuration keeps the LeftWM key bindings, maps scratchpads to special
-workspaces, and replaces the X11 Eww bar with Waybar.
-
-## Theme & Fonts
-
-```sh
-sudo pacman -S lxappearance-gtk3 adapta-gtk-theme
-```
-
-```sh
-sudo pacman -S ttf-firacode-nerd noto-fonts-emoji noto-fonts-cjk noto-fonts-extra
-
-fc-cache -f
-```
-
-or, after running `./dev` from this dotfiles directory.
-
-```sh
-getfonts.sh
-```
-
-`getfonts.sh` also pulls **Atkinson Hyperlegible Mono** (Google Fonts), the
-system-wide UI/monospace family. `./dev` symlinks the font rules that point
-the generic `monospace`/`sans-serif`/`serif` aliases at it:
-
-- `.config/fontconfig/fonts.conf` — base layer, honored by most apps
-- `.config/gtk-3.0/settings.ini`, `.config/gtk-4.0/settings.ini` — GTK UI font
-
-## Mouse driver
-
-```sh
-sudo pacman -S base-devel linux-lts-headers linux-zen-headers
-```
-
-```sh
-curl -fsSL https://www.maccel.org/install.sh | sudo sh
-```
-
-## VirtManager
-
-```sh
-sudo pacman -S qemu-desktop libvirt edk2-ovmf virt-manager dnsmasq
-sudo usermod -aG libvirt,kvm,input $USER
-```
-
-```sh
-sudo virsh net-autostart default
-sudo virsh net-start default
-sudo systemctl enable libvirtd.service --now
-sudo systemctl enable virtlogd.socket --now
-```
-
-## Stable Diffusion Web UI
-
-```sh
-set -e
-cd ~/d
-git clone https://github.com/AUTOMATIC1111/stable-diffusion-webui
-cd stable-diffusion-webui
-rm -r venv
-sed 's/#\s*python_cmd=".*"/python_cmd="python3.11"/' -i webui-user.sh
-paru -S python311
-./webui.sh
-```
-
-[Usage Guide](https://stable-diffusion-art.com/models/)
-
-### Forge
-
-```sh
-cd ~/d/stable-diffusion-webui
-git remote add forge https://github.com/lllyasviel/stable-diffusion-webui-forge
-git branch lllyasviel/main
-git checkout lllyasviel/main
-git fetch forge
-git branch -u forge/main
-git pull
-```
-
-## OpenCode
-
-### Plugins
-
-[opencode-agent-memory](https://github.com/joshuadavidthomas/opencode-agent-memory) and
-[opencode-agent-skills](https://github.com/joshuadavidthomas/opencode-agent-skills)
-are configured in `opencode.json` and installed automatically on startup.
-
-### Browser plugin
-
-The repo also includes the Chrome extension browser plugin:
-
-- package: `@different-ai/opencode-browser@4.6.1`
-- setup guide: [`.config/opencode/browser-plugin-setup.md`](.config/opencode/browser-plugin-setup.md)
-
-Use the setup guide on a new machine. It covers:
-
-- syncing the dotfiles-managed OpenCode config
-- launching the dedicated Chrome profile
-- running the plugin installer once
-- loading the unpacked extension
-- verifying the broker/extension connection
-
-### Superpowers (optional)
-
-[Superpowers](https://github.com/obra/superpowers) is included as a git submodule.
-After cloning this repo, initialize it:
-
-```sh
-git submodule update --init
-```
-
-Skills are discoverable via the `opencode-agent-skills` plugin through
-a symlink at `.config/opencode/skill/superpowers`.
-
-To enable the full superpowers workflow (bootstrap prompt on every session):
-
-```sh
-export OPENCODE_AGENT_SKILLS_SUPERPOWERS_MODE=true
-```
-
-Update to latest:
-
-```sh
-git submodule update --remote .config/opencode/superpowers
-```
-
-## Must-have tools
-
-### Install [x-cmd](https://www.x-cmd.com/start/get-started)
-
-```sh
-eval "$(curl https://get.x-cmd.com)"
-```
-
-### Install [oterm](https://ggozad.github.io/oterm/)
-
-```sh
-uvx oterm
-```
+`./dev` reconciles the home-directory symlinks listed in `AGENTS.md`.
 
 ## References
 
-[How to version control them dotfiles](https://stackoverflow.com/questions/46534290/symlink-dotfiles)  
-[Nvim from scratch](https://github.com/LunarVim/Neovim-from-scratch)  
-[Lsp Server Configurations](https://github.com/neovim/nvim-lspconfig/blob/master/doc/server_configurations.md)
-[Hyprland](https://wiki.hypr.land/)
-[Waybar](https://github.com/Alexays/Waybar/wiki)
-[Using a NTFS disk with Linux and Windows](https://github.com/ValveSoftware/Proton/wiki/Using-a-NTFS-disk-with-Linux-and-Windows)
+- [OpenCode browser plugin setup](.config/opencode/browser-plugin-setup.md)
+- [Hyprland](https://wiki.hypr.land/)
+- [Waybar](https://github.com/Alexays/Waybar/wiki)
+- [How to version control dotfiles](https://stackoverflow.com/questions/46534290/symlink-dotfiles)
