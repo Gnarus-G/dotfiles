@@ -4,10 +4,10 @@
 local M = {}
 
 M.config = {
-  agent_commands = { "claude", "codex", "opencode", "aider", "node" }, -- pane_current_command to auto-detect
-  buffer_name = "nvim-agent",                                  -- named tmux paste buffer, never clobbers the user's
-  bracketed_paste = true,                                      -- paste-buffer -p, so multiline stays one input
-  submit_delay = 60,                                           -- ms between paste and Enter (let the TUI register)
+  agent_commands = { "pi", "claude", "codex", "opencode", "aider", "node" }, -- pane_current_command to auto-detect
+  buffer_name = "nvim-agent",                                                -- named tmux paste buffer, never clobbers the user's
+  bracketed_paste = true,                                                    -- paste-buffer -p, so multiline stays one input
+  submit_delay = 60,                                                         -- ms between paste and Enter (let the TUI register)
 }
 
 M.state = { target = nil } -- remembered "session:win.pane" for this nvim session
