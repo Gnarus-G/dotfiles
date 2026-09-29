@@ -66,8 +66,6 @@ LINKS: dict[str, list[str]] = {
     ".gitconfig": [".gitconfig"],
     ".local/bin/clip": [".local/bin/clip"],
     ".local/bin/getfonts.sh": [".local/bin/getfonts.sh"],
-    ".local/bin/required-tools": [".local/bin/required-tools"],
-    ".local/bin/optional-tools": [".local/bin/optional-tools"],
     ".local/bin/git-ac": [".local/bin/git-ac"],
     ".local/bin/git-prune-old-branches": [".local/bin/git-prune-old-branches"],
     ".local/bin/git-wt": [".local/bin/git-wt"],
