@@ -20,7 +20,13 @@ hl.on("hyprland.start", function()
   hl.exec_cmd('sh "$HOME/.config/hypr/random-wallpaper.sh"')
 end)
 
-hl.config({ animations = { enabled = false } })
+hl.config({
+  animations = { enabled = false },
+  input = {
+    accel_profile = "flat",
+    force_no_accel = true,
+  },
+})
 
 local scratchpad = require("scratchpad")
 scratchpad.setup("Whatever", mainMod .. " + T", 0.5, 0.5)
