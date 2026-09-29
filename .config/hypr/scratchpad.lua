@@ -23,6 +23,25 @@ function M.setup(name, key, width, height, opts)
     end
   end
 
+  local function resize(window, monitor)
+    hl.dispatch(hl.dsp.window.resize({
+      window = window,
+      x = math.floor(monitor.width * width),
+      y = math.floor(monitor.height * height),
+    }))
+    hl.dispatch(hl.dsp.window.center({ window = window }))
+  end
+
+  local function show(window)
+    local monitor = hl.get_active_monitor()
+    hl.dispatch(hl.dsp.window.move({ window = window, workspace = monitor.active_workspace }))
+    closeStorageWorkspace()
+    hl.dispatch(hl.dsp.window.fullscreen({ action = "unset", window = window }))
+    resize(window, monitor)
+    hl.dispatch(hl.dsp.window.bring_to_top({ window = window }))
+    hl.dispatch(hl.dsp.focus({ window = window }))
+  end
+
   closeStorageWorkspace()
 
   hl.on("hyprland.start", function()
@@ -43,11 +62,16 @@ function M.setup(name, key, width, height, opts)
   hl.on("window.open", function(window)
     if pending and is_ours(window) then
       pending = false
-      hl.dispatch(hl.dsp.window.move({ window = window, workspace = hl.get_active_workspace() }))
-      closeStorageWorkspace()
-      hl.dispatch(hl.dsp.window.fullscreen({ action = "unset", window = window }))
-      hl.dispatch(hl.dsp.window.bring_to_top({ window = window }))
-      hl.dispatch(hl.dsp.focus({ window = window }))
+      show(window)
+    end
+  end)
+
+  hl.on("workspace.move_to_monitor", function(movedWorkspace, monitor)
+    for _, window in ipairs(hl.get_windows()) do
+      if is_ours(window) and window.workspace.name == movedWorkspace.name then
+        resize(window, monitor)
+        break
+      end
     end
   end)
 
@@ -69,11 +93,7 @@ function M.setup(name, key, width, height, opts)
       hl.dispatch(hl.dsp.window.move({ window = window, workspace = workspace }))
       closeStorageWorkspace()
     else
-      hl.dispatch(hl.dsp.window.move({ window = window, workspace = hl.get_active_workspace() }))
-      closeStorageWorkspace()
-      hl.dispatch(hl.dsp.window.fullscreen({ action = "unset", window = window }))
-      hl.dispatch(hl.dsp.window.bring_to_top({ window = window }))
-      hl.dispatch(hl.dsp.focus({ window = window }))
+      show(window)
     end
   end)
 end
