@@ -69,6 +69,8 @@ hl.window_rule({
 hl.bind(mainMod .. " + D", hl.dsp.exec_cmd("rofi -show drun"))
 hl.bind("ALT + Up", hl.dsp.focus({ direction = "up" }))
 hl.bind("ALT + Down", hl.dsp.focus({ direction = "down" }))
+hl.bind(mainMod .. " + H", hl.dsp.focus({ monitor = "-1" }))
+hl.bind(mainMod .. " + L", hl.dsp.focus({ monitor = "+1" }))
 hl.bind(mainMod .. " + Print",
   hl.dsp.exec_cmd(
     'file="$HOME/Pictures/Screenshots/$(date +%Y-%m-%d_%H-%M-%S.png)"; mkdir -p "$HOME/Pictures/Screenshots" && grim "$file" && wl-copy --type image/png < "$file"'))
@@ -88,6 +90,6 @@ hl.bind(mainMod .. " + SHIFT + X", hl.dsp.exit())
 
 for i = 1, 9 do
   hl.workspace_rule({ workspace = tostring(i), persistent = true })
-  hl.bind(mainMod .. " + " .. i, hl.dsp.focus({ workspace = i }))
+  hl.bind(mainMod .. " + " .. i, hl.dsp.focus({ workspace = i, on_current_monitor = true }))
   hl.bind(mainMod .. " + SHIFT + " .. i, hl.dsp.window.move({ workspace = i, follow = false }))
 end
