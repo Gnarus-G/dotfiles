@@ -25,6 +25,7 @@ end)
 
 hl.config({
   animations = { enabled = false },
+  binds = { window_direction_monitor_fallback = false },
   input = {
     accel_profile = "flat",
     force_no_accel = true,
@@ -58,7 +59,7 @@ utils.per_rig_profile("home", function()
   -- Todos as the Mynd PWA window (same app LeftWM launches)
   scratchpad.setup("Todos", mainMod .. " + SHIFT + U", 0.5, 0.7, {
     command = "chromium --profile-directory=Default --app-id=hcenedefeplinmokonjlppanijfggjja",
-    class = "crx_hcenedefeplinmokonjlppanijfggjja",
+    class = "chrome-hcenedefeplinmokonjlppanijfggjja-Default",
   })
 end)
 
