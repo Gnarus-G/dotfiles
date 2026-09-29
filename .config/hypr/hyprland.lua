@@ -1,3 +1,18 @@
+-- Monitors: ultrawide main on top, secondary centered below it
+hl.monitor({
+  output = "DP-2",
+  mode = "3440x1440@120",
+  position = "0x0",
+  scale = 1,
+})
+
+hl.monitor({
+  output = "DP-3",
+  mode = "1920x1200@60",
+  position = "760x1440",
+  scale = 1,
+})
+
 local mainMod = "SUPER"
 
 hl.on("hyprland.start", function()
