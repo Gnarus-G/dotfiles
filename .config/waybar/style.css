@@ -24,7 +24,8 @@ window#waybar {
 }
 
 #workspaces button {
-  color: @muted;
+  color: @foreground;
+  font-weight: bold;
   min-width: 22px;
   min-height: 22px;
   margin: 4px 1px;
@@ -53,7 +54,8 @@ window#waybar {
 }
 
 #workspaces button.empty {
-  color: @muted;
+  color: rgba(156, 163, 175, 0.35);
+  font-weight: normal;
 }
 
 #pulseaudio,
