@@ -120,6 +120,7 @@ window#waybar {
 #pulseaudio {
   color: @foreground;
   font-family: "FiraCode Nerd Font", "Atkinson Hyperlegible Mono", monospace;
+  padding: 0 12px;
 }
 
 #pulseaudio.muted {
