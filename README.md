@@ -1,25 +1,19 @@
 # .dotfiles
 
-Wayland-first dotfiles for my Arch workstation.
+Wayland-first dotfiles for my workstations.
 
 ## Bootstrap
 
 ```sh
 git clone <this repo> ~/d/dotfiles
 cd ~/d/dotfiles
-.local/bin/required-tools
-./dev
 ```
 
-Log out, select Hyprland if needed, then log back in.
+Install the tools in [TOOLS.md](TOOLS.md) using the machine's package manager, then run `./dev`; log out, select Hyprland if needed, and log back in.
 
 ## Optional tools
 
-```sh
-optional-tools
-```
-
-Use Tab to choose extras such as the mouse driver, VirtManager, Stable Diffusion, or OpenCode browser-plugin notes.
+See [TOOLS.md](TOOLS.md) for wanted additions and other optional setups.
 
 ## Daily sync
 
