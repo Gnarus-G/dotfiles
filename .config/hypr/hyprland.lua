@@ -28,6 +28,7 @@ hl.config({
   input = {
     accel_profile = "flat",
     force_no_accel = true,
+    focus_on_close = 1,
   },
 })
 
@@ -48,7 +49,8 @@ utils.per_rig_profile("work", function()
 
   -- Todos as a terminal: runs `todo ls` in a named tmux session, then drops to a shell
   scratchpad.setup("Todos", mainMod .. " + Y", 0.5, 0.7, {
-    command = "ghostty --gtk-single-instance=false --title=Todos --title-report=false -e tmux new-session -As Todos 'todo ls; exec $SHELL'",
+    command =
+    "ghostty --gtk-single-instance=false --title=Todos --title-report=false -e tmux new-session -As Todos 'todo ls; exec $SHELL'",
   })
 end)
 
