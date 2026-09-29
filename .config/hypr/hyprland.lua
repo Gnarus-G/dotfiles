@@ -92,6 +92,16 @@ hl.bind(mainMod .. " + SHIFT + X", hl.dsp.exit())
 
 for i = 1, 9 do
   hl.workspace_rule({ workspace = tostring(i), persistent = true })
-  hl.bind(mainMod .. " + " .. i, hl.dsp.focus({ workspace = i, on_current_monitor = true }))
+  hl.bind(mainMod .. " + " .. i, function()
+    local workspace = hl.get_workspace(i)
+    local monitor = hl.get_active_monitor()
+    if workspace and workspace.monitor.name ~= monitor.name then
+      hl.dispatch(hl.dsp.workspace.swap_monitors({ monitor1 = monitor, monitor2 = workspace.monitor }))
+      if workspace.monitor.name ~= monitor.name then
+        hl.dispatch(hl.dsp.workspace.move({ workspace = workspace, monitor = monitor }))
+      end
+    end
+    hl.dispatch(hl.dsp.focus({ workspace = i }))
+  end)
   hl.bind(mainMod .. " + SHIFT + " .. i, hl.dsp.window.move({ workspace = i, follow = false }))
 end
