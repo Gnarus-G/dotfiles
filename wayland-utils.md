@@ -2,6 +2,22 @@
 
 Based on the [Hyprland wiki](https://wiki.hypr.land/useful-utilities/), checked against what's already installed.
 
+## Installed for this Hyprland setup
+
+- `swaybg` displays the wallpaper selected by `random-wallpaper.sh`.
+- `waybar-git` replaces the repository `waybar` 0.15.0 package: that release sends legacy workspace-click commands, which Hyprland's Lua config rejects. `paru -S waybar-git` builds the version with Lua dispatch support; its build also installed `catch2` and `scdoc` as make dependencies.
+- `grim`, `slurp`, and `wl-clipboard` (the `wl-copy` command), plus `rofi`, `brightnessctl`, `hyprlock`, and other existing utilities, were already installed. Screenshot and wallpaper commands use the executables on `PATH`.
+
+## Rig selection and monitors
+
+Hyprland launched by a display manager does not read `~/.zshrc.local`, so an exported `GNARUS_RIG` there may be present in terminals but absent from the Hyprland process. Set `GNARUS_RIG=home` or `GNARUS_RIG=work` in the login environment (for example, in `/etc/environment`, without `export`) and log out and back in; the variable takes precedence when present.
+
+Alternatively, put just `home` or `work` in the **machine-local**, untracked `~/.config/gnarus-rig` file; Hyprland reads it when `GNARUS_RIG` is unset. On this home machine the file contains `home`. No hostname needs to be recorded, including on the work laptop. Run `hyprctl reload` after changing the file.
+
+The home profile sets DP-2 to 3440×1440 at 120 Hz above the centered DP-3 at 1920×1200 at 60 Hz, both at scale 1. The earlier side-by-side layout at 60 Hz occurred because the display-manager session had no `GNARUS_RIG`, so the profile was skipped.
+
+Workspace 10 was automatically created by Hyprland as the second monitor's active workspace: the config explicitly makes only workspaces 1–9 persistent. Waybar hides 10, but Hyprland still needs an active workspace for that monitor.
+
 ## ✅ Already covered
 
 | Category       | Tool                                                 |

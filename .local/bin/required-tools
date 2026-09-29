@@ -32,9 +32,16 @@ pacman_install \
 
 section "Wayland desktop"
 pacman_install \
-  hyprland hyprpaper hyprlock hyprpolkitagent waybar rofi dunst \
+  hyprland hyprpaper swaybg hyprlock hyprpolkitagent rofi dunst \
   grim slurp wl-clipboard brightnessctl xdg-desktop-portal-hyprland \
   xdg-desktop-portal-gtk pipewire wireplumber qt5-wayland qt6-wayland
+
+section "Waybar (Hyprland Lua workspace clicks)"
+if have paru; then
+  paru -S --needed waybar-git
+else
+  echo "Install an AUR helper, then install waybar-git (Waybar 0.15.0 cannot switch Lua workspaces on click)."
+fi
 
 section "Some fonts"
 pacman_install \
