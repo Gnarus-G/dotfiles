@@ -7,7 +7,6 @@
   "hyprland/workspaces": {
     "all-outputs": true,
     "format": "{name}",
-    "ignore-workspaces": ["^[0-9]{2,}$"],
     "sort-by": "number"
   },
   "pulseaudio": {"format": "<span size='large'>{icon}</span>  {volume}%", "format-muted": "󰝟  MUTE", "format-icons": ["", "", ""], "on-click": "pactl set-sink-mute @DEFAULT_SINK@ toggle"},
