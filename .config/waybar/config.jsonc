@@ -2,14 +2,15 @@
   "layer": "top",
   "position": "top",
   "height": 30,
-  "modules-left": ["ext/workspaces"],
+  "modules-left": ["hyprland/workspaces"],
   "modules-right": ["pulseaudio", "custom/audio-error", "network", "cpu", "memory", "disk", "battery", "clock#date", "clock", "tray"],
-  "ext/workspaces": {
+  "hyprland/workspaces": {
     "all-outputs": true,
     "format": "{name}",
-    "on-click": "activate"
+    "ignore-workspaces": ["^10$"],
+    "sort-by": "number"
   },
-  "pulseaudio": {"format": "{icon} {volume}%", "format-muted": "󰝟 MUTE", "format-icons": ["", "", ""], "on-click": "pactl set-sink-mute @DEFAULT_SINK@ toggle"},
+  "pulseaudio": {"format": "<span size='large'>{icon}</span>  {volume}%", "format-muted": "󰝟  MUTE", "format-icons": ["", "", ""], "on-click": "pactl set-sink-mute @DEFAULT_SINK@ toggle"},
   "custom/audio-error": {"exec": "sh -c 'pactl info >/dev/null 2>&1 || echo AUDIO!'", "interval": 10, "hide-empty-text": true, "tooltip-format": "Audio unavailable: install and start pipewire-pulse and wireplumber"},
   "network": {"format": "NET: ↑{bandwidthUpBytes} ↓{bandwidthDownBytes}", "tooltip-format": "{ifname} {ipaddr}", "format-disconnected": ""},
   "cpu": {"format": "CPU: {usage}%", "states": {"warning": 50, "critical": 80}},
