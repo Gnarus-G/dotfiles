@@ -2,6 +2,7 @@ local mainMod = "SUPER"
 
 hl.on("hyprland.start", function()
   hl.exec_cmd("waybar")
+  hl.exec_cmd('sh "$HOME/.config/hypr/random-wallpaper.sh"')
 end)
 
 hl.config({ animations = { enabled = false } })
