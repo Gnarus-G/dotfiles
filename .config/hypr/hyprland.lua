@@ -1,19 +1,22 @@
--- Monitors: ultrawide main on top, secondary centered below it
-hl.monitor({
-  output = "DP-2",
-  mode = "3440x1440@120",
-  position = "0x0",
-  scale = 1,
-})
-
-hl.monitor({
-  output = "DP-3",
-  mode = "1920x1200@60",
-  position = "760x1440",
-  scale = 1,
-})
-
 local mainMod = "SUPER"
+local utils = require("utils")
+
+utils.per_rig_profile("home", function()
+  -- Monitors: ultrawide main on top, secondary centered below it
+  hl.monitor({
+    output = "DP-2",
+    mode = "3440x1440@120",
+    position = "0x0",
+    scale = 1,
+  })
+
+  hl.monitor({
+    output = "DP-3",
+    mode = "1920x1200@60",
+    position = "760x1440",
+    scale = 1,
+  })
+end)
 
 hl.on("hyprland.start", function()
   hl.exec_cmd("waybar")
@@ -31,6 +34,31 @@ hl.config({
 local scratchpad = require("scratchpad")
 scratchpad.setup("Whatever", mainMod .. " + T", 0.5, 0.5)
 scratchpad.setup("Work", mainMod .. " + SHIFT + T", 0.8, 0.8)
+
+utils.per_rig_profile("work", function()
+  hl.config({
+    input = {
+      touchpad = {
+        natural_scroll = true, -- tweak to taste
+        tap_to_click = true,
+        disable_while_typing = true,
+      },
+    },
+  })
+
+  -- Todos as a terminal: runs `todo ls` in a named tmux session, then drops to a shell
+  scratchpad.setup("Todos", mainMod .. " + Y", 0.5, 0.7, {
+    command = "ghostty --gtk-single-instance=false --title=Todos --title-report=false -e tmux new-session -As Todos 'todo ls; exec $SHELL'",
+  })
+end)
+
+utils.per_rig_profile("home", function()
+  -- Todos as the Mynd PWA window (same app LeftWM launches)
+  scratchpad.setup("Todos", mainMod .. " + Y", 0.5, 0.7, {
+    command = "chromium --profile-directory=Default --app-id=hcenedefeplinmokonjlppanijfggjja",
+    class = "crx_hcenedefeplinmokonjlppanijfggjja",
+  })
+end)
 
 hl.window_rule({
   name = "picture-in-picture",
