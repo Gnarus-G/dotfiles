@@ -1,4 +1,5 @@
 [global]
+  monitor = DP-2
   notification_limit = 3
   origin = top-center
   transparency = 25
