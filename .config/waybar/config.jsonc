@@ -7,7 +7,8 @@
   "hyprland/workspaces": {
     "all-outputs": true,
     "format": "{name}",
-    "sort-by": "number"
+    "sort-by": "number",
+    "move-to-monitor": true
   },
   "pulseaudio": {"format": "<span size='large'>{icon}</span>  {volume}%", "format-muted": "🔇  MUTE", "format-icons": ["🔈", "🔉", "🔊"], "states": {"low": 29, "medium": 69}, "scroll-step": 5, "max-volume": 150, "on-click": "pactl set-sink-mute @DEFAULT_SINK@ toggle"},
   "pulseaudio/slider": {"min": 0, "max": 150, "orientation": "horizontal"},
