@@ -8,4 +8,4 @@ Write `home` or `work` as the only line of the machine-local `~/.config/rig-name
 
 The `home` profile places DP-2 (3440×1440 at 120 Hz) above a centered DP-3 (1920×1200 at 60 Hz), both at scale 1. Workspaces 1–9 are persistent; Hyprland may create workspace 10 for the second monitor.
 
-On login, Hyprland starts Waybar and `random-wallpaper.sh`, which picks an image from `wallpaper/` and displays it with `swaybg`. `hyprpaper.conf` is retained but is not used by this startup path.
+On login, Hyprland starts Waybar and `random-wallpaper.sh`, which picks a different random image per monitor from `wallpaper/` and displays all of them with a single `swaybg` instance. Re-running the script (e.g. via the `SUPER+SHIFT+R` bind alongside `hyprctl reload`) rerolls all wallpapers. `hyprpaper.conf` is retained but is not used by this startup path.
