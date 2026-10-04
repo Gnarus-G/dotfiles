@@ -16,6 +16,15 @@ function M.setup(name, key, width, height, opts)
     return window.initial_title == name
   end
 
+  local function findOurs()
+    for _, candidate in ipairs(hl.get_windows()) do
+      if is_ours(candidate) then
+        return candidate
+      end
+    end
+    return nil
+  end
+
   local function closeStorageWorkspace()
     local active = hl.get_active_special_workspace()
     if active and active.name == workspace then
@@ -40,6 +49,45 @@ function M.setup(name, key, width, height, opts)
     resize(window, monitor)
     hl.dispatch(hl.dsp.window.bring_to_top({ window = window }))
     hl.dispatch(hl.dsp.focus({ window = window }))
+  end
+
+  -- Toggling off restores keyboard focus by workspace history, not by what is
+  -- under the cursor, and the follow-mouse refocus is gated on real mouse
+  -- motion. The move dispatch lands after this callback, so poll until our
+  -- window is back on its storage workspace, then hand keyboard focus to the
+  -- topmost floating window under the cursor (floats stack above tiled; most
+  -- recently raised wins).
+  local function hide(window)
+    local ws_name = window.workspace.name
+    hl.dispatch(hl.dsp.window.move({ window = window, workspace = workspace }))
+    closeStorageWorkspace()
+
+    local function refocusUnderCursor()
+      local cursor = hl.get_cursor_pos()
+      local top
+      for _, win in ipairs(hl.get_workspace_windows(hl.get_workspace(ws_name))) do
+        if win.floating and cursor.x >= win.at.x and cursor.x < win.at.x + win.size.x and cursor.y >= win.at.y and cursor.y < win.at.y + win.size.y then
+          if not top or win.focus_history_id < top.focus_history_id then
+            top = win
+          end
+        end
+      end
+      if top then
+        hl.dispatch(hl.dsp.focus({ window = top }))
+      else
+        hl.dispatch(hl.dsp.cursor.move({ x = cursor.x, y = cursor.y }))
+      end
+    end
+
+    local function awaitHidden()
+      if findOurs() and findOurs().workspace.name == ws_name then
+        hl.timer(awaitHidden, { timeout = 20, type = "oneshot" })
+        return
+      end
+      hl.timer(refocusUnderCursor, { timeout = 60, type = "oneshot" })
+    end
+
+    hl.timer(awaitHidden, { timeout = 50, type = "oneshot" })
   end
 
   closeStorageWorkspace()
@@ -67,22 +115,14 @@ function M.setup(name, key, width, height, opts)
   end)
 
   hl.on("workspace.move_to_monitor", function(movedWorkspace, monitor)
-    for _, window in ipairs(hl.get_windows()) do
-      if is_ours(window) and window.workspace.name == movedWorkspace.name then
-        resize(window, monitor)
-        break
-      end
+    local window = findOurs()
+    if window and window.workspace.name == movedWorkspace.name then
+      resize(window, monitor)
     end
   end)
 
   hl.bind(key, function()
-    local window
-    for _, candidate in ipairs(hl.get_windows()) do
-      if is_ours(candidate) then
-        window = candidate
-        break
-      end
-    end
+    local window = findOurs()
 
     if not window then
       if not pending then
@@ -90,8 +130,7 @@ function M.setup(name, key, width, height, opts)
         hl.exec_cmd(command)
       end
     elseif window.workspace.name == hl.get_active_workspace().name then
-      hl.dispatch(hl.dsp.window.move({ window = window, workspace = workspace }))
-      closeStorageWorkspace()
+      hide(window)
     else
       show(window)
     end
