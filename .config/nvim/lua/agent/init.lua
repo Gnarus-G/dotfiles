@@ -180,18 +180,12 @@ end
 
 function M.ask(opts)
   opts = opts or {}
-  -- Capture the selection now, before the input box steals focus / mode.
-  local ctx = nil
-  if in_visual_mode() then
-    local lines, srow, erow = get_selection()
-    ctx = fence(lines, srow, erow)
-  end
-
+  local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+  local ctx = fence(lines, 1, #lines)
   vim.ui.input({ prompt = "Agent: " }, function(text)
     if not text or text == "" then return end
-    local body = ctx and (text .. "\n\n" .. ctx) or text
     resolve_target(function(target)
-      paste_to(target, body, opts.submit ~= false)
+      paste_to(target, text .. "\n\n" .. ctx, opts.submit ~= false)
     end)
   end)
 end
@@ -223,8 +217,8 @@ function M.setup(opts)
 
   vim.keymap.set({ "n", "x" }, "<leader>cc", guard(function() M.send_selection() end),
     { desc = "Ask agent about selection/line" })
-  vim.keymap.set({ "n", "x" }, "<leader>cq", guard(function() M.ask() end),
-    { desc = "Ask agent…" })
+  vim.keymap.set("n", "<leader>cq", guard(function() M.ask() end),
+    { desc = "Ask agent about current file" })
   vim.keymap.set("n", "<leader>cp", guard(function() M.select_pane() end),
     { desc = "Pick agent pane" })
 end
