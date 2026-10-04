@@ -100,7 +100,12 @@ hl.bind(mainMod .. " + SHIFT + Q", hl.dsp.window.close())
 hl.bind(mainMod .. " + SHIFT + X", hl.dsp.exit())
 
 for i = 1, 9 do
-  hl.workspace_rule({ workspace = tostring(i), persistent = true })
+  local workspace = hl.get_workspace(i)
+  hl.workspace_rule({
+    workspace = tostring(i),
+    monitor = workspace and workspace.monitor and workspace.monitor.name,
+    persistent = true,
+  })
   hl.bind(mainMod .. " + " .. i, hl.dsp.focus({ workspace = i, on_current_monitor = true }))
   hl.bind(mainMod .. " + SHIFT + " .. i, hl.dsp.window.move({ workspace = i, follow = false }))
 end
