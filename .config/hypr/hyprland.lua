@@ -70,8 +70,14 @@ hl.window_rule({
 })
 
 hl.bind(mainMod .. " + D", hl.dsp.exec_cmd("rofi -show drun"))
-hl.bind("ALT + Up", hl.dsp.focus({ direction = "up" }))
-hl.bind("ALT + Down", hl.dsp.focus({ direction = "down" }))
+hl.bind("ALT + Up", function()
+  hl.dispatch(hl.dsp.window.cycle_next({ next = false }))
+  hl.dispatch(hl.dsp.window.bring_to_top())
+end)
+hl.bind("ALT + Down", function()
+  hl.dispatch(hl.dsp.window.cycle_next({ next = true }))
+  hl.dispatch(hl.dsp.window.bring_to_top())
+end)
 hl.bind(mainMod .. " + H", hl.dsp.focus({ monitor = "-1" }))
 hl.bind(mainMod .. " + L", hl.dsp.focus({ monitor = "+1" }))
 hl.bind(mainMod .. " + Print",
