@@ -169,9 +169,12 @@ end
 function M.send_selection(opts)
   opts = opts or {}
   local lines, srow, erow = get_selection()
-  local body = fence(lines, srow, erow)
-  resolve_target(function(target)
-    paste_to(target, body, opts.submit ~= false)
+  local ctx = fence(lines, srow, erow)
+  vim.ui.input({ prompt = "Agent: " }, function(text)
+    if not text or text == "" then return end
+    resolve_target(function(target)
+      paste_to(target, text .. "\n\n" .. ctx, opts.submit ~= false)
+    end)
   end)
 end
 
@@ -219,7 +222,7 @@ function M.setup(opts)
   end
 
   vim.keymap.set({ "n", "x" }, "<leader>cc", guard(function() M.send_selection() end),
-    { desc = "Send selection/line to agent" })
+    { desc = "Ask agent about selection/line" })
   vim.keymap.set({ "n", "x" }, "<leader>cq", guard(function() M.ask() end),
     { desc = "Ask agent…" })
   vim.keymap.set("n", "<leader>cp", guard(function() M.select_pane() end),
