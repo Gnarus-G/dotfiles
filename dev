@@ -72,6 +72,7 @@ LINKS: dict[str, list[str]] = {
     ".local/bin/tmux-center-toggle": [".local/bin/tmux-center-toggle"],
     ".local/bin/ollama-websearch-mcp.py": [".local/bin/ollama-websearch-mcp.py"],
     ".local/bin/maccel-profile": [".local/bin/maccel-profile"],
+    ".local/share/applications/discord.desktop": [".local/share/applications/discord.desktop"],
 }
 
 
