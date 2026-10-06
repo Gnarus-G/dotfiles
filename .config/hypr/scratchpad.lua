@@ -32,11 +32,12 @@ function M.setup(name, key, width, height, opts)
     end
   end
 
+  -- monitor.width/height are physical pixels; resize takes logical ones.
   local function resize(window, monitor)
     hl.dispatch(hl.dsp.window.resize({
       window = window,
-      x = math.floor(monitor.width * width),
-      y = math.floor(monitor.height * height),
+      x = math.floor(monitor.width / monitor.scale * width),
+      y = math.floor(monitor.height / monitor.scale * height),
     }))
     hl.dispatch(hl.dsp.window.center({ window = window }))
   end
