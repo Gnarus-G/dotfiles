@@ -26,6 +26,7 @@ end)
 hl.config({
   animations = { enabled = false },
   binds = { window_direction_monitor_fallback = false },
+  misc = { disable_hyprland_logo = true },
   input = {
     accel_profile = "flat",
     force_no_accel = true,
