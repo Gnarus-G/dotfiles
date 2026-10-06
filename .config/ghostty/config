@@ -44,3 +44,8 @@ scrollback-limit = 50000000
 
 window-inherit-font-size = true
 window-decoration = false
+
+# ~/.local/bin/ghostty preloads gtk4-layer-shell to dodge the work laptop's
+# AppProtection hook; keep that preload out of shells Ghostty launches.
+# An empty value doesn't unset inherited vars, so use ":" (an empty list).
+env = LD_PRELOAD=:
