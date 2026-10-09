@@ -16,6 +16,11 @@ utils.per_rig_profile("home", function()
     position = "760x1440",
     scale = 1,
   })
+
+  -- XWayland games use the X11 primary output for their default resolution.
+  hl.on("hyprland.start", function()
+    hl.exec_cmd("xrandr --output DP-2 --primary")
+  end)
 end)
 
 hl.on("hyprland.start", function()
