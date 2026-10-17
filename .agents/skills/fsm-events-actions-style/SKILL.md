@@ -32,7 +32,7 @@ The function must not read time, generate IDs, fetch data, log, call an API, or 
 5. **Observe after attempts.** Correlate input, decision, intent, dispatch attempt, observation, and resulting state with stable IDs. Do not equate dispatch, acknowledgment, observation, and the user's goal. Preserve `Unknown` when an effect might have happened but confirmation was lost; reconcile before retrying non-idempotent effects.
 6. **Verify the contract.** Test reducer transitions and forbidden transitions as tables/sequences; drive a real adapter for the affected flow; inject failure before dispatch, after dispatch, and before observation. Assert state, intents, and externally visible outcome rather than only that mocks were called. For complex interleavings, generate state-machine sequences or model-check a small invariant.
 
-Read [technique.md](references/technique.md) for the detailed execution, replay, failure, and testing protocol; [sources.md](references/sources.md) for research and its precise applicability.
+Read [technique.md](references/technique.md) for the detailed execution, replay, failure, and testing protocol; [typescript.md](references/typescript.md) for a TypeScript implementation and an optional Effect interpreter; [sources.md](references/sources.md) for research and its precise applicability.
 
 ## Design constraints
 
