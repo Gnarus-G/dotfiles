@@ -1,6 +1,6 @@
 ---
 name: fsm-events-actions-style
-description: "Use when designing, implementing, debugging, or reviewing event-driven state machines, events-to-actions systems, functional-core/imperative-shell code, durable effects, replay, or observable workflows."
+description: "Use when designing, implementing, debugging, or reviewing event-driven state machines, events-to-actions systems, functional-core/imperative-shell code, durable effects, replay, observable workflows, or their zero-allocation hot paths."
 ---
 
 # FSM / Events / Actions Style
@@ -26,17 +26,18 @@ The function must not read time, generate IDs, fetch data, log, call an API, or 
 ## How to apply it
 
 1. **Trace the real flow first.** List the inputs, external reads/writes, trust boundaries, existing state ownership, and observable success criteria. Identify one interaction with uncertainty worth modeling; do not remodel the whole codebase at once.
-2. **Write the transition contract.** Name states and legal `(state, event)` pairs; state invariants, preconditions, terminal/pause/unknown states, timeouts, cancellation, and what happens to unexpected inputs. Make impossible states hard to express where practical, without exploding into a type per trivial flag.
+2. **Write the transition contract.** Name states and legal `(state, event)` pairs; state invariants, preconditions, terminal/pause/unknown states, timeouts, cancellation, and what happens to unexpected inputs. Specify whether unhandled input is rejected, ignored, deferred, or outside the contract: a blank transition is not automatically a no-op. Make impossible states hard to express where practical, without exploding into a type per trivial flag.
 3. **Separate decisions from execution.** Convert each outside-world read into a typed observation; have the reducer return typed effect intents; let one interpreter execute them and feed back typed outcomes. Human choices, model outputs, and timer firings are untrusted inputs, not shortcuts around policy.
 4. **Choose an authority and durability boundary.** In memory is enough for disposable work; for crash recovery, persist the transition and pending intent before dispatch, ideally in one atomic operation or an existing workflow journal. If storage and effect cannot be atomic, represent the gap explicitly. Reuse an existing durable engine when it already owns the workflow; do not create a competing event log/state authority.
 5. **Observe after attempts.** Correlate input, decision, intent, dispatch attempt, observation, and resulting state with stable IDs. Do not equate dispatch, acknowledgment, observation, and the user's goal. Preserve `Unknown` when an effect might have happened but confirmation was lost; reconcile before retrying non-idempotent effects.
-6. **Verify the contract.** Test reducer transitions and forbidden transitions as tables/sequences; drive a real adapter for the affected flow; inject failure before dispatch, after dispatch, and before observation. Assert state, intents, and externally visible outcome rather than only that mocks were called. For complex interleavings, generate state-machine sequences or model-check a small invariant.
+6. **Verify the contract.** Test reducer transitions and forbidden transitions as tables/sequences; drive a real adapter for the affected flow; inject failure before dispatch, after dispatch, and before observation. Assert state, intents, and externally visible outcome rather than only that mocks were called. For complex interleavings, generate/shrink state-machine sequences or model-check a small invariant; check generator coverage and the model against independent observations.
 
-Read [technique.md](references/technique.md) for the detailed execution, replay, failure, and testing protocol; [typescript.md](references/typescript.md) for a TypeScript implementation and an optional Effect interpreter; [sources.md](references/sources.md) for research and its precise applicability.
+Read [technique.md](references/technique.md) for the detailed execution, replay, failure, and testing protocol; [typescript.md](references/typescript.md) for a TypeScript implementation and an optional Effect interpreter; [hot-path.md](references/hot-path.md) when latency/throughput measurements justify an allocation-free hot path; [sources.md](references/sources.md) for research and its precise applicability.
 
 ## Design constraints
 
 - Use one serial decision owner per independently ordered workflow/aggregate, or define concurrency control and ordering explicitly. Wall-clock timestamps alone do not establish causal order.
+- Define whether events arriving together are ordered, batched, or concurrent, and when internally emitted events run; avoid unbounded self-triggering chains and hidden priority between competing transitions.
 - An effect intent can be replayed as **data**; an effect must not be executed during state replay. Replay requires the same input events, reducer version/semantics, and ordering; live re-execution against the world is a new run.
 - Event-driven design does **not** imply event sourcing: persist only the history and evidence the requirements justify. Tracing/logging alone is not durable state; a durable journal alone is not evidence of what happened in another system.
 - Prefer visible local sequencing over an elaborate universal event bus. Add hierarchy, orthogonal states, durable workflows, or formal methods only when real complexity warrants them.
