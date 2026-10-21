@@ -22,6 +22,5 @@ that feels accessible to maintain. Simple and low complexity code is what I stri
 
 ## Command handoff
 
-- If you would otherwise ask me to run a command, put the actual command in a fresh shell window in my `Whatever` tmux session and start it there instead of making me copy and paste it. Do the same for interactive commands (passwords, confirmations, yes/no prompts) and long-lived commands I may need to watch or control, such as dev servers.
-- Never interrupt an occupied pane. Identify the new window for me without reminding me of the keybind; use `gnarus-tts` to call me over when my input or attention is needed and it is available.
-- Let me enter passwords and answer prompts in the window, never in chat; then check the command's result or readiness and continue the task.
+- Run short noninteractive commands yourself; start anything you'd otherwise ask me to run, anything interactive, or a long-lived process I may watch or control in a fresh `Whatever` tmux window, never an occupied pane.
+- Tell me the window name without reminding me of the keybind; use `gnarus-tts` when my attention is needed. Let me answer prompts and enter passwords there, never in chat; check the result or readiness and continue.

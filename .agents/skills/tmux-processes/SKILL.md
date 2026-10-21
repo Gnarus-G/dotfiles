@@ -1,27 +1,9 @@
 ---
 name: tmux-processes
-description: "Use tmux to manage panes and long-running processes, or start commands the user needs to watch or interact with (sudo, confirmations, prompts) in the Whatever scratchpad."
+description: "Use tmux for long-lived or interactive commands, including user handoffs in the Whatever scratchpad."
 ---
 
 # tmux Process Management
-
-## What I do
-
-- Run commands in tmux panes so they persist independently of the AI session
-- Monitor long-running processes (builds, dev servers, test watchers, deployments)
-- Capture and read pane output to check on process status
-- Manage sessions, windows, and panes for organized workflows
-
-## When to use me
-
-Use this when you need to:
-
-- Start a dev server, build, or watcher that should keep running
-- Run a long command and check its output later
-- Organize multiple processes across panes/windows
-- Send keys or commands to an existing pane
-- Capture terminal output from a running process
-- Hand off commands the user needs to watch or interact with without making them copy and paste
 
 ## Core Concepts
 
@@ -56,7 +38,7 @@ Because scratchpads use `new-session -As`, the sessions persist across toggles â
 
 ### Command handoff in Whatever
 
-If you would otherwise ask the user to run a command, start it yourself in a **fresh shell window** of `Whatever` instead. This also applies to commands that need user input (sudo, confirmations, yes/no prompts) or should remain accessible for watching and control (dev servers, watchers). Keep short noninteractive commands in the regular shell. Never send a command to a pane that already has an active process or agent.
+Start commands the user needs to run, answer, or watch (including sudo prompts and dev servers) in a fresh `Whatever` window; run short noninteractive commands in the regular shell.
 
 ```bash
 tmux has-session -t Whatever 2>/dev/null || tmux new-session -d -s Whatever
@@ -65,15 +47,11 @@ tmux send-keys -t "$PANE" 'npm run dev' Enter
 tmux capture-pane -p -J -t "$PANE" -S -20
 ```
 
-Substitute the actual command and descriptive window name for the example. The pane id keeps the target unambiguous even if another window has the same name. Check the output for readiness or a prompt, and tell the user the window name. If their input or attention is needed, call them with `gnarus-tts` when available (for example, `gnarus-tts "Your command is waiting for input in the Whatever dev-server window."`). Let the user answer prompts and enter passwords in the window, never in chat; do not capture the pane while they are typing a secret. Once they finish, check the result and continue the task; for long-lived commands, verify readiness and leave the window running.
+Replace the example command and window name; target the returned pane ID so duplicate window names cannot misdirect commands. Tell the user the window name, without a keybind reminder, and call them with `gnarus-tts` when input is needed. Let them answer prompts in the window, never in chat; avoid capturing secrets while they type. Check the result or readiness afterward and leave long-lived processes running.
 
 ```bash
 # Run a build inside the Work scratchpad session, in a new window
 tmux new-window -t Work: -n build 'cargo build --release'
-
-# Give an interactive command its own Whatever window rather than using the first pane
-PANE=$(tmux new-window -d -P -F '#{pane_id}' -t Whatever: -n logs)
-tmux send-keys -t "$PANE" 'tail -f /var/log/syslog' Enter
 
 # Capture output from a pane inside Work
 tmux capture-pane -p -J -t Work:build -S -100
