@@ -8,7 +8,7 @@ for file in "$HOME"/.claude/output-styles/*.md; do
   [ -f "$file" ] || continue
   name=$(awk -F ': ' '/^name: / { print $2; exit }' "$file")
   [ "$name" = "$style" ] || continue
-  description=$(awk -F ': ' '/^description: / { print $2; exit }' "$file")
-  [ -n "$description" ] && printf 'Output style: %s\n' "$description"
+  printf 'Follow this output style in your response:\n'
+  awk '/^---$/ { delimiters++; next } delimiters == 2 { print }' "$file"
   exit 0
 done
