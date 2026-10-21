@@ -5,30 +5,13 @@ description: Use the tmux plugin for pane references, long-lived processes, and 
 
 # tmux Process Management (Plugin-First)
 
-This skill is now backed by the local plugin at:
-
-- `.config/opencode/plugins/tmux.ts`
-
-The plugin adds deterministic tmux workflows directly into OpenCode.
+Plugin: `.config/opencode/plugins/tmux.ts`.
 
 ## Pane Selection and References
 
-Use these commands:
-
-- `/tmux-panes` to list panes
-- `/tmux-pane <index|%pane_id|target>` to select a pane for the current OpenCode session
-- `/tmux-help` to show usage and target formats
-
-Then reference panes in prompts:
-
-- `` `@pane` `` uses the selected pane for the current OpenCode session
-- `` `@pane:<target>` `` uses an explicit pane target
-
-Supported target styles:
-
-- Numeric index from `/tmux-panes` output
-- tmux pane id (for example `%351`)
-- tmux target (for example `Work:1.1` or `Work:opencode.1`)
+- `/tmux-panes` or `/tmux-pane` lists panes; `/tmux-pane <index|%id|target>` selects one; `/tmux-help` shows help.
+- `@pane` captures the session's selection; `@pane:<target>` captures an explicit pane.
+- Targets can be list indexes, pane IDs (`%351`), or tmux targets (`Work:1.1`, `Work:opencode.1`).
 
 ## Command handoff in Whatever
 
