@@ -1,6 +1,6 @@
 ---
 name: tmux-processes
-description: "CLI for tmux - manage sessions, windows, panes, and long-running processes. Use when running background builds, dev servers, watchers, or any task that needs monitoring in a separate pane."
+description: "Use tmux to manage panes and long-running processes, or start commands the user needs to watch or interact with (sudo, confirmations, prompts) in the Whatever scratchpad."
 ---
 
 # tmux Process Management
@@ -21,6 +21,7 @@ Use this when you need to:
 - Organize multiple processes across panes/windows
 - Send keys or commands to an existing pane
 - Capture terminal output from a running process
+- Hand off commands the user needs to watch or interact with without making them copy and paste
 
 ## Core Concepts
 
@@ -40,7 +41,7 @@ The user runs the [oh-my-tmux](https://github.com/gpakosz/.tmux) base config. Be
 - **`renumber-windows on`** — when a window is killed, remaining windows are renumbered to close the gap. **Address windows by name (`Work:build`) rather than index (`Work:3`)** in any script that may outlive a `kill-window`, since indices shift.
 - **`automatic-rename on`** — window titles auto-update to the running command. Passing `-n <name>` to `new-window` locks the name; otherwise `-n build` may drift to `node`, `cargo`, etc. Always pass `-n` if you plan to target by name later.
 - **`history-limit 5000`** — `capture-pane -S -` returns at most 5000 lines per pane. For long-running builds, capture incrementally rather than waiting and grabbing the full scrollback.
-- **Prefix is `C-b` *and* `C-a`** (GNU-Screen compatible via `prefix2`). Irrelevant for scripted `tmux` calls but worth knowing if sending literal prefix sequences via `send-keys`.
+- **Prefix is `C-b` _and_ `C-a`** (GNU-Screen compatible via `prefix2`). Irrelevant for scripted `tmux` calls but worth knowing if sending literal prefix sequences via `send-keys`.
 - **`escape-time 10`** — safe to send `Escape` immediately after other keys with `send-keys`.
 - **mouse mode is off by default** (commented out in `.tmux.conf.local`); don't assume mouse interaction works.
 
@@ -53,12 +54,26 @@ Two tmux sessions are bound to Hyprland special workspaces via `ghostty -e tmux 
 
 Because scratchpads use `new-session -As`, the sessions persist across toggles — closing the pad does not kill the session, so long-running processes stay alive. Prefer attaching to these existing sessions over creating new top-level ones, so the user can pull them up with the keybinding.
 
+### Command handoff in Whatever
+
+If you would otherwise ask the user to run a command, start it yourself in a **fresh shell window** of `Whatever` instead. This also applies to commands that need user input (sudo, confirmations, yes/no prompts) or should remain accessible for watching and control (dev servers, watchers). Keep short noninteractive commands in the regular shell. Never send a command to a pane that already has an active process or agent.
+
+```bash
+tmux has-session -t Whatever 2>/dev/null || tmux new-session -d -s Whatever
+PANE=$(tmux new-window -d -P -F '#{pane_id}' -t Whatever: -n dev-server -c "$PWD")
+tmux send-keys -t "$PANE" 'npm run dev' Enter
+tmux capture-pane -p -J -t "$PANE" -S -20
+```
+
+Substitute the actual command and descriptive window name for the example. The pane id keeps the target unambiguous even if another window has the same name. Check the output for readiness or a prompt, and tell the user the window name. If their input or attention is needed, call them with `gnarus-tts` when available (for example, `gnarus-tts "Your command is waiting for input in the Whatever dev-server window."`). Let the user answer prompts and enter passwords in the window, never in chat; do not capture the pane while they are typing a secret. Once they finish, check the result and continue the task; for long-lived commands, verify readiness and leave the window running.
+
 ```bash
 # Run a build inside the Work scratchpad session, in a new window
 tmux new-window -t Work: -n build 'cargo build --release'
 
-# Send a command to the Whatever session's first window
-tmux send-keys -t Whatever:1 'tail -f /var/log/syslog' Enter
+# Give an interactive command its own Whatever window rather than using the first pane
+PANE=$(tmux new-window -d -P -F '#{pane_id}' -t Whatever: -n logs)
+tmux send-keys -t "$PANE" 'tail -f /var/log/syslog' Enter
 
 # Capture output from a pane inside Work
 tmux capture-pane -p -J -t Work:build -S -100

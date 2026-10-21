@@ -1,6 +1,6 @@
 ---
 name: tmux-processes
-description: Use the tmux plugin workflow for pane selection, '@pane' references, and long-lived process management.
+description: Use the tmux plugin for pane selection and process monitoring, or start commands the user needs to watch or interact with (sudo, confirmations, prompts) in the Whatever scratchpad.
 ---
 
 # tmux Process Management (Plugin-First)
@@ -32,8 +32,21 @@ Supported target styles:
 
 ## Long-Lived Process Rules
 
-- Use tmux for dev servers, watchers, database processes, and anything expected to outlive the conversation.
+- Use tmux for dev servers, watchers, database processes, and anything expected to outlive the conversation; use `Whatever` when the user needs to watch or control it.
 - Use regular shell commands for one-shot tasks (build, lint, short commands).
+
+## Command handoff in Whatever
+
+If you would otherwise ask the user to run a command, start it yourself in a **fresh shell window** of `Whatever` instead. This includes interactive commands (passwords, confirmations, yes/no prompts) and long-lived commands the user may need to watch or control (dev servers, watchers). The plugin's `@pane` references only read output; use tmux CLI `send-keys` to start the command, never an active agent/process pane.
+
+```bash
+tmux has-session -t Whatever 2>/dev/null || tmux new-session -d -s Whatever
+PANE=$(tmux new-window -d -P -F '#{pane_id}' -t Whatever: -n dev-server -c "$PWD")
+tmux send-keys -t "$PANE" 'npm run dev' Enter
+tmux capture-pane -p -J -t "$PANE" -S -20
+```
+
+Replace the sample command and window name with the actual ones. Use the returned pane id to avoid targeting an existing window with the same name. Check the output for readiness or a prompt, then tell the user the window name. If their input or attention is needed, call them with `gnarus-tts` when available (for example, `gnarus-tts "Your command is waiting for input in the Whatever dev-server window."`). Let the user answer prompts and enter passwords in the window, never in chat; do not capture the pane while they are typing a secret. After they finish, verify the result and continue; for long-lived commands, verify readiness and leave the window running.
 
 ## Recommended tmux Start Pattern
 
