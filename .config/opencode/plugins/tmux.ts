@@ -13,8 +13,10 @@ type PaneInfo = {
   windowName: string
   paneIndex: string
   paneID: string
+  visible: boolean
   command: string
   cwd: string
+  size: string
   title: string
   target: string
   namedTarget: string
@@ -29,51 +31,32 @@ type TmuxResult = {
 
 function formatPaneList(sessionID: string, panes: PaneInfo[]): string {
   if (panes.length === 0) {
-    return [
-      "No tmux panes found.",
-      "Start a tmux session first, then run /tmux-panes again.",
-    ].join("\n")
+    return "No tmux panes found. Start a session and retry /tmux-panes."
   }
 
   const selected = selectedPaneBySession.get(sessionID)
-  const lines = ["tmux panes:"]
+  const lines = ["TMUX PANES", ""]
 
   panes.forEach((pane, index) => {
     lines.push(
-      `${index + 1}. ${pane.target} (${pane.paneID}) [${pane.command || "-"}] cwd=${pane.cwd || "-"} title=${pane.title || "-"}`,
+      `${selected === pane.paneID ? "›" : " "} ${pane.visible ? "●" : "○"} ${String(index + 1).padStart(2)}  ${pane.target}  ${pane.windowName} · ${pane.command || "-"} · ${pane.size}`,
     )
+    lines.push(`       ${pane.cwd || "-"}${pane.title ? ` — ${pane.title}` : ""}  (${pane.paneID})`)
   })
 
-  if (selected) {
-    lines.push("")
-    lines.push(`Current selected pane: ${selected}`)
-  }
-
   lines.push("")
-  lines.push("Select with: /tmux-pane <index|%pane_id|target>")
-  lines.push("Use in prompts: `@pane` or `@pane:<target>`")
+  lines.push("● visible  ○ hidden  › selected")
+  lines.push("Select: /tmux-pane <number|%id|target>    Capture: @pane")
 
   return lines.join("\n")
 }
 
 function formatHelpMessage(): string {
   return [
-    "tmux plugin help",
-    "",
-    "Commands:",
-    "- /tmux-panes",
-    "- /tmux-pane <index|%pane_id|target>",
-    "- /tmux-help",
-    "",
-    "Prompt references:",
-    "- `@pane` uses selected pane for this OpenCode session",
-    "- `@pane:<target>` uses explicit pane target",
-    "- expansion only happens for standalone tokens separated by whitespace",
-    "",
-    "Valid targets:",
-    "- numeric index from `/tmux-panes`",
-    "- pane id like `%367`",
-    "- tmux target like `Work:3.1` or `Work:opencode.1`",
+    "Tmux: /tmux-panes lists panes; /tmux-pane [index|%id|target] selects; /tmux-help shows this help.",
+    "@pane captures the selected pane for this session; @pane:<target> captures another.",
+    "Targets: list index, pane ID (%367), or tmux target (Work:3.1 or Work:opencode.1).",
+    "References must be standalone whitespace-separated tokens.",
   ].join("\n")
 }
 
@@ -171,7 +154,7 @@ export const TmuxPlugin: Plugin = async ({ client, $ }) => {
       "list-panes",
       "-a",
       "-F",
-      "#{session_name}\t#{window_index}\t#{window_name}\t#{pane_index}\t#{pane_id}\t#{pane_current_command}\t#{pane_current_path}\t#{pane_title}",
+      "#{session_name}\t#{window_index}\t#{window_name}\t#{pane_index}\t#{pane_id}\t#{pane_active}\t#{window_active}\t#{window_zoomed_flag}\t#{session_attached}\t#{pane_current_command}\t#{pane_current_path}\t#{pane_width}x#{pane_height}\t#{pane_title}",
     ])
 
     if (!result.ok) {
@@ -184,7 +167,7 @@ export const TmuxPlugin: Plugin = async ({ client, $ }) => {
     const lines = result.stdout.split("\n").filter(Boolean)
 
     for (const line of lines) {
-      const [session, windowIndex, windowName, paneIndex, paneID, command, cwd, ...titleParts] = line.split("\t")
+      const [session, windowIndex, windowName, paneIndex, paneID, paneActive, windowActive, zoomed, attached, command, cwd, size, ...titleParts] = line.split("\t")
       if (!session || !windowIndex || !windowName || !paneIndex || !paneID) continue
 
       const title = titleParts.join("\t")
@@ -197,8 +180,10 @@ export const TmuxPlugin: Plugin = async ({ client, $ }) => {
         windowName,
         paneIndex,
         paneID,
+        visible: attached === "1" && windowActive === "1" && (zoomed !== "1" || paneActive === "1"),
         command,
         cwd,
+        size,
         title,
         target,
         namedTarget,
@@ -216,8 +201,7 @@ export const TmuxPlugin: Plugin = async ({ client, $ }) => {
       candidate = selectedPaneBySession.get(sessionID)
       if (!candidate) {
         return {
-          error:
-            "No pane selected for @pane. Use /tmux-panes then /tmux-pane <index|%pane_id|target>, or use @pane:<target>.",
+          error: "No pane selected. Use /tmux-pane to list panes, /tmux-pane <target> to select, or @pane:<target> directly.",
         }
       }
     }
@@ -319,11 +303,8 @@ export const TmuxPlugin: Plugin = async ({ client, $ }) => {
       if (input.command === COMMAND_SELECT_PANE) {
         const selector = input.arguments.trim()
         if (!selector) {
-          await sendNoReplyMessage(
-            client,
-            input.sessionID,
-            "Usage: /tmux-pane <index|%pane_id|target>\nRun /tmux-panes to list available panes.",
-          )
+          const list = await listPanes()
+          await sendNoReplyMessage(client, input.sessionID, list.panes ? formatPaneList(input.sessionID, list.panes) : `Failed to list tmux panes: ${list.error}`)
           throw new Error("Command handled by tmux plugin")
         }
 
@@ -333,20 +314,9 @@ export const TmuxPlugin: Plugin = async ({ client, $ }) => {
           throw new Error("Command handled by tmux plugin")
         }
 
-        selectedPaneBySession.set(input.sessionID, resolved.target)
+        selectedPaneBySession.set(input.sessionID, resolved.paneID)
 
-        await sendNoReplyMessage(
-          client,
-          input.sessionID,
-          [
-            "tmux pane selected for this OpenCode session:",
-            `- target: ${resolved.target}`,
-            `- pane_id: ${resolved.paneID}`,
-            `- alias: ${resolved.namedTarget}`,
-            "",
-            "You can now reference it with `@pane`.",
-          ].join("\n"),
-        )
+        await client.tui.showToast({ body: { title: "Tmux pane selected", message: `${resolved.namedTarget} (${resolved.paneID}) · @pane to capture`, variant: "success" } })
 
         throw new Error("Command handled by tmux plugin")
       }

@@ -1,8 +1,7 @@
 /**
  * Tmux Panes Extension
  *
- * Adds /tmux for selecting a tmux pane, then hands the selected pane id to
- * the model so it can decide how much scrollback to capture with tmux_panes.
+ * Adds /tmux for selecting and inspecting a tmux pane.
  */
 
 import type { ExtensionAPI, ExtensionCommandContext } from "@earendil-works/pi-coding-agent";
@@ -49,18 +48,21 @@ async function choosePane(ctx: ExtensionCommandContext, panes: PaneInfo[]): Prom
 	return choice ? choices.get(choice) ?? null : null;
 }
 
-function requestPaneCapture(pi: ExtensionAPI, ctx: ExtensionCommandContext, pane: PaneInfo): void {
+async function inspectPane(pi: ExtensionAPI, ctx: ExtensionCommandContext, pane: PaneInfo): Promise<void> {
+	const lines = await capturePane(pi, pane.id, 200);
 	const prompt = [
-		`Inspect tmux pane ${pane.id} (${pane.label}).`,
-		"Use the tmux_panes tool with action=\"capture\" and this target.",
-		"Choose the line count yourself based on the current request/context.",
+		`Selected tmux pane ${pane.id} (${pane.label}):`,
+		"<tmux-pane>",
+		...lines,
+		"</tmux-pane>",
+		"Proceed if the next step is clear from context; otherwise ask what to do. Capture more with tmux_panes if needed.",
 	].join("\n");
 
 	if (ctx.isIdle()) {
 		pi.sendUserMessage(prompt);
 	} else {
 		pi.sendUserMessage(prompt, { deliverAs: "followUp" });
-		ctx.ui.notify("Queued tmux pane capture request", "info");
+		ctx.ui.notify("Queued tmux pane inspection", "info");
 	}
 }
 
@@ -72,12 +74,12 @@ async function selectAndRequestCapture(pi: ExtensionAPI, ctx: ExtensionCommandCo
 	}
 
 	const pane = await choosePane(ctx, panes);
-	if (pane) requestPaneCapture(pi, ctx, pane);
+	if (pane) await inspectPane(pi, ctx, pane);
 }
 
 export default function tmuxPanesExtension(pi: ExtensionAPI) {
 	pi.registerCommand("tmux", {
-		description: "Select a tmux pane for the model to capture",
+		description: "Select and inspect a tmux pane",
 		handler: async (_args, ctx) => {
 			if (!ctx.hasUI) return;
 			try {
@@ -89,7 +91,7 @@ export default function tmuxPanesExtension(pi: ExtensionAPI) {
 	});
 
 	pi.registerShortcut(Key.ctrlShift("t"), {
-		description: "Select tmux pane for capture",
+		description: "Select and inspect a tmux pane",
 		handler: async (ctx) => {
 			try {
 				await selectAndRequestCapture(pi, ctx);
