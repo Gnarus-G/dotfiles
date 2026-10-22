@@ -70,6 +70,7 @@ LINKS: dict[str, list[str]] = {
     ".local/bin/git-prune-old-branches": [".local/bin/git-prune-old-branches"],
     ".local/bin/git-wt": [".local/bin/git-wt"],
     ".local/bin/tmux-center-toggle": [".local/bin/tmux-center-toggle"],
+    ".local/bin/tmux-remote-paste": [".local/bin/tmux-remote-paste"],
     ".local/bin/ollama-websearch-mcp.py": [".local/bin/ollama-websearch-mcp.py"],
     ".local/bin/maccel-profile": [".local/bin/maccel-profile"],
     ".local/bin/ghostty": [".local/bin/ghostty"],
