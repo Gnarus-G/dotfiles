@@ -1,8 +1,9 @@
 # If you come from bash you might have to change your $PATH.
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
 
-# Path to your oh-my-zsh installation.
+# Path to your oh-my-zsh installation (per-user checkout, else system-wide).
 export ZSH="$HOME/.oh-my-zsh"
+[[ -d $ZSH ]] || export ZSH=/usr/local/share/oh-my-zsh
 
 # Set name of the theme to load --- if set to "random", it will
 # load a random theme each time oh-my-zsh is loaded, in which case,
@@ -26,7 +27,7 @@ ZSH_THEME="sunrise"
 # HYPHEN_INSENSITIVE="true"
 
 # Uncomment one of the following lines to change the auto-update behavior
-# zstyle ':omz:update' mode disabled  # disable automatic updates
+zstyle ':omz:update' mode disabled  # disable automatic updates
 # zstyle ':omz:update' mode auto      # update automatically without asking
 # zstyle ':omz:update' mode reminder  # just remind me to update when it's time
 
@@ -72,7 +73,12 @@ ZSH_THEME="sunrise"
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git vi-mode zsh-autosuggestions zsh-syntax-highlighting direnv)
+# Only plugins installed on this machine are loaded; the rest are skipped.
+plugins=()
+for _p in git vi-mode starship zsh-autosuggestions zsh-syntax-highlighting direnv eza fzf zoxide; do
+  [[ -d $ZSH/plugins/$_p || -d $ZSH/custom/plugins/$_p ]] && plugins+=($_p)
+done
+unset _p
 
 # Skip the insecure-directory audit (compaudit) on a single-user machine; it
 # forks on every startup for no benefit here.
@@ -81,6 +87,12 @@ ZSH_DISABLE_COMPFIX="true"
 source $ZSH/oh-my-zsh.sh
 
 # User configuration
+
+# New files are not readable by other users.
+umask 027
+
+# Rootless Docker, when its socket is present.
+[[ -S $XDG_RUNTIME_DIR/docker.sock ]] && export DOCKER_HOST="unix://$XDG_RUNTIME_DIR/docker.sock"
 
 # Show different cursors per mode
 VI_MODE_SET_CURSOR=true
@@ -173,6 +185,7 @@ cdd() {
 }
 alias jq2env='jq -r "to_entries | .[] | [.key, .value] | join(\"=\")"'
 alias cp2='rsync -aPWh'
+alias sysu='systemctl --user'
 alias sshx='ssh -YC felix@192.168.1.24 -p 456 x2x -east -to :0'
 
 # x-cmd: lazy-loaded (its bootstrap sources the full framework + advise hooks,
@@ -197,15 +210,19 @@ unset _pi_node_bin
 
 # Keep Proto authoritative after plugins, direnv, and local overrides mutate PATH.
 typeset -U path PATH
-PROTO_GLOBAL_NODE_BIN="${$(proto --config-mode global bin node 2> /dev/null):h}"
+PROTO_HOME="${PROTO_HOME:-$HOME/.proto}"
+PROTO_GLOBAL_NODE_BIN=
+if [[ -x $PROTO_HOME/bin/proto ]]; then
+  PROTO_GLOBAL_NODE_BIN="${$($PROTO_HOME/bin/proto --config-mode global bin node 2> /dev/null):h}"
+fi
 path=(
   "$PROTO_HOME/shims"
   "$PROTO_HOME/bin"
-  "$PROTO_GLOBAL_NODE_BIN"
+  ${PROTO_GLOBAL_NODE_BIN:+"$PROTO_GLOBAL_NODE_BIN"}
   "$HOME/.opencode/bin"
   "$HOME/.local/bin"
   "$HOME/.cargo/bin"
-  "$BUN_INSTALL/bin"
+  ${BUN_INSTALL:+"$BUN_INSTALL/bin"}
   $path
 )
 
