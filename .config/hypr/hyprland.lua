@@ -42,9 +42,12 @@ hl.config({
 
 local scratchpad = require("scratchpad")
 scratchpad.setup("Whatever", mainMod .. " + T", 0.5, 0.5)
-scratchpad.setup("Work", mainMod .. " + SHIFT + T", 0.8, 0.8)
 
 utils.per_rig_profile("work", function()
+  scratchpad.setup("Work", mainMod .. " + SHIFT + T", 0.8, 0.8, {
+    command = "ghostty --gtk-single-instance=false --title=Work --title-report=false -e herdr --remote moon-oma-compute1.grid.ransky.io",
+  })
+
   hl.config({
     input = {
       touchpad = {
@@ -63,6 +66,8 @@ utils.per_rig_profile("work", function()
 end)
 
 utils.per_rig_profile("home", function()
+  scratchpad.setup("Work", mainMod .. " + SHIFT + T", 0.8, 0.8)
+
   -- Todos as the Mynd PWA window (same app LeftWM launches)
   scratchpad.setup("Todos", mainMod .. " + SHIFT + U", 0.5, 0.7, {
     command = "chromium --profile-directory=Default --app-id=hcenedefeplinmokonjlppanijfggjja",
