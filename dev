@@ -57,6 +57,7 @@ LINKS: dict[str, list[str]] = {
     ".config/waybar": [".config/waybar"],
     ".config/dunst": [".config/dunst"],
     ".config/ghostty/config": [".config/ghostty/config"],
+    ".config/herdr/config.toml": [".config/herdr/config.toml"],
     ".config/systemd/user/ollama.service": [".config/systemd/user/ollama.service"],
     ".config/himither": [".config/himither"],
     ".config/maccel": [".config/maccel"],
