@@ -75,3 +75,4 @@ reconciled projection of shared skills under `~/.config/opencode/skills`.
 - Keep review findings relevant to the goal and realistic scenarios; omit speculative corrections and hypothetical findings
 - Run available linters/typecheckers after edits
 - Research unfamiliar tools before implementing
+- Show the consequence, not the idea: a recommendation ships with its concrete result in the same message — the sample payload before and after a schema change, the topic line for a feed name, the `--help` line for a CLI change, a small table for numbers, a web artifact for anything two-dimensional. Prose that describes a shape without showing it is a wasted round trip.

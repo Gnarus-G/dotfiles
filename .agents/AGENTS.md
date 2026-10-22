@@ -45,3 +45,4 @@ Use syllogistic thinking where applicable.
 ## Miscellaneous
 
 - **Announce completion**: Announce aloud when finishing multi-step plans.
+- **Show the consequence, not the idea**: a recommendation ships with its concrete result in the same message — the sample payload before and after a schema change, the topic line for a feed name, the `--help` line for a CLI change, a small table for numbers, a web artifact for anything two-dimensional. Prose that describes a shape without showing it is a wasted round trip.
