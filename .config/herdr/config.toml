@@ -1,0 +1,34 @@
+onboarding = false
+
+[keys]
+prefix = "ctrl+a"
+detach = "prefix+d"
+workspace_picker = "prefix+s"
+settings = "prefix+shift+s"
+new_tab = "prefix+c"
+rename_tab = "prefix+comma"
+previous_tab = "prefix+ctrl+h"
+next_tab = "prefix+ctrl+l"
+switch_tab = "prefix+1..9"
+close_tab = "prefix+ampersand"
+focus_pane_left = "prefix+h"
+focus_pane_down = "prefix+j"
+focus_pane_up = "prefix+k"
+focus_pane_right = "prefix+l"
+cycle_pane_next = "prefix+o"
+last_pane = "prefix+semicolon"
+split_vertical = "prefix+percent"
+split_horizontal = "prefix+minus"
+close_pane = "prefix+x"
+zoom = "prefix+z"
+resize_pane_left = "prefix+shift+h"
+resize_pane_down = "prefix+shift+j"
+resize_pane_up = "prefix+shift+k"
+resize_pane_right = "prefix+shift+l"
+remote_image_paste = "ctrl+v"
+
+[ui]
+mouse_capture = true
+prompt_new_tab_name = false
+sidebar_width = 20
+sidebar_max_width = 20
