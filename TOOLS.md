@@ -1,6 +1,6 @@
 # Workstation tools
 
-This is the desired tool inventory for new machines, not an installation script. Install the equivalents available on the machine's distribution, then run `./dev` to link the configurations. Package names and setup commands may vary.
+This is the desired tool inventory for new machines, not an installation script. Install the equivalents available on the machine's distribution, then run `./dev --machine home` (or `work`/`remote`) to link the configurations. Package names and setup commands may vary.
 
 ## Required
 
@@ -15,12 +15,12 @@ This is the desired tool inventory for new machines, not an installation script.
 | Native Qt apps            | `qt5-wayland`, `qt6-wayland`                                                                         | Package names vary by distribution.                                                                                                                                        |
 | Fonts                     | a Nerd Font, Noto fonts (including emoji and CJK), Atkinson Hyperlegible Mono                        | Arch examples: `ttf-firacode-nerd`, `noto-fonts-emoji`, `noto-fonts-cjk`, `noto-fonts-extra`; `.local/bin/getfonts.sh` installs the additional fonts used by the dotfiles. |
 | Shell                     | `zsh`, Oh My Zsh, `zsh-autosuggestions`, `zsh-syntax-highlighting`                                   | The two plugins go in the Oh My Zsh custom plugins directory.                                                                                                              |
-| Terminal workflow         | `tmux`, gpakosz's `.tmux` config                                                                     | Link its `.tmux.conf` as `~/.tmux.conf` before `./dev` links `.tmux.conf.local`.                                                                                           |
+| Terminal workflow         | `tmux`, gpakosz's `.tmux` config                                                                     | Link its `.tmux.conf` as `~/.tmux.conf` before `./dev --machine home` links `.tmux.conf.local`.                                                                            |
 | CLI extras                | `x-cmd`                                                                                              | Loaded lazily by `.zshrc` when installed.                                                                                                                                 |
 
 ## Optional — wanted
 
-These are chosen additions, not prerequisites for `./dev`; install and set up the ones wanted on each machine.
+These are chosen additions, not prerequisites for `./dev --machine <machine>`; install and set up the ones wanted on each machine.
 
 | Purpose               | Tools             | Setup/use                                                                                            |
 | --------------------- | ----------------- | ---------------------------------------------------------------------------------------------------- | ----------- | --------------- | --------- |

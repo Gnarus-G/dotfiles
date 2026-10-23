@@ -5,22 +5,25 @@ Configuration for AI coding assistants (OpenCode, Claude Code, etc). The `dev` s
 ## Quick Start
 
 ```bash
-./dev  # Sync all dotfiles to ~
+python3 -B machine_preview.py work  # Preview machine-specific changes
+./dev --machine work                  # Install after reviewing the preview
 ```
+
+Choose `remote`, `home`, or `work` for the machine; see `MACHINE_PLAN.md` for
+the migration details. `./dev` requires `--machine`.
 
 ## Symlinked Configuration
 
 | Source                   | Target                     | Description         |
 | ------------------------ | -------------------------- | ------------------- |
 | `.config/nvim/`          | `~/.config/nvim`           | Neovim config       |
-| `.config/opencode/`      | `~/.config/opencode`       | OpenCode settings   |
+| `.machine-generated/<machine>/opencode.json` | `~/.config/opencode/opencode.json` | OpenCode settings |
 | `.config/awesome/`       | `~/.config/awesome`        | Awesome WM theme    |
 | `.config/hypr/`          | `~/.config/hypr`           | Hyprland config     |
 | `.config/waybar/`        | `~/.config/waybar`         | Waybar config       |
 | `.config/dunst/`         | `~/.config/dunst`          | Notifications       |
 | `.config/ghostty/config` | `~/.config/ghostty/config` | Ghostty terminal    |
 | `.zshrc`                 | `~/.zshrc`                 | Shell configuration |
-| `.gitconfig`             | `~/.gitconfig`             | Git settings        |
 
 ## Skills
 
@@ -50,7 +53,7 @@ reconciled projection of shared skills under `~/.config/opencode/skills`.
    # Skill instructions here
    ```
 
-3. Run `./dev` to sync
+3. Run `./dev --machine home` (or the appropriate machine) to sync
 4. Skill auto-discovered on next session
 
 ## Files
@@ -60,7 +63,7 @@ reconciled projection of shared skills under `~/.config/opencode/skills`.
 | `AGENTS.md`                  | Project instructions for AI assistants     |
 | `.claude/CLAUDE.md`          | Claude-only system instructions            |
 | `.codex/AGENTS.md`           | Codex-only system instructions             |
-| `.config/opencode/system.md` | OpenCode and Pi system instructions        |
+| `profiles/core/instructions.md` | Base instructions for Claude, Codex, OpenCode, and Pi |
 | `dev`                        | Symlink and skill composition script       |
 
 ## Response Length — **ONE SENTENCE BY DEFAULT**

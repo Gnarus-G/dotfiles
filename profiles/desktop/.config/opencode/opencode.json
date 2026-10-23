@@ -1,0 +1,20 @@
+{
+  "permission": {
+    "external_directory": {
+      "/tmp/**": "allow",
+      "~/d/**": "allow"
+    }
+  },
+  "plugin": ["@different-ai/opencode-browser@4.6.1"],
+  "mcp": {
+    "websearch": {
+      "type": "local",
+      "command": ["sh", "-c", "uv run --python 3.12 $HOME/.local/bin/ollama-websearch-mcp.py"]
+    },
+    "convex": {
+      "type": "local",
+      "command": ["npx", "-y", "convex@latest", "mcp", "start"],
+      "enabled": true
+    }
+  }
+}

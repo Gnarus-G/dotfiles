@@ -4,7 +4,7 @@ This repo uses the **Chrome extension backend** for OpenCode browser automation.
 On this machine, use **Chromium only**.
 
 - package: `@different-ai/opencode-browser@4.6.1`
-- OpenCode config: `.config/opencode/opencode.json`
+- OpenCode desktop overlay: `profiles/desktop/.config/opencode/opencode.json`
 - browser: `chromium`
 - dedicated profile: `~/.opencode-browser/chromium-profile`
 - extension directory: `~/.opencode-browser/extension`
@@ -24,21 +24,21 @@ There are two parts.
    - local broker at `~/.opencode-browser/broker.sock`
    - dedicated Chromium launcher/profile
 
-`./dev` handles the repo-managed config.
+`./dev --machine home` or `./dev --machine work` handles the repo-managed config.
 You must run the plugin installer once for the machine-local install.
 
 ## Prerequisites
 
 - Chromium installed: `chromium`
 - `node` / `npx` available
-- this dotfiles repo synced with `./dev`
+- this dotfiles repo synced with `./dev --machine home` or `work`
 
 ## 1. Sync dotfiles
 
 From the repo root:
 
 ```bash
-./dev
+./dev --machine home
 ```
 
 This should give you:

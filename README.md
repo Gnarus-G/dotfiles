@@ -9,7 +9,7 @@ git clone <this repo> ~/d/dotfiles
 cd ~/d/dotfiles
 ```
 
-Install the tools in [TOOLS.md](TOOLS.md) using the machine's package manager, then run `./dev`; log out, select Hyprland if needed, and log back in.
+Install the tools in [TOOLS.md](TOOLS.md) using the machine's package manager, then run `./dev --machine home` (or `work`/`remote`); log out, select Hyprland if needed, and log back in.
 
 ## Optional tools
 
@@ -18,10 +18,10 @@ See [TOOLS.md](TOOLS.md) for wanted additions and other optional setups.
 ## Daily sync
 
 ```sh
-./dev
+./dev --machine home
 ```
 
-`./dev` reconciles the home-directory symlinks listed in `AGENTS.md`.
+`./dev --machine <machine>` reconciles the links for that machine; preview changes with `python3 -B machine_preview.py <machine>`.
 
 ## References
 

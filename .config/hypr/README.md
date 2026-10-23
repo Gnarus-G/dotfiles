@@ -1,6 +1,6 @@
 # Hyprland setup
 
-Install the desktop tools listed in [TOOLS.md](../../TOOLS.md) and run `./dev` from the repository root to link this directory.
+Install the desktop tools listed in [TOOLS.md](../../TOOLS.md) and run `./dev --machine home` or `./dev --machine work` from the repository root to link this directory.
 
 ## Machine profile
 
