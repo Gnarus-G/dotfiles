@@ -74,9 +74,14 @@ zstyle ':omz:update' mode disabled  # disable automatic updates
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
 # Only plugins installed on this machine are loaded; the rest are skipped.
+# Tool-backed plugins also require their binary on PATH, since their
+# oh-my-zsh plugin prints a warning on every start when the tool is absent.
 plugins=()
-for _p in git vi-mode starship zsh-autosuggestions zsh-syntax-highlighting direnv eza fzf zoxide; do
+for _p in git vi-mode zsh-autosuggestions zsh-syntax-highlighting; do
   [[ -d $ZSH/plugins/$_p || -d $ZSH/custom/plugins/$_p ]] && plugins+=($_p)
+done
+for _p in starship direnv eza fzf zoxide; do
+  [[ -d $ZSH/plugins/$_p || -d $ZSH/custom/plugins/$_p ]] && (( $+commands[$_p] )) && plugins+=($_p)
 done
 unset _p
 
