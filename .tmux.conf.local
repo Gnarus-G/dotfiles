@@ -404,11 +404,6 @@ bind-key M-a send-prefix
 
 bind P run-shell "echo -n '#{session_name}:#{window_index}.#{pane_index}' | xclip -selection clipboard" \; display-message "Copied pane ID: #{session_name}:#{window_index}.#{pane_index}"
 
-# Let remote apps (including Claude's /copy) send OSC 52 to the local terminal.
-set -g set-clipboard on
-# For image clipboard contents, upload to compute1 and paste the remote path.
-bind -n C-v run-shell -b "$HOME/.local/bin/tmux-remote-paste '#{pane_id}'"
-
 # Toggle a centered 100-column reading column for LLM agents (Claude Code /
 # codex / opencode have no native width limit). Flanks the active pane with
 # blank padding panes so the content is centered on the ultrawide. Tap
