@@ -7,7 +7,7 @@ import tempfile
 from pathlib import Path
 
 from machine_bundle import Build, render
-from machine_plan import MACHINES, PROPOSED, Conflict, Link, Preserve, Remove, plan
+from machine_plan import MACHINES, PROPOSED, Conflict, Link, Remove, plan
 from machine_preview import snapshot
 
 
@@ -31,7 +31,7 @@ def _stage_replacements(root: Path, home: Path, effects: tuple, staged: dict):
         children = [
             effect
             for effect in effects
-            if isinstance(effect, (Preserve, Link))
+            if isinstance(effect, Link)
             and effect.target.startswith(removal.target + "/")
         ]
         if not children:
@@ -44,14 +44,7 @@ def _stage_replacements(root: Path, home: Path, effects: tuple, staged: dict):
         for child in children:
             destination = stage / child.target[len(removal.target) + 1 :]
             destination.parent.mkdir(parents=True, exist_ok=True)
-            if isinstance(child, Preserve):
-                source = root / child.source
-                if source.is_dir():
-                    shutil.copytree(source, destination, symlinks=True)
-                else:
-                    shutil.copy2(source, destination)
-            else:
-                destination.symlink_to(root / child.source)
+            destination.symlink_to(root / child.source)
 
 
 def _apply_removals(home: Path, effects: tuple, staged: dict) -> set[str]:

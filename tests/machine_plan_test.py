@@ -13,7 +13,6 @@ from machine_plan import (
     Conflict,
     Link,
     Managed,
-    Preserve,
     Remove,
     Spec,
     Unmanaged,
@@ -326,44 +325,6 @@ def test_retiring_directory_refuses_unaccounted_contents():
     ) == (Conflict(".config/opencode/unknown", "unaccounted contents"),)
 
 
-def test_runtime_state_is_staged_before_replacing_directory_link():
-    inventory = (
-        Spec("old/config", ".config/opencode", frozenset()),
-        Spec("new/config", ".config/opencode/opencode.json", frozenset({"remote"})),
-    )
-    observed = {
-        ".config/opencode": Managed("old/config"),
-        ".config/opencode/node_modules": Unmanaged("existing directory"),
-        ".config/opencode/package.json": Unmanaged("existing file"),
-    }
-
-    assert plan("remote", inventory, observed, inspected={".config/opencode"}) == (
-        Preserve(".config/opencode/node_modules", "old/config/node_modules"),
-        Preserve(".config/opencode/package.json", "old/config/package.json"),
-        Remove(".config/opencode", "old/config"),
-        Link(".config/opencode/opencode.json", "new/config"),
-    )
-
-
-def test_missing_source_suppresses_preservation_and_removal_together():
-    inventory = (
-        Spec("old/config", ".config/opencode", frozenset()),
-        Spec("new/config", ".config/opencode/opencode.json", frozenset({"remote"})),
-    )
-    observed = {
-        ".config/opencode": Managed("old/config"),
-        ".config/opencode/node_modules": Unmanaged("existing directory"),
-    }
-
-    assert plan(
-        "remote",
-        inventory,
-        observed,
-        available_sources=set(),
-        inspected={".config/opencode"},
-    ) == (Conflict(".config/opencode/opencode.json", "missing source: new/config"),)
-
-
 def test_skill_inventory_covers_each_source_set():
     root = Path(__file__).resolve().parents[1]
     shared = {
@@ -382,8 +343,7 @@ def test_skill_inventory_covers_each_source_set():
 def test_opencode_migration_accounts_for_all_top_level_entries():
     root = Path(__file__).resolve().parents[1] / ".config/opencode"
     targets = {item.target for item in PROPOSED}
-    # Runtime/package-manager state is intentionally a blocker until a
-    # separate migration preserves it outside the old directory link.
+    # Runtime/package-manager state stays local to each machine.
     runtime = {"node_modules", "package.json", "package-lock.json", "bun.lock"}
     for child in root.iterdir():
         if child.name in runtime:
@@ -398,27 +358,6 @@ def test_opencode_migration_accounts_for_all_top_level_entries():
     for directory in ("plugins", "skills", "tools"):
         for child in (root / directory).iterdir():
             assert f".config/opencode/{directory}/{child.name}" in targets
-
-
-def test_snapshot_plans_to_stage_runtime_directory_before_parent_migration(tmp_path):
-    root = tmp_path / "repo"
-    home = tmp_path / "home"
-    source = root / ".config/opencode"
-    source.mkdir(parents=True)
-    (source / "node_modules").mkdir()
-    (home / ".config").mkdir(parents=True)
-    (home / ".config/opencode").symlink_to(source)
-
-    inventory = (
-        Spec(".config/opencode", ".config/opencode", frozenset()),
-        Spec("new", ".config/opencode/opencode.json", frozenset({"remote"})),
-    )
-    observed, _, inspected = snapshot(root, home, "remote", inventory)
-    assert ".config/opencode" in inspected
-    assert observed[".config/opencode/node_modules"] == Unmanaged("existing directory")
-    assert Preserve(
-        ".config/opencode/node_modules", ".config/opencode/node_modules"
-    ) in plan("remote", inventory, observed, inspected=inspected)
 
 
 def test_snapshot_recognizes_legacy_skill_directory_link_as_a_blocker(tmp_path):
@@ -464,36 +403,6 @@ def test_legacy_skill_parent_migrates_without_linking_into_source(tmp_path):
     assert (home / ".agents/skills/context7").resolve() == source / "context7"
     assert not (home / ".agents/skills/tts").exists()
     assert (source / "tts").is_dir()
-    assert install(root, home, "remote", inventory) == ()
-
-
-def test_install_stages_runtime_and_replaces_legacy_directory_link(tmp_path):
-    root = tmp_path / "repo"
-    home = tmp_path / "home"
-    old = root / "old/config"
-    old.mkdir(parents=True)
-    (old / "node_modules").mkdir()
-    (old / "node_modules/dependency").write_text("keep me")
-    (old / "package.json").write_text("keep package")
-    new = root / "new/config"
-    new.parent.mkdir(parents=True)
-    new.write_text("new config")
-    (home / ".config").mkdir(parents=True)
-    (home / ".config/opencode").symlink_to(old)
-    inventory = (
-        Spec("old/config", ".config/opencode", frozenset()),
-        Spec("new/config", ".config/opencode/opencode.json", frozenset({"remote"})),
-    )
-
-    effects = install(root, home, "remote", inventory)
-
-    assert effects[0] == Preserve(
-        ".config/opencode/node_modules", "old/config/node_modules"
-    )
-    assert not (home / ".config/opencode").is_symlink()
-    assert (home / ".config/opencode/node_modules/dependency").read_text() == "keep me"
-    assert (home / ".config/opencode/package.json").read_text() == "keep package"
-    assert (home / ".config/opencode/opencode.json").resolve() == new
     assert install(root, home, "remote", inventory) == ()
 
 

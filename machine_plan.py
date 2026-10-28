@@ -4,8 +4,7 @@ The caller supplies a proposed inventory, observed targets (omitted means
 absent), and optionally the sources known to exist. Managed observations mean
 links owned by this installer; Unmanaged observations are obstacles that must
 not be replaced. Link and Remove carry the previously observed source as an
-execution precondition. Preserve stages local state before retiring a directory
-link; conflicts suppress all effects for that plan. Retiring a directory link
+execution precondition. Conflicts suppress all effects for that plan. Retiring a directory link
 requires a complete contents snapshot.
 
 PROPOSED is a machine-specific inventory; the existing dev script remains
@@ -45,12 +44,6 @@ class Remove:
 
 
 @dataclass(frozen=True)
-class Preserve:
-    target: str
-    source: str
-
-
-@dataclass(frozen=True)
 class Link:
     target: str
     source: str
@@ -71,14 +64,6 @@ def _beneath(target: str, parents: Collection[str]) -> bool:
 DESKTOP = frozenset({"home", "work"})
 CORE = MACHINES
 WORK = frozenset({"work"})
-OPENCODE_LOCAL_STATE = frozenset(
-    {
-        ".config/opencode/bun.lock",
-        ".config/opencode/node_modules",
-        ".config/opencode/package-lock.json",
-        ".config/opencode/package.json",
-    }
-)
 PROPOSED = (
     Spec(".config/nvim", ".config/nvim", CORE),
     Spec(".claude/hooks", ".claude/hooks", DESKTOP),
@@ -278,8 +263,7 @@ def _retirement_effects(
     wanted: set[str],
     retired: set[str],
     inspected: Collection[str],
-) -> tuple[list[Preserve], list[Conflict]]:
-    preservation = []
+) -> list[Conflict]:
     conflicts = []
     for parent in sorted(retired):
         if not any(_beneath(target, {parent}) for target in wanted):
@@ -290,16 +274,6 @@ def _retirement_effects(
         for target in sorted(observed):
             if not target.startswith(parent + "/"):
                 continue
-            if (
-                target in OPENCODE_LOCAL_STATE
-                and isinstance(observed[target], Unmanaged)
-                and observed[target].description
-                in ("existing file", "existing directory")
-            ):
-                preservation.append(
-                    Preserve(target, observed[parent].source + target[len(parent) :])
-                )
-                continue
             if not any(
                 target == known_target or _beneath(target, {known_target})
                 for known_target in known - {parent}
@@ -307,7 +281,7 @@ def _retirement_effects(
                 known_target.startswith(target + "/") for known_target in known
             ):
                 conflicts.append(Conflict(target, "unaccounted contents"))
-    return preservation, conflicts
+    return conflicts
 
 
 def _link_effect(
@@ -354,7 +328,7 @@ def plan(
     observed: Mapping[str, Managed | Unmanaged],
     available_sources: Collection[str] | None = None,
     inspected: Collection[str] = (),
-) -> tuple[Preserve | Link | Remove | Conflict, ...]:
+) -> tuple[Link | Remove | Conflict, ...]:
     if machine not in MACHINES:
         raise ValueError(f"unknown machine: {machine}")
     inventory = tuple(inventory)
@@ -371,7 +345,7 @@ def plan(
         for target, current in observed.items()
         if target in known and target not in wanted and isinstance(current, Managed)
     }
-    preservation, actions = _retirement_effects(
+    actions = _retirement_effects(
         observed, known, wanted, retired, inspected
     )
     for item in inventory:
@@ -388,4 +362,4 @@ def plan(
         if not _beneath(target, retired)
     ]
     removals.sort(key=lambda item: item.target)
-    return tuple(preservation + removals + actions)
+    return tuple(removals + actions)

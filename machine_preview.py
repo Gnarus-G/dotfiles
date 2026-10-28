@@ -10,7 +10,6 @@ from machine_plan import (
     Conflict,
     Link,
     Managed,
-    Preserve,
     Remove,
     Unmanaged,
     plan,
@@ -114,10 +113,6 @@ def main():
     for action in result:
         if isinstance(action, Conflict):
             print(f"BLOCK  ~/{action.target}: {action.found}")
-        elif isinstance(action, Preserve):
-            print(
-                f"STAGE  ~/{action.target} from {action.source} before replacing its parent"
-            )
         elif isinstance(action, Remove):
             print(f"REMOVE ~/{action.target} (currently -> {action.previous})")
         elif isinstance(action, Link):
@@ -126,8 +121,7 @@ def main():
         print(f"Blocked: {len(result)} conflict(s); no effects")
     else:
         print(
-            f"Ready: {sum(isinstance(a, Preserve) for a in result)} preservations, "
-            f"{sum(isinstance(a, Remove) for a in result)} removals, "
+            f"Ready: {sum(isinstance(a, Remove) for a in result)} removals, "
             f"{sum(isinstance(a, Link) for a in result)} links (preview only)"
         )
 
