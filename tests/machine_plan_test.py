@@ -384,6 +384,7 @@ def test_dev_explains_conflict_without_traceback(tmp_path):
         env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1"},
         capture_output=True,
         text=True,
+        check=False,
     )
 
     assert completed.returncode == 1
@@ -408,6 +409,39 @@ def test_conflict_display_highlights_the_problem_and_next_step(tmp_path):
     assert "Nothing changed." in plain
     assert "\033[" in colored
     assert re.sub(r"\033\[[0-9;]*m", "", colored) == plain
+
+
+def test_parent_conflicts_name_the_parent_to_fix(tmp_path):
+    managed = Conflict(".agents/skills/tdd", "managed parent link .agents/skills")
+    unmanaged = Conflict(
+        ".config/opencode/opencode.json",
+        "unmanaged parent .config/opencode: symlink outside dotfiles",
+    )
+
+    text = format_conflicts((managed, unmanaged), tmp_path)
+
+    assert f"Remove the link {tmp_path / '.agents/skills'} before retrying." in text
+    assert f"Move {tmp_path / '.config/opencode'} aside before retrying." in text
+    assert "(symlink outside dotfiles)" in text
+
+
+def test_preview_of_blocked_plan_exits_nonzero(tmp_path):
+    root = Path(__file__).resolve().parents[1]
+    home = tmp_path / "home"
+    (home / ".claude").mkdir(parents=True)
+    (home / ".claude/CLAUDE.md").write_text("local")
+
+    completed = subprocess.run(
+        ["python3", "-B", str(root / "machine_preview.py"), "remote"],
+        env={**os.environ, "HOME": str(home)},
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert completed.returncode == 1
+    assert "Preview only; nothing was installed." in completed.stdout
+    assert "Nothing changed." not in completed.stdout
 
 
 def test_terminal_colors_respect_no_color_and_dumb_term(monkeypatch):

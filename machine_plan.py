@@ -10,9 +10,9 @@ PROPOSED is a machine-specific inventory; the existing dev script remains
 unchanged until the new installer has been exercised separately.
 """
 
+import os
 from collections.abc import Collection, Iterable, Mapping
 from dataclasses import dataclass
-import os
 from pathlib import Path, PurePosixPath
 
 from machine_bundle import bundle_source
@@ -64,7 +64,7 @@ def color_enabled(stream) -> bool:
     )
 
 
-def _explain(reason: str) -> tuple[str, str]:
+def _explain(reason: str, home: Path) -> tuple[str, str]:
     """Describe a conflict reason in plain language and give one next step."""
     if reason == "existing file":
         return "A local file already exists here.", "Move it aside before retrying."
@@ -76,7 +76,7 @@ def _explain(reason: str) -> tuple[str, str]:
     if reason == "symlink outside dotfiles":
         return (
             "This link points outside the dotfiles repo.",
-            "Replace it with a link into the repo before retrying.",
+            "Move or remove it before retrying.",
         )
     if reason.startswith("missing source: "):
         source = reason.removeprefix("missing source: ")
@@ -85,19 +85,26 @@ def _explain(reason: str) -> tuple[str, str]:
             "Add it to the repo before retrying.",
         )
     if reason.startswith("unmanaged parent "):
+        parent, found = reason.removeprefix("unmanaged parent ").split(": ", 1)
         return (
-            "A parent directory of this path is not managed by this installer.",
-            "Make that parent a plain directory before retrying.",
+            f"Its parent {home / parent} is not a plain directory ({found}).",
+            f"Move {home / parent} aside before retrying.",
         )
     if reason.startswith("managed parent link "):
+        parent = reason.removeprefix("managed parent link ")
         return (
-            "A parent directory of this path is a link this installer leaves alone.",
-            "Remove that parent link before retrying; each file is linked on its own.",
+            f"Its parent {home / parent} is a link into the repo.",
+            f"Remove the link {home / parent} before retrying.",
         )
     return reason, ""
 
 
-def format_conflicts(conflicts: Iterable[Conflict], home: Path, color: bool = False) -> str:
+def format_conflicts(
+    conflicts: Iterable[Conflict],
+    home: Path,
+    color: bool = False,
+    closing: str = "Nothing changed.",
+) -> str:
     def paint(text: str, code: str) -> str:
         return f"\033[{code}m{text}\033[0m" if color else text
 
@@ -108,12 +115,14 @@ def format_conflicts(conflicts: Iterable[Conflict], home: Path, color: bool = Fa
     lines = [paint(f"Can't install: {count} {noun} {verb} attention.", "1;31")]
     for conflict in conflicts:
         lines.append("")
-        lines.append(f"  {paint('●', '31')} {paint(str(home / conflict.target), '1;36')}")
-        description, step = _explain(conflict.found)
+        lines.append(
+            f"  {paint('●', '31')} {paint(str(home / conflict.target), '1;36')}"
+        )
+        description, step = _explain(conflict.found, home)
         lines.append(f"    {description}")
         if step:
             lines.append(f"    {paint('Next step:', '1;33')} {step}")
-    lines.extend(("", "Nothing changed."))
+    lines.extend(("", closing))
     return "\n".join(lines)
 
 

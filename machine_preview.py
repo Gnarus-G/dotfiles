@@ -86,8 +86,15 @@ def main():
                     f"BUILD  {source} ({len(content)} bytes from common + {args.machine} overlays)"
                 )
     if any(isinstance(action, Conflict) for action in result):
-        print(format_conflicts(result, Path.home(), color=color_enabled(sys.stdout)))
-        return
+        print(
+            format_conflicts(
+                result,
+                Path.home(),
+                color=color_enabled(sys.stdout),
+                closing="Preview only; nothing was installed.",
+            )
+        )
+        sys.exit(1)
     for action in result:
         if isinstance(action, Remove):
             print(f"REMOVE ~/{action.target} (currently -> {action.previous})")
