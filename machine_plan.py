@@ -12,7 +12,8 @@ unchanged until the new installer has been exercised separately.
 
 from collections.abc import Collection, Iterable, Mapping
 from dataclasses import dataclass
-from pathlib import PurePosixPath
+import os
+from pathlib import Path, PurePosixPath
 
 from machine_bundle import bundle_source
 
@@ -53,6 +54,67 @@ class Link:
 class Conflict:
     target: str
     found: str
+
+
+def color_enabled(stream) -> bool:
+    return (
+        stream.isatty()
+        and "NO_COLOR" not in os.environ
+        and os.environ.get("TERM") != "dumb"
+    )
+
+
+def _explain(reason: str) -> tuple[str, str]:
+    """Describe a conflict reason in plain language and give one next step."""
+    if reason == "existing file":
+        return "A local file already exists here.", "Move it aside before retrying."
+    if reason == "existing directory":
+        return (
+            "A local directory already exists here.",
+            "Move it aside before retrying.",
+        )
+    if reason == "symlink outside dotfiles":
+        return (
+            "This link points outside the dotfiles repo.",
+            "Replace it with a link into the repo before retrying.",
+        )
+    if reason.startswith("missing source: "):
+        source = reason.removeprefix("missing source: ")
+        return (
+            f"The source {source} is missing.",
+            "Add it to the repo before retrying.",
+        )
+    if reason.startswith("unmanaged parent "):
+        return (
+            "A parent directory of this path is not managed by this installer.",
+            "Make that parent a plain directory before retrying.",
+        )
+    if reason.startswith("managed parent link "):
+        return (
+            "A parent directory of this path is a link this installer leaves alone.",
+            "Remove that parent link before retrying; each file is linked on its own.",
+        )
+    return reason, ""
+
+
+def format_conflicts(conflicts: Iterable[Conflict], home: Path, color: bool = False) -> str:
+    def paint(text: str, code: str) -> str:
+        return f"\033[{code}m{text}\033[0m" if color else text
+
+    conflicts = tuple(conflicts)
+    count = len(conflicts)
+    noun = "issue" if count == 1 else "issues"
+    verb = "needs" if count == 1 else "need"
+    lines = [paint(f"Can't install: {count} {noun} {verb} attention.", "1;31")]
+    for conflict in conflicts:
+        lines.append("")
+        lines.append(f"  {paint('●', '31')} {paint(str(home / conflict.target), '1;36')}")
+        description, step = _explain(conflict.found)
+        lines.append(f"    {description}")
+        if step:
+            lines.append(f"    {paint('Next step:', '1;33')} {step}")
+    lines.extend(("", "Nothing changed."))
+    return "\n".join(lines)
 
 
 def _beneath(target: str, parents: Collection[str]) -> bool:

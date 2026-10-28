@@ -1,6 +1,7 @@
 """Read-only snapshot and preview of the proposed machine policy."""
 
 import argparse
+import sys
 from pathlib import Path
 
 from machine_bundle import render
@@ -12,6 +13,8 @@ from machine_plan import (
     Managed,
     Remove,
     Unmanaged,
+    color_enabled,
+    format_conflicts,
     plan,
 )
 
@@ -82,20 +85,18 @@ def main():
                 print(
                     f"BUILD  {source} ({len(content)} bytes from common + {args.machine} overlays)"
                 )
+    if any(isinstance(action, Conflict) for action in result):
+        print(format_conflicts(result, Path.home(), color=color_enabled(sys.stdout)))
+        return
     for action in result:
-        if isinstance(action, Conflict):
-            print(f"BLOCK  ~/{action.target}: {action.found}")
-        elif isinstance(action, Remove):
+        if isinstance(action, Remove):
             print(f"REMOVE ~/{action.target} (currently -> {action.previous})")
         elif isinstance(action, Link):
             print(f"LINK   ~/{action.target} -> {action.source}")
-    if any(isinstance(action, Conflict) for action in result):
-        print(f"Blocked: {len(result)} conflict(s); no effects")
-    else:
-        print(
-            f"Ready: {sum(isinstance(a, Remove) for a in result)} removals, "
-            f"{sum(isinstance(a, Link) for a in result)} links (preview only)"
-        )
+    print(
+        f"Ready: {sum(isinstance(a, Remove) for a in result)} removals, "
+        f"{sum(isinstance(a, Link) for a in result)} links (preview only)"
+    )
 
 
 if __name__ == "__main__":

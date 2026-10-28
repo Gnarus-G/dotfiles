@@ -1,4 +1,5 @@
 import os
+import re
 import subprocess
 from pathlib import Path
 
@@ -16,6 +17,8 @@ from machine_plan import (
     Remove,
     Spec,
     Unmanaged,
+    color_enabled,
+    format_conflicts,
     plan,
 )
 
@@ -363,8 +366,60 @@ def test_install_conflict_leaves_sandbox_untouched(tmp_path):
     own = home / ".claude/CLAUDE.md"
     own.write_text("local instructions")
 
-    with pytest.raises(ValueError, match="plan blocked"):
+    with pytest.raises(ValueError, match="Can't install: 1 issue"):
         install(root, home, "remote")
 
     assert own.read_text() == "local instructions"
     assert not (home / ".config/opencode").exists()
+
+
+def test_dev_explains_conflict_without_traceback(tmp_path):
+    root = Path(__file__).resolve().parents[1]
+    home = tmp_path / "home"
+    (home / ".claude").mkdir(parents=True)
+    (home / ".claude/CLAUDE.md").write_text("local instructions")
+
+    completed = subprocess.run(
+        [str(root / "dev"), "--machine", "home", "--home", str(home)],
+        env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1"},
+        capture_output=True,
+        text=True,
+    )
+
+    assert completed.returncode == 1
+    assert "Traceback" not in completed.stderr
+    assert "Nothing changed." in completed.stderr
+    assert str(home / ".claude/CLAUDE.md") in completed.stderr
+    assert "A local file already exists here." in completed.stderr
+    assert (home / ".claude/CLAUDE.md").read_text() == "local instructions"
+
+
+def test_conflict_display_highlights_the_problem_and_next_step(tmp_path):
+    conflict = Conflict(".config/opencode/opencode.json", "existing file")
+
+    plain = format_conflicts((conflict,), tmp_path)
+    colored = format_conflicts((conflict,), tmp_path, color=True)
+
+    assert "\033[" not in plain
+    assert "Can't install: 1 issue needs attention." in plain
+    assert str(tmp_path / ".config/opencode/opencode.json") in plain
+    assert "A local file already exists here." in plain
+    assert "Next step: Move it aside before retrying." in plain
+    assert "Nothing changed." in plain
+    assert "\033[" in colored
+    assert re.sub(r"\033\[[0-9;]*m", "", colored) == plain
+
+
+def test_terminal_colors_respect_no_color_and_dumb_term(monkeypatch):
+    class Terminal:
+        def isatty(self):
+            return True
+
+    monkeypatch.delenv("NO_COLOR", raising=False)
+    monkeypatch.setenv("TERM", "xterm")
+    assert color_enabled(Terminal())
+    monkeypatch.setenv("NO_COLOR", "")
+    assert not color_enabled(Terminal())
+    monkeypatch.delenv("NO_COLOR")
+    monkeypatch.setenv("TERM", "dumb")
+    assert not color_enabled(Terminal())

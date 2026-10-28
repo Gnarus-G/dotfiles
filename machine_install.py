@@ -2,11 +2,30 @@
 
 import argparse
 import os
+import sys
 from pathlib import Path
 
 from machine_bundle import Build, render
-from machine_plan import MACHINES, PROPOSED, Conflict, Link, Remove, plan
+from machine_plan import (
+    MACHINES,
+    PROPOSED,
+    Conflict,
+    Link,
+    Remove,
+    color_enabled,
+    format_conflicts,
+    plan,
+)
 from machine_preview import snapshot
+
+
+class PlanBlocked(ValueError):
+    """The machine plan has conflicts and made no changes."""
+
+    def __init__(self, conflicts: tuple[Conflict, ...], home: Path):
+        self.conflicts = conflicts
+        self.home = home
+        super().__init__(format_conflicts(conflicts, home))
 
 
 def _write_bundles(root: Path, bundles: dict[str, bytes]) -> tuple[Build, ...]:
@@ -47,7 +66,7 @@ def install(root: Path, home: Path, machine: str, inventory=PROPOSED):
     observed, available = snapshot(root, home, machine, inventory)
     effects = plan(machine, inventory, observed, available)
     if any(isinstance(effect, Conflict) for effect in effects):
-        raise ValueError(f"plan blocked: {effects}")
+        raise PlanBlocked(effects, home)
 
     bundles = (
         render(root, machine)
@@ -68,7 +87,13 @@ def main():
     parser.add_argument("--machine", choices=sorted(MACHINES), required=True)
     parser.add_argument("--home", type=Path, default=Path.home())
     args = parser.parse_args()
-    effects = install(Path(__file__).resolve().parent, args.home, args.machine)
+    try:
+        effects = install(Path(__file__).resolve().parent, args.home, args.machine)
+    except PlanBlocked as error:
+        message = format_conflicts(
+            error.conflicts, error.home, color=color_enabled(sys.stderr)
+        )
+        parser.exit(1, f"{message}\n")
     print(f"Applied {len(effects)} effects to {args.home}")
 
 
