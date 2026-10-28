@@ -39,7 +39,6 @@ JSON fields, and capability links. For example, the desktop Convex MCP entry
 appears in home/work OpenCode config but not in remote's rendered config.
 
 Foreign files or links and missing sources block **all**
-effects. The installer checks the plan again immediately before mutation, and
-a second run makes no changes.
+effects, and a second run makes no changes.
 
 Restart OpenCode after installation so it reloads its machine-specific config.

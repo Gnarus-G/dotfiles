@@ -1,9 +1,7 @@
-"""Apply a conflict-free machine plan, staging directory replacements first."""
+"""Apply a conflict-free machine plan."""
 
 import argparse
 import os
-import shutil
-import tempfile
 from pathlib import Path
 
 from machine_bundle import Build, render
@@ -26,53 +24,13 @@ def _write_bundles(root: Path, bundles: dict[str, bytes]) -> tuple[Build, ...]:
     return tuple(built)
 
 
-def _stage_replacements(root: Path, home: Path, effects: tuple, staged: dict):
+def _apply_removals(home: Path, effects: tuple):
     for removal in (effect for effect in effects if isinstance(effect, Remove)):
-        children = [
-            effect
-            for effect in effects
-            if isinstance(effect, Link)
-            and effect.target.startswith(removal.target + "/")
-        ]
-        if not children:
-            continue
-        target = home / removal.target
-        stage = Path(
-            tempfile.mkdtemp(prefix=f".{target.name}-stage-", dir=target.parent)
-        )
-        staged[removal.target] = stage
-        for child in children:
-            destination = stage / child.target[len(removal.target) + 1 :]
-            destination.parent.mkdir(parents=True, exist_ok=True)
-            destination.symlink_to(root / child.source)
+        (home / removal.target).unlink()
 
 
-def _apply_removals(home: Path, effects: tuple, staged: dict) -> set[str]:
-    replaced = set()
-    for removal in (effect for effect in effects if isinstance(effect, Remove)):
-        target = home / removal.target
-        if removal.target not in staged:
-            target.unlink()
-            continue
-        backup = target.with_name(target.name + ".previous-machine-plan")
-        if backup.exists() or backup.is_symlink():
-            raise RuntimeError(f"backup already exists: {backup}")
-        target.rename(backup)
-        try:
-            staged[removal.target].rename(target)
-        except BaseException:
-            backup.rename(target)
-            raise
-        backup.unlink()
-        del staged[removal.target]
-        replaced.add(removal.target)
-    return replaced
-
-
-def _apply_links(root: Path, home: Path, effects: tuple, replaced: set[str]):
+def _apply_links(root: Path, home: Path, effects: tuple):
     for effect in (effect for effect in effects if isinstance(effect, Link)):
-        if any(effect.target.startswith(parent + "/") for parent in replaced):
-            continue
         target = home / effect.target
         target.parent.mkdir(parents=True, exist_ok=True)
         if target.is_symlink():
@@ -86,8 +44,8 @@ def _apply_links(root: Path, home: Path, effects: tuple, replaced: set[str]):
 
 
 def install(root: Path, home: Path, machine: str, inventory=PROPOSED):
-    observed, available, inspected = snapshot(root, home, machine, inventory)
-    effects = plan(machine, inventory, observed, available, inspected)
+    observed, available = snapshot(root, home, machine, inventory)
+    effects = plan(machine, inventory, observed, available)
     if any(isinstance(effect, Conflict) for effect in effects):
         raise ValueError(f"plan blocked: {effects}")
 
@@ -99,22 +57,10 @@ def install(root: Path, home: Path, machine: str, inventory=PROPOSED):
         )
         else {}
     )
-    staged = {}
-    try:
-        _stage_replacements(root, home, effects, staged)
-        # The staged copy is complete before any installed link is removed.
-        if (
-            plan(machine, inventory, *snapshot(root, home, machine, inventory))
-            != effects
-        ):
-            raise RuntimeError("home or sources changed since the preview")
-        built = _write_bundles(root, bundles)
-        replaced = _apply_removals(home, effects, staged)
-        _apply_links(root, home, effects, replaced)
-        return built + effects
-    finally:
-        for stage in staged.values():
-            shutil.rmtree(stage)
+    built = _write_bundles(root, bundles)
+    _apply_removals(home, effects)
+    _apply_links(root, home, effects)
+    return built + effects
 
 
 def main():

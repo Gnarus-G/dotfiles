@@ -36,30 +36,6 @@ def _record(observed: dict, root: Path, home: Path, target: str, wanted: set[str
         observed[target] = current
 
 
-def _inspect_retiring_parents(
-    root: Path, home: Path, targets: set[str], wanted: set[str], observed: dict
-) -> set[str]:
-    inspected = set()
-    for parent, current in tuple(observed.items()):
-        if not isinstance(current, Managed) or parent in wanted:
-            continue
-        if not any(target.startswith(parent + "/") for target in wanted):
-            continue
-        pending = [parent]
-        while pending:
-            directory = pending.pop()
-            for child in (home / directory).iterdir():
-                relative = str(child.relative_to(home))
-                _record(observed, root, home, relative, wanted)
-                if child.is_dir() and not child.is_symlink():
-                    if any(target.startswith(relative + "/") for target in targets):
-                        pending.append(relative)
-                    elif relative not in targets:
-                        observed[relative] = Unmanaged("existing directory")
-        inspected.add(parent)
-    return inspected
-
-
 def snapshot(root: Path, home: Path, machine: str, inventory=PROPOSED):
     targets = {item.target for item in inventory}
     wanted = {item.target for item in inventory if machine in item.machines}
@@ -71,16 +47,13 @@ def snapshot(root: Path, home: Path, machine: str, inventory=PROPOSED):
             if str(parent) != ".":
                 _record(observed, root, home, str(parent), wanted)
 
-    # Inspect only the directory symlinks being replaced by individual links.
-    inspected = _inspect_retiring_parents(root, home, targets, wanted, observed)
-
     available = {item.source for item in inventory if (root / item.source).exists()}
     if any(
         item.source.startswith(".machine-generated/") and machine in item.machines
         for item in inventory
     ):
         available.update(render(root, machine))
-    return observed, available, inspected
+    return observed, available
 
 
 def main():
@@ -95,13 +68,12 @@ def main():
     )
     args = parser.parse_args()
     root = Path(__file__).resolve().parent
-    observed, available, inspected = snapshot(root, Path.home(), args.machine)
+    observed, available = snapshot(root, Path.home(), args.machine)
     result = plan(
         args.machine,
         PROPOSED,
         observed,
         available_sources=None if args.assume_sources_present else available,
-        inspected=inspected,
     )
     if not any(isinstance(action, Conflict) for action in result):
         for source, content in render(root, args.machine).items():

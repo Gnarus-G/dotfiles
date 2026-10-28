@@ -4,8 +4,7 @@ The caller supplies a proposed inventory, observed targets (omitted means
 absent), and optionally the sources known to exist. Managed observations mean
 links owned by this installer; Unmanaged observations are obstacles that must
 not be replaced. Link and Remove carry the previously observed source as an
-execution precondition. Conflicts suppress all effects for that plan. Retiring a directory link
-requires a complete contents snapshot.
+execution precondition. Conflicts suppress all effects for that plan.
 
 PROPOSED is a machine-specific inventory; the existing dev script remains
 unchanged until the new installer has been exercised separately.
@@ -257,37 +256,9 @@ PROPOSED += tuple(
 )
 
 
-def _retirement_effects(
-    observed: Mapping[str, Managed | Unmanaged],
-    known: set[str],
-    wanted: set[str],
-    retired: set[str],
-    inspected: Collection[str],
-) -> list[Conflict]:
-    conflicts = []
-    for parent in sorted(retired):
-        if not any(_beneath(target, {parent}) for target in wanted):
-            continue
-        if parent not in inspected:
-            conflicts.append(Conflict(parent, "contents not inspected"))
-            continue
-        for target in sorted(observed):
-            if not target.startswith(parent + "/"):
-                continue
-            if not any(
-                target == known_target or _beneath(target, {known_target})
-                for known_target in known - {parent}
-            ) and not any(
-                known_target.startswith(target + "/") for known_target in known
-            ):
-                conflicts.append(Conflict(target, "unaccounted contents"))
-    return conflicts
-
-
 def _link_effect(
     item: Spec,
     observed: Mapping[str, Managed | Unmanaged],
-    retired: set[str],
     available_sources: Collection[str] | None,
 ) -> Link | Conflict | None:
     foreign_parent = next(
@@ -295,8 +266,6 @@ def _link_effect(
             str(parent)
             for parent in PurePosixPath(item.target).parents
             if isinstance(observed.get(str(parent)), (Managed, Unmanaged))
-            and str(parent) not in retired
-            and not _beneath(str(parent), retired)
         ),
         None,
     )
@@ -305,14 +274,12 @@ def _link_effect(
         reason = (
             f"unmanaged parent {foreign_parent}: {current_parent.description}"
             if isinstance(current_parent, Unmanaged)
-            else f"managed parent {foreign_parent} is not retired"
+            else f"managed parent link {foreign_parent}"
         )
         return Conflict(item.target, reason)
     if available_sources is not None and item.source not in available_sources:
         return Conflict(item.target, f"missing source: {item.source}")
-    # A child observed through a departing directory symlink disappears
-    # with the parent; linking it must happen into the new real directory.
-    current = None if _beneath(item.target, retired) else observed.get(item.target)
+    current = observed.get(item.target)
     if current is None:
         return Link(item.target, item.source)
     if isinstance(current, Managed) and current.source != item.source:
@@ -327,7 +294,6 @@ def plan(
     inventory: Iterable[Spec],
     observed: Mapping[str, Managed | Unmanaged],
     available_sources: Collection[str] | None = None,
-    inspected: Collection[str] = (),
 ) -> tuple[Link | Remove | Conflict, ...]:
     if machine not in MACHINES:
         raise ValueError(f"unknown machine: {machine}")
@@ -345,12 +311,10 @@ def plan(
         for target, current in observed.items()
         if target in known and target not in wanted and isinstance(current, Managed)
     }
-    actions = _retirement_effects(
-        observed, known, wanted, retired, inspected
-    )
+    actions = []
     for item in inventory:
         if machine in item.machines:
-            effect = _link_effect(item, observed, retired, available_sources)
+            effect = _link_effect(item, observed, available_sources)
             if effect is not None:
                 actions.append(effect)
     conflicts = tuple(action for action in actions if isinstance(action, Conflict))

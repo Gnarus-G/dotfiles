@@ -18,7 +18,6 @@ from machine_plan import (
     Unmanaged,
     plan,
 )
-from machine_preview import snapshot
 
 
 def test_remote_removes_managed_speech_without_touching_shared_instructions():
@@ -178,27 +177,6 @@ def test_changing_a_desktop_fragment_rebuilds_linked_prompt(tmp_path):
     )
 
 
-def test_old_directory_link_is_removed_before_links_beneath_it():
-    inventory = (
-        Spec(".config/opencode", ".config/opencode", frozenset()),
-        Spec(
-            "profiles/core/opencode.json",
-            ".config/opencode/opencode.json",
-            frozenset({"remote"}),
-        ),
-    )
-
-    assert plan(
-        "remote",
-        inventory,
-        {".config/opencode": Managed(".config/opencode")},
-        inspected=frozenset({".config/opencode"}),
-    ) == (
-        Remove(".config/opencode", ".config/opencode"),
-        Link(".config/opencode/opencode.json", "profiles/core/opencode.json"),
-    )
-
-
 def test_missing_source_blocks_a_link_before_installation():
     inventory = (
         Spec("profiles/core/CLAUDE.md", ".claude/CLAUDE.md", frozenset({"remote"})),
@@ -206,24 +184,6 @@ def test_missing_source_blocks_a_link_before_installation():
 
     assert plan("remote", inventory, {}, available_sources=frozenset()) == (
         Conflict(".claude/CLAUDE.md", "missing source: profiles/core/CLAUDE.md"),
-    )
-
-
-def test_retiring_parent_does_not_operate_through_it_to_a_child():
-    inventory = (
-        Spec("old/config", ".config/opencode", frozenset()),
-        Spec("new/tts", ".config/opencode/skills/tts", frozenset({"home"})),
-    )
-    observed = {
-        ".config/opencode": Managed("old/config"),
-        ".config/opencode/skills/tts": Managed("new/tts"),
-    }
-
-    assert plan(
-        "home", inventory, observed, inspected=frozenset({".config/opencode"})
-    ) == (
-        Remove(".config/opencode", "old/config"),
-        Link(".config/opencode/skills/tts", "new/tts"),
     )
 
 
@@ -244,36 +204,13 @@ def test_unmanaged_parent_link_blocks_child_installation():
     )
 
 
-def test_managed_parent_link_must_be_retired_before_linking_its_child():
+def test_managed_parent_link_blocks_child_installation():
     inventory = (Spec("new/skill", ".agents/skills/context7", frozenset({"remote"})),)
 
     assert plan("remote", inventory, {".agents/skills": Managed(".agents/skills")}) == (
         Conflict(
             ".agents/skills/context7",
-            "managed parent .agents/skills is not retired",
-        ),
-    )
-
-
-def test_blocked_migration_keeps_existing_parent_link_intact():
-    inventory = (
-        Spec("old/config", ".config/opencode", frozenset()),
-        Spec(
-            "future/config.json",
-            ".config/opencode/opencode.json",
-            frozenset({"remote"}),
-        ),
-    )
-
-    assert plan(
-        "remote",
-        inventory,
-        {".config/opencode": Managed("old/config")},
-        available_sources=frozenset(),
-        inspected=frozenset({".config/opencode"}),
-    ) == (
-        Conflict(
-            ".config/opencode/opencode.json", "missing source: future/config.json"
+            "managed parent link .agents/skills",
         ),
     )
 
@@ -298,31 +235,6 @@ def test_switch_and_interrupted_relink_are_replanned_from_observation():
     assert plan("remote", inventory, installed) == (
         Link(".claude/settings.json", "core/settings.json", "work/settings.json"),
     )
-
-
-def test_retiring_directory_requires_complete_contents_snapshot():
-    inventory = (
-        Spec("old", ".config/opencode", frozenset()),
-        Spec("new/config", ".config/opencode/config", frozenset({"remote"})),
-    )
-    assert plan("remote", inventory, {".config/opencode": Managed("old")}) == (
-        Conflict(".config/opencode", "contents not inspected"),
-    )
-
-
-def test_retiring_directory_refuses_unaccounted_contents():
-    inventory = (
-        Spec("old", ".config/opencode", frozenset()),
-        Spec("new/config", ".config/opencode/config", frozenset({"remote"})),
-    )
-    observed = {
-        ".config/opencode": Managed("old"),
-        ".config/opencode/config": Unmanaged("existing file"),
-        ".config/opencode/unknown": Unmanaged("existing directory"),
-    }
-    assert plan(
-        "remote", inventory, observed, inspected=frozenset({".config/opencode"})
-    ) == (Conflict(".config/opencode/unknown", "unaccounted contents"),)
 
 
 def test_skill_inventory_covers_each_source_set():
@@ -358,52 +270,6 @@ def test_opencode_migration_accounts_for_all_top_level_entries():
     for directory in ("plugins", "skills", "tools"):
         for child in (root / directory).iterdir():
             assert f".config/opencode/{directory}/{child.name}" in targets
-
-
-def test_snapshot_recognizes_legacy_skill_directory_link_as_a_blocker(tmp_path):
-    root = tmp_path / "repo"
-    home = tmp_path / "home"
-    (root / ".agents/skills").mkdir(parents=True)
-    (home / ".agents").mkdir(parents=True)
-    (home / ".agents/skills").symlink_to(root / ".agents/skills")
-
-    inventory = (
-        Spec(".agents/skills", ".agents/skills", frozenset()),
-        Spec(
-            ".agents/skills/context7", ".agents/skills/context7", frozenset({"remote"})
-        ),
-    )
-    observed, _, inspected = snapshot(root, home, "remote", inventory)
-    assert ".agents/skills" in inspected
-    assert Remove(".agents/skills", ".agents/skills") in plan(
-        "remote", inventory, observed, inspected=inspected
-    )
-
-
-def test_legacy_skill_parent_migrates_without_linking_into_source(tmp_path):
-    root = tmp_path / "repo"
-    home = tmp_path / "home"
-    source = root / ".agents/skills"
-    (source / "context7").mkdir(parents=True)
-    (source / "tts").mkdir()
-    (home / ".agents").mkdir(parents=True)
-    (home / ".agents/skills").symlink_to(source)
-    inventory = (
-        Spec(".agents/skills", ".agents/skills", frozenset()),
-        Spec(
-            ".agents/skills/context7", ".agents/skills/context7", frozenset({"remote"})
-        ),
-        Spec(".agents/skills/tts", ".agents/skills/tts", frozenset({"home"})),
-    )
-
-    install(root, home, "remote", inventory)
-
-    assert (home / ".agents/skills").is_dir()
-    assert not (home / ".agents/skills").is_symlink()
-    assert (home / ".agents/skills/context7").resolve() == source / "context7"
-    assert not (home / ".agents/skills/tts").exists()
-    assert (source / "tts").is_dir()
-    assert install(root, home, "remote", inventory) == ()
 
 
 def test_install_in_empty_home_is_idempotent_and_remote_excludes_desktop(tmp_path):
