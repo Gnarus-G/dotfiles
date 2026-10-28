@@ -9,6 +9,10 @@ ctx=$(echo "$input" | jq -r '.context_window.current_usage
   | if type == "number" then . elif type == "object" then
       (.input_tokens // 0) + (.cache_creation_input_tokens // 0) + (.cache_read_input_tokens // 0)
     else empty end')
+# Remote Control is on when this session's file carries a bridge session id.
+session_id=$(echo "$input" | jq -r '.session_id // empty')
+rc=$(jq -r --arg id "$session_id" 'select(.sessionId == $id) | .bridgeSessionId // empty' \
+  "$HOME"/.claude/sessions/*.json 2>/dev/null)
 
 R=$'\033[31m'; G=$'\033[32m'; Y=$'\033[33m'; B=$'\033[34m'
 C=$'\033[36m'; DIM=$'\033[2m'
@@ -54,6 +58,7 @@ if [ -n "$ref" ]; then
 fi
 
 head=""
+[ -n "$rc" ] && head+="${G}RC${RESET} "
 [ -n "$model" ] && head+="${C}${model}${RESET} "
 if [ -n "$ctx" ]; then
   if [ "$ctx" -ge 1000 ]; then ctx_fmt=$(awk -v t="$ctx" 'BEGIN {printf "%.1fk", t/1000}'); else ctx_fmt=$ctx; fi
