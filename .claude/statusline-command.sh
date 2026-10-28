@@ -3,8 +3,15 @@
 #   --- <last 2 path parts> ‹branch*➔ AMRD MD UU ?›
 input=$(cat)
 cwd=$(echo "$input" | jq -r '.workspace.current_dir // .cwd')
+model=$(echo "$input" | jq -r '.model.display_name // empty')
+# Context in use = input + cache tokens of the last turn, like ccstatusline's context-length.
+ctx=$(echo "$input" | jq -r '.context_window.current_usage
+  | if type == "number" then . elif type == "object" then
+      (.input_tokens // 0) + (.cache_creation_input_tokens // 0) + (.cache_read_input_tokens // 0)
+    else empty end')
 
 R=$'\033[31m'; G=$'\033[32m'; Y=$'\033[33m'; B=$'\033[34m'
+C=$'\033[36m'; DIM=$'\033[2m'
 BOLD=$'\033[1m'; RESET=$'\033[0m'
 
 # %2~ : last two path components, $HOME shown as ~
@@ -38,7 +45,19 @@ if [ -n "$ref" ]; then
   has '^?? '  && status+="${R}?"
   [ -n "$status" ] && status=" $status"
 
-  git_part=" ${Y}‹${branch}${dirty}${ahead}${status}${Y}›${RESET}"
+    # (+added,-removed) over staged and unstaged lines, like ccstatusline's git-changes.
+  read -r added removed < <(git -C "$cwd" --no-optional-locks diff --numstat HEAD 2>/dev/null \
+    | awk '{a+=$1; d+=$2} END {print a+0, d+0}')
+  changes=" ${Y}(+${added},-${removed})${RESET}"
+
+  git_part=" ${Y}‹${branch}${dirty}${ahead}${status}${Y}›${RESET}${changes}"
 fi
 
-printf '%s--- %s%s%s' "$BOLD" "$dir" "$RESET" "$git_part"
+head=""
+[ -n "$model" ] && head+="${C}${model}${RESET} "
+if [ -n "$ctx" ]; then
+  if [ "$ctx" -ge 1000 ]; then ctx_fmt=$(awk -v t="$ctx" 'BEGIN {printf "%.1fk", t/1000}'); else ctx_fmt=$ctx; fi
+  head+="${DIM}Ctx: ${ctx_fmt}${RESET} "
+fi
+
+printf '%s%s--- %s%s%s' "$head" "$BOLD" "$dir" "$RESET" "$git_part"
