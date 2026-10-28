@@ -85,6 +85,7 @@ PROPOSED = (
     Spec(".claude/skills", ".claude/skills", frozenset()),
     Spec(".config/nvim", ".config/nvim", CORE),
     Spec(".claude/hooks", ".claude/hooks", DESKTOP),
+    Spec(".claude/statusline-command.sh", ".claude/statusline-command.sh", DESKTOP),
     Spec(".claude/output-styles", ".claude/output-styles", CORE),
     Spec(".codex/agents/commit.toml", ".codex/agents/commit.toml", CORE),
     Spec(".pi/agent/extensions", ".pi/agent/extensions", frozenset()),

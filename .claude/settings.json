@@ -29,7 +29,7 @@
   },
   "statusLine": {
     "type": "command",
-    "command": "bunx -y ccstatusline@latest",
+    "command": "bash $HOME/.claude/statusline-command.sh",
     "padding": 0,
     "refreshInterval": 10
   },
