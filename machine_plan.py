@@ -136,7 +136,7 @@ CORE = MACHINES
 WORK = frozenset({"work"})
 PROPOSED = (
     Spec(".config/nvim", ".config/nvim", CORE),
-    Spec(".claude/hooks", ".claude/hooks", DESKTOP),
+    Spec(".claude/hooks", ".claude/hooks", CORE),
     Spec(".claude/statusline-command.sh", ".claude/statusline-command.sh", CORE),
     Spec(".claude/output-styles", ".claude/output-styles", CORE),
     Spec(".codex/agents/commit.toml", ".codex/agents/commit.toml", CORE),
