@@ -411,18 +411,25 @@ def test_conflict_display_highlights_the_problem_and_next_step(tmp_path):
     assert re.sub(r"\033\[[0-9;]*m", "", colored) == plain
 
 
-def test_parent_conflicts_name_the_parent_to_fix(tmp_path):
-    managed = Conflict(".agents/skills/tdd", "managed parent link .agents/skills")
-    unmanaged = Conflict(
-        ".config/opencode/opencode.json",
-        "unmanaged parent .config/opencode: symlink outside dotfiles",
+def test_parent_conflicts_are_reported_once_per_parent(tmp_path):
+    conflicts = (
+        Conflict(".agents/skills/tdd", "managed parent link .agents/skills"),
+        Conflict(".agents/skills/simple", "managed parent link .agents/skills"),
+        Conflict(
+            ".config/opencode/opencode.json",
+            "unmanaged parent .config/opencode: symlink outside dotfiles",
+        ),
     )
 
-    text = format_conflicts((managed, unmanaged), tmp_path)
+    text = format_conflicts(conflicts, tmp_path)
 
-    assert f"Remove the link {tmp_path / '.agents/skills'} before retrying." in text
-    assert f"Move {tmp_path / '.config/opencode'} aside before retrying." in text
-    assert "(symlink outside dotfiles)" in text
+    assert "Can't install: 2 issues need attention." in text
+    assert f"● {tmp_path / '.agents/skills'}\n" in text
+    assert "This is a link into the repo; 2 files go inside it." in text
+    assert "Next step: Remove the link before retrying." in text
+    assert f"● {tmp_path / '.config/opencode'}\n" in text
+    assert "(symlink outside dotfiles); 1 file goes inside it." in text
+    assert "tdd" not in text
 
 
 def test_preview_of_blocked_plan_exits_nonzero(tmp_path):

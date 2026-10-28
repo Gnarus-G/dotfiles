@@ -64,7 +64,7 @@ def color_enabled(stream) -> bool:
     )
 
 
-def _explain(reason: str, home: Path) -> tuple[str, str]:
+def _explain(reason: str, children: int) -> tuple[str, str]:
     """Describe a conflict reason in plain language and give one next step."""
     if reason == "existing file":
         return "A local file already exists here.", "Move it aside before retrying."
@@ -84,19 +84,32 @@ def _explain(reason: str, home: Path) -> tuple[str, str]:
             f"The source {source} is missing.",
             "Add it to the repo before retrying.",
         )
+    files = "1 file goes" if children == 1 else f"{children} files go"
     if reason.startswith("unmanaged parent "):
-        parent, found = reason.removeprefix("unmanaged parent ").split(": ", 1)
+        found = reason.split(": ", 1)[1]
         return (
-            f"Its parent {home / parent} is not a plain directory ({found}).",
-            f"Move {home / parent} aside before retrying.",
+            f"This is not a plain directory ({found}); {files} inside it.",
+            "Move it aside before retrying.",
         )
     if reason.startswith("managed parent link "):
-        parent = reason.removeprefix("managed parent link ")
         return (
-            f"Its parent {home / parent} is a link into the repo.",
-            f"Remove the link {home / parent} before retrying.",
+            f"This is a link into the repo; {files} inside it.",
+            "Remove the link before retrying.",
         )
     return reason, ""
+
+
+def _group_by_parent(conflicts: Iterable[Conflict]) -> dict[str, tuple[str, int]]:
+    """Report a blocking parent once, with how many paths it blocks."""
+    groups = {}
+    for conflict in conflicts:
+        target = conflict.target
+        for prefix in ("unmanaged parent ", "managed parent link "):
+            if conflict.found.startswith(prefix):
+                target = conflict.found.removeprefix(prefix).split(": ", 1)[0]
+        reason, count = groups.get(target, (conflict.found, 0))
+        groups[target] = (reason, count + 1)
+    return groups
 
 
 def format_conflicts(
@@ -108,17 +121,15 @@ def format_conflicts(
     def paint(text: str, code: str) -> str:
         return f"\033[{code}m{text}\033[0m" if color else text
 
-    conflicts = tuple(conflicts)
-    count = len(conflicts)
+    groups = _group_by_parent(conflicts)
+    count = len(groups)
     noun = "issue" if count == 1 else "issues"
     verb = "needs" if count == 1 else "need"
     lines = [paint(f"Can't install: {count} {noun} {verb} attention.", "1;31")]
-    for conflict in conflicts:
+    for target, (reason, children) in groups.items():
         lines.append("")
-        lines.append(
-            f"  {paint('●', '31')} {paint(str(home / conflict.target), '1;36')}"
-        )
-        description, step = _explain(conflict.found, home)
+        lines.append(f"  {paint('●', '31')} {paint(str(home / target), '1;36')}")
+        description, step = _explain(reason, children)
         lines.append(f"    {description}")
         if step:
             lines.append(f"    {paint('Next step:', '1;33')} {step}")
