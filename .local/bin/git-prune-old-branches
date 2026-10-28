@@ -14,7 +14,6 @@ from pathlib import Path
 
 HOME = str(Path.home())
 PROTECTED_RE = re.compile(r"^(main|master)$")
-REMOTE_ALLOW_RE = re.compile(r"^user/")
 
 
 @dataclass
@@ -22,6 +21,7 @@ class Config:
     root: str = os.environ.get("ROOT", f"{HOME}/d")
     days: int = int(os.environ.get("DAYS", "30"))
     worktree_allow_prefix: str = os.environ.get("WORKTREE_ALLOW_PREFIX", f"{HOME}/d/agentic/")
+    remote_allow_prefix: str = os.environ.get("REMOTE_ALLOW_PREFIX", f"{Path.home().name}/")
     execute: bool = False
     remote: bool = False
     prune_worktrees: bool = False
@@ -69,7 +69,7 @@ def parse_args(argv: list[str]) -> Config:
     parser.add_argument(
         "--remote",
         action="store_true",
-        help=f"also delete the branch on origin; only branches matching {REMOTE_ALLOW_RE.pattern} are pushed",
+        help=f"also delete the branch on origin; only branches starting with {defaults.remote_allow_prefix} are pushed",
     )
     parser.add_argument(
         "--prune-worktrees",
@@ -98,6 +98,7 @@ def parse_args(argv: list[str]) -> Config:
         root=args.root,
         days=args.days,
         worktree_allow_prefix=defaults.worktree_allow_prefix,
+        remote_allow_prefix=defaults.remote_allow_prefix,
         execute=args.execute,
         remote=args.remote,
         prune_worktrees=args.prune_worktrees,
@@ -185,8 +186,8 @@ def local_branches(repo: str) -> list[Branch]:
     return branches
 
 
-def branch_has_remote(repo: str, branch: str, state: RepoState) -> bool:
-    if not state.has_origin or not REMOTE_ALLOW_RE.search(branch):
+def branch_has_remote(repo: str, branch: str, state: RepoState, config: Config) -> bool:
+    if not state.has_origin or not branch.startswith(config.remote_allow_prefix):
         return False
 
     return git(repo, "show-ref", "--verify", "--quiet", f"refs/remotes/origin/{branch}").returncode == 0
@@ -252,7 +253,7 @@ def prune_repo(repo: str, config: Config, totals: Totals, cutoff: int, now: int)
         age_days = (now - branch.timestamp) // 86400
         totals.candidates += 1
 
-        has_remote_branch = branch_has_remote(repo, branch.name, state)
+        has_remote_branch = branch_has_remote(repo, branch.name, state, config)
         if has_remote_branch:
             totals.remote_candidates += 1
 

@@ -253,11 +253,12 @@ test_zsh_wrapper_auto_cd() {
 
   mkdir -p "$tmpdir/bin" "$tmpdir/target"
 
-  python - <<'PY' >"$tmpdir/git-wrapper.zsh"
+  ROOT_DIR="$ROOT_DIR" python - <<'PY' >"$tmpdir/git-wrapper.zsh"
 from pathlib import Path
+import os
 import re
 
-text = Path('.zshrc').read_text()
+text = (Path(os.environ['ROOT_DIR']) / '.zshrc').read_text()
 match = re.search(r'^git\(\) \{.*?^\}', text, re.MULTILINE | re.DOTALL)
 if not match:
     raise SystemExit('git wrapper not found in .zshrc')
