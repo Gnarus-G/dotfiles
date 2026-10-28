@@ -80,15 +80,11 @@ OPENCODE_LOCAL_STATE = frozenset(
     }
 )
 PROPOSED = (
-    Spec(".config/opencode", ".config/opencode", frozenset()),
-    Spec(".agents/skills", ".agents/skills", frozenset()),
-    Spec(".claude/skills", ".claude/skills", frozenset()),
     Spec(".config/nvim", ".config/nvim", CORE),
     Spec(".claude/hooks", ".claude/hooks", DESKTOP),
     Spec(".claude/statusline-command.sh", ".claude/statusline-command.sh", CORE),
     Spec(".claude/output-styles", ".claude/output-styles", CORE),
     Spec(".codex/agents/commit.toml", ".codex/agents/commit.toml", CORE),
-    Spec(".pi/agent/extensions", ".pi/agent/extensions", frozenset()),
     Spec(".pi/agent/extensions/commit.ts", ".pi/agent/extensions/commit.ts", CORE),
     Spec(
         ".pi/agent/extensions/ollama-websearch.ts",
@@ -205,19 +201,8 @@ PROPOSED = (
     Spec(".wezterm.lua", ".wezterm.lua", DESKTOP),
     Spec(".config/maccel", ".config/maccel", DESKTOP),
     Spec(".local/bin/maccel-profile", ".local/bin/maccel-profile", DESKTOP),
-    Spec(".local/bin/tmux-remote-paste", ".local/bin/tmux-remote-paste", frozenset()),
     Spec(".local/bin/tmux-center-toggle", ".local/bin/tmux-center-toggle", DESKTOP),
     Spec(".local/bin/ghostty", ".local/bin/ghostty", WORK),
-    Spec(
-        "profiles/work/.codex/AGENTS.override.md",
-        ".codex/AGENTS.override.md",
-        frozenset(),
-    ),
-    Spec(
-        "profiles/work/.claude/rules/jbcontext.md",
-        ".claude/rules/jbcontext.md",
-        frozenset(),
-    ),
     Spec(
         ".local/share/applications/com.mitchellh.ghostty.desktop",
         ".local/share/applications/com.mitchellh.ghostty.desktop",
