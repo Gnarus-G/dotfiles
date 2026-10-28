@@ -2,5 +2,11 @@
   "permissions": {
     "defaultMode": "auto"
   },
-  "editorMode": "vim"
+  "editorMode": "vim",
+  "statusLine": {
+    "type": "command",
+    "command": "bash $HOME/.claude/statusline-command.sh",
+    "padding": 0,
+    "refreshInterval": 10
+  }
 }
