@@ -399,6 +399,7 @@ set -g mode-keys vi
 # bind C-a send-prefix
 
 unbind C-b
+unbind -n C-v
 set-option -g prefix M-a
 bind-key M-a send-prefix
 
