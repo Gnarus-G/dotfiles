@@ -4,6 +4,8 @@ import json
 from dataclasses import dataclass
 from pathlib import Path
 
+import mcp_servers
+
 MACHINES = ("remote", "home", "work")
 
 
@@ -59,6 +61,13 @@ def render(root: Path, machine: str) -> dict[str, bytes]:
     machine_json = root / f"profiles/{machine}/.config/opencode/opencode.json"
     if machine_json.exists():
         config = merge(config, json.loads(machine_json.read_text()))
+    if machine != "remote":
+        entries = mcp_servers.servers(root)
+        if entries:
+            config["mcp"] = {
+                **config.get("mcp", {}),
+                **mcp_servers.opencode_entries(entries),
+            }
     claude_settings = json.loads(
         (root / "profiles/core/.claude/settings.json").read_text()
     )

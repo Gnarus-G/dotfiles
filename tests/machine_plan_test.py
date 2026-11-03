@@ -1,3 +1,4 @@
+import json
 import os
 import re
 import subprocess
@@ -7,6 +8,7 @@ import pytest
 
 from machine_bundle import Build, bundle_source, merge, render
 from machine_install import install
+import mcp_servers
 from machine_plan import (
     CLAUDE_SKILLS,
     PROPOSED,
@@ -337,6 +339,62 @@ def test_switching_work_to_remote_removes_desktop_capabilities(tmp_path):
     assert (home / ".agents/skills/tts").exists()
     assert (home / ".config/opencode/tools/screenshot.ts").exists()
     assert not (home / ".local/bin/ghostty").exists()
+
+
+def test_canonical_mcp_servers_reach_every_desktop_harness(tmp_path):
+    root = Path(__file__).resolve().parents[1]
+    home = tmp_path / "home"
+    home.mkdir()
+
+    install(root, home, "home")
+    canonical = json.loads((root / ".config/mcp/mcp.json").read_text())["mcpServers"]
+
+    assert (home / ".pi/agent/mcp.json").resolve() == root / ".config/mcp/mcp.json"
+    claude = json.loads((home / ".claude.json").read_text())
+    assert claude["mcpServers"]["playwright"] == canonical["playwright"]
+    codex = (home / ".codex/config.toml").read_text()
+    assert "[mcp_servers.playwright]" in codex
+    opencode = json.loads((home / ".config/opencode/opencode.json").read_text())
+    playwright = canonical["playwright"]
+    assert opencode["mcp"]["playwright"]["command"] == [
+        playwright["command"],
+        *playwright["args"],
+    ]
+
+
+def test_remote_machine_carries_no_mcp_servers(tmp_path):
+    root = Path(__file__).resolve().parents[1]
+    home = tmp_path / "home"
+    home.mkdir()
+
+    install(root, home, "remote")
+
+    assert not (home / ".pi/agent/mcp.json").exists()
+    assert not (home / ".claude.json").exists()
+    assert not (home / ".codex/config.toml").exists()
+
+
+def test_merging_keeps_the_harness_own_state():
+    entries = {"playwright": {"command": "npx", "args": ["-y", "@playwright/mcp"]}}
+    claude = json.loads(
+        mcp_servers.claude_state('{"projects": {"/tmp": {}}}', entries)
+    )
+    codex = mcp_servers.codex_state('model = "x"\n[projects."/tmp"]\ntrust_level = "trusted"\n', entries)
+
+    assert claude["projects"] == {"/tmp": {}}
+    assert claude["mcpServers"] == entries
+    assert 'model = "x"' in codex
+    assert 'trust_level = "trusted"' in codex
+    assert "[mcp_servers.playwright]" in codex
+
+
+def test_merging_twice_changes_nothing():
+    entries = {"playwright": {"command": "npx", "args": ["-y", "@playwright/mcp"]}}
+    claude = mcp_servers.claude_state("", entries)
+    codex = mcp_servers.codex_state("", entries)
+
+    assert mcp_servers.claude_state(claude, entries) == claude
+    assert mcp_servers.codex_state(codex, entries) == codex
 
 
 def test_dev_machine_option_installs_into_sandbox_home(tmp_path):

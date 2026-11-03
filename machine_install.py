@@ -7,6 +7,7 @@ from pathlib import Path
 
 from machine_bundle import Build, render
 from machine_plan import (
+    DESKTOP,
     MACHINES,
     PROPOSED,
     Conflict,
@@ -17,6 +18,7 @@ from machine_plan import (
     plan,
 )
 from machine_preview import snapshot
+import mcp_servers
 
 
 class PlanBlocked(ValueError):
@@ -79,7 +81,9 @@ def install(root: Path, home: Path, machine: str, inventory=PROPOSED):
     built = _write_bundles(root, bundles)
     _apply_removals(home, effects)
     _apply_links(root, home, effects)
-    return built + effects
+    entries = mcp_servers.servers(root) if machine in DESKTOP else {}
+    merges = mcp_servers.apply(home, entries)
+    return built + effects + merges
 
 
 def main():

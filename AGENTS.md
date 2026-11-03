@@ -17,6 +17,7 @@ the migration details. `./dev` requires `--machine`.
 | Source                   | Target                     | Description         |
 | ------------------------ | -------------------------- | ------------------- |
 | `.config/nvim/`          | `~/.config/nvim`           | Neovim config       |
+| `.config/mcp/mcp.json`   | `~/.config/mcp/mcp.json`, `~/.pi/agent/mcp.json` | MCP server list for Pi and OpenCode |
 | `.machine-generated/<machine>/opencode.json` | `~/.config/opencode/opencode.json` | OpenCode settings |
 | `.config/awesome/`       | `~/.config/awesome`        | Awesome WM theme    |
 | `.config/hypr/`          | `~/.config/hypr`           | Hyprland config     |
@@ -39,6 +40,13 @@ Skills are specialized instructions loaded by AI assistants for specific tasks.
 
 OpenCode disables automatic `.claude`/`.agents` discovery and receives a
 reconciled projection of shared skills under `~/.config/opencode/skills`.
+
+### MCP Servers
+
+`.config/mcp/mcp.json` is the single list of MCP servers. Pi and OpenCode read
+the linked file; Claude Code and Codex own their config files, so the same
+entries are merged into `~/.claude.json` and `~/.codex/config.toml` on every
+install. Add a server once, in `.config/mcp/mcp.json`.
 
 ### Adding Shared Skills
 

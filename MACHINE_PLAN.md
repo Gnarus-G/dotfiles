@@ -35,8 +35,12 @@ writes only the five machine-specific outputs under the ignored
 `.machine-generated/<machine>/` directory and links them into the home. JSON
 objects merge recursively; arrays and scalars replace their base values.
 The `machine-config` skill describes where to put a new tool's instructions,
-JSON fields, and capability links. For example, the desktop Convex MCP entry
-appears in home/work OpenCode config but not in remote's rendered config.
+JSON fields, and capability links. For example, the desktop MCP servers
+appear in home/work OpenCode config but not in remote's rendered config.
+
+MCP servers live once in `.config/mcp/mcp.json`. Pi and OpenCode read the
+linked file; `mcp_servers.py` merges the same entries into `~/.claude.json`
+and `~/.codex/config.toml`, which those harnesses own and rewrite.
 
 Foreign files or links and missing sources block **all**
 effects, and a second run makes no changes.

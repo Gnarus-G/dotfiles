@@ -169,6 +169,8 @@ PROPOSED = (
         DESKTOP,
     ),
     Spec(".pi/agent/models.json", ".pi/agent/models.json", CORE),
+    Spec(".config/mcp/mcp.json", ".config/mcp/mcp.json", DESKTOP),
+    Spec(".config/mcp/mcp.json", ".pi/agent/mcp.json", DESKTOP),
     Spec(".zshrc", ".zshrc", CORE),
     Spec(".local/bin/git-ac", ".local/bin/git-ac", CORE),
     Spec(
