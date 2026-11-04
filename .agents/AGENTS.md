@@ -23,7 +23,7 @@ Terms I use when describing work. Apply these meanings consistently.
 
 ## Information & Research
 
-- **Library docs**: Use the `context7` skill to fetch library/framework documentation through the Context7 REST API
+- **Library docs**: Use the Context7 MCP server to fetch library/framework documentation
 - **Default to research**: When uncertain about a tool, pattern, or best practice, research first rather than guessing
 
 ## Confidence

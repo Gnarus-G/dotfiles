@@ -287,7 +287,6 @@ PROPOSED = (
 # silently omitted from the future inventory.
 SHARED_SKILLS = (
     "commit",
-    "context7",
     "draft-msg",
     "fix-loop",
     "frontend-design",

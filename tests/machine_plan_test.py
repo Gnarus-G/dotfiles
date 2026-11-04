@@ -210,11 +210,11 @@ def test_unmanaged_parent_link_blocks_child_installation():
 
 
 def test_managed_parent_link_blocks_child_installation():
-    inventory = (Spec("new/skill", ".agents/skills/context7", frozenset({"remote"})),)
+    inventory = (Spec("new/skill", ".agents/skills/commit", frozenset({"remote"})),)
 
     assert plan("remote", inventory, {".agents/skills": Managed(".agents/skills")}) == (
         Conflict(
-            ".agents/skills/context7",
+            ".agents/skills/commit",
             "managed parent link .agents/skills",
         ),
     )
