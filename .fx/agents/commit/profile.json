@@ -1,0 +1,6 @@
+{
+  "description": "Commits only the exact session paths supplied by the parent using git-ac and repository conventions.",
+  "tools": ["shell"],
+  "mcp_servers": [],
+  "effort": "low"
+}

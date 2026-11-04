@@ -152,6 +152,7 @@ PROPOSED = (
     Spec(".claude/statusline-command.sh", ".claude/statusline-command.sh", CORE),
     Spec(".claude/output-styles", ".claude/output-styles", CORE),
     Spec(".codex/agents/commit.toml", ".codex/agents/commit.toml", CORE),
+    Spec(".fx/agents/commit", ".fx/agents/commit", CORE),
     Spec(".pi/agent/extensions/commit.ts", ".pi/agent/extensions/commit.ts", CORE),
     Spec(
         ".pi/agent/extensions/ollama-websearch.ts",

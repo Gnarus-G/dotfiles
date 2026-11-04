@@ -6,10 +6,10 @@ from pathlib import Path
 
 import pytest
 
-from machine_bundle import Build, bundle_source, merge, render
-from machine_install import _describe, install
 import machine_history
 import mcp_servers
+from machine_bundle import Build, bundle_source, merge, render
+from machine_install import _describe, install
 from machine_plan import (
     CLAUDE_SKILLS,
     PROPOSED,
@@ -101,6 +101,66 @@ def test_proposed_machine_policy_exposes_only_available_capabilities():
     assert ".claude/rules/jbcontext.md" not in remote | home | work
     assert ".local/bin/ghostty" in work
     assert ".local/bin/ghostty" not in remote | home
+
+
+@pytest.mark.parametrize("machine", ["remote", "home", "work"])
+def test_fx_commit_profile_is_shared_on_every_machine(machine, tmp_path):
+    root = Path(__file__).resolve().parents[1]
+    target = ".fx/agents/commit"
+    specs = tuple(item for item in PROPOSED if item.target == target)
+    assert specs, "The fx commit profile must be installed on every machine"
+    home = tmp_path / "home"
+    home.mkdir()
+    assert Link(target, target) in install(root, home, machine, specs)
+    profile = json.loads((home / target / "profile.json").read_text())
+    assert profile["description"]
+    assert profile["tools"] == ["shell"]
+    assert profile["mcp_servers"] == []
+    assert "permission_mode" not in profile
+    prompt = (home / target / "prompt.md").read_text()
+    assert "git-ac -y -- <paths>" in prompt
+    assert "only" in prompt
+    assert "do not inspect the repository or run any other command" in prompt
+
+
+@pytest.mark.parametrize("machine", ["remote", "home", "work"])
+def test_fx_settings_are_repository_managed_on_every_machine(machine, tmp_path):
+    repo = Path(__file__).resolve().parents[1]
+    root = tmp_path / "repo"
+    (root / ".fx").mkdir(parents=True)
+    (root / ".fx/settings.json").write_bytes((repo / ".fx/settings.json").read_bytes())
+    home = tmp_path / "home"
+    (home / ".fx").mkdir(parents=True)
+    target = home / ".fx/settings.json"
+    original = '{"effort":"high","models":{"codex":"existing-model"}}\n'
+    target.write_text(original)
+    effects = install(root, home, machine, ())
+    assert effects, (
+        "fx settings must be installed even without symlink inventory entries"
+    )
+    assert target.is_file() and not target.is_symlink()
+    config = json.loads(target.read_text())
+    assert config["effort"] == "high"
+    assert config["models"]["codex"] == "existing-model"
+    pi = json.loads((repo / ".pi/agent/models.json").read_text())["providers"][
+        "ollama-cloud"
+    ]
+    provider = config["providers"]["ollama-cloud"]
+    assert provider["base_url"] == pi["baseUrl"]
+    assert provider["auth"] == {"type": "bearer", "env": "OLLAMA_API_KEY"}
+    assert config["provider"] == "ollama-cloud"
+    assert config["models"]["ollama-cloud"] in provider["model_metadata"]
+    assert provider["model_metadata"] == {
+        model["id"]: {
+            "context_window": model["contextWindow"],
+            "max_output_tokens": model["maxTokens"],
+            "supports_vision": "image" in model["input"],
+        }
+        for model in pi["models"]
+    }
+    assert install(root, home, machine, ()) == ()
+    machine_history.undo(root, home, machine)
+    assert target.read_text() == original
 
 
 def test_instruction_fragments_and_json_overlays_are_machine_scoped():
@@ -388,10 +448,10 @@ def test_remote_machine_carries_no_mcp_servers(tmp_path):
 
 def test_merging_keeps_the_harness_own_state():
     entries = {"playwright": {"command": "npx", "args": ["-y", "@playwright/mcp"]}}
-    claude = json.loads(
-        mcp_servers.claude_state('{"projects": {"/tmp": {}}}', entries)
+    claude = json.loads(mcp_servers.claude_state('{"projects": {"/tmp": {}}}', entries))
+    codex = mcp_servers.codex_state(
+        'model = "x"\n[projects."/tmp"]\ntrust_level = "trusted"\n', entries
     )
-    codex = mcp_servers.codex_state('model = "x"\n[projects."/tmp"]\ntrust_level = "trusted"\n', entries)
 
     assert claude["projects"] == {"/tmp": {}}
     assert claude["mcpServers"] == entries
@@ -570,9 +630,10 @@ def test_effect_descriptions_show_each_effect_kind():
     )
     assert _describe(fresh) == "LINK   ~/.zshrc -> .zshrc"
     assert _describe(retired) == "REMOVE ~/.agents/skills/tts (was -> features/tts)"
-    assert _describe(
-        mcp_servers.Merge(".claude.json", ("context7", "playwright"))
-    ) == "MERGE  ~/.claude.json (context7, playwright)"
+    assert (
+        _describe(mcp_servers.Merge(".claude.json", ("context7", "playwright")))
+        == "MERGE  ~/.claude.json (context7, playwright)"
+    )
 
 
 def test_undo_restores_the_last_installed_machine(tmp_path):

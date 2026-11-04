@@ -1,0 +1,128 @@
+{
+  "models": {
+    "ollama-cloud": "beam"
+  },
+  "provider": "ollama-cloud",
+  "providers": {
+    "ollama-cloud": {
+      "protocol": "openai-chat-completions",
+      "base_url": "https://ollama.com/v1",
+      "auth": {
+        "type": "bearer",
+        "env": "OLLAMA_API_KEY"
+      },
+      "model_metadata": {
+        "gemma4:31b": {
+          "context_window": 256000,
+          "max_output_tokens": 16384,
+          "supports_vision": true
+        },
+        "gpt-oss:20b": {
+          "context_window": 128000,
+          "max_output_tokens": 16384,
+          "supports_vision": false
+        },
+        "gpt-oss:120b": {
+          "context_window": 128000,
+          "max_output_tokens": 16384,
+          "supports_vision": false
+        },
+        "beam": {
+          "context_window": 1048576,
+          "max_output_tokens": 16384,
+          "supports_vision": false
+        },
+        "glm-5.3": {
+          "context_window": 976000,
+          "max_output_tokens": 16384,
+          "supports_vision": false
+        },
+        "glm-5.3-flash": {
+          "context_window": 976000,
+          "max_output_tokens": 16384,
+          "supports_vision": true
+        },
+        "glm-5.2": {
+          "context_window": 976000,
+          "max_output_tokens": 16384,
+          "supports_vision": false
+        },
+        "kimi-k2.7-code": {
+          "context_window": 256000,
+          "max_output_tokens": 16384,
+          "supports_vision": true
+        },
+        "kimi-k2.6": {
+          "context_window": 256000,
+          "max_output_tokens": 16384,
+          "supports_vision": true
+        },
+        "kimi-k3": {
+          "context_window": 1000000,
+          "max_output_tokens": 16384,
+          "supports_vision": true
+        },
+        "minimax-m2.7": {
+          "context_window": 200000,
+          "max_output_tokens": 16384,
+          "supports_vision": false
+        },
+        "muse-spark-open": {
+          "context_window": 1048576,
+          "max_output_tokens": 16384,
+          "supports_vision": true
+        },
+        "minimax-m3": {
+          "context_window": 512000,
+          "max_output_tokens": 16384,
+          "supports_vision": true
+        },
+        "minimax-m3.1-flash": {
+          "context_window": 976000,
+          "max_output_tokens": 16384,
+          "supports_vision": true
+        },
+        "mistral-large-3:675b": {
+          "context_window": 256000,
+          "max_output_tokens": 16384,
+          "supports_vision": true
+        },
+        "mistral-large-4": {
+          "context_window": 1000000,
+          "max_output_tokens": 16384,
+          "supports_vision": true
+        },
+        "deepseek-v4-pro:0813": {
+          "context_window": 1000000,
+          "max_output_tokens": 32768,
+          "supports_vision": false
+        },
+        "deepseek-v4.1-flash": {
+          "context_window": 1048576,
+          "max_output_tokens": 32768,
+          "supports_vision": true
+        },
+        "deepseek-v4.1-flash:1017": {
+          "context_window": 1048576,
+          "max_output_tokens": 32768,
+          "supports_vision": true
+        },
+        "nemotron-3-ultra": {
+          "context_window": 256000,
+          "max_output_tokens": 16384,
+          "supports_vision": false
+        },
+        "nemotron-3-nano:30b": {
+          "context_window": 1000000,
+          "max_output_tokens": 16384,
+          "supports_vision": false
+        },
+        "nemotron-3-super": {
+          "context_window": 256000,
+          "max_output_tokens": 16384,
+          "supports_vision": false
+        }
+      }
+    }
+  }
+}

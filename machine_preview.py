@@ -4,6 +4,8 @@ import argparse
 import sys
 from pathlib import Path
 
+import fx_settings
+import mcp_servers
 from machine_bundle import render
 from machine_plan import (
     DESKTOP,
@@ -18,7 +20,6 @@ from machine_plan import (
     format_conflicts,
     plan,
 )
-import mcp_servers
 
 
 def _observe(root: Path, home: Path, target: str):
@@ -103,7 +104,9 @@ def main():
         elif isinstance(action, Link):
             print(f"LINK   ~/{action.target} -> {action.source}")
     entries = mcp_servers.servers(root) if args.machine in DESKTOP else {}
-    merges = mcp_servers.pending(Path.home(), entries)
+    merges = mcp_servers.pending(Path.home(), entries) + fx_settings.pending(
+        root, Path.home()
+    )
     for merge in merges:
         print(f"MERGE  ~/{merge.target} ({', '.join(merge.names)})")
     print(

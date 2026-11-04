@@ -29,6 +29,13 @@ applied effect and journal its inverse to
 | `.config/ghostty/config` | `~/.config/ghostty/config` | Ghostty terminal    |
 | `.zshrc`                 | `~/.zshrc`                 | Shell configuration |
 
+fx rejects symlinked settings, so `./dev` merges `.fx/settings.json` into
+`~/.fx/settings.json` on every machine, preserving unrelated local settings;
+Ollama Cloud authentication uses `OLLAMA_API_KEY`.
+The shared fx `commit` profile lives in `.fx/agents/commit/` and is linked to
+`~/.fx/agents/commit` on every machine; saved profiles require an fx version
+that supports agent profiles (the installed 0.0.16 does not).
+
 ## Skills
 
 Skills are specialized instructions loaded by AI assistants for specific tasks.

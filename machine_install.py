@@ -5,6 +5,9 @@ import os
 import sys
 from pathlib import Path
 
+import fx_settings
+import machine_history
+import mcp_servers
 from machine_bundle import Build, render
 from machine_plan import (
     DESKTOP,
@@ -18,8 +21,6 @@ from machine_plan import (
     plan,
 )
 from machine_preview import snapshot
-import mcp_servers
-import machine_history
 
 
 class PlanBlocked(ValueError):
@@ -83,6 +84,7 @@ def install(root: Path, home: Path, machine: str, inventory=PROPOSED):
     conflicts = tuple(effect for effect in effects if isinstance(effect, Conflict))
     if conflicts:
         raise PlanBlocked(conflicts, home)
+    fx_settings.pending(root, home)
 
     bundles = (
         render(root, machine)
@@ -96,7 +98,7 @@ def install(root: Path, home: Path, machine: str, inventory=PROPOSED):
     _apply_removals(home, effects)
     _apply_links(root, home, effects)
     entries = mcp_servers.servers(root) if machine in DESKTOP else {}
-    merges = mcp_servers.apply(home, entries)
+    merges = mcp_servers.apply(home, entries) + fx_settings.apply(root, home)
     machine_history.record(home, machine, built + effects + merges, bundles)
     return built + effects + merges
 
