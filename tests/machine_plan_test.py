@@ -7,7 +7,8 @@ from pathlib import Path
 import pytest
 
 from machine_bundle import Build, bundle_source, merge, render
-from machine_install import install
+from machine_install import _describe, install
+import machine_history
 import mcp_servers
 from machine_plan import (
     CLAUDE_SKILLS,
@@ -147,18 +148,29 @@ def test_changing_a_desktop_fragment_rebuilds_linked_prompt(tmp_path):
             bundle_source("home", "claude.md"), ".claude/CLAUDE.md", frozenset({"home"})
         ),
     )
-    assert Build(bundle_source("home", "claude.md")) in install(
+    assert Build(bundle_source("home", "claude.md"), None) in install(
         root, home, "home", inventory
     )
     target = home / ".claude/CLAUDE.md"
     assert target.read_text() == "Common instruction\n\nDesktop instruction\n"
 
     fragment.write_text("Updated desktop instruction\n")
-    assert Build(bundle_source("home", "claude.md")) in install(
-        root, home, "home", inventory
-    )
+    assert Build(
+        bundle_source("home", "claude.md"),
+        "Common instruction\n\nDesktop instruction\n",
+    ) in install(root, home, "home", inventory)
     assert target.read_text() == "Common instruction\n\nUpdated desktop instruction\n"
     assert install(root, home, "home", inventory) == ()
+
+    machine_history.undo(root, home, "home")
+    assert target.read_text() == "Common instruction\n\nDesktop instruction\n"
+    assert (root / bundle_source("home", "claude.md")).read_text() == (
+        "Common instruction\n\nDesktop instruction\n"
+    )
+
+    machine_history.undo(root, home, "home")
+    assert not (home / ".claude/CLAUDE.md").exists()
+    assert not (root / bundle_source("home", "claude.md")).exists()
 
     work = root / "profiles/work"
     (work / ".config/opencode").mkdir(parents=True)
@@ -522,3 +534,135 @@ def test_terminal_colors_respect_no_color_and_dumb_term(monkeypatch):
     monkeypatch.delenv("NO_COLOR")
     monkeypatch.setenv("TERM", "dumb")
     assert not color_enabled(Terminal())
+
+
+def test_install_summary_lists_each_effect(tmp_path):
+    root = Path(__file__).resolve().parents[1]
+    home = tmp_path / "home"
+    home.mkdir()
+
+    completed = subprocess.run(
+        [str(root / "dev"), "--machine", "home", "--home", str(home)],
+        env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1"},
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+
+    lines = completed.stdout.splitlines()
+    count = int(re.findall(r"Applied (\d+) effects", lines[0])[0])
+    assert len(lines) - 1 == count
+    assert "  LINK   ~/.zshrc -> .zshrc" in lines
+    assert any(line.startswith("  MERGE  ~/.claude.json (") for line in lines)
+
+
+def test_effect_descriptions_show_each_effect_kind():
+    build = Build(".machine-generated/home/claude.md", None)
+    rebuilt = Build(bundle_source("work", "claude.md"), "old instructions\n")
+    switch = Link(".claude/CLAUDE.md", "sources/claude.md", "other/claude.md")
+    fresh = Link(".zshrc", ".zshrc", None)
+    retired = Remove(".agents/skills/tts", "features/tts")
+
+    assert _describe(build) == "BUILD  .machine-generated/home/claude.md"
+    assert _describe(rebuilt) == "BUILD  .machine-generated/work/claude.md"
+    assert _describe(switch) == (
+        "LINK   ~/.claude/CLAUDE.md -> sources/claude.md (was -> other/claude.md)"
+    )
+    assert _describe(fresh) == "LINK   ~/.zshrc -> .zshrc"
+    assert _describe(retired) == "REMOVE ~/.agents/skills/tts (was -> features/tts)"
+    assert _describe(
+        mcp_servers.Merge(".claude.json", ("context7", "playwright"))
+    ) == "MERGE  ~/.claude.json (context7, playwright)"
+
+
+def test_undo_restores_the_last_installed_machine(tmp_path):
+    root = Path(__file__).resolve().parents[1]
+    home = tmp_path / "home"
+    home.mkdir()
+    install(root, home, "work")
+    install(root, home, "remote")
+
+    when, restored = machine_history.undo(root, home, "remote")
+
+    assert isinstance(when, str) and when
+    assert restored
+    assert (home / ".claude/CLAUDE.md").resolve() == root / bundle_source(
+        "work", "claude.md"
+    )
+    assert (home / ".agents/skills/tts").resolve() == root / ".agents/skills/tts"
+    assert (
+        home / ".config/opencode/tools/screenshot.ts"
+    ).resolve() == root / ".config/opencode/tools/screenshot.ts"
+    with pytest.raises(machine_history.NothingToUndo):
+        machine_history.undo(root, home, "remote")
+
+
+def test_undo_clears_the_run_from_the_journal(tmp_path):
+    root = Path(__file__).resolve().parents[1]
+    home = tmp_path / "home"
+    home.mkdir()
+    install(root, home, "home")
+
+    when, restored = machine_history.undo(root, home, "home")
+    assert when and restored
+    assert not (home / ".claude/CLAUDE.md").exists()
+    assert not (home / ".zshrc").exists()
+    assert not (home / machine_history.HISTORY).read_text()
+
+    with pytest.raises(machine_history.NothingToUndo):
+        machine_history.undo(root, home, "home")
+
+
+def test_undo_refuses_paths_changed_behind_the_installer(tmp_path):
+    root = Path(__file__).resolve().parents[1]
+    home = tmp_path / "home"
+    home.mkdir()
+    install(root, home, "remote")
+    target = home / ".claude/CLAUDE.md"
+    target.unlink()
+    target.symlink_to("/nowhere")
+
+    with pytest.raises(machine_history.PathChanged):
+        machine_history.undo(root, home, "remote")
+
+
+def test_dev_undo_reports_the_restored_effects(tmp_path):
+    root = Path(__file__).resolve().parents[1]
+    home = tmp_path / "home"
+    home.mkdir()
+
+    first = subprocess.run(
+        [str(root / "dev"), "--machine", "home", "--home", str(home)],
+        env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1"},
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    applied = int(re.findall(r"Applied (\d+) effects", first.stdout)[0])
+
+    undo = subprocess.run(
+        [str(root / "dev"), "undo", "--machine", "home", "--home", str(home)],
+        env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1"},
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    lines = undo.stdout.splitlines()
+
+    assert f"Undid {applied} effects on {home}" in lines[0]
+    assert "install was" in lines[0]
+    assert len(lines) - 1 == applied
+    assert "  REMOVE   ~/.zshrc" in lines
+    assert not (home / ".claude/CLAUDE.md").exists()
+    assert not (home / ".zshrc").exists()
+
+    again = subprocess.run(
+        [str(root / "dev"), "undo", "--machine", "home", "--home", str(home)],
+        env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1"},
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert again.returncode == 1
+    assert "Nothing to undo for home." in again.stderr

@@ -19,6 +19,7 @@ from machine_plan import (
 )
 from machine_preview import snapshot
 import mcp_servers
+import machine_history
 
 
 class PlanBlocked(ValueError):
@@ -36,12 +37,13 @@ def _write_bundles(root: Path, bundles: dict[str, bytes]) -> tuple[Build, ...]:
         path = root / source
         path.parent.mkdir(parents=True, exist_ok=True)
         if not path.exists() or path.read_bytes() != content:
+            previous = path.read_text() if path.exists() else None
             temporary = path.with_suffix(path.suffix + ".next-machine-plan")
             if temporary.exists() or temporary.is_symlink():
                 raise RuntimeError(f"temporary bundle already exists: {temporary}")
             temporary.write_bytes(content)
             os.replace(temporary, path)
-            built.append(Build(source))
+            built.append(Build(source, previous))
     return tuple(built)
 
 
@@ -64,11 +66,23 @@ def _apply_links(root: Path, home: Path, effects: tuple):
             target.symlink_to(root / effect.source)
 
 
+def _describe(item) -> str:
+    if isinstance(item, Build):
+        return f"BUILD  {item.source}"
+    if isinstance(item, Remove):
+        return f"REMOVE ~/{item.target} (was -> {item.previous})"
+    if isinstance(item, Link):
+        was = f" (was -> {item.previous})" if item.previous is not None else ""
+        return f"LINK   ~/{item.target} -> {item.source}{was}"
+    return f"MERGE  ~/{item.target} ({', '.join(item.names)})"
+
+
 def install(root: Path, home: Path, machine: str, inventory=PROPOSED):
     observed, available = snapshot(root, home, machine, inventory)
     effects = plan(machine, inventory, observed, available)
-    if any(isinstance(effect, Conflict) for effect in effects):
-        raise PlanBlocked(effects, home)
+    conflicts = tuple(effect for effect in effects if isinstance(effect, Conflict))
+    if conflicts:
+        raise PlanBlocked(conflicts, home)
 
     bundles = (
         render(root, machine)
@@ -83,22 +97,39 @@ def install(root: Path, home: Path, machine: str, inventory=PROPOSED):
     _apply_links(root, home, effects)
     entries = mcp_servers.servers(root) if machine in DESKTOP else {}
     merges = mcp_servers.apply(home, entries)
+    machine_history.record(home, machine, built + effects + merges, bundles)
     return built + effects + merges
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Install a conflict-free machine plan")
+    parser = argparse.ArgumentParser(
+        description="Install or undo a machine plan for the selected machine"
+    )
     parser.add_argument("--machine", choices=sorted(MACHINES), required=True)
     parser.add_argument("--home", type=Path, default=Path.home())
+    parser.add_argument(
+        "command", nargs="?", choices=("install", "undo"), default="install"
+    )
     args = parser.parse_args()
+    root = Path(__file__).resolve().parent
     try:
-        effects = install(Path(__file__).resolve().parent, args.home, args.machine)
+        if args.command == "undo":
+            when, restored = machine_history.undo(root, args.home, args.machine)
+            print(f"Undid {len(restored)} effects on {args.home} (install was {when}):")
+            for line in restored:
+                print(f"  {line}")
+            return
+        effects = install(root, args.home, args.machine)
+        print(f"Applied {len(effects)} effects to {args.home}:")
+        for item in effects:
+            print(f"  {_describe(item)}")
     except PlanBlocked as error:
         message = format_conflicts(
             error.conflicts, error.home, color=color_enabled(sys.stderr)
         )
         parser.exit(1, f"{message}\n")
-    print(f"Applied {len(effects)} effects to {args.home}")
+    except (machine_history.NothingToUndo, machine_history.PathChanged) as error:
+        parser.exit(1, f"{error}\n")
 
 
 if __name__ == "__main__":

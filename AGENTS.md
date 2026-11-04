@@ -7,10 +7,13 @@ Configuration for AI coding assistants (OpenCode, Claude Code, etc). The `dev` s
 ```bash
 python3 -B machine_preview.py work  # Preview machine-specific changes
 ./dev --machine work                  # Install after reviewing the preview
+./dev undo --machine work             # Revert the last install
 ```
 
 Choose `remote`, `home`, or `work` for the machine; see `MACHINE_PLAN.md` for
-the migration details. `./dev` requires `--machine`.
+the migration details. `./dev` requires `--machine`. Installs print each
+applied effect and journal its inverse to
+`~/.local/state/dotfiles/history.jsonl` for `undo`.
 
 ## Symlinked Configuration
 

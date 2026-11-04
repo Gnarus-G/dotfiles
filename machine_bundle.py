@@ -12,6 +12,7 @@ MACHINES = ("remote", "home", "work")
 @dataclass(frozen=True)
 class Build:
     source: str
+    previous: str | None = None
 
 
 def bundle_source(machine: str, name: str) -> str:

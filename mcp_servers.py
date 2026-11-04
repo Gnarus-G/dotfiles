@@ -18,6 +18,8 @@ CODEX_CONFIG = ".codex/config.toml"
 class Merge:
     target: str
     names: tuple[str, ...]
+    previous: str | None = None
+    updated: str = ""
 
 
 def servers(root: Path) -> dict[str, dict]:
@@ -91,25 +93,26 @@ def _replace_codex_table(text: str, name: str, entry: dict) -> str:
 def _changes(home: Path, entries: dict[str, dict]):
     for target, state in ((CLAUDE_CONFIG, claude_state), (CODEX_CONFIG, codex_state)):
         path = home / target
-        current = path.read_text() if path.exists() else ""
+        existed = path.exists()
+        current = path.read_text() if existed else ""
         updated = state(current, entries)
         if updated != current:
-            yield target, path, updated
+            yield target, path, (current if existed else None), updated
 
 
 def pending(home: Path, entries: dict[str, dict]) -> tuple[Merge, ...]:
     """Report the harness config files that would change."""
     return tuple(
         Merge(target, tuple(sorted(entries)))
-        for target, _path, _updated in _changes(home, entries)
+        for target, _path, _previous, _updated in _changes(home, entries)
     )
 
 
 def apply(home: Path, entries: dict[str, dict]) -> tuple[Merge, ...]:
     """Write the canonical servers into the harness config files."""
     merges = []
-    for target, path, updated in _changes(home, entries):
+    for target, path, previous, updated in _changes(home, entries):
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(updated)
-        merges.append(Merge(target, tuple(sorted(entries))))
+        merges.append(Merge(target, tuple(sorted(entries)), previous, updated))
     return tuple(merges)
