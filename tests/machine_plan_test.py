@@ -248,7 +248,7 @@ def test_skill_inventory_covers_each_source_set():
         if p.is_dir() and not p.is_symlink()
     }
     claude = {p.name for p in (root / ".claude.only/skills").iterdir() if p.is_dir()}
-    assert shared == set(SHARED_SKILLS) | {"tts", "tmux-processes"}
+    assert shared == set(SHARED_SKILLS) | {"tts", "tmux-processes", "full-send"}
     assert claude == set(CLAUDE_SKILLS)
     assert {item.target for item in PROPOSED} >= {
         f".config/opencode/skills/{name}" for name in shared - {"tmux-processes"}

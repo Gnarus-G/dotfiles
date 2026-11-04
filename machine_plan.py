@@ -145,6 +145,7 @@ def _beneath(target: str, parents: Collection[str]) -> bool:
 DESKTOP = frozenset({"home", "work"})
 CORE = MACHINES
 WORK = frozenset({"work"})
+NOT_WORK = MACHINES - WORK
 PROPOSED = (
     Spec(".config/nvim", ".config/nvim", CORE),
     Spec(".claude/hooks", ".claude/hooks", CORE),
@@ -228,6 +229,10 @@ PROPOSED = (
     Spec(
         ".config/opencode/skills/.gitignore", ".config/opencode/skills/.gitignore", CORE
     ),
+    # Work machines get agent-skills' full-send, which builds on its /work.
+    Spec(".agents/skills/full-send", ".agents/skills/full-send", NOT_WORK),
+    Spec(".agents/skills/full-send", ".claude/skills/full-send", NOT_WORK),
+    Spec(".agents/skills/full-send", ".config/opencode/skills/full-send", NOT_WORK),
     Spec(".agents/skills/tts", ".agents/skills/tts", DESKTOP),
     Spec(".agents/skills/tts", ".claude/skills/tts", DESKTOP),
     Spec(".agents/skills/tts", ".config/opencode/skills/tts", DESKTOP),
@@ -281,16 +286,22 @@ PROPOSED = (
 SHARED_SKILLS = (
     "commit",
     "context7",
+    "draft-msg",
+    "fix-loop",
     "frontend-design",
     "fsm-events-actions-style",
+    "gnarus-review",
     "gnarus-good-code",
+    "goal",
     "machine-config",
     "ollama-gpu-installation",
     "one-sentence",
+    "ship",
     "simple",
     "syllogism",
     "systematic-debugging",
     "tdd",
+    "where-are-we",
 )
 CLAUDE_SKILLS = (
     "codex-computer-use",
