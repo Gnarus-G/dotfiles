@@ -1,6 +1,6 @@
 # Simple Playbook
 
-Detailed operating guidance for the `simple` skill. Use with the `simple-made-easy` and `cyclomatic-complexity` source skills loaded as needed.
+Detailed operating guidance for the `simple` skill. Use with the `simple-made-easy.md` and `cyclomatic-complexity.md` references as needed.
 
 ## Composite Workflow
 

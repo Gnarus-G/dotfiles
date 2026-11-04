@@ -1,6 +1,6 @@
 ---
 name: simple
-description: "Applies a composite simplicity discipline: Rich Hickey's Simple Made Easy lens plus cyclomatic complexity measurement to unbraid concerns and reduce branch-heavy code. Use when designing and writing code."
+description: "Applies a composite simplicity discipline: Rich Hickey's Simple Made Easy lens plus cyclomatic complexity measurement to unbraid concerns and reduce branch-heavy code. Use when designing and writing code, reviewing for accidental complexity, or measuring, interpreting, or reducing cyclomatic complexity (hotspots, thresholds, branch-heavy Rust functions)."
 license: MIT
 compatibility: opencode
 metadata:
@@ -28,8 +28,8 @@ Unbraid before extracting. Measure before celebrating. Treat code the current go
 
 ## Workflow
 
-1. Use `simple-made-easy` to identify what is complected.
-2. Use `cyclomatic-complexity` when branching, Rust control flow, or measurable complexity is relevant.
+1. Use the Simple Made Easy reference to identify what is complected.
+2. Use the cyclomatic complexity reference when branching, Rust control flow, or measurable complexity is relevant.
 3. Separate inherent domain complexity from accidental implementation complexity.
 4. Prefer the smallest behavior-preserving change that unbraids one concern or removes one accidental decision path.
 5. Apply YAGNI: do not add abstractions, flexibility, cases, or cleanup beyond the current goal.

@@ -1,7 +1,5 @@
 # Simple Made Easy Reference
 
-Copied reference content from `.agents/skills/simple-made-easy/SKILL.md` for self-contained use by `/simple`.
-
 Use this reference to make "simple" precise: simple means **not interleaved**. Easy means **near at hand, familiar, or near current capability**. Prefer simple over merely easy when long-term reliability, debugging, and change matter.
 
 Source lens: Rich Hickey, "Simple Made Easy" (Strange Loop 2011), video `https://www.youtube.com/watch?v=SxdOUGdseq4`, public transcript `https://github.com/matthiasn/talk-transcripts/blob/master/Hickey_Rich/SimpleMadeEasy.md`.

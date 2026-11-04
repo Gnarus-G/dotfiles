@@ -1,7 +1,5 @@
 # Cyclomatic Complexity Reference
 
-Copied reference content from `.agents/skills/cyclomatic-complexity/SKILL.md` for self-contained use by `/simple`.
-
 Measure cyclomatic complexity in Rust before refactoring, then reduce it with behavior-preserving changes and verify the result.
 
 ## Goals
