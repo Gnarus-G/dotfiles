@@ -64,6 +64,26 @@ def color_enabled(stream) -> bool:
     )
 
 
+def paint(text: str, code: str, color: bool = False) -> str:
+    return f"\033[{code}m{text}\033[0m" if color else text
+
+
+EFFECT_CODES = {
+    "BUILD": "1;35",
+    "LINK": "1;32",
+    "REMOVE": "1;31",
+    "MERGE": "1;33",
+    "RESTORED": "1;36",
+}
+
+
+def paint_effect(line: str, color: bool) -> str:
+    """Color the verb of a BUILD/LINK/REMOVE/MERGE/RESTORED output line."""
+    verb, _, rest = line.partition(" ")
+    code = EFFECT_CODES.get(verb)
+    return paint(verb, code, color) + " " + rest if code else line
+
+
 def _explain(reason: str, children: int) -> tuple[str, str]:
     """Describe a conflict reason in plain language and give one next step."""
     if reason == "existing file":
@@ -118,21 +138,20 @@ def format_conflicts(
     color: bool = False,
     closing: str = "Nothing changed.",
 ) -> str:
-    def paint(text: str, code: str) -> str:
-        return f"\033[{code}m{text}\033[0m" if color else text
-
     groups = _group_by_parent(conflicts)
     count = len(groups)
     noun = "issue" if count == 1 else "issues"
     verb = "needs" if count == 1 else "need"
-    lines = [paint(f"Can't install: {count} {noun} {verb} attention.", "1;31")]
+    lines = [paint(f"Can't install: {count} {noun} {verb} attention.", "1;31", color)]
     for target, (reason, children) in groups.items():
         lines.append("")
-        lines.append(f"  {paint('●', '31')} {paint(str(home / target), '1;36')}")
+        lines.append(
+            f"  {paint('●', '31', color)} {paint(str(home / target), '1;36', color)}"
+        )
         description, step = _explain(reason, children)
         lines.append(f"    {description}")
         if step:
-            lines.append(f"    {paint('Next step:', '1;33')} {step}")
+            lines.append(f"    {paint('Next step:', '1;33', color)} {step}")
     lines.extend(("", closing))
     return "\n".join(lines)
 
@@ -401,8 +420,8 @@ def plan(
         if item.target in wanted:
             raise ValueError(f"duplicate target for {machine}: {item.target}")
         wanted.add(item.target)
-    retired = {
-        target
+    retired: dict[str, Managed] = {
+        target: current
         for target, current in observed.items()
         if target in known and target not in wanted and isinstance(current, Managed)
     }
@@ -416,7 +435,7 @@ def plan(
     if conflicts:
         return conflicts
     removals = [
-        Remove(target, observed[target].source)
+        Remove(target, retired[target].source)
         for target in retired
         if not _beneath(target, retired)
     ]

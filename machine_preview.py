@@ -18,6 +18,8 @@ from machine_plan import (
     Unmanaged,
     color_enabled,
     format_conflicts,
+    paint,
+    paint_effect,
     plan,
 )
 
@@ -74,6 +76,7 @@ def main():
     )
     args = parser.parse_args()
     root = Path(__file__).resolve().parent
+    color = color_enabled(sys.stdout)
     observed, available = snapshot(root, Path.home(), args.machine)
     result = plan(
         args.machine,
@@ -81,38 +84,50 @@ def main():
         observed,
         available_sources=None if args.assume_sources_present else available,
     )
-    if not any(isinstance(action, Conflict) for action in result):
+    conflicts = tuple(action for action in result if isinstance(action, Conflict))
+    if not conflicts:
         for source, content in render(root, args.machine).items():
             path = root / source
             if not path.exists() or path.read_bytes() != content:
                 print(
-                    f"BUILD  {source} ({len(content)} bytes from common + {args.machine} overlays)"
+                    paint_effect(
+                        f"BUILD  {source} ({len(content)} bytes from common + {args.machine} overlays)",
+                        color,
+                    )
                 )
-    if any(isinstance(action, Conflict) for action in result):
+    if conflicts:
         print(
             format_conflicts(
-                result,
+                conflicts,
                 Path.home(),
-                color=color_enabled(sys.stdout),
+                color=color,
                 closing="Preview only; nothing was installed.",
             )
         )
         sys.exit(1)
     for action in result:
         if isinstance(action, Remove):
-            print(f"REMOVE ~/{action.target} (currently -> {action.previous})")
+            print(
+                paint_effect(
+                    f"REMOVE ~/{action.target} (currently -> {action.previous})", color
+                )
+            )
         elif isinstance(action, Link):
-            print(f"LINK   ~/{action.target} -> {action.source}")
+            print(paint_effect(f"LINK   ~/{action.target} -> {action.source}", color))
     entries = mcp_servers.servers(root) if args.machine in DESKTOP else {}
     merges = mcp_servers.pending(Path.home(), entries) + fx_settings.pending(
         root, Path.home()
     )
     for merge in merges:
-        print(f"MERGE  ~/{merge.target} ({', '.join(merge.names)})")
+        print(paint_effect(f"MERGE  ~/{merge.target} ({', '.join(merge.names)})", color))
     print(
-        f"Ready: {sum(isinstance(a, Remove) for a in result)} removals, "
-        f"{sum(isinstance(a, Link) for a in result)} links, "
-        f"{len(merges)} merges (preview only)"
+        paint(
+            f"Ready: {sum(isinstance(a, Remove) for a in result)} removals, "
+            f"{sum(isinstance(a, Link) for a in result)} links, "
+            f"{len(merges)} merges (preview only)",
+            "1",
+            color,
+        )
     )
 
 

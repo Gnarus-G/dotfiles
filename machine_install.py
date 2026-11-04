@@ -18,6 +18,8 @@ from machine_plan import (
     Remove,
     color_enabled,
     format_conflicts,
+    paint,
+    paint_effect,
     plan,
 )
 from machine_preview import snapshot
@@ -114,17 +116,24 @@ def main():
     )
     args = parser.parse_args()
     root = Path(__file__).resolve().parent
+    color = color_enabled(sys.stdout)
     try:
         if args.command == "undo":
             when, restored = machine_history.undo(root, args.home, args.machine)
-            print(f"Undid {len(restored)} effects on {args.home} (install was {when}):")
+            print(
+                paint(
+                    f"Undid {len(restored)} effects on {args.home} (install was {when}):",
+                    "1",
+                    color,
+                )
+            )
             for line in restored:
-                print(f"  {line}")
+                print(f"  {paint_effect(line, color)}")
             return
         effects = install(root, args.home, args.machine)
-        print(f"Applied {len(effects)} effects to {args.home}:")
+        print(paint(f"Applied {len(effects)} effects to {args.home}:", "1", color))
         for item in effects:
-            print(f"  {_describe(item)}")
+            print(f"  {paint_effect(_describe(item), color)}")
     except PlanBlocked as error:
         message = format_conflicts(
             error.conflicts, error.home, color=color_enabled(sys.stderr)

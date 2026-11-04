@@ -22,6 +22,8 @@ from machine_plan import (
     Unmanaged,
     color_enabled,
     format_conflicts,
+    paint,
+    paint_effect,
     plan,
 )
 
@@ -579,6 +581,19 @@ def test_preview_of_blocked_plan_exits_nonzero(tmp_path):
     assert completed.returncode == 1
     assert "Preview only; nothing was installed." in completed.stdout
     assert "Nothing changed." not in completed.stdout
+
+
+def test_effect_lines_color_verbs_when_requested():
+    assert paint_effect("LINK   ~/.zshrc -> .zshrc", color=False) == (
+        "LINK   ~/.zshrc -> .zshrc"
+    )
+    assert paint_effect("LINK   ~/.zshrc -> .zshrc", color=True) == (
+        "\033[1;32mLINK\033[0m   ~/.zshrc -> .zshrc"
+    )
+    assert paint_effect("REMOVE   ~/.claude.json", color=True) == (
+        "\033[1;31mREMOVE\033[0m   ~/.claude.json"
+    )
+    assert paint_effect("UNKNOWN   something", color=True) == "UNKNOWN   something"
 
 
 def test_terminal_colors_respect_no_color_and_dumb_term(monkeypatch):
