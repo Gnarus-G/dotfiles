@@ -324,7 +324,12 @@ def test_skill_inventory_covers_each_source_set():
         if p.is_dir() and not p.is_symlink()
     }
     claude = {p.name for p in (root / ".claude.only/skills").iterdir() if p.is_dir()}
-    assert shared == set(SHARED_SKILLS) | {"tts", "tmux-processes", "full-send"}
+    assert shared == set(SHARED_SKILLS) | {
+        "tts",
+        "tmux-processes",
+        "full-send",
+        "computer-use",
+    }
     assert claude == set(CLAUDE_SKILLS)
     assert {item.target for item in PROPOSED} >= {
         f".config/opencode/skills/{name}" for name in shared - {"tmux-processes"}
@@ -366,6 +371,9 @@ def test_install_in_empty_home_is_idempotent_and_remote_excludes_desktop(tmp_pat
         "remote", "opencode.json"
     )
     assert not (home / ".agents/skills/tts").exists()
+    assert not (home / ".agents/skills/computer-use").exists()
+    assert not (home / ".claude/skills/computer-use").exists()
+    assert not (home / ".config/opencode/skills/computer-use").exists()
     assert not (home / ".config/opencode/tools/screenshot.ts").exists()
     assert not (home / ".pi/agent/extensions/tmux-panes.ts").exists()
     assert install(root, home, "remote") == ()
@@ -382,6 +390,12 @@ def test_install_desktop_in_empty_home_is_idempotent(tmp_path, machine):
         machine, "claude.md"
     )
     assert (home / ".agents/skills/tts").resolve() == root / ".agents/skills/tts"
+    for target in (
+        ".agents/skills/computer-use",
+        ".claude/skills/computer-use",
+        ".config/opencode/skills/computer-use",
+    ):
+        assert (home / target).resolve() == root / ".agents/skills/computer-use"
     assert (
         home / ".config/opencode/tools/screenshot.ts"
     ).resolve() == root / ".config/opencode/tools/screenshot.ts"

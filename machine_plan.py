@@ -258,6 +258,11 @@ PROPOSED = (
     Spec(".agents/skills/tts", ".agents/skills/tts", DESKTOP),
     Spec(".agents/skills/tts", ".claude/skills/tts", DESKTOP),
     Spec(".agents/skills/tts", ".config/opencode/skills/tts", DESKTOP),
+    Spec(".agents/skills/computer-use", ".agents/skills/computer-use", DESKTOP),
+    Spec(".agents/skills/computer-use", ".claude/skills/computer-use", DESKTOP),
+    Spec(
+        ".agents/skills/computer-use", ".config/opencode/skills/computer-use", DESKTOP
+    ),
     Spec(".config/himither", ".config/himither", DESKTOP),
     Spec(
         ".agents/skills/tmux-processes",
