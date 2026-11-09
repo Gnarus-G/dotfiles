@@ -165,6 +165,31 @@ def test_fx_settings_are_repository_managed_on_every_machine(machine, tmp_path):
     assert target.read_text() == original
 
 
+@pytest.mark.parametrize("machine", ["remote", "home", "work"])
+def test_claude_subagent_models_on_work_and_remote(machine, tmp_path):
+    root = Path(__file__).resolve().parents[1]
+    settings = json.loads(
+        render(root, machine)[bundle_source(machine, "claude-settings.json")]
+    )
+    env = settings.get("env", {})
+    target = ".claude/agents/Explore.md"
+    specs = tuple(item for item in PROPOSED if item.target == target)
+    assert specs, "Explore's model override must be managed by the installer"
+    home = tmp_path / "home"
+    home.mkdir()
+    install(root, home, machine, specs)
+    if machine == "home":
+        assert "CLAUDE_CODE_SUBAGENT_MODEL" not in env
+        assert not (home / target).exists()
+    else:
+        assert env["CLAUDE_CODE_SUBAGENT_MODEL"] == "opus"
+        assert "CLAUDE_CODE_SUBAGENT_MODEL_FORCE" not in env
+        agent = (home / target).read_text()
+        assert "name: Explore\n" in agent
+        assert "model: sonnet\n" in agent
+        assert "tools: Read, Glob, Grep, Bash, WebFetch, WebSearch\n" in agent
+
+
 def test_instruction_fragments_and_json_overlays_are_machine_scoped():
     root = Path(__file__).resolve().parents[1]
     remote = render(root, "remote")

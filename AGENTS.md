@@ -34,6 +34,12 @@ uses `ollama-cloud/glm-5.3-flash`; other agents keep their defaults.
 On work, the [OpenCode overlay](profiles/work/.config/opencode/opencode.json)
 sets `general` to `openai/gpt-6.1-sol#high` and `explore` to `openai/gpt-6.1-sol#low`.
 
+On work and remote, Claude's native `general-purpose` defaults to Opus through
+`CLAUDE_CODE_SUBAGENT_MODEL`; a user-level `Explore` override selects Sonnet
+([scope test](<code:tests/machine_plan_test.py#def test_claude_subagent_models_on_work_and_remote(machine, tmp_path):>)).
+The main model is selected independently, including Fable with `/model fable`;
+an explicit model on a delegation takes precedence over these defaults.
+
 fx rejects symlinked settings, so `./dev` merges `.fx/settings.json` into
 `~/.fx/settings.json` on every machine, preserving unrelated local settings;
 Ollama Cloud authentication uses `OLLAMA_API_KEY`.

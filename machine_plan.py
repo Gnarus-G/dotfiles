@@ -170,6 +170,11 @@ PROPOSED = (
     Spec(".claude/hooks", ".claude/hooks", CORE),
     Spec(".claude/statusline-command.sh", ".claude/statusline-command.sh", CORE),
     Spec(".claude/output-styles", ".claude/output-styles", CORE),
+    Spec(
+        "profiles/core/.claude/agents/Explore.md",
+        ".claude/agents/Explore.md",
+        frozenset({"remote", "work"}),
+    ),
     Spec(".codex/agents/commit.toml", ".codex/agents/commit.toml", CORE),
     Spec(".fx/agents/commit", ".fx/agents/commit", CORE),
     Spec(".pi/agent/extensions/commit.ts", ".pi/agent/extensions/commit.ts", CORE),
