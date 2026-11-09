@@ -31,6 +31,8 @@ applied effect and journal its inverse to
 
 On home, OpenCode's `general` agent uses `ollama-cloud/glm-5.3` and `explore`
 uses `ollama-cloud/glm-5.3-flash`; other agents keep their defaults.
+On work, the [OpenCode overlay](profiles/work/.config/opencode/opencode.json)
+sets `general` to `openai/gpt-6.1-sol#high` and `explore` to `openai/gpt-6.1-sol#low`.
 
 fx rejects symlinked settings, so `./dev` merges `.fx/settings.json` into
 `~/.fx/settings.json` on every machine, preserving unrelated local settings;

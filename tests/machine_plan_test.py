@@ -179,12 +179,14 @@ def test_instruction_fragments_and_json_overlays_are_machine_scoped():
     home_agents = json.loads(home[bundle_source("home", "opencode.json")])["agents"]
     assert home_agents["general"]["model"] == "ollama-cloud/glm-5.3"
     assert home_agents["explore"]["model"] == "ollama-cloud/glm-5.3-flash"
-    for machine, rendered in (("remote", remote), ("work", work)):
-        agents = json.loads(rendered[bundle_source(machine, "opencode.json")]).get(
-            "agents", {}
-        )
-        assert "general" not in agents
-        assert "explore" not in agents
+    work_agents = json.loads(work[bundle_source("work", "opencode.json")])["agents"]
+    assert work_agents["general"]["model"] == "openai/gpt-6.1-sol#high"
+    assert work_agents["explore"]["model"] == "openai/gpt-6.1-sol#low"
+    remote_agents = json.loads(remote[bundle_source("remote", "opencode.json")]).get(
+        "agents", {}
+    )
+    assert "general" not in remote_agents
+    assert "explore" not in remote_agents
     assert (
         b'"SessionStart"' not in remote[bundle_source("remote", "claude-settings.json")]
     )
