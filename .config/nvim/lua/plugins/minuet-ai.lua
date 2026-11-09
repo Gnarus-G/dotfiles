@@ -1,16 +1,16 @@
-local env_cascade = require("gnarus.utils").env_var_cascade
-
 return {
   "milanglacier/minuet-ai.nvim",
   dependencies = { "nvim-lua/plenary.nvim" },
   event = "InsertEnter",
   config = function()
-    local ollama_api_base         = os.getenv("OLLAMA_API_BASE") or "http://localhost:11434"
+    local ollama_api_base = os.getenv("OLLAMA_API_BASE") or "http://localhost:11434"
 
-    local minuet_config           = require('minuet.config')
-    local extra_context           = require('minuet_ctx')
+    local minuet_config   = require('minuet.config')
+    local extra_context   = require('minuet_ctx')
 
-    local opts                    = {
+    local opts            = {
+      provider = "openai_compatible",
+      n_completions = 3,
       cmp = {
         enable_auto_complete = true,
       },
@@ -34,7 +34,6 @@ return {
       -- 3. Insert each response between its prefix/suffix, execute it, and score behavioral assertions.
       -- 4. Upgrade only when the candidate improves both latency and functional pass rate.
       -- 2026-08-04: DeepSeek 0731 passed 100% vs 50%, but had slower totals and an 18s tail; keep cloud.
-      -- GPT-5.6 Luna remains untested until OPENAI_API_KEY is available in the benchmark shell.
       provider_options = {
         claude = {
           model = 'claude-haiku-4-5', -- $0.80/$4.00 per 1M tokens (input/output)
@@ -42,39 +41,6 @@ return {
             template = "{{{extra_context}}}\n" ..
                 minuet_config.default_chat_input_prefix_first.template,
             extra_context = extra_context.get_formatted_context
-          },
-        },
-        gemini = {
-          -- gemini-3.1-flash-lite $0.25/$1.50 per 1M tokens (input/output)
-          -- Upgrade: gemini-3-flash-preview, gemini-2.5-pro ($1.25/$5.00)
-          model = "gemini-3.1-flash-lite",
-          chat_input = {
-            template = "{{{extra_context}}}\n" ..
-                minuet_config.default_chat_input_prefix_first.template,
-            extra_context = extra_context.get_formatted_context
-          },
-          optional = {
-            generationConfig = {
-              maxOutputTokens = 256,
-              thinkingConfig = {
-                thinkingBudget = 0,
-              },
-            },
-          },
-        },
-        openai = {
-          -- gpt-6-luna $0.10/$0.50 per 1M tokens (input/output)
-          -- Upgrade: gpt-6-sol ($2.00/$10.00), gpt-6-astra ($10.00/$50.00)
-          model = "gpt-6-luna",
-          chat_input = {
-            template = "{{{extra_context}}}\n" ..
-                minuet_config.default_chat_input_prefix_first.template,
-            extra_context = extra_context.get_formatted_context
-          },
-          stream = true,
-          optional = {
-            max_completion_tokens = 128,
-            reasoning_effort = "none",
           },
         },
         openai_compatible = {
@@ -117,17 +83,10 @@ return {
       }
     }
 
-    local config                  = env_cascade({
-      { vars = { "GNARUS_ALLOW_VENDOR_LLM", "OPENAI_API_KEY" }, value = { "openai", 3 } },
-      { vars = { "GNARUS_ALLOW_VENDOR_LLM", "GEMINI_API_KEY" }, value = { "gemini", 2 } },
-    }, { "openai_compatible", 1 })
-    local provider, n_completions = config[1], config[2]
-    vim.notify(string.format("Minuet AI configured with provider: %s, completions: %s", provider, n_completions),
+    vim.notify(
+      string.format("Minuet AI configured with provider: %s, completions: %s", opts.provider, opts.n_completions),
       vim.log.levels.DEBUG)
 
-    require('minuet').setup(vim.tbl_extend('force', opts, {
-      provider = provider,
-      n_completions = n_completions,
-    }))
+    require('minuet').setup(opts)
   end,
 }

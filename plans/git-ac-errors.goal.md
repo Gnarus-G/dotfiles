@@ -1,6 +1,6 @@
 # git-ac error presentation
 
-Status: implemented locally; simulated-provider tests, lint, and formatting passed; live fx verification and commit pending.
+Status: committed locally as `a6ff03b`; tests, lint, formatting, and live fx generation passed; publication pending.
 
 Goal: Explain provider failures in one readable message with commands that help the user recover.
 Done when: a local HTTP 429 reproduction exits nonzero without a traceback, preserves staging, and shows recovery commands.
@@ -16,6 +16,8 @@ Done when: a local HTTP 429 reproduction exits nonzero without a traceback, pres
 - Keep unrelated working-tree and staged changes intact.
 
 ## Verification
+- Three alternating live trials per tool used the same prompt, model, and reasoning effort: fx median 3.194 seconds, Pi median 5.331 seconds.
+- The installed git-ac completed three live dry runs through fx in 3.2–4.4 seconds end-to-end.
 - Fifteen git-ac tests passed, including a real subprocess against a local HTTP 429 server and simulated fx responses.
 - The [regression test](<code:tests/git_ac_test.py#def test_429_explains_fallback_and_preserves_staging(tmp_path, failing_provider):>) verifies the nonzero exit, preserved staging, absent traceback, and recovery commands.
 - Ruff lint and formatting passed; the installed executable points to the edited source.
@@ -24,6 +26,5 @@ Done when: a local HTTP 429 reproduction exits nonzero without a traceback, pres
 - The [explicit-model test](<code:tests/git_ac_fx_test.py#def test_explicit_model_failure_never_commits_or_falls_back(>) verifies that an explicit model failure neither commits nor falls back.
 
 ## Left
-- Verify a real fx-backed dry run; simulated providers do not establish live authentication or availability.
-- Commit the git-ac changes after reviewing the staged diff.
+- Commit the Minuet OpenAI/Gemini configuration cleanup and this status correction.
 - Publish the local commits when requested; no tracking issue or open PR was found during the status check.
