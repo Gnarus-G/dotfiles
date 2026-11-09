@@ -23,8 +23,8 @@ This is the desired tool inventory for new machines, not an installation script.
 These are chosen additions, not prerequisites for `./dev --machine <machine>`; install and set up the ones wanted on each machine.
 
 | Purpose               | Tools             | Setup/use                                                                                            |
-| --------------------- | ----------------- | ---------------------------------------------------------------------------------------------------- | ----------- | --------------- | --------- |
-| Clipboard history     | `cliphist`        | Watch clipboard changes with `wl-paste --watch cliphist store`; select an entry using `cliphist list | rofi -dmenu | cliphist decode | wl-copy`. |
+| --------------------- | ----------------- | ---------------------------------------------------------------------------------------------------- |
+| Clipboard history     | `cliphist`        | Watch clipboard changes with `wl-paste --watch cliphist store`; select an entry using `cliphist list \| rofi -dmenu \| cliphist decode \| wl-copy`. |
 | Persistent clipboard  | `wl-clip-persist` | Start it in the Wayland session to retain clipboard contents after the source app closes.            |
 | Screen recording      | `wl-screenrec`    | Record video of a region or monitor when needed; screenshots already use `grim` and `slurp`.         |
 | Warmer evening colors | `hyprsunset`      | Start it in the Wayland session with the desired temperature/schedule.                               |
@@ -36,6 +36,7 @@ These are chosen additions, not prerequisites for `./dev --machine <machine>`; i
 
 | Purpose                 | Tools                                          | Notes                                                                                                                                |
 | ----------------------- | ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| AI commit messages      | Python 3, [fx](https://fx.sh/docs), Ollama | Run `fx login codex` to use your ChatGPT subscription with [`git-ac`](<code:.local/bin/git-ac#def main():>); no OpenAI API key is needed. Keep Ollama available for the [default-model fallback](<code:tests/git_ac_fx_test.py#def test_default_model_falls_back_to_ollama(workspace):>). Use `git ac -n -v` to check generation and timing without committing. |
 | Mouse acceleration      | `maccel`, matching kernel headers, build tools | Follow the installer at [maccel.org](https://www.maccel.org/).                                                                       |
 | Virtual machines        | QEMU, libvirt, OVMF, virt-manager, dnsmasq     | Set up the libvirt services/network and user permissions for the host distribution.                                                  |
 | Stable Diffusion        | AUTOMATIC1111 Stable Diffusion Web UI          | Clone under `~/d`, install its compatible Python version, then run `webui.sh`; Forge is an optional remote/branch for that checkout. |

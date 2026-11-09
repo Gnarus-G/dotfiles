@@ -3,26 +3,20 @@ import argparse
 import json
 import logging
 import os
+import shlex
 import shutil
 import subprocess
 import sys
 import tempfile
 import time
+import urllib.error
 import urllib.request
 
 logger = logging.getLogger("git-ac")
 
 OLLAMA_HOST = os.environ.get("OLLAMA_HOST", "http://localhost:11434")
-OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "")
-OPENAI_BASE_URL = os.environ.get("OPENAI_BASE_URL", "https://api.openai.com/v1")
-GNARUS_ALLOW_VENDOR_LLM = os.environ.get("GNARUS_ALLOW_VENDOR_LLM", "")
-
 DEFAULT_MODEL_OLLAMA = "deepseek-v4.1-flash:cloud"
-DEFAULT_MODEL_OPENAI = "gpt-6-luna"
-DEFAULT_MODEL = DEFAULT_MODEL_OPENAI if GNARUS_ALLOW_VENDOR_LLM else DEFAULT_MODEL_OLLAMA
-
-OLLAMA_PREFIXES = ("ollama/", "deepseek-", "qwen", "devstral")
-OPENAI_PREFIXES = ("openai/", "gpt-", "o1", "o3", "o4")
+DEFAULT_MODEL = "gpt-6-luna"
 
 PROMPT_TEMPLATE = """Generate a git commit message for these changes.
 
@@ -40,14 +34,14 @@ Write a commit message for this Git diff:
 
 
 def detect_provider(model):
-    if any(model.startswith(p) for p in OPENAI_PREFIXES) or model.startswith("openai/"):
-        return "openai"
+    if model.startswith(("openai/", "codex/", "gpt-", "o1", "o3", "o4")):
+        return "fx"
     return "ollama"
 
 
 def strip_prefix(model):
-    if model.startswith("openai/"):
-        return model[len("openai/"):]
+    if model.startswith(("openai/", "codex/", "ollama/")):
+        return model.split("/", 1)[1]
     return model
 
 
@@ -66,18 +60,59 @@ def ollama_request(path, data=None):
     return http_request(url, data)
 
 
-def openai_request(path, data=None):
-    url = f"{OPENAI_BASE_URL.rstrip('/')}/{path.lstrip('/')}"
-    headers = {"Authorization": f"Bearer {OPENAI_API_KEY}"}
-    return http_request(url, data, headers)
+def fx_message(model, prompt):
+    binary = shutil.which("fx") or os.path.expanduser("~/.local/bin/fx")
+    command = [
+        binary,
+        "--context-limit",
+        "project_instructions_total_bytes=0",
+        "--context-limit",
+        "skill_catalog_bytes=0",
+        "ask",
+        "--model",
+        strip_prefix(model),
+        "--effort",
+        "low",
+        "--json",
+        "--no-save",
+        "--no-color",
+        "--system",
+        "Generate only a git commit message from the supplied diff and history; do not use tools.",
+    ]
+    env = {
+        **os.environ,
+        "FX_PROVIDER": "codex",
+        "FX_MAX_AGENT_STEPS": "1",
+        "FX_PERMISSION_MODE": "ask",
+        "FX_AUTO_UPGRADE": "0",
+        "FX_SOUND": "off",
+    }
+    with tempfile.TemporaryDirectory(prefix="git-ac-") as cwd:
+        result = subprocess.run(
+            command,
+            input=prompt,
+            capture_output=True,
+            text=True,
+            env=env,
+            cwd=cwd,
+            timeout=60,
+            check=True,
+        )
+    response = json.loads(result.stdout)
+    content = response.get("final_output") if isinstance(response, dict) else None
+    if (
+        not isinstance(content, str)
+        or not content.strip()
+        or response.get("exit_code") != 0
+        or response.get("tool_calls")
+    ):
+        raise ValueError("fx did not return a completed text-only response")
+    return content.strip()
 
 
 def model_exists(model):
-    try:
-        tags = ollama_request("/api/tags")
-        return any(m["name"] == model for m in tags.get("models", []))
-    except Exception:
-        return False
+    tags = ollama_request("/api/tags")
+    return any(m["name"] == model for m in tags.get("models", []))
 
 
 def pull_model(model):
@@ -101,30 +136,113 @@ def commit_command(message_file, paths):
     return command
 
 
+def retry_command(args, model):
+    command = ["git", "ac", "--model", model]
+    if args.no_edit:
+        command.append("-y")
+    if args.dry_run:
+        command.append("-n")
+    if args.paths:
+        command.extend(["--", *args.paths])
+    return shlex.join(command)
+
+
+def report_generation_error(error, args, requested_model):
+    """Explain expected failures without printing provider bodies or credentials."""
+    provider = (
+        "fx (Codex subscription)" if detect_provider(args.model) == "fx" else "Ollama"
+    )
+    color = (
+        sys.stderr.isatty()
+        and "NO_COLOR" not in os.environ
+        and os.environ.get("TERM") != "dumb"
+    )
+
+    def paint(text, code):
+        return f"\033[{code}m{text}\033[0m" if color else text
+
+    status = error.code if isinstance(error, urllib.error.HTTPError) else None
+    context = f"{provider} / {args.model}" + (f" / HTTP {status}" if status else "")
+    steps = []
+    if provider != "Ollama":
+        reason = "fx could not complete subscription-backed generation."
+        steps.append(
+            "Check fx is installed and sign in with your ChatGPT subscription: fx login codex"
+        )
+        steps.append(
+            f"Retry with Ollama:\n      {retry_command(args, DEFAULT_MODEL_OLLAMA)}"
+        )
+    elif status == 429:
+        reason = "The service rejected the request: rate limit or quota exhausted."
+        delay = error.headers.get("Retry-After", "") if error.headers else ""
+        wait = (
+            f"Wait at least {delay} seconds"
+            if delay.isdecimal()
+            else "Wait for the rate limit or quota to reset"
+        )
+        steps.append(f"{wait}, then retry:\n      {retry_command(args, args.model)}")
+    elif status in (401, 403):
+        reason = "Authentication is missing or was rejected."
+        steps.append("Sign in to Ollama on the server running the model: ollama signin")
+    elif status is None and isinstance(error, (urllib.error.URLError, TimeoutError)):
+        reason = "Could not reach the model service."
+        steps.append("Check OLLAMA_HOST and that Ollama is running (ollama serve).")
+    elif isinstance(error, subprocess.CalledProcessError):
+        reason = "Ollama could not download the selected model."
+        steps.append("Check the model name and Ollama connection before retrying.")
+    else:
+        reason = "The model service rejected the request."
+        steps.append("Check the model name and service availability before retrying.")
+    if provider == "Ollama":
+        steps.append(
+            f"Choose an installed local model from `ollama list` (replace MODEL):\n      {retry_command(args, 'MODEL')}"
+        )
+    manual = ["git", "commit"]
+    if args.paths:
+        manual.extend(["--only", "--", *args.paths])
+    steps.append(f"Or commit without AI:\n      {shlex.join(manual)}")
+
+    print(
+        paint("git-ac: Could not generate a commit message.", "1;31"), file=sys.stderr
+    )
+    print(f"  {context}\n  {reason}", file=sys.stderr)
+    if requested_model != args.model:
+        print(
+            f"\n  Requested {requested_model}; used Ollama because fx generation failed.",
+            file=sys.stderr,
+        )
+        print(
+            "  Check your subscription login with: fx login codex",
+            file=sys.stderr,
+        )
+    print("\n  No commit was created; your changes remain staged.", file=sys.stderr)
+    print("\n  " + paint("Next steps", "1;36"), file=sys.stderr)
+    for step in steps:
+        print(f"    • {step}", file=sys.stderr)
+
+
 def generate_message(model, diff_text, history):
     provider = detect_provider(model)
     logger.debug("Using provider=%s model=%s", provider, model)
     prompt = build_prompt(diff_text, history)
-    payload = {
-        "model": strip_prefix(model),
-        "stream": False,
-        "messages": [{"role": "user", "content": prompt}],
-    }
-
     start = time.perf_counter()
-    match provider:
-        case "openai":
-            if not OPENAI_API_KEY:
-                logger.error("OPENAI_API_KEY not set")
-                sys.exit(1)
-            payload["reasoning_effort"] = "none"
-            resp = openai_request("/chat/completions", payload)
-        case "ollama":
-            payload["reasoning_effort"] = "none"
-            resp = ollama_request("/v1/chat/completions", payload)
-
+    if provider == "fx":
+        content = fx_message(model, prompt)
+    else:
+        model = strip_prefix(model)
+        if not model_exists(model):
+            pull_model(model)
+        payload = {
+            "model": model,
+            "stream": False,
+            "reasoning_effort": "none",
+            "messages": [{"role": "user", "content": prompt}],
+        }
+        resp = ollama_request("/v1/chat/completions", payload)
+        content = resp["choices"][0]["message"]["content"]
+        if not isinstance(content, str) or not content.strip():
+            raise ValueError("Ollama returned an empty message")
     elapsed = time.perf_counter() - start
-    content = resp["choices"][0]["message"]["content"]
     logger.debug("Generated message in %.2fs (%d chars)", elapsed, len(content))
     return content, elapsed
 
@@ -132,43 +250,85 @@ def generate_message(model, diff_text, history):
 def main():
     parser = argparse.ArgumentParser(
         prog="git-ac",
-        description="Generate a commit message using Ollama for staged changes.",
+        description="Generate a commit message using fx (Codex subscription), with Ollama fallback.",
     )
-    parser.add_argument("-y", "--no-edit", action="store_true", help="Commit directly without editing")
-    parser.add_argument("-n", "--dry-run", action="store_true", help="Print message, don't commit")
-    parser.add_argument("-m", "--model", default=DEFAULT_MODEL, help=f"Model (default: {DEFAULT_MODEL})")
-    parser.add_argument("-v", "--verbose", action="store_true", help="Show timing and quality metrics")
-    parser.add_argument("-d", "--debug", action="store_true", help="Enable debug logging")
+    parser.add_argument(
+        "-y", "--no-edit", action="store_true", help="Commit directly without editing"
+    )
+    parser.add_argument(
+        "-n", "--dry-run", action="store_true", help="Print message, don't commit"
+    )
+    parser.add_argument(
+        "-m",
+        "--model",
+        help=f"Model (default: {DEFAULT_MODEL}; fallback: {DEFAULT_MODEL_OLLAMA}); explicit models do not fall back",
+    )
+    parser.add_argument(
+        "-v", "--verbose", action="store_true", help="Show timing and quality metrics"
+    )
+    parser.add_argument(
+        "-d", "--debug", action="store_true", help="Enable debug logging"
+    )
     parser.add_argument("paths", nargs="*", help="Paths to stage before committing")
     args = parser.parse_args()
 
-    log_level = logging.DEBUG if args.debug else logging.WARNING
+    log_level = (
+        logging.DEBUG
+        if args.debug
+        else logging.INFO
+        if args.verbose
+        else logging.WARNING
+    )
     logging.basicConfig(level=log_level, format="%(name)s: %(message)s")
 
-    if args.model == DEFAULT_MODEL and detect_provider(args.model) == "openai" and not OPENAI_API_KEY:
-        logger.warning("OPENAI_API_KEY not set, falling back to %s", DEFAULT_MODEL_OLLAMA)
-        args.model = DEFAULT_MODEL_OLLAMA
+    allow_fallback = args.model is None
+    args.model = args.model or DEFAULT_MODEL
+    requested_model = args.model
 
     stage_paths(args.paths)
 
-    if subprocess.run(["git", "diff", "--staged", "--quiet"]).returncode == 0:
+    if (
+        subprocess.run(["git", "diff", "--staged", "--quiet"], check=False).returncode
+        == 0
+    ):
         logger.error("No staged changes")
         sys.exit(1)
 
-    diff_text = subprocess.run(["git", "diff", "--staged"], capture_output=True, text=True).stdout
+    diff_text = subprocess.run(
+        ["git", "diff", "--staged"], capture_output=True, text=True, check=False
+    ).stdout
     history = subprocess.run(
-        ["git", "log", "-10", "--format=%B%n---"], capture_output=True, text=True
+        ["git", "log", "-10", "--format=%B%n---"],
+        capture_output=True,
+        text=True,
+        check=False,
     ).stdout
     logger.debug("Diff size: %d bytes", len(diff_text))
 
     provider = detect_provider(args.model)
-    if provider == "ollama" and not model_exists(args.model):
-        pull_model(args.model)
-
-    message, elapsed = generate_message(args.model, diff_text, history)
+    try:
+        try:
+            message, elapsed = generate_message(args.model, diff_text, history)
+        except (OSError, subprocess.SubprocessError, ValueError):
+            if not allow_fallback:
+                raise
+            logger.warning(
+                "fx generation failed; falling back to Ollama / %s",
+                DEFAULT_MODEL_OLLAMA,
+            )
+            args.model = DEFAULT_MODEL_OLLAMA
+            provider = "ollama"
+            message, elapsed = generate_message(args.model, diff_text, history)
+    except (
+        OSError,
+        subprocess.SubprocessError,
+        ValueError,
+    ) as error:
+        report_generation_error(error, args, requested_model)
+        return 1
 
     if args.dry_run:
-        logger.info(message)
+        print(message)
         if args.verbose:
             subject = message.split("\n", 1)[0]
             body_lines = message.split("\n")[2:] if "\n\n" in message else []
@@ -211,4 +371,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()# test
+    sys.exit(main())
