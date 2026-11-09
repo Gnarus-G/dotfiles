@@ -118,7 +118,7 @@ def _apply(root: Path, home: Path, op: dict) -> str:
     if kind == "unlink" or (kind == "write" and op["previous"] is None):
         return f"REMOVE   {shown}"
     if kind in {"relink", "create"}:
-        return f"LINK     {shown} -> {op['source']}"
+        return f"LINK     {shown} <- {op['source']}"
     return f"RESTORED {shown}"
 
 

@@ -22,7 +22,6 @@ from machine_plan import (
     Unmanaged,
     color_enabled,
     format_conflicts,
-    paint,
     paint_effect,
     plan,
 )
@@ -390,6 +389,9 @@ def test_opencode_migration_accounts_for_all_top_level_entries():
             assert f".config/opencode/{child.name}" in targets
     for directory in ("plugins", "skills", "tools"):
         for child in (root / directory).iterdir():
+            # Installed skill links are local runtime state, not migration sources.
+            if directory == "skills" and child.is_symlink():
+                continue
             assert f".config/opencode/{directory}/{child.name}" in targets
 
 
@@ -635,11 +637,11 @@ def test_preview_of_blocked_plan_exits_nonzero(tmp_path):
 
 
 def test_effect_lines_color_verbs_when_requested():
-    assert paint_effect("LINK   ~/.zshrc -> .zshrc", color=False) == (
-        "LINK   ~/.zshrc -> .zshrc"
+    assert paint_effect("LINK   ~/.zshrc <- .zshrc", color=False) == (
+        "LINK   ~/.zshrc <- .zshrc"
     )
-    assert paint_effect("LINK   ~/.zshrc -> .zshrc", color=True) == (
-        "\033[1;32mLINK\033[0m   ~/.zshrc -> .zshrc"
+    assert paint_effect("LINK   ~/.zshrc <- .zshrc", color=True) == (
+        "\033[1;32mLINK\033[0m   ~/.zshrc <- .zshrc"
     )
     assert paint_effect("REMOVE   ~/.claude.json", color=True) == (
         "\033[1;31mREMOVE\033[0m   ~/.claude.json"
@@ -678,7 +680,7 @@ def test_install_summary_lists_each_effect(tmp_path):
     lines = completed.stdout.splitlines()
     count = int(re.findall(r"Applied (\d+) effects", lines[0])[0])
     assert len(lines) - 1 == count
-    assert "  LINK   ~/.zshrc -> .zshrc" in lines
+    assert "  LINK   ~/.zshrc <- .zshrc" in lines
     assert any(line.startswith("  MERGE  ~/.claude.json (") for line in lines)
 
 
@@ -692,9 +694,9 @@ def test_effect_descriptions_show_each_effect_kind():
     assert _describe(build) == "BUILD  .machine-generated/home/claude.md"
     assert _describe(rebuilt) == "BUILD  .machine-generated/work/claude.md"
     assert _describe(switch) == (
-        "LINK   ~/.claude/CLAUDE.md -> sources/claude.md (was -> other/claude.md)"
+        "LINK   ~/.claude/CLAUDE.md <- sources/claude.md (was -> other/claude.md)"
     )
-    assert _describe(fresh) == "LINK   ~/.zshrc -> .zshrc"
+    assert _describe(fresh) == "LINK   ~/.zshrc <- .zshrc"
     assert _describe(retired) == "REMOVE ~/.agents/skills/tts (was -> features/tts)"
     assert (
         _describe(mcp_servers.Merge(".claude.json", ("context7", "playwright")))

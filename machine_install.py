@@ -81,7 +81,7 @@ def _describe(item) -> str:
         return f"REMOVE ~/{item.target} (was -> {item.previous})"
     if isinstance(item, Link):
         was = f" (was -> {item.previous})" if item.previous is not None else ""
-        return f"LINK   ~/{item.target} -> {item.source}{was}"
+        return f"LINK   ~/{item.target} <- {item.source}{was}"
     return f"MERGE  ~/{item.target} ({', '.join(item.names)})"
 
 

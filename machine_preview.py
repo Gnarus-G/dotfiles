@@ -113,7 +113,7 @@ def main():
                 )
             )
         elif isinstance(action, Link):
-            print(paint_effect(f"LINK   ~/{action.target} -> {action.source}", color))
+            print(paint_effect(f"LINK   ~/{action.target} <- {action.source}", color))
     entries = mcp_servers.servers(root) if args.machine in DESKTOP else {}
     merges = mcp_servers.pending(Path.home(), entries) + fx_settings.pending(
         root, Path.home()
