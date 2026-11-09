@@ -3,10 +3,13 @@
 import hashlib
 import os
 import shutil
+import sys
 import tempfile
 from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
+
+from machine_plan import color_enabled, paint
 
 
 @dataclass(frozen=True)
@@ -61,10 +64,26 @@ def choose(root, home, conflicts, sources, ask):
 
 def prompt(home: Path, conflict, source: Path) -> str:
     target = home / conflict.target
-    print(f"\nConflict: {target} ({conflict.found})")
-    if target.is_symlink():
-        print(f"  Existing link: {target.readlink()}")
-    print(f"  Repository: {source}")
+    color = color_enabled(sys.stdout)
+
+    def shown(path):
+        path = Path(path)
+        return f"~/{path.relative_to(home)}" if path.is_relative_to(home) else str(path)
+
+    print(
+        "\n"
+        + paint("  ── Resolve conflict ──────────────────────────────────", "2", color)
+    )
+    print("  " + paint("●", "33", color) + " " + paint(shown(target), "1;36", color))
+    print("    " + paint(conflict.found.capitalize(), "2", color))
+    print()
+    local = (
+        shown(target.readlink())
+        if target.is_symlink()
+        else "file or directory at this path"
+    )
+    print("    " + paint("Local", "33", color) + f"       {local}")
+    print("    " + paint("Repository", "36", color) + f"  {shown(source)}")
     options = {"s": "skip", "q": "quit"}
     if conflict.found in DIRECT_CONFLICTS:
         options = {"o": "overwrite", **options}
@@ -75,25 +94,49 @@ def prompt(home: Path, conflict, source: Path) -> str:
                 pass
             else:
                 options = {"o": "overwrite", "a": "absorb", "s": "skip", "q": "quit"}
-    if "o" in options:
-        print(
-            "  Overwrite backs up the local path and replaces it with a repository link."
-        )
+    descriptions = {
+        "o": (
+            "36",
+            "Use repository",
+            "Back up local path, then replace it with a link.",
+        ),
+        "a": (
+            "32",
+            "Keep local content",
+            "Merge into repository, then link; back up both originals.",
+        ),
+        "s": ("33", "Skip this path", "Leave it untouched for this run."),
+        "q": ("2", "Quit", "Cancel the whole run; nothing has changed."),
+    }
+    print()
+    for key in options:
+        code, title, detail = descriptions[key]
+        print("    " + paint(f"[{key}] {title}", "1;" + code, color))
+        print("        " + paint(detail, "2", color))
     if "a" in options:
         print(
-            "  Absorb backs up both originals, merges local content into the repository, then links."
+            "\n    "
+            + paint(
+                "Merge keeps repository-only files; local files win conflicts.",
+                "2",
+                color,
+            )
         )
-    label = (
-        "  "
-        + " / ".join(f"[{key}]{value[1:]}" for key, value in options.items())
-        + "? "
-    )
+    print()
+    label = f"  Choose [{' / '.join(options)}] (Enter = skip): "
     while True:
-        answer = input(label).strip().lower()
+        answer = input(paint(label, "1", color)).strip().lower() or "s"
         if answer in options:
             answer = options[answer]
         if answer in options.values():
+            print("  " + paint(f"✓ {answer.capitalize()}", "2", color))
             return answer
+        print(
+            "  "
+            + paint(
+                f"Choose {', '.join(options)}, or press Enter to skip.", "33", color
+            )
+        )
 
 
 def link_fingerprint(destination: str) -> str:

@@ -246,5 +246,5 @@ def test_cli_prompts_only_when_interactive(
         assert "Nothing changed" in capsys.readouterr().err
     else:
         machine_install.main()
-        assert prompts == ["  [o]verwrite / [a]bsorb / [s]kip / [q]uit? "]
+        assert prompts == ["  Choose [o / a / s / q] (Enter = skip): "]
         assert target.readlink() == root / "config"

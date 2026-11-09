@@ -11,6 +11,7 @@ Done when: sandbox tests prove choices, cancellation, noninteractive refusal, an
 - Absorb copies local content into the source; directory absorption retains repository-only entries.
 - Collect choices before changing anything; quit or EOF cancels the run.
 - Keep machine scoping and the existing journal.
+- The prompt uses color, short paths, and separate action descriptions; Enter skips the current path.
 - Existing staged Claude subagent changes belong to the preceding task.
 
 ## Verification

@@ -47,7 +47,7 @@ and `~/.codex/config.toml`, which those harnesses own and rewrite.
 In a terminal, `./dev --machine work` asks how to resolve each conflict:
 
 ```text
-[o]verwrite / [a]bsorb / [s]kip / [q]uit?
+Choose [o / a / s / q] (Enter = skip):
 ```
 
 Choices are collected before writes; quit or EOF cancels the run
