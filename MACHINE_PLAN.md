@@ -42,7 +42,32 @@ MCP servers live once in `.config/mcp/mcp.json`. Pi and OpenCode read the
 linked file; `mcp_servers.py` merges the same entries into `~/.claude.json`
 and `~/.codex/config.toml`, which those harnesses own and rewrite.
 
-Foreign files or links and missing sources block **all**
-effects, and a second run makes no changes.
+## Resolve local conflicts
+
+In a terminal, `./dev --machine work` asks how to resolve each conflict:
+
+```text
+[o]verwrite / [a]bsorb / [s]kip / [q]uit?
+```
+
+Choices are collected before writes; quit or EOF cancels the run
+([cancellation test](<code:tests/machine_conflicts_test.py#def test_cancel_after_first_choice_changes_nothing(sandbox, answer):>)).
+Skip leaves that target alone for this run
+([choice test](<code:tests/machine_conflicts_test.py#def test_collect_choices_before_writes_and_skip_one_target(sandbox):>)).
+
+Overwrite saves the original file, directory, or link before installing the repository link
+([link test](<code:tests/machine_conflicts_test.py#def test_overwrite_and_undo_preserve_external_symlink(sandbox, destination):>)).
+Absorb copies local content into the repository source, keeping repository-only directory entries, then installs the link
+([absorb test](<code:tests/machine_conflicts_test.py#def test_absorb_merges_directory_and_undo_restores_both_sides(sandbox):>)).
+`./dev undo --machine work` restores both originals; backups remain under
+`~/.local/state/dotfiles/backups/` ([backup implementation](<code:machine_conflicts.py#def save(root: Path, home: Path, where: str, target: str, expects: str)>)).
+
+For scripts, `--non-interactive` refuses conflicts; input without a terminal does the same
+([CLI test](<code:tests/machine_conflicts_test.py#def test_cli_prompts_only_when_interactive(>)).
+Generated outputs cannot be absorbed: edit their profiles instead
+([generated-source test](<code:tests/machine_conflicts_test.py#def test_generated_configuration_cannot_be_absorbed(sandbox):>)).
+Parent-directory links cannot be overwritten through a child target
+([parent-link test](<code:tests/machine_conflicts_test.py#def test_parent_link_conflict_cannot_be_overwritten(sandbox):>)).
+Unresolved conflicts still block all effects.
 
 Restart OpenCode after installation so it reloads its machine-specific config.

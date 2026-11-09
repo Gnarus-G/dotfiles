@@ -5,9 +5,10 @@ import os
 import time
 from pathlib import Path
 
-from machine_bundle import Build
-from machine_plan import Link, Remove
 import mcp_servers
+from machine_bundle import Build
+from machine_conflicts import Backup, restore
+from machine_plan import Link, Remove
 
 HISTORY = ".local/state/dotfiles/history.jsonl"
 
@@ -22,6 +23,15 @@ class PathChanged(Exception):
 
 def _inverse(item, bundles: dict[str, bytes]) -> dict:
     """Describe the operation that restores state from one applied effect."""
+    if isinstance(item, Backup):
+        return {
+            "op": "restore",
+            "where": item.where,
+            "target": item.target,
+            "backup": item.backup,
+            "previous": item.previous,
+            "expects": item.expects,
+        }
     if isinstance(item, Build):
         return {
             "op": "write",
@@ -83,11 +93,7 @@ def _runs(home: Path) -> list[dict]:
     path = home / HISTORY
     if not path.exists():
         return []
-    return [
-        json.loads(line)
-        for line in path.read_text().splitlines()
-        if line.strip()
-    ]
+    return [json.loads(line) for line in path.read_text().splitlines() if line.strip()]
 
 
 def _apply(root: Path, home: Path, op: dict) -> str:
@@ -95,7 +101,12 @@ def _apply(root: Path, home: Path, op: dict) -> str:
     place = home if op["where"] == "home" else root
     path = place / op["target"]
     kind = op["op"]
-    if kind == "unlink":
+    if kind == "restore":
+        try:
+            restore(root, home, op)
+        except ValueError as error:
+            raise PathChanged(str(error)) from error
+    elif kind == "unlink":
         _unlink(path, root, op["expects"])
     elif kind == "relink":
         _relink(root, path, op["source"], op["expects"])

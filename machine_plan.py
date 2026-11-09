@@ -56,6 +56,13 @@ class Conflict:
     found: str
 
 
+@dataclass(frozen=True)
+class Resolve:
+    target: str
+    source: str
+    choice: str
+
+
 def color_enabled(stream) -> bool:
     return (
         stream.isatty()
@@ -73,6 +80,7 @@ EFFECT_CODES = {
     "LINK": "1;32",
     "REMOVE": "1;31",
     "MERGE": "1;33",
+    "REPLACE": "1;33",
     "RESTORED": "1;36",
 }
 
@@ -384,7 +392,12 @@ def _link_effect(
     item: Spec,
     observed: Mapping[str, Managed | Unmanaged],
     available_sources: Collection[str] | None,
-) -> Link | Conflict | None:
+    choice: str | None = None,
+) -> Link | Resolve | Conflict | None:
+    if choice == "skip":
+        return None
+    if choice not in (None, "overwrite", "absorb"):
+        raise ValueError(f"unknown conflict choice: {choice}")
     foreign_parent = next(
         (
             str(parent)
@@ -409,6 +422,12 @@ def _link_effect(
     if isinstance(current, Managed) and current.source != item.source:
         return Link(item.target, item.source, current.source)
     if isinstance(current, Unmanaged):
+        if choice == "absorb" and item.source.startswith(".machine-generated/"):
+            return Conflict(
+                item.target, "generated source: edit its profile instead of absorbing"
+            )
+        if choice in ("overwrite", "absorb"):
+            return Resolve(item.target, item.source, choice)
         return Conflict(item.target, current.description)
     return None
 
@@ -418,7 +437,8 @@ def plan(
     inventory: Iterable[Spec],
     observed: Mapping[str, Managed | Unmanaged],
     available_sources: Collection[str] | None = None,
-) -> tuple[Link | Remove | Conflict, ...]:
+    choices: Mapping[str, str] | None = None,
+) -> tuple[Link | Remove | Resolve | Conflict, ...]:
     if machine not in MACHINES:
         raise ValueError(f"unknown machine: {machine}")
     inventory = tuple(inventory)
@@ -438,7 +458,9 @@ def plan(
     actions = []
     for item in inventory:
         if machine in item.machines:
-            effect = _link_effect(item, observed, available_sources)
+            effect = _link_effect(
+                item, observed, available_sources, (choices or {}).get(item.target)
+            )
             if effect is not None:
                 actions.append(effect)
     conflicts = tuple(action for action in actions if isinstance(action, Conflict))

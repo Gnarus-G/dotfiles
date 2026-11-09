@@ -6,6 +6,7 @@ import sys
 from pathlib import Path
 
 import fx_settings
+import machine_conflicts
 import machine_history
 import mcp_servers
 from machine_bundle import Build, render
@@ -16,6 +17,7 @@ from machine_plan import (
     Conflict,
     Link,
     Remove,
+    Resolve,
     color_enabled,
     format_conflicts,
     paint,
@@ -70,6 +72,9 @@ def _apply_links(root: Path, home: Path, effects: tuple):
 
 
 def _describe(item) -> str:
+    if isinstance(item, machine_conflicts.Backup):
+        shown = f"~/{item.target}" if item.where == "home" else item.target
+        return f"REPLACE {shown} (original saved -> ~/{item.backup})"
     if isinstance(item, Build):
         return f"BUILD  {item.source}"
     if isinstance(item, Remove):
@@ -80,12 +85,37 @@ def _describe(item) -> str:
     return f"MERGE  ~/{item.target} ({', '.join(item.names)})"
 
 
-def install(root: Path, home: Path, machine: str, inventory=PROPOSED):
+def install(
+    root: Path,
+    home: Path,
+    machine: str,
+    inventory=PROPOSED,
+    *,
+    choices=None,
+    resolve_conflict=None,
+):
+    inventory = tuple(inventory)
     observed, available = snapshot(root, home, machine, inventory)
-    effects = plan(machine, inventory, observed, available)
+    effects = plan(machine, inventory, observed, available, choices)
     conflicts = tuple(effect for effect in effects if isinstance(effect, Conflict))
+    if conflicts and resolve_conflict is not None:
+        sources = {
+            item.target: item.source for item in inventory if machine in item.machines
+        }
+        answers = machine_conflicts.choose(
+            root, home, conflicts, sources, resolve_conflict
+        )
+        choices = {**(choices or {}), **answers}
+        observed, available = snapshot(root, home, machine, inventory)
+        effects = plan(machine, inventory, observed, available, choices)
+        conflicts = tuple(effect for effect in effects if isinstance(effect, Conflict))
     if conflicts:
         raise PlanBlocked(conflicts, home)
+    for effect in effects:
+        if isinstance(effect, Resolve) and effect.choice == "absorb":
+            machine_conflicts.validate_absorb(
+                root / effect.source, home / effect.target
+            )
     fx_settings.pending(root, home)
 
     bundles = (
@@ -96,13 +126,47 @@ def install(root: Path, home: Path, machine: str, inventory=PROPOSED):
         )
         else {}
     )
-    built = _write_bundles(root, bundles)
-    _apply_removals(home, effects)
-    _apply_links(root, home, effects)
-    entries = mcp_servers.servers(root) if machine in DESKTOP else {}
-    merges = mcp_servers.apply(home, entries) + fx_settings.apply(root, home)
-    machine_history.record(home, machine, built + effects + merges, bundles)
-    return built + effects + merges
+    applied = []
+    try:
+        applied.extend(_write_bundles(root, bundles))
+        for effect in effects:
+            if isinstance(effect, Resolve):
+                if effect.choice == "absorb":
+                    source = root / effect.source
+                    with machine_conflicts.absorbed_source(
+                        source, home / effect.target
+                    ) as staged:
+                        applied.append(
+                            machine_conflicts.save(
+                                root,
+                                home,
+                                "root",
+                                effect.source,
+                                machine_conflicts.fingerprint(staged),
+                            )
+                        )
+                        machine_conflicts.remove_path(source)
+                        os.replace(staged, source)
+                saved = machine_conflicts.save(
+                    root,
+                    home,
+                    "home",
+                    effect.target,
+                    machine_conflicts.link_fingerprint(str(root / effect.source)),
+                )
+                applied.append(saved)
+                machine_conflicts.remove_path(home / effect.target)
+                _apply_links(root, home, (Link(effect.target, effect.source),))
+            else:
+                _apply_removals(home, (effect,))
+                _apply_links(root, home, (effect,))
+                applied.append(effect)
+        entries = mcp_servers.servers(root) if machine in DESKTOP else {}
+        applied.extend(mcp_servers.apply(home, entries))
+        applied.extend(fx_settings.apply(root, home))
+    finally:
+        machine_history.record(home, machine, tuple(applied), bundles)
+    return tuple(applied)
 
 
 def main():
@@ -111,6 +175,11 @@ def main():
     )
     parser.add_argument("--machine", choices=sorted(MACHINES), required=True)
     parser.add_argument("--home", type=Path, default=Path.home())
+    parser.add_argument(
+        "--non-interactive",
+        action="store_true",
+        help="fail on conflicts instead of prompting",
+    )
     parser.add_argument(
         "command", nargs="?", choices=("install", "undo"), default="install"
     )
@@ -130,7 +199,12 @@ def main():
             for line in restored:
                 print(f"  {paint_effect(line, color)}")
             return
-        effects = install(root, args.home, args.machine)
+        resolver = None
+        if sys.stdin.isatty() and not args.non_interactive:
+            resolver = lambda conflict, source: machine_conflicts.prompt(
+                args.home, conflict, source
+            )
+        effects = install(root, args.home, args.machine, resolve_conflict=resolver)
         print(paint(f"Applied {len(effects)} effects to {args.home}:", "1", color))
         for item in effects:
             print(f"  {paint_effect(_describe(item), color)}")
@@ -140,6 +214,8 @@ def main():
         )
         parser.exit(1, f"{message}\n")
     except (machine_history.NothingToUndo, machine_history.PathChanged) as error:
+        parser.exit(1, f"{error}\n")
+    except (ValueError, OSError) as error:
         parser.exit(1, f"{error}\n")
 
 
