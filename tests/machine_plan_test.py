@@ -168,6 +168,7 @@ def test_fx_settings_are_repository_managed_on_every_machine(machine, tmp_path):
 def test_instruction_fragments_and_json_overlays_are_machine_scoped():
     root = Path(__file__).resolve().parents[1]
     remote = render(root, "remote")
+    home = render(root, "home")
     work = render(root, "work")
     assert b"gnarus-tts" not in remote[bundle_source("remote", "claude.md")]
     assert b"gnarus-tts" in work[bundle_source("work", "claude.md")]
@@ -175,6 +176,15 @@ def test_instruction_fragments_and_json_overlays_are_machine_scoped():
     assert b"claude-implement" not in remote[bundle_source("remote", "codex.md")]
     assert b'"convex"' not in remote[bundle_source("remote", "opencode.json")]
     assert b'"convex"' in work[bundle_source("work", "opencode.json")]
+    home_agents = json.loads(home[bundle_source("home", "opencode.json")])["agents"]
+    assert home_agents["general"]["model"] == "ollama-cloud/glm-5.3"
+    assert home_agents["explore"]["model"] == "ollama-cloud/glm-5.3-flash"
+    for machine, rendered in (("remote", remote), ("work", work)):
+        agents = json.loads(rendered[bundle_source(machine, "opencode.json")]).get(
+            "agents", {}
+        )
+        assert "general" not in agents
+        assert "explore" not in agents
     assert (
         b'"SessionStart"' not in remote[bundle_source("remote", "claude-settings.json")]
     )
