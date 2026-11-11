@@ -12,18 +12,22 @@ def test_opencode_uses_only_explicitly_composed_skills():
     )
 
 
-def test_claude_commit_skill_runs_on_haiku_fork():
-    skill = (ROOT / ".claude.only/skills/commit/SKILL.md").read_text()
-    assert "context: fork" in skill
-    assert "model: haiku" in skill
-    assert "effort: low" in skill
-    assert "background: false" in skill
+def test_commit_skills_reach_subscription_fallback_without_model_wrapper():
+    for source in (
+        ".agents/skills/commit/SKILL.md",
+        ".claude.only/skills/commit/SKILL.md",
+    ):
+        skill = (ROOT / source).read_text()
+        assert "git-ac -y -- <paths>" in skill
+        assert "Codex subscription" in skill
+        assert "Ollama" in skill
+        assert "context: fork" not in skill
+        assert "delegate to" not in skill
 
 
-def test_commit_skill_routes_primary_agents_to_subagent():
-    skill = (ROOT / ".agents/skills/commit/SKILL.md").read_text()
-    assert "If you are the primary agent, do not run Git commands" in skill
-    assert "delegate to the custom `commit` subagent" in skill
+def test_opencode_explicit_commit_agent_uses_openai():
+    agent = (ROOT / ".config/opencode/agent/commit.md").read_text()
+    assert "model: openai/gpt-6-luna" in agent
 
 
 def test_codex_delegation_is_desktop_only():

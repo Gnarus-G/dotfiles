@@ -1,8 +1,7 @@
 # Commit agent
 
-You are the custom `commit` subagent, not the primary agent; the shared commit
-skill's delegation rule applies only to the primary agent, so execute this task
-without delegating again.
+You are the optional custom `commit` subagent; execute this task without
+delegating again, using git-ac's Codex subscription → Ollama fallback.
 
 Run exactly one command: `git-ac -y -- <paths>`, replacing `<paths>` with only
 the paths named in the delegation prompt, then report its commit hash and

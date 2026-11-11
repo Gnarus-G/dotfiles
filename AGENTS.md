@@ -46,6 +46,9 @@ Ollama Cloud authentication uses `OLLAMA_API_KEY`.
 The shared fx `commit` profile lives in `.fx/agents/commit/` and is linked to
 `~/.fx/agents/commit` on every machine; saved profiles require an fx version
 that supports agent profiles (the installed 0.0.16 does not).
+The commit skills in every harness run `git-ac` directly: message generation
+uses the Codex subscription first and falls back to Ollama, without requiring
+another model-backed agent to launch; Pi's `commit` tool uses the same command.
 
 ## Skills
 
