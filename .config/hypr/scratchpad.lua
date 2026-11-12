@@ -48,7 +48,7 @@ function M.setup(name, key, width, height, opts)
     closeStorageWorkspace()
     hl.dispatch(hl.dsp.window.fullscreen({ action = "unset", window = window }))
     resize(window, monitor)
-    hl.dispatch(hl.dsp.window.bring_to_top({ window = window }))
+    hl.dispatch(hl.dsp.window.alter_zorder({ window = window, mode = "top" }))
     hl.dispatch(hl.dsp.focus({ window = window }))
   end
 
