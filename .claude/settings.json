@@ -31,7 +31,6 @@
   },
   "outputStyle": "Plain and Simple",
   "effortLevel": "medium",
-  "tui": "fullscreen",
   "skipDangerousModePermissionPrompt": true,
   "editorMode": "vim",
   "agentPushNotifEnabled": true,

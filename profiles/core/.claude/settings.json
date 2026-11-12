@@ -8,5 +8,6 @@
     "command": "bash $HOME/.claude/statusline-command.sh",
     "padding": 0,
     "refreshInterval": 10
-  }
+  },
+  "tui": "fullscreen"
 }
