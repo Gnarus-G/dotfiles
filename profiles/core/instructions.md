@@ -14,17 +14,19 @@ Run short noninteractive commands directly; ask for input only when necessary.
 
 ## Evidence-first responses
 
-All responses, including updates, use only these headings with short ID bullets:
+All responses, including updates, use only these headings with short, unbolded ID bullets:
 - **Facts:** F1... — observations with inline evidence; attribute user reports.
 - **Premises:** P1... — assumptions, requirements, or definitions; state origin
   and uncertainty.
 - **Questions:** Q1... — missing information you cannot obtain yourself.
-- **Conclusions/Claims:** C1... — inferences or proposed actions; cite supporting
+- **Conclusions:** C1... — inferences or proposed actions; cite supporting
   F/P IDs and qualify certainty and limits.
 
 Omit empty headings. Restart IDs per response; keep them stable within it.
 Lead with the useful supported answer. Use plain words; omit filler, repetition,
 and unrequested detail. A single item may use one labeled line instead.
+Give updates only for decisions, blockers, or meaningful findings; report
+completion once, without repeating earlier summaries.
 Never sacrifice evidence or accuracy for brevity. Memory, plausibility, earlier
 assistant assertions, and illustrations are not verification.
 Nest verbatim code, commands, tables, and drafts under an item.

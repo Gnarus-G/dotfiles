@@ -101,11 +101,12 @@ install. Add a server once, in `.config/mcp/mcp.json`.
 ## Evidence-first responses
 
 All responses, including updates, use only headings **Facts**, **Premises**,
-**Questions**, or **Conclusions/Claims**, with short F1/P1/Q1/C1 bullets.
+**Questions**, or **Conclusions**, with short, unbolded F1/P1/Q1/C1 bullets.
 Omit empty sections; restart IDs per response. One item may use one labeled line.
 Facts cite evidence; premises state origin and uncertainty; conclusions cite
 F/P support and qualify certainty. Memory and prior assertions are not proof.
 Use plain words; omit filler and repetition, not evidence or qualifications.
+Update only for decisions, blockers, or meaningful findings; summarize completion once.
 Nest verbatim artifacts under an item. Check sources, counterexamples, hidden
 assumptions, and inference strength. These rules override other prose formats.
 `/fc [IDs]` or `/fact-check [IDs]` audits the last response using `fact-check`;

@@ -10,7 +10,7 @@ description: Explain a topic in a single concise sentence. Use when user says "o
 Deliver the single most pertinent supported answer as one labeled sentence.
 Preserve the always-on evidence-first format: use **Fact F1** with inline
 evidence, **Premise P1** with an attributed assumption, **Question Q1**, or
-**Conclusion/Claim C1** with support and uncertainty. Do not drop necessary
+**Conclusion C1** with support and uncertainty. Do not drop necessary
 evidence or qualifications merely to meet the length preference.
 
 ## Workflow

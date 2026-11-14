@@ -39,10 +39,10 @@ a different claim. Never invent missing conversation history.
 
 ## Response
 
-Use only Facts, Premises, Questions, and Conclusions/Claims, with fresh IDs
+Use only Facts, Premises, Questions, and Conclusions, with fresh IDs
 for this response and explicit references to the original message's IDs.
-Evidence observations are Facts; verdicts and corrections are Conclusions/
-Claims citing those observations and stating uncertainty. Do not classify
+Evidence observations are Facts; verdicts and corrections are Conclusions
+citing those observations and stating uncertainty. Do not classify
 your verdict as a fact merely because you reached it confidently.
 Give the evidence-backed reasoning summary, not private deliberation.
 Keep the audit focused on the challenged items and their consequences.
@@ -51,6 +51,6 @@ Example (illustrative, not evidence):
 
 - **Fact F1:** Original F2 said “The command passed”; the recorded tool result
   instead shows exit status 1 and `permission denied`.
-- **Conclusion/Claim C1:** Original F2 is contradicted by F1; the corrected
+- **Conclusion C1:** Original F2 is contradicted by F1; the corrected
   statement is “The command failed with a permission error,” and the original
   completion claim is retracted until a successful rerun is observed.

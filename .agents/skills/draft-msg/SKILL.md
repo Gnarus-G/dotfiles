@@ -30,7 +30,7 @@ nested under a labeled evidence-first item; labels belong outside the artifact.
 
 ## Output
 
-Put the complete message under a labeled **Conclusion/Claim C1** item as a
+Put the complete message under a labeled **Conclusion C1** item as a
 proposed draft, citing the user's requirements or verified facts that support
 it. Add a labeled Premise for any substantive assumption or a targeted Question
 if the user's decision is necessary. Keep these outside the draft artifact.

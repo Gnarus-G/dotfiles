@@ -6,7 +6,7 @@ Done when: All machine previews and agent configuration tests pass, the home
 profile is installed, and installed prompts, style, and aliases are verified.
 
 ## Facts
-- The user approved only Facts, Premises, Questions, and Conclusions/Claims.
+- The user approved only Facts, Premises, Questions, and Conclusions.
 - Facts require evidence; premises expose assumptions; conclusions state
   uncertainty and identify their supporting facts or premises.
 - The response format is always-on system/output guidance, not a skill.
@@ -25,6 +25,10 @@ profile is installed, and installed prompts, style, and aliases are verified.
   been measured, and prompt instructions do not guarantee factual truth.
 
 ## Corrections log
+- 2026-11-14: User approved Conclusions as the sole heading for inferences;
+  claims are the broader class of assertions, not a separate response category.
+- 2026-11-14: User accepted unbolded IDs, fewer progress updates, and no
+  repeated completion summaries; the per-turn formatting hook remains enabled.
 - 2026-11-14: User prefers headings and bullets and asked to reduce token use;
   use category headings with ID-only bullets and compact shared instructions.
 - 2026-11-14: User requested removing Plain and Simple and accepted removing
