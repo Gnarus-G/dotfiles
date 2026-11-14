@@ -6,6 +6,7 @@ I'm `gnarus`. I prefer simple, maintainable software and especially enjoy Rust.
 
 - Keep changes small and focused; apply YAGNI.
 - Prefer AHA over reflexive DRY.
+- Prefer squash merges when merging Git branches or pull requests.
 - When reviewing, report realistic findings relevant to the goal.
 - Never hardcode API keys or read or display their values.
 - Show concrete results alongside recommendations.
