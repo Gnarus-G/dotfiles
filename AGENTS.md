@@ -100,20 +100,16 @@ install. Add a server once, in `.config/mcp/mcp.json`.
 
 ## Evidence-first responses
 
-Use only labeled **Facts (F1...)**, **Premises (P1...)**, **Questions (Q1...)**,
-and **Conclusions/Claims (C1...)** in every user-facing response, including
-progress updates; omit empty categories and keep items concise.
-Facts need inline evidence; premises identify assumptions and their origin;
-conclusions reference supporting facts/premises and state uncertainty.
-Do not treat memory or prior assistant assertions as verified evidence.
-Keep IDs stable within each response and restart numbering in the next.
-Nest requested code, commands, tables, and drafts as artifacts under a labeled
-item; never present examples as evidence.
-Check labels, sources, and inference strength before sending; this replaces
-the old one-sentence default and applies alongside other skills' formats.
-`/fc F1` and `/fact-check P1` independently check selected items in the last
-assistant message using the shared `fact-check` skill.
-Codex uses its native `$fc F1` or `$fact-check P1` skill syntax instead.
+All responses, including updates, use only headings **Facts**, **Premises**,
+**Questions**, or **Conclusions/Claims**, with short F1/P1/Q1/C1 bullets.
+Omit empty sections; restart IDs per response. One item may use one labeled line.
+Facts cite evidence; premises state origin and uncertainty; conclusions cite
+F/P support and qualify certainty. Memory and prior assertions are not proof.
+Use plain words; omit filler and repetition, not evidence or qualifications.
+Nest verbatim artifacts under an item. Check sources, counterexamples, hidden
+assumptions, and inference strength. These rules override other prose formats.
+`/fc [IDs]` or `/fact-check [IDs]` audits the last response using `fact-check`;
+no IDs means all facts and premises. Codex uses `$fc` or `$fact-check`.
 
 ## Guidelines
 

@@ -25,6 +25,8 @@ profile is installed, and installed prompts, style, and aliases are verified.
   been measured, and prompt instructions do not guarantee factual truth.
 
 ## Corrections log
+- 2026-11-14: User prefers headings and bullets and asked to reduce token use;
+  use category headings with ID-only bullets and compact shared instructions.
 - 2026-11-14: User requested removing Plain and Simple and accepted removing
   syllogism while retaining its useful conclusion check in the shared prompt.
 - 2026-11-14: User clarified that the skill is the selective fact-check audit;

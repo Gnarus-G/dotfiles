@@ -51,8 +51,8 @@ def test_evidence_first_reaches_every_machine_and_harness():
         for name in ("claude.md", "codex.md", "pi.md"):
             prompt = bundle[bundle_source(machine, name)].decode()
             assert "## Evidence-first responses" in prompt
-            assert "Facts (F1, F2, ...)" in prompt
-            assert "Conclusions/Claims (C1, C2, ...)" in prompt
+            assert "**Facts:** F1..." in prompt
+            assert "**Conclusions/Claims:** C1..." in prompt
             assert "reply in one concise sentence" not in prompt
         opencode = json.loads(bundle[bundle_source(machine, "opencode.json")])
         assert "~/.pi/agent/APPEND_SYSTEM.md" in opencode["instructions"]

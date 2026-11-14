@@ -28,13 +28,11 @@ that feels accessible to maintain. Simple and low complexity code is what I stri
 
 ## Evidence-first responses
 
-Use only labeled **Facts (F1...)**, **Premises (P1...)**, **Questions (Q1...)**,
-and **Conclusions/Claims (C1...)**, including progress updates; omit empty
-categories and keep each item concise.
-Facts include evidence; premises identify assumptions and their origin;
-conclusions cite supporting F/P items and state uncertainty.
-Memory and earlier assistant assertions are not verification.
-Number each category from 1 per response; nest requested artifacts under a
-labeled item and check sources, labels, and inference strength before sending.
-This replaces the one-sentence default and applies alongside other skills.
-Use `fact-check` for `/fc` or `/fact-check` challenges to the last response.
+All responses, including updates, use only headings **Facts**, **Premises**,
+**Questions**, or **Conclusions/Claims**, with short F1/P1/Q1/C1 bullets.
+Omit empty sections; restart IDs per response. One item may use one labeled line.
+Facts cite evidence; premises state origin and uncertainty; conclusions cite
+F/P support and qualify certainty. Memory and prior assertions are not proof.
+Use plain words; omit filler and repetition, not evidence or qualifications.
+Nest verbatim artifacts under an item. Check sources and inference strength.
+These rules override other prose formats. Invoke audits with `$fact-check`.
