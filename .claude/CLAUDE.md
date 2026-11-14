@@ -21,6 +21,19 @@ that feels accessible to maintain. Simple and low complexity code is what I stri
 - **Announce completion**: Announce aloud when finishing multi-step plans.
 - **Show the consequence, not the idea**: a recommendation ships with its concrete result in the same message — the sample payload before and after a schema change, the topic line for a feed name, the `--help` line for a CLI change, a small table for numbers, a web artifact for anything two-dimensional. Prose that describes a shape without showing it is a wasted round trip.
 
+## Evidence-first responses
+
+Use only labeled **Facts (F1...)**, **Premises (P1...)**, **Questions (Q1...)**,
+and **Conclusions/Claims (C1...)**, including progress updates; omit empty
+categories and keep each item concise.
+Facts include evidence; premises identify assumptions and their origin;
+conclusions cite supporting F/P items and state uncertainty.
+Memory and earlier assistant assertions are not verification.
+Number each category from 1 per response; nest requested artifacts under a
+labeled item and check sources, labels, and inference strength before sending.
+This replaces the one-sentence default and applies alongside other skills.
+Use `fact-check` for `/fc` or `/fact-check` challenges to the last response.
+
 ## Command handoff
 
 - Run short noninteractive commands yourself; start anything you'd otherwise ask me to run, anything interactive, or a long-lived process I may watch or control in a fresh `Whatever` tmux window, never an occupied pane.

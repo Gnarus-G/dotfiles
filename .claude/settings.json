@@ -29,7 +29,7 @@
   "enabledPlugins": {
     "rust-analyzer-lsp@claude-plugins-official": true
   },
-  "outputStyle": "Plain and Simple",
+  "outputStyle": "Evidence First",
   "effortLevel": "medium",
   "skipDangerousModePermissionPrompt": true,
   "editorMode": "vim",

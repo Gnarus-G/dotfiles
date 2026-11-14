@@ -3,6 +3,19 @@
     "defaultMode": "auto"
   },
   "editorMode": "vim",
+  "outputStyle": "Evidence First",
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/.claude/hooks/output-style.sh"
+          }
+        ]
+      }
+    ]
+  },
   "statusLine": {
     "type": "command",
     "command": "bash $HOME/.claude/statusline-command.sh",

@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 
 from machine_bundle import bundle_source, render
@@ -42,3 +43,23 @@ def test_claude_prompt_does_not_offer_codex_delegation():
     instructions = render(ROOT, "work")[bundle_source("work", "claude.md")]
     assert b"claude-implement" not in instructions
     assert b"caveman" not in instructions
+
+
+def test_evidence_first_reaches_every_machine_and_harness():
+    for machine in ("remote", "home", "work"):
+        bundle = render(ROOT, machine)
+        for name in ("claude.md", "codex.md", "pi.md"):
+            prompt = bundle[bundle_source(machine, name)].decode()
+            assert "## Evidence-first responses" in prompt
+            assert "Facts (F1, F2, ...)" in prompt
+            assert "Conclusions/Claims (C1, C2, ...)" in prompt
+            assert "reply in one concise sentence" not in prompt
+        opencode = json.loads(bundle[bundle_source(machine, "opencode.json")])
+        assert "~/.pi/agent/APPEND_SYSTEM.md" in opencode["instructions"]
+        claude = json.loads(bundle[bundle_source(machine, "claude-settings.json")])
+        assert claude["outputStyle"] == "Evidence First"
+        assert any(
+            hook["command"] == "$HOME/.claude/hooks/output-style.sh"
+            for entry in claude["hooks"]["UserPromptSubmit"]
+            for hook in entry["hooks"]
+        )

@@ -98,9 +98,22 @@ install. Add a server once, in `.config/mcp/mcp.json`.
 | `profiles/core/instructions.md` | Base instructions for Claude, Codex, OpenCode, and Pi |
 | `dev`                        | Symlink and skill composition script       |
 
-## Response Length — **ONE SENTENCE BY DEFAULT**
+## Evidence-first responses
 
-**Unless the user explicitly requests otherwise, every user-facing response must be exactly one concise sentence.** Do not add explanations, summaries, progress narration, headings, or follow-up offers; this default is mandatory and takes precedence over general readability guidance.
+Use only labeled **Facts (F1...)**, **Premises (P1...)**, **Questions (Q1...)**,
+and **Conclusions/Claims (C1...)** in every user-facing response, including
+progress updates; omit empty categories and keep items concise.
+Facts need inline evidence; premises identify assumptions and their origin;
+conclusions reference supporting facts/premises and state uncertainty.
+Do not treat memory or prior assistant assertions as verified evidence.
+Keep IDs stable within each response and restart numbering in the next.
+Nest requested code, commands, tables, and drafts as artifacts under a labeled
+item; never present examples as evidence.
+Check labels, sources, and inference strength before sending; this replaces
+the old one-sentence default and applies alongside other skills' formats.
+`/fc F1` and `/fact-check P1` independently check selected items in the last
+assistant message using the shared `fact-check` skill.
+Codex uses its native `$fc F1` or `$fact-check P1` skill syntax instead.
 
 ## Guidelines
 

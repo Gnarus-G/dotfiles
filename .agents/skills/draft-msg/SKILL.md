@@ -5,12 +5,13 @@ description: Draft a message for the user to paste into Slack, email or a GitHub
 
 # draft-msg
 
-The user pastes the output directly. Make it ready to paste.
+The user pastes the draft directly. Make the draft artifact ready to paste,
+nested under a labeled evidence-first item; labels belong outside the artifact.
 
 ## Rules
 
-- **Plain text you can copy.** No quote blocks, no code fences, no
-  "Here's a draft:" preamble, no commentary inside the message.
+- **Plain text you can copy.** Keep the draft verbatim inside its labeled
+  artifact, with no commentary or evidence labels inside the message itself.
 - **The whole message every time.** On a revision, resend all of it, not
   a diff.
 - **Short.** Open with the point. One or two sentences for a first contact
@@ -29,5 +30,7 @@ The user pastes the output directly. Make it ready to paste.
 
 ## Output
 
-The message alone. After it, at most one line outside the message if
-something needs the user's decision (e.g. "Item 3 assumes X — confirm").
+Put the complete message under a labeled **Conclusion/Claim C1** item as a
+proposed draft, citing the user's requirements or verified facts that support
+it. Add a labeled Premise for any substantive assumption or a targeted Question
+if the user's decision is necessary. Keep these outside the draft artifact.

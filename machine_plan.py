@@ -202,6 +202,12 @@ PROPOSED = (
         DESKTOP,
     ),
     Spec(".pi/agent/models.json", ".pi/agent/models.json", CORE),
+    Spec(".config/opencode/command/fc.md", ".pi/agent/prompts/fc.md", CORE),
+    Spec(
+        ".config/opencode/command/fact-check.md",
+        ".pi/agent/prompts/fact-check.md",
+        CORE,
+    ),
     Spec(".config/mcp/mcp.json", ".config/mcp/mcp.json", DESKTOP),
     Spec(".config/mcp/mcp.json", ".pi/agent/mcp.json", DESKTOP),
     Spec(".zshrc", ".zshrc", CORE),
@@ -326,6 +332,8 @@ PROPOSED = (
 SHARED_SKILLS = (
     "commit",
     "draft-msg",
+    "fact-check",
+    "fc",
     "fix-loop",
     "frontend-design",
     "fsm-events-actions-style",
@@ -337,7 +345,6 @@ SHARED_SKILLS = (
     "one-sentence",
     "ship",
     "simple",
-    "syllogism",
     "systematic-debugging",
     "tdd",
     "where-are-we",
@@ -348,6 +355,11 @@ CLAUDE_SKILLS = (
     "codex-review",
     "codex-second-opinion",
     "commit",
+)
+# Keep retired targets known so installs remove their old managed links.
+PROPOSED += tuple(
+    Spec(".agents/skills/syllogism", f"{directory}/syllogism", frozenset())
+    for directory in (".agents/skills", ".claude/skills", ".config/opencode/skills")
 )
 PROPOSED += (
     tuple(
