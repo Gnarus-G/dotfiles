@@ -1,19 +1,23 @@
 ---
 name: ui-review
-description: Review and iteratively improve a rendered UI against a mandatory documented and encoded design system, using multiple selected vision models, independent scores out of 10, cross-review, and unanimous high-score consensus. Use for /ui-review, screenshot or UI critiques, design polish, or requests to keep improving a UI until it is excellent.
+description: Review rendered UI and infer UX semantics against a mandatory documented and encoded design system, using multiple selected vision models, independent scores out of 10, cross-review, and unanimous high-score consensus; optionally verify full UX through observed flows. Use for /ui-review, screenshot or UI/UX critiques, usability and design polish, or requests to keep improving a UI until it is excellent.
 ---
 
-# UI Review
+# UI/UX Review
 
-Invoked as `/ui-review [route, screenshots, or UI description]`.
-Run a review-and-improve loop by default. If the user asks for review-only or
-read-only work, do not edit; report the findings and stop after that review.
+Invoked as `/ui-review [route, screenshots, or UI/UX description]`.
+Run a review-and-improve loop by default. Default to static UI review plus
+explicitly labeled UX-semantic inference; require observed flows only for full UX
+review or when the user requests interaction/usability testing. If the user asks
+for review-only or read-only work, do not edit; report findings and stop after
+that review.
 
 ## 1. Set the contract and require a design system
 
-- Identify the product brief, primary user tasks, required states and viewports,
-  and fixed design or product constraints. Use the current project and supplied
-  screenshots when available. Ask only for information that cannot be obtained.
+- Identify the product brief, users, primary tasks, end-to-end success criteria,
+  required states and viewports, and fixed design or product constraints. Use the
+  current project and supplied evidence when available. Ask only for information
+  that cannot be obtained.
 - Use at least two image-capable models. Accept explicit selections as
   `codex:MODEL` and `fx:MODEL`; otherwise use:
   - `fx:inkling-2-small`
@@ -21,6 +25,7 @@ read-only work, do not edit; report the findings and stop after that review.
 
   For high-stakes or complex interaction review, explicitly add
   `codex:gpt-6-astra` for the entire run rather than introducing it midway.
+
 - Default to target **9.0/10** and at most **five review rounds**. Honor an
   explicit target or round limit. Keep the target and other reviewers' scores
   out of reviewer prompts: they are stopping rules, not instructions to inflate.
@@ -66,17 +71,29 @@ Do not silently invent a system, mix unrelated systems, or continue with purely
 subjective scores. Resume only when both halves exist; existing UI deviations
 from the adopted system become review findings.
 
-## 2. Capture the actual UI
+## 2. Capture the actual UI and UX
 
 Use the supplied image files or drive the real interface with browser tools.
 Capture the same representative states every round, including the primary flow,
 mobile and desktop layouts, and relevant empty, error, loading, or open-menu
 states. Use deterministic data where possible. Name images by state and viewport.
 
-A model must receive the actual image attachments. Never describe a screenshot
-in text and then present the response as visual review. Do not invent findings
-about unseen states. Verify interactive accessibility concerns with interaction
-or measurements rather than claiming a screenshot proves keyboard behavior.
+By default, infer likely UX semantics from visible cues: affordances, hierarchy,
+labels, next actions, status meaning, and expected feedback or recovery. Mark
+these as inferences tied to visible evidence, not observed behavior.
+
+For optional full UX review, execute the primary flows end-to-end where
+permitted. Record the action sequence, user feedback, errors and recovery, and
+task-completion evidence for every reviewer. Preserve production records and
+obtain consent before consequential actions. Static images cannot establish task
+success, learnability, actual interaction efficiency, or recovery. Label a static
+run a UI review with inferred UX semantics, not validated UX sign-off.
+
+A model must receive the actual image attachments and applicable interaction
+records. Never describe a screenshot in text and then present the response as
+visual review. Do not invent findings about unseen states. Verify interaction and
+accessibility concerns with interaction or measurements rather than claiming a
+screenshot proves keyboard behavior.
 
 ## 3. Run independent reviews
 
@@ -108,13 +125,17 @@ than two valid visual reviews, or a missing selected reviewer, is not consensus.
 ### Shared reviewer prompt
 
 ```text
-You are an independent UI reviewer. Inspect every attached image directly.
-Review the current rendered UI against the brief below. Do not use tools, edit
-files, propose a generic redesign, or speculate about unseen states. If an image
-is unavailable, say UNABLE TO REVIEW instead of giving a numeric score.
+You are an independent senior UI/UX reviewer. Inspect every attached image directly.
+Review the current rendered UI and any supplied interaction evidence against the
+brief below. Infer likely UX semantics from visible affordances, labels, hierarchy,
+status cues, and expected next actions; mark those claims as inferences. Do not
+use tools, edit files, propose a generic redesign, or speculate about unseen
+states. If an image is unavailable, say UNABLE TO REVIEW instead of giving a
+numeric score.
 
 BRIEF AND CONSTRAINTS
-<product, users, primary tasks, states, viewports, and fixed constraints>
+<product, users, primary tasks, success criteria, observed action/feedback/error
+sequence, states, viewports, and fixed constraints>
 
 DOCUMENTED AND ENCODED DESIGN SYSTEM
 <principles, token values, component and state rules, accessibility constraints,
@@ -126,11 +147,16 @@ Do not propose replacing or redesigning the system itself.
 
 Score each dimension from 0 to 10, then calculate Overall as the weighted sum,
 rounded to one decimal:
-- Workflow efficiency and task clarity: 30%
+- Task flow, interaction efficiency, feedback, and error recovery (inferred from
+  visible cues unless observed): 30%
 - Visual hierarchy, typography, and legibility: 20%
 - Layout and responsive behavior at the supplied viewports: 20%
 - Visible accessibility and interaction-state clarity: 15%
 - Design-system coherence and visual polish: 15%
+
+Score only the supplied evidence. Without observed flows, Workflow covers
+inferred task flow and visible cues only; do not claim measured efficiency,
+learnability, actual feedback, or recovery behavior.
 
 Calibration: 9-10 is excellent and has no major shortcomings; 8-8.9 is strong
 but still has meaningful improvements; 7-7.9 is usable with visible weaknesses;
@@ -157,10 +183,11 @@ anyone else.
 
 ## 4. Synthesize and confer
 
-1. Validate that every score is present and every visual finding cites an actual
-   attachment. Independently inspect the images, design system, and relevant code
-   before accepting a finding. Discard false positives, claims that misread the
-   design system, and out-of-scope redesigns.
+1. Validate that every score is present and every finding cites an actual
+   attachment or recorded interaction evidence. Independently inspect the images,
+   interaction records, design system, and relevant code before accepting a
+   finding. Discard false positives, claims that misread the design system, and
+   out-of-scope redesigns.
 2. Merge duplicate findings without losing their evidence. Mark which reviewers
    independently agree, and preserve valid high-impact singleton findings and
    dissent. Agreement is supporting evidence, not proof.
@@ -198,9 +225,9 @@ mode:
    before/after images. A change is progress only if the lowest score improves,
    or the lowest score holds while accepted major findings decrease without a
    meaningful regression elsewhere.
-4. Start the next independent review from current screenshots and a neutral list
-   of changed findings, not from peer scores. Repeat the synthesis and confer
-   steps before making more changes.
+4. Start the next independent review from current screenshots, applicable
+   interaction records, and a neutral list of changed findings, not from peer
+   scores. Repeat the synthesis and confer steps before making more changes.
 
 Stop without claiming success after five rounds, after two consecutive rounds
 without progress, when a selected reviewer remains unavailable, or when further
@@ -211,8 +238,9 @@ findings, and the blocker.
 
 Consensus requires all of the following in the same final round:
 
-- at least two selected models returned valid image-based reviews;
-- every selected reviewer scores the current UI at or above the target;
+- at least two selected models returned valid reviews over the same visual and
+  applicable interaction evidence;
+- every selected reviewer scores the current UI/UX at or above the target;
 - every selected reviewer returns `ACCEPT`;
 - no accepted major finding remains unresolved.
 
@@ -229,10 +257,10 @@ example, not evidence):
 | DeepSeek Flash  | 7.6    | 8.8     | +1.2  | NOT YET |
 
 Consensus: not reached; lowest score 8.8/10 against the 9.0 target.
-Changed: <specific UI correction>; remaining: <finding and image evidence>.
+Changed: <specific UI/UX correction>; remaining: <finding and evidence>.
 ```
 
-Finish with the design-system sources and revision, score history,
-before/after screenshots, changes made, checks run, unresolved dissent, and the
-artifact directory. Never manufacture a high score or hide a regression to
-terminate the loop.
+Finish with the design-system sources and revision, score history, before/after
+screenshots and task-flow evidence, changes made, checks run, unresolved dissent,
+and the artifact directory. Never manufacture a high score or hide a regression
+to terminate the loop.
