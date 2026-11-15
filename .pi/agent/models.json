@@ -74,6 +74,15 @@
           "cost": { "input": 0, "output": 0, "cacheRead": 0, "cacheWrite": 0 }
         },
         {
+          "id": "inkling-2-small",
+          "name": "Inkling 2 Small",
+          "input": ["text", "image"],
+          "reasoning": true,
+          "contextWindow": 1048576,
+          "maxTokens": 16384,
+          "cost": { "input": 0, "output": 0, "cacheRead": 0, "cacheWrite": 0 }
+        },
+        {
           "id": "kimi-k2.7-code",
           "name": "Kimi K2.7 Code",
           "input": ["text", "image"],

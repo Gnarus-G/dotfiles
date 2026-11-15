@@ -47,6 +47,11 @@
           "max_output_tokens": 16384,
           "supports_vision": false
         },
+        "inkling-2-small": {
+          "context_window": 1048576,
+          "max_output_tokens": 16384,
+          "supports_vision": true
+        },
         "kimi-k2.7-code": {
           "context_window": 256000,
           "max_output_tokens": 16384,
