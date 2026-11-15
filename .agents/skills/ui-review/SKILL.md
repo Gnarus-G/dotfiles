@@ -16,9 +16,11 @@ read-only work, do not edit; report the findings and stop after that review.
   screenshots when available. Ask only for information that cannot be obtained.
 - Use at least two image-capable models. Accept explicit selections as
   `codex:MODEL` and `fx:MODEL`; otherwise use:
-  - `codex:gpt-6-astra`
   - `fx:inkling-2-small`
   - `fx:deepseek-v4.1-flash`
+
+  For high-stakes or complex interaction review, explicitly add
+  `codex:gpt-6-astra` for the entire run rather than introducing it midway.
 - Default to target **9.0/10** and at most **five review rounds**. Honor an
   explicit target or round limit. Keep the target and other reviewers' scores
   out of reviewer prompts: they are stopping rules, not instructions to inflate.
@@ -84,16 +86,11 @@ concurrently. For long-running calls, follow the command-handoff instructions
 and use a fresh `Whatever:ui-review` tmux window; use `/tmux-processes` when
 available. Wait for every process and inspect its exit status and output.
 
-For the default panel, set `PROJECT` to the project root, `ROUND` to the current
-artifact directory, and `PROMPT` to the reviewer prompt file. Repeat image flags
-for every captured state; the two-image examples are illustrative.
+For the default panel, set `ROUND` to the current artifact directory and
+`PROMPT` to the reviewer prompt file. Repeat image flags for every captured
+state; the two-image examples are illustrative.
 
 ```bash
-codex exec --ephemeral -s read-only --skip-git-repo-check \
-  -C "$PROJECT" -m gpt-6-astra -c model_reasoning_effort="high" \
-  -i "$ROUND/desktop.png" "$ROUND/mobile.png" \
-  -o "$ROUND/codex-gpt-6-astra.md" - < "$PROMPT"
-
 fx ask --model inkling-2-small --effort high --no-save \
   --image "$ROUND/desktop.png" --image "$ROUND/mobile.png" \
   < "$PROMPT" > "$ROUND/fx-inkling-2-small.md"
@@ -228,7 +225,6 @@ example, not evidence):
 ```text
 | Reviewer        | Before | Current | Delta | Verdict |
 |-----------------|--------|---------|-------|---------|
-| Codex Astra     | 7.8    | 9.1     | +1.3  | ACCEPT  |
 | Inkling 2 Small | 8.2    | 9.0     | +0.8  | ACCEPT  |
 | DeepSeek Flash  | 7.6    | 8.8     | +1.2  | NOT YET |
 
