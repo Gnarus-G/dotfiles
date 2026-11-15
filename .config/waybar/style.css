@@ -38,14 +38,10 @@ window#waybar {
   background: @dark;
 }
 
-#workspaces button.active {
+#workspaces button.visible.hosting-monitor {
   color: @background;
   background: @primary;
   font-weight: bold;
-}
-
-#workspaces button.visible:not(.active) {
-  color: @foreground;
 }
 
 #workspaces button.urgent {
