@@ -13,6 +13,15 @@ I'm `gnarus`. I prefer simple, maintainable software and especially enjoy Rust.
 
 Run short noninteractive commands directly; ask for input only when necessary.
 
+## Worktrees
+
+- Create worktrees with `git wt -b <branch>` for a new branch, or `git wt`
+  without `-b` to use the selected base directly. Remove selected worktrees
+  with `git wt rm`; do not use raw `git worktree` or harness-specific worktree
+  tools.
+- Base selection uses `fzf`, so run creation in an interactive terminal and
+  work in the printed `Created worktree: <path>` directory.
+
 ## Evidence-first responses
 
 All responses, including updates, use only these headings with short, unbolded ID bullets:

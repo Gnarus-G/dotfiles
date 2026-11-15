@@ -45,6 +45,18 @@ def test_claude_prompt_does_not_offer_codex_delegation():
     assert b"caveman" not in instructions
 
 
+def test_git_wt_is_the_worktree_standard_for_every_harness():
+    for machine in ("remote", "home", "work"):
+        bundle = render(ROOT, machine)
+        for name in ("claude.md", "codex.md", "pi.md"):
+            prompt = bundle[bundle_source(machine, name)].decode()
+            assert "## Worktrees" in prompt
+            assert "`git wt -b <branch>`" in prompt
+            assert "`git wt rm`" in prompt
+        opencode = json.loads(bundle[bundle_source(machine, "opencode.json")])
+        assert "~/.pi/agent/APPEND_SYSTEM.md" in opencode["instructions"]
+
+
 def test_evidence_first_reaches_every_machine_and_harness():
     for machine in ("remote", "home", "work"):
         bundle = render(ROOT, machine)
