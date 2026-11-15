@@ -347,6 +347,7 @@ SHARED_SKILLS = (
     "simple",
     "systematic-debugging",
     "tdd",
+    "ui-review",
     "where-are-we",
 )
 CLAUDE_SKILLS = (
