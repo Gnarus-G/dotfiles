@@ -7,7 +7,8 @@ profile is installed, and installed prompts, style, and aliases are verified.
 
 ## Facts
 - The user approved only Facts, Premises, Questions, and Conclusions.
-- Facts require evidence; premises expose assumptions; conclusions state
+- Facts require evidence; premises are reasons supporting a conclusion, not
+  just assumptions; conditional form is optional. Conclusions state
   uncertainty and identify their supporting facts or premises.
 - The response format is always-on system/output guidance, not a skill.
 - `/fc` and `/fact-check` audit dubious facts or premises in the last response.
@@ -25,6 +26,8 @@ profile is installed, and installed prompts, style, and aliases are verified.
   been measured, and prompt instructions do not guarantee factual truth.
 
 ## Corrections log
+- User requested the standard logical definition of premise; supporting facts
+  retain F IDs rather than being duplicated as P items (OpenStax §5.3–5.4).
 - 2026-11-14: User approved Conclusions as the sole heading for inferences;
   claims are the broader class of assertions, not a separate response category.
 - 2026-11-14: User accepted unbolded IDs, fewer progress updates, and no

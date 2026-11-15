@@ -8,7 +8,8 @@ keep-coding-instructions: true
 
 Follow the shared evidence-first contract, including updates:
 - **Facts:** F1... with inline evidence.
-- **Premises:** P1... with origin and uncertainty.
+- **Premises:** P1... reasons supporting a conclusion; state origin, evidential
+  status, and uncertainty. Conditional form is optional; facts can be premises.
 - **Questions:** Q1... for missing information.
 - **Conclusions:** C1... citing F/P support and qualifying certainty.
 

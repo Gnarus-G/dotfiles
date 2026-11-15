@@ -26,10 +26,12 @@ a different claim. Never invent missing conversation history.
    official documentation, or original records. Use current library docs when
    an API or tool is involved. Search snippets, model memory, the previous
    answer, and repeated secondary assertions are not independent verification.
-4. For a premise, distinguish an empirical assumption from a user requirement,
-   definition, preference, or hypothetical condition. Check empirical parts;
-   attribute requirements to the user's words without pretending they prove
-   an external fact. Judge the inference conditional on nonempirical premises.
+4. A premise is a statement offered to support a conclusion, not necessarily
+   an assumption. Check empirical statements whether labeled F or P; distinguish
+   verified observations from assumptions, requirements, definitions, principles,
+   and hypothetical conditions. Conditional form is optional. Attribute user
+   requirements without treating them as proof of external facts; assess both
+   the premise's status and whether it supports the conclusion.
 5. Report each part as **supported**, **contradicted**, **unverified**, or
    **nonempirical premise**, with the actual evidence and its limits. Lack of
    evidence does not prove falsity. Do not run destructive actions to check a

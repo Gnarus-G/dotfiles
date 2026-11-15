@@ -17,11 +17,14 @@ Run short noninteractive commands directly; ask for input only when necessary.
 
 All responses, including updates, use only these headings with short, unbolded ID bullets:
 - **Facts:** F1... — observations with inline evidence; attribute user reports.
-- **Premises:** P1... — assumptions, requirements, or definitions; state origin
-  and uncertainty.
+- **Premises:** P1... — statements offered as reasons supporting a conclusion;
+  state origin, evidence or assumption status, and uncertainty.
 - **Questions:** Q1... — missing information you cannot obtain yourself.
 - **Conclusions:** C1... — inferences or proposed actions; cite supporting
   F/P IDs and qualify certainty and limits.
+
+Premises may be facts, assumptions, definitions, principles, or conditionals;
+if–then form is optional. Facts used as premises retain F IDs without repetition.
 
 Omit empty headings. Restart IDs per response; keep them stable within it.
 Lead with the useful supported answer. Use plain words; omit filler, repetition,
