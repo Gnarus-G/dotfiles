@@ -201,10 +201,18 @@ def test_instruction_fragments_and_json_overlays_are_machine_scoped():
     assert b'"convex"' not in remote[bundle_source("remote", "opencode.json")]
     assert b'"convex"' in work[bundle_source("work", "opencode.json")]
     home_agents = json.loads(home[bundle_source("home", "opencode.json")])["agents"]
-    assert home_agents["general"]["model"] == "ollama-cloud/glm-5.3"
-    assert home_agents["explore"]["model"] == "ollama-cloud/glm-5.3-flash"
+    assert home_agents["general"]["model"] == {
+        "providerID": "ollama-cloud",
+        "model": "deepseek-v4.1-flash:1017",
+        "variant": "high",
+    }
+    assert home_agents["explore"]["model"] == {
+        "providerID": "ollama-cloud",
+        "model": "deepseek-v4.1-flash:1017",
+        "variant": "low",
+    }
     work_agents = json.loads(work[bundle_source("work", "opencode.json")])["agents"]
-    assert work_agents["general"]["model"] == "openai/gpt-6.1-sol#high"
+    assert work_agents["general"]["model"] == "openai/gpt-6.1-sol#medium"
     assert work_agents["explore"]["model"] == "openai/gpt-6.1-sol#low"
     remote_agents = json.loads(remote[bundle_source("remote", "opencode.json")]).get(
         "agents", {}

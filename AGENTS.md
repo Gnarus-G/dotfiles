@@ -17,22 +17,23 @@ applied effect and journal its inverse to
 
 ## Symlinked Configuration
 
-| Source                   | Target                     | Description         |
-| ------------------------ | -------------------------- | ------------------- |
-| `.config/nvim/`          | `~/.config/nvim`           | Neovim config       |
-| `.config/mcp/mcp.json`   | `~/.config/mcp/mcp.json`, `~/.pi/agent/mcp.json` | MCP server list for Pi and OpenCode |
-| `.machine-generated/<machine>/opencode.json` | `~/.config/opencode/opencode.json` | OpenCode settings |
-| `.config/awesome/`       | `~/.config/awesome`        | Awesome WM theme    |
-| `.config/hypr/`          | `~/.config/hypr`           | Hyprland config     |
-| `.config/waybar/`        | `~/.config/waybar`         | Waybar config       |
-| `.config/dunst/`         | `~/.config/dunst`          | Notifications       |
-| `.config/ghostty/config` | `~/.config/ghostty/config` | Ghostty terminal    |
-| `.zshrc`                 | `~/.zshrc`                 | Shell configuration |
+| Source                                       | Target                                           | Description                         |
+| -------------------------------------------- | ------------------------------------------------ | ----------------------------------- |
+| `.config/nvim/`                              | `~/.config/nvim`                                 | Neovim config                       |
+| `.config/mcp/mcp.json`                       | `~/.config/mcp/mcp.json`, `~/.pi/agent/mcp.json` | MCP server list for Pi and OpenCode |
+| `.machine-generated/<machine>/opencode.json` | `~/.config/opencode/opencode.json`               | OpenCode settings                   |
+| `.config/awesome/`                           | `~/.config/awesome`                              | Awesome WM theme                    |
+| `.config/hypr/`                              | `~/.config/hypr`                                 | Hyprland config                     |
+| `.config/waybar/`                            | `~/.config/waybar`                               | Waybar config                       |
+| `.config/dunst/`                             | `~/.config/dunst`                                | Notifications                       |
+| `.config/ghostty/config`                     | `~/.config/ghostty/config`                       | Ghostty terminal                    |
+| `.zshrc`                                     | `~/.zshrc`                                       | Shell configuration                 |
 
-On home, OpenCode's `general` agent uses `ollama-cloud/glm-5.3` and `explore`
-uses `ollama-cloud/glm-5.3-flash`; other agents keep their defaults.
+On home, subagent routing is using Ollama Cloud . On home, OpenCode's `general` and
+`explore` agents use `ollama-cloud/deepseek-v4.1-flash:1017` at `high` and
+`low` effort, respectively; other agents keep their defaults.
 On work, the [OpenCode overlay](profiles/work/.config/opencode/opencode.json)
-sets `general` to `openai/gpt-6.1-sol#high` and `explore` to `openai/gpt-6.1-sol#low`.
+sets `general` to `openai/gpt-6.1-sol#medium` and `explore` to `openai/gpt-6.1-sol#low`.
 
 On work and remote, Claude's native `general-purpose` defaults to Opus through
 `CLAUDE_CODE_SUBAGENT_MODEL`; a user-level `Explore` override selects Sonnet
@@ -56,11 +57,11 @@ Skills are specialized instructions loaded by AI assistants for specific tasks.
 
 ### Skill Source Sets
 
-| Source                    | Consumers                    |
-| ------------------------- | ---------------------------- |
-| `.agents/skills/`         | Claude, Codex, and OpenCode  |
-| `.claude.only/skills/`    | Claude only                  |
-| `.codex.only/skills/`     | Codex-compatible agents only |
+| Source                 | Consumers                    |
+| ---------------------- | ---------------------------- |
+| `.agents/skills/`      | Claude, Codex, and OpenCode  |
+| `.claude.only/skills/` | Claude only                  |
+| `.codex.only/skills/`  | Codex-compatible agents only |
 
 OpenCode disables automatic `.claude`/`.agents` discovery and receives a
 reconciled projection of shared skills under `~/.config/opencode/skills`.
@@ -90,13 +91,13 @@ install. Add a server once, in `.config/mcp/mcp.json`.
 
 ## Files
 
-| File                         | Purpose                                    |
-| ---------------------------- | ------------------------------------------ |
-| `AGENTS.md`                  | Project instructions for AI assistants     |
-| `.claude/CLAUDE.md`          | Claude-only system instructions            |
-| `.codex/AGENTS.md`           | Codex-only system instructions             |
+| File                            | Purpose                                               |
+| ------------------------------- | ----------------------------------------------------- |
+| `AGENTS.md`                     | Project instructions for AI assistants                |
+| `.claude/CLAUDE.md`             | Claude-only system instructions                       |
+| `.codex/AGENTS.md`              | Codex-only system instructions                        |
 | `profiles/core/instructions.md` | Base instructions for Claude, Codex, OpenCode, and Pi |
-| `dev`                        | Symlink and skill composition script       |
+| `dev`                           | Symlink and skill composition script                  |
 
 ## Evidence-first responses
 

@@ -1,10 +1,18 @@
 {
   "agents": {
     "general": {
-      "model": "ollama-cloud/glm-5.3"
+      "model": {
+        "providerID": "ollama-cloud",
+        "model": "deepseek-v4.1-flash:1017",
+        "variant": "high"
+      }
     },
     "explore": {
-      "model": "ollama-cloud/glm-5.3-flash"
+      "model": {
+        "providerID": "ollama-cloud",
+        "model": "deepseek-v4.1-flash:1017",
+        "variant": "low"
+      }
     }
   }
 }
