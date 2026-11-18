@@ -10,8 +10,21 @@ I'm `gnarus`. I prefer simple, maintainable software and especially enjoy Rust.
 - When reviewing, report realistic findings relevant to the goal.
 - Never hardcode API keys or read or display their values.
 - Show concrete results alongside recommendations.
+- Always squash-merge branches and pull requests, including feature branches
+  into an integration branch (`git merge --squash <branch>` then commit,
+  `gh pr merge --squash`); never land `--no-ff` merge commits.
+- When working through an epic, commit each logical unit as it lands instead
+  of piling everything up in one commit at the end.
 
 Run short noninteractive commands directly; ask for input only when necessary.
+
+## Subagents
+
+- Fan out to subagents when your harness provides them: launch independent
+  tasks as parallel subagents in one batch, and hand work to a subagent whose
+  model or effort fits it better than your own.
+- Give each subagent a self-contained prompt (goal, paths, constraints, what
+  to report back); keep judgment-heavy or tightly coupled steps inline.
 
 ## Worktrees
 

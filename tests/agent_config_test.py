@@ -45,6 +45,17 @@ def test_claude_prompt_does_not_offer_codex_delegation():
     assert b"caveman" not in instructions
 
 
+def test_fanout_and_squash_rules_reach_every_harness():
+    for machine in ("remote", "home", "work"):
+        bundle = render(ROOT, machine)
+        for name in ("claude.md", "codex.md", "pi.md"):
+            prompt = bundle[bundle_source(machine, name)].decode()
+            assert "## Subagents" in prompt
+            assert "parallel subagents in one batch" in prompt
+            assert "Always squash-merge" in prompt
+            assert "commit each logical unit" in prompt
+
+
 def test_git_wt_is_the_worktree_standard_for_every_harness():
     for machine in ("remote", "home", "work"):
         bundle = render(ROOT, machine)
