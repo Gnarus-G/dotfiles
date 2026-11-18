@@ -3,6 +3,8 @@ import os
 import subprocess
 import sys
 import threading
+import time
+from contextlib import contextmanager
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 
@@ -88,6 +90,59 @@ def test_dry_run_uses_subscription_and_only_final_output(workspace):
     )
 
 
+RATE_LIMITED_FX_STUB = (
+    f"#!{sys.executable}\n"
+    "import sys, time\n"
+    "print('[notice] Rate limited · HTTP 429 · usage_limit_reached:"
+    " retrying request in 1s', file=sys.stderr, flush=True)\n"
+    "time.sleep(120)\n"
+)
+
+
+@pytest.fixture
+def rate_limited_fx(workspace, tmp_path):
+    repo, env = workspace
+    stub = Path(env["PATH"].split(":")[0]) / "fx"
+    stub.write_text(RATE_LIMITED_FX_STUB)
+    stub.chmod(0o755)
+    return repo, env
+
+
+def run_git_ac(repo, env, *flags):
+    start = time.monotonic()
+    result = subprocess.run(
+        [sys.executable, str(SCRIPT), *flags],
+        check=False,
+        cwd=repo,
+        env=env,
+        capture_output=True,
+        text=True,
+    )
+    return result, time.monotonic() - start
+
+
+def assert_no_commit(repo):
+    assert (
+        subprocess.run(
+            ["git", "rev-parse", "--verify", "HEAD"],
+            cwd=repo,
+            capture_output=True,
+            check=False,
+        ).returncode
+        != 0
+    )
+    assert (
+        subprocess.run(
+            ["git", "diff", "--cached", "--name-only"],
+            cwd=repo,
+            capture_output=True,
+            text=True,
+            check=True,
+        ).stdout
+        == "change.txt\n"
+    )
+
+
 @pytest.mark.parametrize(
     "response,exit_code",
     [
@@ -140,10 +195,8 @@ def test_explicit_model_failure_never_commits_or_falls_back(
     )
 
 
-def test_default_model_falls_back_to_ollama(workspace):
-    repo, env = workspace
-    requests = []
-
+@contextmanager
+def local_ollama_server(requests):
     class Handler(BaseHTTPRequestHandler):
         def do_GET(self):
             self.send_response(200)
@@ -171,7 +224,41 @@ def test_default_model_falls_back_to_ollama(workspace):
     thread = threading.Thread(target=server.serve_forever, daemon=True)
     thread.start()
     try:
-        env.update(EXIT_CODE="1", OLLAMA_HOST=f"http://127.0.0.1:{server.server_port}")
+        yield f"http://127.0.0.1:{server.server_port}"
+    finally:
+        server.shutdown()
+        thread.join()
+        server.server_close()
+
+
+def test_rate_limited_fx_falls_back_immediately(rate_limited_fx):
+    repo, env = rate_limited_fx
+    requests = []
+    with local_ollama_server(requests) as host:
+        env.update(OLLAMA_HOST=host)
+        result, elapsed = run_git_ac(repo, env, "-n")
+    assert result.returncode == 0, result.stderr
+    assert elapsed < 10
+    assert result.stdout == "fix: fallback example\n"
+    assert "falling back to Ollama" in result.stderr
+    assert requests[0]["model"] == "deepseek-v4.1-flash:cloud"
+
+
+def test_rate_limited_fx_with_explicit_model_fails_fast(rate_limited_fx):
+    repo, env = rate_limited_fx
+    result, elapsed = run_git_ac(repo, env, "-y", "-m", "gpt-6-sol")
+    assert result.returncode == 1
+    assert elapsed < 10
+    assert "No commit was created" in result.stderr
+    assert "Traceback" not in result.stderr
+    assert_no_commit(repo)
+
+
+def test_default_model_falls_back_to_ollama(workspace):
+    repo, env = workspace
+    requests = []
+    with local_ollama_server(requests) as host:
+        env.update(EXIT_CODE="1", OLLAMA_HOST=host)
         result = subprocess.run(
             [sys.executable, str(SCRIPT), "-n"],
             check=False,
@@ -180,10 +267,6 @@ def test_default_model_falls_back_to_ollama(workspace):
             capture_output=True,
             text=True,
         )
-    finally:
-        server.shutdown()
-        thread.join()
-        server.server_close()
     assert result.returncode == 0, result.stderr
     assert result.stdout == "fix: fallback example\n"
     assert "falling back to Ollama" in result.stderr

@@ -17,6 +17,7 @@ logger = logging.getLogger("git-ac")
 OLLAMA_HOST = os.environ.get("OLLAMA_HOST", "http://localhost:11434")
 DEFAULT_MODEL_OLLAMA = "deepseek-v4.1-flash:cloud"
 DEFAULT_MODEL = "gpt-6-luna"
+FX_TIMEOUT_SECONDS = 20
 
 PROMPT_TEMPLATE = """Generate a git commit message for these changes.
 
@@ -88,17 +89,40 @@ def fx_message(model, prompt):
         "FX_SOUND": "off",
     }
     with tempfile.TemporaryDirectory(prefix="git-ac-") as cwd:
-        result = subprocess.run(
-            command,
-            input=prompt,
-            capture_output=True,
-            text=True,
-            env=env,
-            cwd=cwd,
-            timeout=60,
-            check=True,
-        )
-    response = json.loads(result.stdout)
+        prompt_file = os.path.join(cwd, "prompt.txt")
+        with open(prompt_file, "w") as f:
+            f.write(prompt)
+        with open(prompt_file) as stdin, tempfile.TemporaryFile() as stderr:
+            process = subprocess.Popen(
+                command,
+                stdin=stdin,
+                stdout=subprocess.PIPE,
+                stderr=stderr,
+                env=env,
+                cwd=cwd,
+            )
+            deadline = time.monotonic() + FX_TIMEOUT_SECONDS
+            while True:
+                try:
+                    process.wait(timeout=0.2)
+                    break
+                except subprocess.TimeoutExpired:
+                    stderr.seek(0)
+                    data = stderr.read()
+                    if b"HTTP 429" in data or b"usage_limit_reached" in data:
+                        process.kill()
+                        process.wait()
+                        raise ValueError(
+                            "fx subscription rate limited; retries cannot succeed"
+                        )
+                    if time.monotonic() > deadline:
+                        process.kill()
+                        process.wait()
+                        raise ValueError("fx did not finish in 20s")
+    result = process.stdout.read()
+    if process.returncode != 0:
+        raise subprocess.CalledProcessError(process.returncode, command)
+    response = json.loads(result)
     content = response.get("final_output") if isinstance(response, dict) else None
     if (
         not isinstance(content, str)
