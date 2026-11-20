@@ -24,7 +24,7 @@ that review.
   - `fx:deepseek-v4.1-flash`
 
   For high-stakes or complex interaction review, explicitly add
-  `codex:gpt-6-astra` for the entire run rather than introducing it midway.
+  `codex:gpt-6.2-astra` for the entire run rather than introducing it midway.
 
 - Default to target **9.0/10** and at most **five review rounds**. Honor an
   explicit target or round limit. Keep the target and other reviewers' scores

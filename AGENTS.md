@@ -29,11 +29,10 @@ applied effect and journal its inverse to
 | `.config/ghostty/config`                     | `~/.config/ghostty/config`                       | Ghostty terminal                    |
 | `.zshrc`                                     | `~/.zshrc`                                       | Shell configuration                 |
 
-On home, subagent routing is using Ollama Cloud . On home, OpenCode's `general` and
-`explore` agents use `ollama-cloud/deepseek-v4.1-flash:1017` at `high` and
-`low` effort, respectively; other agents keep their defaults.
+On home, the [OpenCode overlay](profiles/home/.config/opencode/opencode.json)
+sets `general` to `openai/gpt-6.2-sol#high` and `explore` to `openai/gpt-6.2-sol#low`.
 On work, the [OpenCode overlay](profiles/work/.config/opencode/opencode.json)
-sets `general` to `openai/gpt-6.1-sol#medium` and `explore` to `openai/gpt-6.1-sol#low`.
+sets `general` to `openai/gpt-6.2-sol#medium` and `explore` to `openai/gpt-6.2-sol#low`.
 
 On work and remote, Claude's native `general-purpose` defaults to Opus through
 `CLAUDE_CODE_SUBAGENT_MODEL`; a user-level `Explore` override selects Sonnet

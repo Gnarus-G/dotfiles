@@ -1,18 +1,11 @@
 {
+  "$schema": "https://opencode.ai/config.json",
   "agents": {
     "general": {
-      "model": {
-        "providerID": "ollama-cloud",
-        "model": "deepseek-v4.1-flash:1017",
-        "variant": "high"
-      }
+      "model": "openai/gpt-6.2-sol#medium"
     },
     "explore": {
-      "model": {
-        "providerID": "ollama-cloud",
-        "model": "deepseek-v4.1-flash:1017",
-        "variant": "low"
-      }
+      "model": "openai/gpt-6.2-sol#low"
     }
   }
 }

@@ -53,7 +53,7 @@ def workspace(tmp_path):
 def test_dry_run_uses_subscription_and_only_final_output(workspace):
     repo, env = workspace
     result = subprocess.run(
-        [sys.executable, str(SCRIPT), "-n", "-m", "gpt-6-sol"],
+        [sys.executable, str(SCRIPT), "-n", "-m", "gpt-6.2-sol"],
         check=False,
         cwd=repo,
         env=env,
@@ -64,7 +64,7 @@ def test_dry_run_uses_subscription_and_only_final_output(workspace):
     assert result.stdout == "fix: example\n"
     capture = json.loads(Path(env["CAPTURE"]).read_text())
     assert capture["provider"] == "codex"
-    assert "gpt-6-sol" in capture["args"]
+    assert "gpt-6.2-sol" in capture["args"]
     assert "--no-save" in capture["args"]
     assert "--json" in capture["args"]
     assert "work in progress" in capture["prompt"]
@@ -161,7 +161,7 @@ def test_explicit_model_failure_never_commits_or_falls_back(
     repo, env = workspace
     env.update(RESPONSE=response, EXIT_CODE=exit_code)
     result = subprocess.run(
-        [sys.executable, str(SCRIPT), "-y", "-m", "gpt-6-sol"],
+        [sys.executable, str(SCRIPT), "-y", "-m", "gpt-6.2-sol"],
         check=False,
         cwd=repo,
         env=env,
@@ -246,7 +246,7 @@ def test_rate_limited_fx_falls_back_immediately(rate_limited_fx):
 
 def test_rate_limited_fx_with_explicit_model_fails_fast(rate_limited_fx):
     repo, env = rate_limited_fx
-    result, elapsed = run_git_ac(repo, env, "-y", "-m", "gpt-6-sol")
+    result, elapsed = run_git_ac(repo, env, "-y", "-m", "gpt-6.2-sol")
     assert result.returncode == 1
     assert elapsed < 10
     assert "No commit was created" in result.stderr

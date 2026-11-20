@@ -10,6 +10,7 @@ Done when: Shared and Claude skills run git-ac directly, Pi's tool does likewise
 - Commit skills in all harnesses now invoke git-ac directly, without a model-backed wrapper; Pi's commit tool does the same.
 - Message generation uses the Codex subscription first, then Ollama on failure.
 - OpenCode's optional explicit commit subagent uses OpenAI rather than Ollama.
+- Model upgrades preserve the original family. The OpenCode commit agent, its plugin, and `git-ac` stay on GPT-6 Luna until a newer Luna is available.
 - Installed fx 0.0.16 rejects `--profile`; saved-profile runtime use requires a supporting fx version.
 
 ## Out of scope
@@ -18,6 +19,7 @@ Done when: Shared and Claude skills run git-ac directly, Pi's tool does likewise
 
 ## Corrections log
 - 2026-11-11: User: all harnesses must use Codex with Ollama fallback; an Ollama wrapper had failed before git-ac could run.
+- 2026-11-20: User: “sol -> sol, luna -> luna. don't mix.”
 
 ## Verification
 - 66 Python checks pass, including git-ac subscription/fallback subprocess tests and all machine inventory tests.
