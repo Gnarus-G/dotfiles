@@ -18,10 +18,11 @@ Invoked as `/gnarus-review <PR...>`. One PR at a time, in simple sentences.
 3. **Is it tested?** Name the test that would fail without the change.
    Integration or end-to-end coverage where the change touches external
    behavior. "It runs in staging" counts only with a run id or log.
-4. **Is it simple?** Run `/simple` and a code review. Flag code the goal
-   does not need, hasty abstraction (prefer duplication until a stable
-   abstraction emerges), arbitrary timers, hot-path allocations, and any
-   repo-specific bans.
+4. **Is it simple?** Run `/simple` and a code review; in Claude the code
+   review is `council-review` (Fable and Codex, each finding verified).
+   Flag code the goal does not need, hasty abstraction (prefer duplication
+   until a stable abstraction emerges), arbitrary timers, hot-path
+   allocations, and any repo-specific bans.
 5. **Bot reviews.** Read every bot and human comment on the PR. Say which
    are right, which are wrong and why.
 6. **Verdict:** approve / request changes / needs discussion, with the

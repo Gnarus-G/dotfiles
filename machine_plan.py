@@ -357,6 +357,7 @@ CLAUDE_SKILLS = (
     "codex-review",
     "codex-second-opinion",
     "commit",
+    "council-review",
 )
 # Keep retired targets known so installs remove their old managed links.
 PROPOSED += tuple(
