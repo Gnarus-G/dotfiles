@@ -32,4 +32,4 @@ Show code or payloads for every finding — `file:line` plus the snippet.
 ## After
 
 Ask before posting. When told to post, post findings as one review on the
-PR. When told to take over the PR, fix in a worktree and `/ship`.
+PR. When told to take over the PR, fix in a worktree and `/land`.

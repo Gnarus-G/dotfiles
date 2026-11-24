@@ -1,21 +1,21 @@
 ---
-name: ship
+name: land
 description: Land a change end to end — rebase, wait for CI, squash merge, deploy (roll) the build to the target environment, prove it works there, record the change, update the issue, clean the worktree. Use when told "squash merge when green", "roll it to staging/testnet", "merge and roll", "go ahead with the plan and approve", or "ship it".
 ---
 
-# ship
+# land
 
 One command for the sequence that otherwise takes four prompts. Invoked as
-`/ship [PR...] [env]`. `env` defaults to the environment named in the plan
+`/land [PR...] [env]`. `env` defaults to the environment named in the plan
 or issue; ask only if none is named.
-`/ship --merge-only [PR...]` stops after the squash merge: skip steps 5–7
+`/land --merge-only [PR...]` stops after the squash merge: skip steps 5–7
 (deploy, prove, record), then clean up and report.
 
 How to deploy and approve is the repo's business: follow its ops docs or
 skills (e.g. a deploy/ops skill, a runbook). This skill is the order and the
 stop conditions.
 
-`/full-send` takes an issue through implementation and then runs `/ship`.
+`/full-send` takes an issue through implementation and then runs `/land`.
 
 ## Hard limits
 

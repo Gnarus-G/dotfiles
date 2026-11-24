@@ -90,13 +90,13 @@ install. Add a server once, in `.config/mcp/mcp.json`.
 
 ## Files
 
-| File                            | Purpose                                               |
-| ------------------------------- | ----------------------------------------------------- |
-| `AGENTS.md`                     | Project instructions for AI assistants                |
-| `.claude/CLAUDE.md`             | Claude-only system instructions                       |
-| `.codex/AGENTS.md`              | Codex-only system instructions                        |
-| `profiles/core/instructions.md` | Base instructions for Claude, Codex, OpenCode, and Pi |
-| `dev`                           | Symlink and skill composition script                  |
+| File                               | Purpose                                               |
+| ---------------------------------- | ----------------------------------------------------- |
+| `AGENTS.md`                        | Project instructions for AI assistants                |
+| `profiles/core/instructions.md`    | Base instructions for Claude, Codex, OpenCode, and Pi |
+| `profiles/desktop/instructions.md` | Home and work additions to the base instructions      |
+| `profiles/desktop/codex.md`        | Codex-only home and work instructions                 |
+| `dev`                              | Symlink and skill composition script                  |
 
 ## Evidence-first responses
 

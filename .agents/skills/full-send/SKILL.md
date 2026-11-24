@@ -1,13 +1,13 @@
 ---
 name: full-send
-description: Take a GitHub issue all the way to a proven deploy — plan, approve, implement test-first in a worktree, open the PR, self-review with /gnarus-review, then /ship — pausing only to approve the plan. Use when told "full send", "take it all the way", or "work and ship #N".
+description: Take a GitHub issue all the way to a proven deploy — plan, approve, implement test-first in a worktree, open the PR, self-review with /gnarus-review, then /land — pausing only to approve the plan. Use when told "full send", "take it all the way", or "work and ship #N".
 argument-hint: <issue number or URL>
 ---
 
 # full-send
 
 Issue in, proven deploy out. The user approves the plan once; after that,
-stop only where a step below or `/ship` says to.
+stop only where a step below or `/land` says to.
 
 ## 1. Understand the issue
 
@@ -26,6 +26,9 @@ page:
 - **Cause / why** — the mechanism, with `file:line`.
 - **Plan** — the smallest change that removes the cause, and the test that
   will prove it.
+- **Merge** — approving the plan approves the squash merge once self-review
+  and CI are green. If the repo says the user merges (ramp: "The user merges
+  to main"), ask for that approval here, not after CI.
 
 **Wait for approval.** No worktree, no code before it.
 
@@ -57,9 +60,10 @@ Run `/gnarus-review` on the PR. Fix the findings, push, wait for CI green.
 Stop and ask only if a finding needs the user's call (scope, design
 trade-off, a rule that might be wrong).
 
-## 7. Ship
+## 7. Land
 
-Run `/ship` on the PR: merge, deploy, prove, record, remove the worktree.
+Run `/land` on the PR: squash merge, deploy, prove, record, remove the
+worktree.
 
 ## 8. Report
 

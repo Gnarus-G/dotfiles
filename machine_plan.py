@@ -340,10 +340,11 @@ SHARED_SKILLS = (
     "gnarus-review",
     "gnarus-good-code",
     "goal",
+    "land",
     "machine-config",
     "ollama-gpu-installation",
     "one-sentence",
-    "ship",
+    "prompt-correction",
     "simple",
     "systematic-debugging",
     "tdd",
@@ -359,7 +360,8 @@ CLAUDE_SKILLS = (
 )
 # Keep retired targets known so installs remove their old managed links.
 PROPOSED += tuple(
-    Spec(".agents/skills/syllogism", f"{directory}/syllogism", frozenset())
+    Spec(f".agents/skills/{name}", f"{directory}/{name}", frozenset())
+    for name in ("syllogism", "ship")
     for directory in (".agents/skills", ".claude/skills", ".config/opencode/skills")
 )
 PROPOSED += (

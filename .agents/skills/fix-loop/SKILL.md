@@ -1,6 +1,6 @@
 ---
 name: fix-loop
-description: Keep finding and fixing problems toward a stated goal without waiting for a prompt per step — find the next issue, fix it in a worktree, /ship it, re-check, repeat. Use when told "let's continue identifying and fixing issues", "keep going until X passes", or "pick the next low hanging fruit".
+description: Keep finding and fixing problems toward a stated goal without waiting for a prompt per step — find the next issue, fix it in a worktree, /land it, re-check, repeat. Use when told "let's continue identifying and fixing issues", "keep going until X passes", or "pick the next low hanging fruit".
 ---
 
 # fix-loop
@@ -19,7 +19,7 @@ hits — not when one fix lands.
 3. **Root cause** before fixing (`systematic-debugging`). The fix removes
    the cause; no band-aids, no arbitrary timers or sleeps.
 4. **Fix** in a worktree, one small PR, test first where it helps.
-5. **`/ship`** it to the environment the goal names.
+5. **`/land`** it to the environment the goal names.
 6. **Re-check** the thing from step 1. Show before/after.
 7. **Clean old noise** the fix made obsolete (stale records, old errors) so
    the next look is honest.
@@ -31,5 +31,5 @@ Repeat. Between rounds print one status line:
 
 - A decision only the user can make (design trade-off, scope, money).
 - Two rounds in a row did not move the goal.
-- Anything `/ship` stops on.
+- Anything `/land` stops on.
 - A problem outside the goal's scope: file an issue, link it, move on.
