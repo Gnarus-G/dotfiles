@@ -30,7 +30,7 @@ applied effect and journal its inverse to
 | `.zshrc`                                     | `~/.zshrc`                                       | Shell configuration                 |
 
 On home, the [OpenCode overlay](profiles/home/.config/opencode/opencode.json)
-sets `general` to `openai/gpt-6.2-sol#high` and `explore` to `openai/gpt-6.2-sol#low`.
+sets `general` to `openai/gpt-6.2-sol#medium` and `explore` to `openai/gpt-6.2-sol#low`.
 On work, the [OpenCode overlay](profiles/work/.config/opencode/opencode.json)
 sets `general` to `openai/gpt-6.2-sol#medium` and `explore` to `openai/gpt-6.2-sol#low`.
 
