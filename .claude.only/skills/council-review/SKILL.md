@@ -26,8 +26,9 @@ This skill is the review step. It works inside other review skills
 
 Run them in the background and in parallel, one pair per PR.
 
-**Fable** — Agent tool, `model: "fable"`, `subagent_type: "general-purpose"`,
-`run_in_background: true`. Brief:
+**Fable** — Agent tool, `subagent_type: "council-reviewer"`,
+`run_in_background: true`. Its model and effort come from the managed
+`profiles/core/.claude/agents/council-reviewer.md` source. Brief:
 
 - Read-only: do not edit, commit, push or post.
 - Where the code is: repo path, the branch ref, and how to read it
@@ -52,9 +53,14 @@ scratch file:
 ```bash
 { echo "Goal: <goal and quoted rule>. Find concrete correctness bugs in this diff that are relevant to the goal and realistically reachable. You may read the repo; the branch is <ref> (git show <ref>:<path>). Omit speculative corrections; report no issues if none exist. For each finding: file:line, snippet, concrete scenario with numbers.";
   <diff command>;
-} | codex exec -m gpt-6.2-sol -c model_reasoning_effort="high" \
+} | codex exec --profile review \
   --skip-git-repo-check - > <scratch>/codex-<n>.txt 2>&1
 ```
+
+The profile is installed from `profiles/core/.codex/review.config.toml`.
+Both review configurations are machine-gated in `machine_plan.py`; edit
+their source files to change model and effort. Their explicit review choices
+are independent of the general-agent defaults.
 
 Read only the final answer: the text after the last line that is exactly
 `codex`. Codex's local sandbox sometimes fails to start; it then reads the

@@ -34,6 +34,11 @@ sets `general` to `openai/gpt-6.2-sol#medium` and `explore` to `openai/gpt-6.2-s
 On work, the [OpenCode overlay](profiles/work/.config/opencode/opencode.json)
 sets `general` to `openai/gpt-6.2-sol#medium` and `explore` to `openai/gpt-6.2-sol#low`.
 
+Review roles use separate managed configuration: the Codex
+[review profile](profiles/core/.codex/review.config.toml) and Claude
+[council reviewer](profiles/core/.claude/agents/council-reviewer.md) are linked
+on every machine ([installation check](<code:tests/machine_plan_test.py#def test_review_models_are_installed_as_explicit_role_configs(machine, tmp_path):>)).
+
 On work and remote, Claude's native `general-purpose` defaults to Opus through
 `CLAUDE_CODE_SUBAGENT_MODEL`; a user-level `Explore` override selects Sonnet
 ([scope test](<code:tests/machine_plan_test.py#def test_claude_subagent_models_on_work_and_remote(machine, tmp_path):>)).

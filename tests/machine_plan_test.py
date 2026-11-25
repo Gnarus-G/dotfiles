@@ -2,6 +2,7 @@ import json
 import os
 import re
 import subprocess
+import tomllib
 from pathlib import Path
 
 import pytest
@@ -102,6 +103,60 @@ def test_proposed_machine_policy_exposes_only_available_capabilities():
     assert ".claude/rules/jbcontext.md" not in remote | home | work
     assert ".local/bin/ghostty" in work
     assert ".local/bin/ghostty" not in remote | home
+
+
+@pytest.mark.parametrize("machine", ["remote", "home", "work"])
+def test_revise_prompts_replaces_retired_links(machine, tmp_path):
+    root = Path(__file__).resolve().parents[1]
+    home = tmp_path / "home"
+    directories = (".agents/skills", ".claude/skills", ".config/opencode/skills")
+    for directory in directories:
+        target = home / directory / "prompt-correction"
+        target.parent.mkdir(parents=True)
+        target.symlink_to(root / ".agents/skills/prompt-correction")
+    targets = {
+        f"{directory}/{name}"
+        for directory in directories
+        for name in ("prompt-correction", "revise-prompts")
+    }
+    specs = tuple(item for item in PROPOSED if item.target in targets)
+
+    effects = install(root, home, machine, specs)
+
+    for directory in directories:
+        assert (
+            Remove(f"{directory}/prompt-correction", ".agents/skills/prompt-correction")
+            in effects
+        )
+        assert not (home / directory / "prompt-correction").is_symlink()
+        skill = home / directory / "revise-prompts"
+        assert skill.resolve() == root / ".agents/skills/revise-prompts"
+        assert "name: revise-prompts\n" in (skill / "SKILL.md").read_text()
+    assert install(root, home, machine, specs) == ()
+
+
+@pytest.mark.parametrize("machine", ["remote", "home", "work"])
+def test_review_models_are_installed_as_explicit_role_configs(machine, tmp_path):
+    root = Path(__file__).resolve().parents[1]
+    home = tmp_path / "home"
+    home.mkdir()
+    targets = {".codex/review.config.toml", ".claude/agents/council-reviewer.md"}
+    specs = tuple(item for item in PROPOSED if item.target in targets)
+
+    install(root, home, machine, specs)
+
+    profile = tomllib.loads((home / ".codex/review.config.toml").read_text())
+    assert profile["model"] == "gpt-6.2-sol"
+    assert profile["model_reasoning_effort"] == "high"
+    reviewer = (home / ".claude/agents/council-reviewer.md").read_text()
+    assert "name: council-reviewer\n" in reviewer
+    assert "model: fable\n" in reviewer
+    assert "effort: high\n" in reviewer
+    for name in ("council-review", "codex-review"):
+        skill = (root / f".claude.only/skills/{name}/SKILL.md").read_text()
+        assert "codex exec --profile review" in skill
+        assert 'model_reasoning_effort="high"' not in skill
+    assert install(root, home, machine, specs) == ()
 
 
 @pytest.mark.parametrize("machine", ["remote", "home", "work"])

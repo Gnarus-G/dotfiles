@@ -10,8 +10,11 @@ Delegate the diff and ask only for concrete current failures relevant to the sta
 ```bash
 { echo "Find concrete correctness bugs in this diff that are relevant to its stated goal and realistically reachable scenarios. Omit speculative corrections and report no issues if none exist.";
   git diff main...HEAD;
-} | codex exec -m gpt-6.2-sol -c model_reasoning_effort="high" \
+} | codex exec --profile review \
   --skip-git-repo-check -
 ```
+
+The review model and effort are selected by the managed profile at
+`profiles/core/.codex/review.config.toml`, installed through `machine_plan.py`.
 
 Verify every finding and discard false positives, findings outside the goal, hypothetical scenarios we will not hit, and non-YAGNI suggestions.

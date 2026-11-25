@@ -183,6 +183,16 @@ PROPOSED = (
         ".claude/agents/Explore.md",
         frozenset({"remote", "work"}),
     ),
+    Spec(
+        "profiles/core/.claude/agents/council-reviewer.md",
+        ".claude/agents/council-reviewer.md",
+        CORE,
+    ),
+    Spec(
+        "profiles/core/.codex/review.config.toml",
+        ".codex/review.config.toml",
+        CORE,
+    ),
     Spec(".codex/agents/commit.toml", ".codex/agents/commit.toml", CORE),
     Spec(".fx/agents/commit", ".fx/agents/commit", CORE),
     Spec(".pi/agent/extensions/commit.ts", ".pi/agent/extensions/commit.ts", CORE),
@@ -344,7 +354,7 @@ SHARED_SKILLS = (
     "machine-config",
     "ollama-gpu-installation",
     "one-sentence",
-    "prompt-correction",
+    "revise-prompts",
     "simple",
     "systematic-debugging",
     "tdd",
@@ -362,7 +372,7 @@ CLAUDE_SKILLS = (
 # Keep retired targets known so installs remove their old managed links.
 PROPOSED += tuple(
     Spec(f".agents/skills/{name}", f"{directory}/{name}", frozenset())
-    for name in ("syllogism", "ship")
+    for name in ("syllogism", "ship", "prompt-correction")
     for directory in (".agents/skills", ".claude/skills", ".config/opencode/skills")
 )
 PROPOSED += (
