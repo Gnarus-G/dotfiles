@@ -25,6 +25,7 @@ utils.per_rig_profile("home", function()
 end)
 
 hl.on("hyprland.start", function()
+  hl.exec_cmd("gsettings set org.gnome.desktop.interface color-scheme prefer-dark")
   hl.exec_cmd("waybar")
   hl.exec_cmd("nm-applet --indicator")
   hl.exec_cmd('sh "$HOME/.config/hypr/random-wallpaper.sh"')
